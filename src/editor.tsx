@@ -244,6 +244,24 @@ function EditorApp(): React.ReactElement {
     });
   }, []);
 
+  const handleButtonPositionChange = useCallback((index: number, x: number, y: number) => {
+    setLayout((current) => {
+      const next = cloneLayout(current);
+      next.buttons[index].x = String(x);
+      next.buttons[index].y = String(y);
+      return next;
+    });
+  }, []);
+
+  const handleStickPositionChange = useCallback((x: number, y: number) => {
+    setLayout((current) => {
+      const next = cloneLayout(current);
+      next.stick.x = String(x);
+      next.stick.y = String(y);
+      return next;
+    });
+  }, []);
+
   const loadLayout = async () => {
     if (!selectedLayout) return;
     try {
@@ -524,6 +542,8 @@ function EditorApp(): React.ReactElement {
             onBackgroundSizeChange={updateBackgroundSize}
             onButtonClick={(index) => startAssignment(index)}
             onStickClick={(index) => startAssignment(1000 + index)}
+            onButtonPositionChange={handleButtonPositionChange}
+            onStickPositionChange={handleStickPositionChange}
           />
         </div>
       </main>

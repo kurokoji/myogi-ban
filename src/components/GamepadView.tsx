@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Layout, STICK_NAMES } from '../types';
 
@@ -13,6 +13,8 @@ export interface GamepadViewProps {
   onBackgroundSizeChange?: (width: number, height: number) => void;
   onButtonClick?: (index: number) => void;
   onStickClick?: (index: number) => void;
+  onButtonPositionChange?: (index: number, x: number, y: number) => void;
+  onStickPositionChange?: (x: number, y: number) => void;
 }
 
 function assetUrl(layout: Layout, fileName: string): string {
@@ -112,12 +114,65 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     editorMode = false,
     onBackgroundSizeChange,
     onButtonClick,
-    onStickClick
+    onStickClick,
+    onButtonPositionChange,
+    onStickPositionChange
   } = props;
   const backgroundSize = useBackgroundSize(layout, onBackgroundSizeChange);
   const defaultButton = layout.defaultbuttons;
   const stickScaleX = layout.stick.w ? parseFloat(layout.stick.w) / 100 : 1;
   const stickScaleY = layout.stick.h ? parseFloat(layout.stick.h) / 100 : 1;
+
+  const [dragState, setDragState] = useState<{
+    type: 'button' | 'stick';
+    index: number;
+    startX: number;
+    startY: number;
+    initialX: number;
+    initialY: number;
+  } | null>(null);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent, type: 'button' | 'stick', index: number, initialX: number, initialY: number) => {
+    if (!editorMode) return;
+    e.stopPropagation();
+    setDragState({
+      type,
+      index,
+      startX: e.clientX,
+      startY: e.clientY,
+      initialX,
+      initialY
+    });
+  }, [editorMode]);
+
+  useEffect(() => {
+    if (!dragState) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaX = e.clientX - dragState.startX;
+      const deltaY = e.clientY - dragState.startY;
+      const newX = Math.round(dragState.initialX + deltaX);
+      const newY = Math.round(dragState.initialY + deltaY);
+
+      if (dragState.type === 'button') {
+        onButtonPositionChange?.(dragState.index, newX, newY);
+      } else if (dragState.type === 'stick') {
+        onStickPositionChange?.(newX, newY);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setDragState(null);
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [dragState, onButtonPositionChange, onStickPositionChange]);
 
   return (
     <>
@@ -148,8 +203,10 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
               left: layout.stick.x ? `${layout.stick.x}px` : undefined,
               top: layout.stick.y ? `${layout.stick.y}px` : undefined,
               transform: `translate(-50%,-50%) scale(${stickScaleX},${stickScaleY})`,
-              display: layout.showstick ? undefined : 'none'
+              display: layout.showstick ? undefined : 'none',
+              cursor: editorMode ? 'move' : undefined
             }}
+            onMouseDown={editorMode ? (e) => handleMouseDown(e, 'stick', 0, parseFloat(layout.stick.x) || 110, parseFloat(layout.stick.y) || 125) : undefined}
           >
             <div id="stick" className={stickClass} />
             {STICK_NAMES.map((name, index) => (
@@ -176,7 +233,8 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
                 top: `${button.y || defaultButton.y || 0}px`,
                 width: `${pressed ? pressedWidth : releasedWidth}px`,
                 height: `${pressed ? pressedHeight : releasedHeight}px`,
-                ...getImageStyle(layout, pressed ? pressedImage : releasedImage)
+                ...getImageStyle(layout, pressed ? pressedImage : releasedImage),
+                cursor: editorMode ? 'move' : undefined
               };
               if (pressed) {
                 if (button.xp || defaultButton.xp) style.left = `${button.xp || defaultButton.xp}px`;
@@ -188,6 +246,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
                   className={`gamepad-button button${index} ${pressed ? 'button-pressed' : 'button-released'}`}
                   key={index}
                   onClick={editorMode ? () => onButtonClick?.(index) : undefined}
+                  onMouseDown={editorMode ? (e) => handleMouseDown(e, 'button', index, parseFloat(button.x || defaultButton.x || '0'), parseFloat(button.y || defaultButton.y || '0')) : undefined}
                   style={style}
                 />
               );

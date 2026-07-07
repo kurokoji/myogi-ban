@@ -171,3 +171,9 @@ body {
 #preview .stick-block:hover {
 	filter: brightness(1.3);
 }
+
+#preview .gamepad-button:active,
+#preview .stick-area:active {
+	filter: brightness(1.5);
+	opacity: 0.8;
+}
