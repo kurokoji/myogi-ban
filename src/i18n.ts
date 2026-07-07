@@ -57,8 +57,8 @@ export const resources = {
       defaultSaved: 'デフォルトに設定しました',
       pressAnyButton: 'Press Any Button',
       language: '言語',
-      obsWidth: 'OBS W',
-      obsHeight: 'OBS H',
+      obsWidth: '幅',
+      obsHeight: '高さ',
       useCssButton: '画像を使わない',
       useCssStick: '画像を使わない'
     }
@@ -118,8 +118,8 @@ export const resources = {
       defaultSaved: 'Set as default layout!',
       pressAnyButton: 'Press Any Button',
       language: 'Language',
-      obsWidth: 'OBS W',
-      obsHeight: 'OBS H',
+      obsWidth: 'Width',
+      obsHeight: 'Height',
       useCssButton: 'Disable images',
       useCssStick: 'Disable images'
     }
