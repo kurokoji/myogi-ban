@@ -9,6 +9,7 @@ const PORT = 33770;
 const PID_FILE = path.join(__dirname, '..', 'server.pid');
 const LAYOUT_BASE = path.join(__dirname, '..', 'public', 'layout');
 const USER_LAYOUT_BASE = path.join(__dirname, '..', 'public', 'user-layouts');
+const UPLOAD_DIR = path.join(__dirname, '..', 'public', '_uploads');
 let mainWindow: BrowserWindow | null = null;
 let server: http.Server;
 let wss: WebSocket.Server;
@@ -82,6 +83,7 @@ function startServer(): void {
   const expressApp = express();
   server = http.createServer(expressApp);
 
+  expressApp.use('/layout', express.static(USER_LAYOUT_BASE));
   expressApp.use(express.static(path.join(__dirname, '..', 'public')));
   expressApp.use(express.json({ limit: '100mb' }));
 
@@ -107,6 +109,13 @@ function startServer(): void {
     }
     const data = { ...req.body.data, name: layoutName };
     copyLayoutAssets(req.body.data, req.body.data?.name || layoutName, layoutName);
+    if (fs.existsSync(UPLOAD_DIR)) {
+      for (const file of fs.readdirSync(UPLOAD_DIR)) {
+        const src = path.join(UPLOAD_DIR, file);
+        const dst = path.join(layoutDir, file);
+        if (!fs.existsSync(dst)) fs.copyFileSync(src, dst);
+      }
+    }
     fs.writeFileSync(path.join(layoutDir, 'layout.json'), JSON.stringify(data, null, 2));
     res.json({ ok: true });
   });
@@ -137,14 +146,13 @@ function startServer(): void {
   });
 
   expressApp.post('/api/upload-image', (req, res) => {
-    const { data, layoutName, fileName } = req.body;
+    const { data, fileName } = req.body;
     const safeFileName = path.basename(fileName);
-    const layoutDir = path.join(LAYOUT_BASE, layoutName || 'custom');
-    if (!fs.existsSync(layoutDir)) {
-      fs.mkdirSync(layoutDir, { recursive: true });
+    if (!fs.existsSync(UPLOAD_DIR)) {
+      fs.mkdirSync(UPLOAD_DIR, { recursive: true });
     }
     const base64Data = data.replace(/^data:image\/[^;]+;base64,/, '');
-    fs.writeFileSync(path.join(layoutDir, safeFileName), Buffer.from(base64Data, 'base64'));
+    fs.writeFileSync(path.join(UPLOAD_DIR, safeFileName), Buffer.from(base64Data, 'base64'));
     res.json({ ok: true, fileName: safeFileName });
   });
 

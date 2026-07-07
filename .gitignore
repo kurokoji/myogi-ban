@@ -6,3 +6,4 @@ server.pid
 *.afphoto
 *.psd
 public/user-layouts/
+public/_uploads/
