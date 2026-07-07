@@ -459,6 +459,10 @@ function EditorApp(): React.ReactElement {
                   />
                 </div>
                 <NumberInput size="xs" label={t('borderRadius')} min={0} max={999} value={layout.background.cssBorderRadius ?? 0} onChange={(value) => updateLayout((next) => { next.background.cssBorderRadius = Number(value) || 0; })} />
+                <div className="control row">
+                  <NumberInput size="xs" label={t('obsWidth')} min={1} value={numericValue(layout.background.w)} onChange={(value) => updateLayout((next) => { next.background.w = String(value ?? ''); })} />
+                  <NumberInput size="xs" label={t('obsHeight')} min={1} value={numericValue(layout.background.h)} onChange={(value) => updateLayout((next) => { next.background.h = String(value ?? ''); })} />
+                </div>
               </>
             ) : (
               <Group gap="xs" align="end" wrap="nowrap">
@@ -466,11 +470,6 @@ function EditorApp(): React.ReactElement {
                 <Button size="xs" variant="light" onClick={() => openImagePicker({ type: 'background' })}>{t('selectFile')}</Button>
               </Group>
             )}
-            <NumberInput size="xs" label={t('bgScale')} min={0.1} max={5} step={0.1} value={numericValue(layout.background.scale || '1')} onChange={(value) => updateLayout((next) => { next.background.scale = String(value ?? ''); })} />
-            <div className="control row obs-size-row">
-              <label>{t('obsWidth')}</label><span className="readonly-value">{layout.background.w || '500'}</span>
-              <label>{t('obsHeight')}</label><span className="readonly-value">{layout.background.h || '250'}</span>
-            </div>
             <input ref={fileInputRef} type="file" accept="image/*" onChange={uploadImage} hidden />
           </Stack>
         </Paper>
