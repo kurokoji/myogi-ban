@@ -81,7 +81,6 @@ function createServer(): void {
   const expressApp = express();
   server = http.createServer(expressApp);
 
-  expressApp.use('/layout', express.static(USER_LAYOUT_BASE));
   expressApp.use(express.static(path.join(__dirname, '..', 'public')));
   expressApp.use(express.json({ limit: '100mb' }));
 
@@ -141,14 +140,16 @@ function createServer(): void {
   expressApp.post('/api/upload-image', (req, res) => {
     const { data, layoutName, fileName } = req.body;
     const safeFileName = path.basename(fileName);
-    const layoutDir = path.join(USER_LAYOUT_BASE, layoutName || 'custom');
+    const layoutDir = path.join(LAYOUT_BASE, layoutName || 'custom');
+    
     if (!fs.existsSync(layoutDir)) {
       fs.mkdirSync(layoutDir, { recursive: true });
     }
 
     const base64Data = data.replace(/^data:image\/[^;]+;base64,/, '');
     const buffer = Buffer.from(base64Data, 'base64');
-    fs.writeFileSync(path.join(layoutDir, safeFileName), buffer);
+    const filePath = path.join(layoutDir, safeFileName);
+    fs.writeFileSync(filePath, buffer);
 
     res.json({ ok: true, fileName: safeFileName });
   });

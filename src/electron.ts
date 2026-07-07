@@ -55,7 +55,7 @@ function collectLayoutAssets(layout: any): string[] {
 }
 
 function copyLayoutAssets(layout: any, sourceLayoutName: string, targetLayoutName: string): void {
-  const targetDir = path.join(LAYOUT_BASE, targetLayoutName);
+  const targetDir = path.join(USER_LAYOUT_BASE, targetLayoutName);
   const userDirs = getUserLayoutDirs();
   const builtinDirs = getBuiltinLayoutDirs();
   const sourceLayoutPath = findLayoutPath(sourceLayoutName);
@@ -82,7 +82,6 @@ function startServer(): void {
   const expressApp = express();
   server = http.createServer(expressApp);
 
-  expressApp.use('/layout', express.static(USER_LAYOUT_BASE));
   expressApp.use(express.static(path.join(__dirname, '..', 'public')));
   expressApp.use(express.json({ limit: '100mb' }));
 
@@ -140,7 +139,7 @@ function startServer(): void {
   expressApp.post('/api/upload-image', (req, res) => {
     const { data, layoutName, fileName } = req.body;
     const safeFileName = path.basename(fileName);
-    const layoutDir = path.join(USER_LAYOUT_BASE, layoutName || 'custom');
+    const layoutDir = path.join(LAYOUT_BASE, layoutName || 'custom');
     if (!fs.existsSync(layoutDir)) {
       fs.mkdirSync(layoutDir, { recursive: true });
     }
