@@ -2,6 +2,7 @@
   "name": "myogi-ban",
   "version": "1.0.0",
   "description": "Fighting game controller viewer for OBS",
+  "author": "Myogi Ban",
   "main": "dist/electron.js",
   "scripts": {
     "build": "npm run build:server && npm run build:electron && npm run build:editor && npm run build:viewer",
@@ -42,9 +43,9 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "Myogi Ban",
-      "installerIcon": "build/icon.ico",
-      "uninstallerIcon": "build/icon.ico",
-      "installerHeaderIcon": "build/icon.ico",
+      "installerIcon": "build/icon.png",
+      "uninstallerIcon": "build/icon.png",
+      "installerHeaderIcon": "build/icon.png",
       "license": "LICENSE.txt"
     }
   },
