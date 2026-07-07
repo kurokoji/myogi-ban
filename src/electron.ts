@@ -6,9 +6,9 @@ import WebSocket from 'ws';
 import * as fs from 'fs';
 
 const PORT = 33770;
-const PID_FILE = path.join(__dirname, '..', 'server.pid');
+const PID_FILE = path.join(app.getPath('userData'), 'server.pid');
 const LAYOUT_BASE = path.join(__dirname, '..', 'public', 'layout');
-const USER_LAYOUT_BASE = path.join(__dirname, '..', 'public', 'user-layouts');
+const USER_LAYOUT_BASE = path.join(app.getPath('userData'), 'user-layouts');
 let mainWindow: BrowserWindow | null = null;
 let server: http.Server;
 let wss: WebSocket.Server;
@@ -150,7 +150,7 @@ function startServer(): void {
     res.json({ ok: true, fileName: safeFileName });
   });
 
-  const DEFAULT_LAYOUT_FILE = path.join(__dirname, '..', 'public', 'default-layout.json');
+  const DEFAULT_LAYOUT_FILE = path.join(app.getPath('userData'), 'default-layout.json');
   expressApp.get('/api/default-layout', (req, res) => {
     if (fs.existsSync(DEFAULT_LAYOUT_FILE)) {
       const data = JSON.parse(fs.readFileSync(DEFAULT_LAYOUT_FILE, 'utf8'));
