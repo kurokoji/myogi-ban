@@ -34,6 +34,8 @@ export interface BackgroundConfig {
   scale: string;
   w: string;
   h: string;
+  useCss?: boolean;
+  cssColor?: string;
 }
 
 export interface Layout {

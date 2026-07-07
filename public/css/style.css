@@ -267,3 +267,8 @@ body {
 .stick-shaft.stick-up.stick-right { transform: rotate(45deg); }
 .stick-shaft.stick-down.stick-left { transform: rotate(-135deg); }
 .stick-shaft.stick-down.stick-right { transform: rotate(135deg); }
+
+.background-css {
+	background-image: none !important;
+	background-color: var(--bg-color, #0b0f14);
+}

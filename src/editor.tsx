@@ -441,15 +441,33 @@ function EditorApp(): React.ReactElement {
             <Title order={2}>{t('buttons')}</Title>
             <NumberInput size="xs" label={t('count')} min={0} max={48} value={layout.totalbuttonshow} onChange={(value) => updateLayout((next) => { next.totalbuttonshow = Math.max(0, Math.min(48, Number(value) || 0)); })} />
             <Switch size="sm" label={t('showBackground')} checked={layout.background.show} onChange={(event) => updateLayout((next) => { next.background.show = event.target.checked; })} />
+            <Switch
+              size="sm"
+              label={t('useCssBg')}
+              checked={layout.background.useCss ?? true}
+              onChange={(event) => updateLayout((next) => { next.background.useCss = event.target.checked; })}
+            />
+            {layout.background.useCss ? (
+              <div>
+                <label style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>色</label>
+                <input
+                  type="color"
+                  value={layout.background.cssColor || '#0b0f14'}
+                  onChange={(e) => updateLayout((next) => { next.background.cssColor = e.target.value; })}
+                  style={{ width: '100%', height: '30px', cursor: 'pointer' }}
+                />
+              </div>
+            ) : (
+              <Group gap="xs" align="end" wrap="nowrap">
+                <TextInput size="xs" label={t('bgImage')} value={layout.background.image} onChange={(event) => updateLayout((next) => { next.background.image = event.target.value; })} placeholder="filename.png" className="grow" />
+                <Button size="xs" variant="light" onClick={() => openImagePicker({ type: 'background' })}>{t('selectFile')}</Button>
+              </Group>
+            )}
             <NumberInput size="xs" label={t('bgScale')} min={0.1} max={5} step={0.1} value={numericValue(layout.background.scale || '1')} onChange={(value) => updateLayout((next) => { next.background.scale = String(value ?? ''); })} />
             <div className="control row obs-size-row">
               <label>{t('obsWidth')}</label><span className="readonly-value">{layout.background.w || '500'}</span>
               <label>{t('obsHeight')}</label><span className="readonly-value">{layout.background.h || '250'}</span>
             </div>
-            <Group gap="xs" align="end" wrap="nowrap">
-              <TextInput size="xs" label={t('bgImage')} value={layout.background.image} onChange={(event) => updateLayout((next) => { next.background.image = event.target.value; })} placeholder="filename.png" className="grow" />
-              <Button size="xs" variant="light" onClick={() => openImagePicker({ type: 'background' })}>{t('selectFile')}</Button>
-            </Group>
             <input ref={fileInputRef} type="file" accept="image/*" onChange={uploadImage} hidden />
           </Stack>
         </Paper>
