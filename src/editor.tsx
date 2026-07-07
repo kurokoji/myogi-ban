@@ -465,10 +465,13 @@ function EditorApp(): React.ReactElement {
                 </div>
               </>
             ) : (
-              <Group gap="xs" align="end" wrap="nowrap">
-                <TextInput size="xs" label={t('bgImage')} value={layout.background.image} onChange={(event) => updateLayout((next) => { next.background.image = event.target.value; })} placeholder="filename.png" className="grow" />
-                <Button size="xs" variant="light" onClick={() => openImagePicker({ type: 'background' })}>{t('selectFile')}</Button>
-              </Group>
+              <>
+                <Group gap="xs" align="end" wrap="nowrap">
+                  <TextInput size="xs" label={t('bgImage')} value={layout.background.image} onChange={(event) => updateLayout((next) => { next.background.image = event.target.value; })} placeholder="filename.png" className="grow" />
+                  <Button size="xs" variant="light" onClick={() => openImagePicker({ type: 'background' })}>{t('selectFile')}</Button>
+                </Group>
+                <NumberInput size="xs" label={t('bgScale')} min={0.1} max={5} step={0.1} value={numericValue(layout.background.scale || '1')} onChange={(value) => updateLayout((next) => { next.background.scale = String(value ?? ''); })} />
+              </>
             )}
             <input ref={fileInputRef} type="file" accept="image/*" onChange={uploadImage} hidden />
           </Stack>
