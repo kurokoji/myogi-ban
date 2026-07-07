@@ -30,4 +30,17 @@ export class ApiClient {
       // ignore errors
     }
   }
+
+  async getDefaultLayout(): Promise<{ name: string }> {
+    const res = await fetch(`${SERVER_URL}/api/default-layout`);
+    return res.json();
+  }
+
+  async setDefaultLayout(name: string): Promise<void> {
+    await fetch(`${SERVER_URL}/api/default-layout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name })
+    });
+  }
 }

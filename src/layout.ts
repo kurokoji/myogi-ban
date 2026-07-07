@@ -3,7 +3,9 @@ import { Layout, ButtonLayout, StickLayout, BackgroundConfig, InputHistoryMode, 
 export function createDefaultButtonLayout(overrides: Partial<ButtonLayout> = {}): ButtonLayout {
   return {
     x: '0', y: '0', w: '', h: '', img: '',
-    xp: '', yp: '', wp: '', hp: '', imgp: '',
+    xp: '', yp: '', wp: '', hp: '', imgp: '', useCss: false,
+    cssColor: '#cccccc', cssPressedColor: '#999999',
+    cssTransition: '0.02', cssEasing: 'ease',
     ...overrides
   };
 }
@@ -69,13 +71,25 @@ export function ensureLayoutDefaults(layout: Partial<Layout>): Layout {
   if (incomingBackground && !('scale' in incomingBackground) && (incomingBackground.w || incomingBackground.h)) {
     background.scale = '';
   }
+  const incomingDefaultButtons = layout.defaultbuttons as Partial<ButtonLayout> | undefined;
+  const defaultbuttons = { ...defaults.defaultbuttons, ...(incomingDefaultButtons || {}) };
+  
+  const buttons = (layout.buttons || defaults.buttons).map((button) => {
+    const b = { ...button };
+    if (b.w === defaultbuttons.w) b.w = '';
+    if (b.h === defaultbuttons.h) b.h = '';
+    if (b.img === defaultbuttons.img) b.img = '';
+    if (b.imgp === defaultbuttons.imgp) b.imgp = '';
+    return b;
+  });
+  
   return {
     ...defaults,
     ...layout,
     inputhistorymode: { ...defaults.inputhistorymode, ...(layout.inputhistorymode || {}) },
     stick: { ...defaults.stick, ...(layout.stick || {}) },
-    defaultbuttons: { ...defaults.defaultbuttons, ...(layout.defaultbuttons || {}) },
+    defaultbuttons,
     background,
-    buttons: layout.buttons || defaults.buttons,
+    buttons,
   };
 }

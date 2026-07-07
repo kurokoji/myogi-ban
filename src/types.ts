@@ -9,6 +9,11 @@ export interface ButtonLayout {
   wp: string;
   hp: string;
   imgp: string;
+  useCss?: boolean;
+  cssColor?: string;
+  cssPressedColor?: string;
+  cssTransition?: string;
+  cssEasing?: string;
 }
 
 export interface StickLayout {

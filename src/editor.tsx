@@ -79,7 +79,7 @@ function EditorApp(): React.ReactElement {
   const [previewScale, setPreviewScale] = useState(1);
   const [backgroundOpacity, setBackgroundOpacity] = useState(1);
   const [assigningTarget, setAssigningTarget] = useState<AssigningTarget>(null);
-  const [selectedButtonIndex, setSelectedButtonIndex] = useState(0);
+  const [selectedButtonIndex, setSelectedButtonIndex] = useState<number | null>(null);
   const [language, setLanguage] = useState(i18n.language);
   const axisHoldCounterRef = useRef(0);
   const axisHoldTargetRef = useRef<{ axis: number; value: number } | null>(null);
@@ -117,9 +117,13 @@ function EditorApp(): React.ReactElement {
 
   useEffect(() => {
     refreshLayouts();
-    apiRef.current.getLayout('default')
-      .then((data) => {
-        if (data && data.version) applyLayout(data, 'default');
+    apiRef.current.getDefaultLayout()
+      .then((defaultLayout) => {
+        const layoutName = defaultLayout.name || 'preset';
+        return apiRef.current.getLayout(layoutName)
+          .then((data) => {
+            if (data && data.version) applyLayout(data, layoutName);
+          });
       })
       .catch(() => {
         console.log('No default layout found, using built-in default');
@@ -127,7 +131,10 @@ function EditorApp(): React.ReactElement {
   }, [applyLayout, refreshLayouts]);
 
   useEffect(() => {
-    setSelectedButtonIndex((current) => Math.min(current, Math.max(0, layout.totalbuttonshow - 1)));
+    setSelectedButtonIndex((current) => {
+      if (current === null) return null;
+      return Math.min(current, Math.max(0, layout.totalbuttonshow - 1));
+    });
   }, [layout.totalbuttonshow]);
 
   useEffect(() => {
@@ -280,7 +287,6 @@ function EditorApp(): React.ReactElement {
     data.stickMappings = stickMappings;
     try {
       await apiRef.current.saveLayout(name, data);
-      await apiRef.current.saveLayout('default', data);
       await refreshLayouts();
       window.alert(t('saved'));
     } catch (error) {
@@ -289,12 +295,9 @@ function EditorApp(): React.ReactElement {
   };
 
   const setDefaultLayout = async () => {
-    const data = cloneLayout(layout);
-    data.buttonMappings = buttonMappings;
-    data.stickMappings = stickMappings;
+    const name = layoutName || layout.name || 'custom';
     try {
-      await apiRef.current.saveLayout('default', data);
-      await refreshLayouts();
+      await apiRef.current.setDefaultLayout(name);
       window.alert(t('defaultSaved'));
     } catch (error) {
       console.error('Failed to set default layout:', error);
@@ -424,6 +427,60 @@ function EditorApp(): React.ReactElement {
         <Paper className="panel" withBorder>
           <Stack gap="xs">
             <Title order={2}>{t('buttonImages')}</Title>
+            <Switch
+              size="sm"
+              label={t('useCssButton')}
+              checked={layout.defaultbuttons.useCss ?? false}
+              onChange={(event) => updateLayout((next) => { next.defaultbuttons.useCss = event.target.checked; })}
+            />
+            {layout.defaultbuttons.useCss && (
+              <div className="control row">
+                <div>
+                  <label style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>通常色</label>
+                  <input
+                    type="color"
+                    value={layout.defaultbuttons.cssColor || '#cccccc'}
+                    onChange={(e) => updateLayout((next) => { next.defaultbuttons.cssColor = e.target.value; })}
+                    style={{ width: '100%', height: '30px', cursor: 'pointer' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>押下時色</label>
+                  <input
+                    type="color"
+                    value={layout.defaultbuttons.cssPressedColor || '#999999'}
+                    onChange={(e) => updateLayout((next) => { next.defaultbuttons.cssPressedColor = e.target.value; })}
+                    style={{ width: '100%', height: '30px', cursor: 'pointer' }}
+                  />
+                </div>
+              </div>
+            )}
+            {layout.defaultbuttons.useCss && (
+              <div className="control row">
+                <NumberInput
+                  size="xs"
+                  label="Transition (秒)"
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={parseFloat(layout.defaultbuttons.cssTransition || '0.02')}
+                  onChange={(value) => updateLayout((next) => { next.defaultbuttons.cssTransition = String(value ?? 0.02); })}
+                />
+                <NativeSelect
+                  size="xs"
+                  label="Easing"
+                  value={layout.defaultbuttons.cssEasing || 'ease'}
+                  onChange={(event) => updateLayout((next) => { next.defaultbuttons.cssEasing = event.target.value; })}
+                  data={[
+                    { value: 'ease', label: 'ease' },
+                    { value: 'linear', label: 'linear' },
+                    { value: 'ease-in', label: 'ease-in' },
+                    { value: 'ease-out', label: 'ease-out' },
+                    { value: 'ease-in-out', label: 'ease-in-out' }
+                  ]}
+                />
+              </div>
+            )}
             <Group gap="xs" align="end" wrap="nowrap">
               <TextInput size="xs" label={t('defaultReleasedImage')} value={layout.defaultbuttons.img} onChange={(event) => updateLayout((next) => { next.defaultbuttons.img = event.target.value; })} placeholder="button-released.png" className="grow" />
               <Button size="xs" variant="light" onClick={() => openImagePicker({ type: 'defaultButton', state: 'released' })}>{t('selectFile')}</Button>
@@ -444,38 +501,133 @@ function EditorApp(): React.ReactElement {
             <NativeSelect
               size="xs"
               label={t('editButton')}
-              value={String(selectedButtonIndex)}
-              onChange={(event) => setSelectedButtonIndex(parseInt(event.target.value))}
-              data={Array.from({ length: Math.max(1, layout.totalbuttonshow) }, (_, index) => ({ value: String(index), label: `Button ${index + 1}` }))}
+              value={selectedButtonIndex === null ? '' : String(selectedButtonIndex)}
+              onChange={(event) => setSelectedButtonIndex(event.target.value === '' ? null : parseInt(event.target.value))}
+              data={[
+                { value: '', label: '選択してください' },
+                ...Array.from({ length: Math.max(1, layout.totalbuttonshow) }, (_, index) => ({ value: String(index), label: `Button ${index + 1}` }))
+              ]}
             />
-            <TextInput
-              size="xs"
-              label={t('releasedImage')}
-              value={layout.buttons[selectedButtonIndex]?.img || ''}
-              onChange={(event) => updateLayout((next) => { next.buttons[selectedButtonIndex].img = event.target.value; })}
-              placeholder={layout.defaultbuttons.img || 'button-released.png'}
-              rightSection={<Button size="compact-xs" variant="subtle" onClick={() => openImagePicker({ type: 'button', index: selectedButtonIndex, state: 'released' })}>{t('selectFile')}</Button>}
-              rightSectionWidth={74}
-            />
-            <TextInput
-              size="xs"
-              label={t('pressedImage')}
-              value={layout.buttons[selectedButtonIndex]?.imgp || ''}
-              onChange={(event) => updateLayout((next) => { next.buttons[selectedButtonIndex].imgp = event.target.value; })}
-              placeholder={layout.defaultbuttons.imgp || 'button-pressed.png'}
-              rightSection={<Button size="compact-xs" variant="subtle" onClick={() => openImagePicker({ type: 'button', index: selectedButtonIndex, state: 'pressed' })}>{t('selectFile')}</Button>}
-              rightSectionWidth={74}
-            />
-            <Text size="xs" fw={600}>{t('releasedSize')}</Text>
-            <div className="control row">
-              <NumberInput size="xs" label="W" value={numericValue(layout.buttons[selectedButtonIndex]?.w || '')} onChange={(value) => updateLayout((next) => { next.buttons[selectedButtonIndex].w = String(value ?? ''); })} />
-              <NumberInput size="xs" label="H" value={numericValue(layout.buttons[selectedButtonIndex]?.h || '')} onChange={(value) => updateLayout((next) => { next.buttons[selectedButtonIndex].h = String(value ?? ''); })} />
-            </div>
-            <Text size="xs" fw={600}>{t('pressedSize')}</Text>
-            <div className="control row">
-              <NumberInput size="xs" label="W" value={numericValue(layout.buttons[selectedButtonIndex]?.wp || '')} onChange={(value) => updateLayout((next) => { next.buttons[selectedButtonIndex].wp = String(value ?? ''); })} />
-              <NumberInput size="xs" label="H" value={numericValue(layout.buttons[selectedButtonIndex]?.hp || '')} onChange={(value) => updateLayout((next) => { next.buttons[selectedButtonIndex].hp = String(value ?? ''); })} />
-            </div>
+            {selectedButtonIndex !== null && (
+              <Group gap="xs">
+                <Switch
+                  size="sm"
+                  label={t('useCssButton')}
+                  checked={layout.buttons[selectedButtonIndex]?.useCss ?? layout.defaultbuttons.useCss ?? false}
+                  onChange={(event) => updateLayout((next) => { next.buttons[selectedButtonIndex].useCss = event.target.checked; })}
+                />
+                <Button
+                  size="xs"
+                  variant="light"
+                  color="gray"
+                  onClick={() => {
+                    updateLayout((next) => {
+                      next.buttons[selectedButtonIndex] = {
+                        x: next.buttons[selectedButtonIndex].x,
+                        y: next.buttons[selectedButtonIndex].y,
+                        w: next.defaultbuttons.w,
+                        h: next.defaultbuttons.h,
+                        img: next.defaultbuttons.img,
+                        xp: next.defaultbuttons.xp,
+                        yp: next.defaultbuttons.yp,
+                        wp: next.defaultbuttons.wp,
+                        hp: next.defaultbuttons.hp,
+                        imgp: next.defaultbuttons.imgp,
+                        useCss: next.defaultbuttons.useCss,
+                        cssColor: next.defaultbuttons.cssColor,
+                        cssPressedColor: next.defaultbuttons.cssPressedColor,
+                        cssTransition: next.defaultbuttons.cssTransition,
+                        cssEasing: next.defaultbuttons.cssEasing
+                      };
+                    });
+                  }}
+                >
+                  標準に戻す
+                </Button>
+              </Group>
+            )}
+            {selectedButtonIndex !== null && (layout.buttons[selectedButtonIndex]?.useCss ?? layout.defaultbuttons.useCss ?? false) && (
+              <div className="control row">
+                <div>
+                  <label style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>通常色</label>
+                  <input
+                    type="color"
+                    value={layout.buttons[selectedButtonIndex]?.cssColor === layout.defaultbuttons.cssColor ? '#cccccc' : (layout.buttons[selectedButtonIndex]?.cssColor ?? layout.defaultbuttons.cssColor ?? '#cccccc')}
+                    onChange={(e) => updateLayout((next) => { next.buttons[selectedButtonIndex].cssColor = e.target.value; })}
+                    style={{ width: '100%', height: '30px', cursor: 'pointer' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>押下時色</label>
+                  <input
+                    type="color"
+                    value={layout.buttons[selectedButtonIndex]?.cssPressedColor === layout.defaultbuttons.cssPressedColor ? '#999999' : (layout.buttons[selectedButtonIndex]?.cssPressedColor ?? layout.defaultbuttons.cssPressedColor ?? '#999999')}
+                    onChange={(e) => updateLayout((next) => { next.buttons[selectedButtonIndex].cssPressedColor = e.target.value; })}
+                    style={{ width: '100%', height: '30px', cursor: 'pointer' }}
+                  />
+                </div>
+              </div>
+            )}
+            {selectedButtonIndex !== null && (layout.buttons[selectedButtonIndex]?.useCss ?? layout.defaultbuttons.useCss ?? false) && (
+              <div className="control row">
+                <NumberInput
+                  size="xs"
+                  label="Transition (秒)"
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  value={layout.buttons[selectedButtonIndex]?.cssTransition === layout.defaultbuttons.cssTransition ? '' : parseFloat(layout.buttons[selectedButtonIndex]?.cssTransition ?? layout.defaultbuttons.cssTransition ?? '0.02')}
+                  onChange={(value) => updateLayout((next) => { next.buttons[selectedButtonIndex].cssTransition = String(value ?? 0.02); })}
+                  placeholder={layout.defaultbuttons.cssTransition || '0.02'}
+                />
+                <NativeSelect
+                  size="xs"
+                  label="Easing"
+                  value={layout.buttons[selectedButtonIndex]?.cssEasing === layout.defaultbuttons.cssEasing ? '' : (layout.buttons[selectedButtonIndex]?.cssEasing ?? layout.defaultbuttons.cssEasing ?? 'ease')}
+                  onChange={(event) => updateLayout((next) => { next.buttons[selectedButtonIndex].cssEasing = event.target.value; })}
+                  data={[
+                    { value: '', label: '標準準拠' },
+                    { value: 'ease', label: 'ease' },
+                    { value: 'linear', label: 'linear' },
+                    { value: 'ease-in', label: 'ease-in' },
+                    { value: 'ease-out', label: 'ease-out' },
+                    { value: 'ease-in-out', label: 'ease-in-out' }
+                  ]}
+                />
+              </div>
+            )}
+            {selectedButtonIndex !== null && (
+              <>
+                <TextInput
+                  size="xs"
+                  label={t('releasedImage')}
+                  value={layout.buttons[selectedButtonIndex]?.img === layout.defaultbuttons.img ? '' : (layout.buttons[selectedButtonIndex]?.img || '')}
+                  onChange={(event) => updateLayout((next) => { next.buttons[selectedButtonIndex].img = event.target.value; })}
+                  placeholder={layout.defaultbuttons.img || 'button-released.png'}
+                  rightSection={<Button size="compact-xs" variant="subtle" onClick={() => openImagePicker({ type: 'button', index: selectedButtonIndex, state: 'released' })}>{t('selectFile')}</Button>}
+                  rightSectionWidth={74}
+                />
+                <TextInput
+                  size="xs"
+                  label={t('pressedImage')}
+                  value={layout.buttons[selectedButtonIndex]?.imgp === layout.defaultbuttons.imgp ? '' : (layout.buttons[selectedButtonIndex]?.imgp || '')}
+                  onChange={(event) => updateLayout((next) => { next.buttons[selectedButtonIndex].imgp = event.target.value; })}
+                  placeholder={layout.defaultbuttons.imgp || 'button-pressed.png'}
+                  rightSection={<Button size="compact-xs" variant="subtle" onClick={() => openImagePicker({ type: 'button', index: selectedButtonIndex, state: 'pressed' })}>{t('selectFile')}</Button>}
+                  rightSectionWidth={74}
+                />
+                <Text size="xs" fw={600}>{t('releasedSize')}</Text>
+                <div className="control row">
+                  <NumberInput size="xs" label="W" value={layout.buttons[selectedButtonIndex]?.w === layout.defaultbuttons.w ? '' : numericValue(layout.buttons[selectedButtonIndex]?.w || '')} onChange={(value) => updateLayout((next) => { next.buttons[selectedButtonIndex].w = String(value ?? ''); })} placeholder={layout.defaultbuttons.w || '60'} />
+                  <NumberInput size="xs" label="H" value={layout.buttons[selectedButtonIndex]?.h === layout.defaultbuttons.h ? '' : numericValue(layout.buttons[selectedButtonIndex]?.h || '')} onChange={(value) => updateLayout((next) => { next.buttons[selectedButtonIndex].h = String(value ?? ''); })} placeholder={layout.defaultbuttons.h || '60'} />
+                </div>
+                <Text size="xs" fw={600}>{t('pressedSize')}</Text>
+                <div className="control row">
+                  <NumberInput size="xs" label="W" value={layout.buttons[selectedButtonIndex]?.wp === layout.defaultbuttons.wp ? '' : numericValue(layout.buttons[selectedButtonIndex]?.wp || '')} onChange={(value) => updateLayout((next) => { next.buttons[selectedButtonIndex].wp = String(value ?? ''); })} placeholder={layout.defaultbuttons.wp || '60'} />
+                  <NumberInput size="xs" label="H" value={layout.buttons[selectedButtonIndex]?.hp === layout.defaultbuttons.hp ? '' : numericValue(layout.buttons[selectedButtonIndex]?.hp || '')} onChange={(value) => updateLayout((next) => { next.buttons[selectedButtonIndex].hp = String(value ?? ''); })} placeholder={layout.defaultbuttons.hp || '60'} />
+                </div>
+              </>
+            )}
             <Text size="xs" c="dimmed">{t('useDefaultWhenBlank')}</Text>
           </Stack>
         </Paper>
@@ -539,6 +691,7 @@ function EditorApp(): React.ReactElement {
             inputHistory={inputHistory}
             backgroundOpacity={backgroundOpacity}
             editorMode
+            selectedButtonIndex={selectedButtonIndex}
             onBackgroundSizeChange={updateBackgroundSize}
             onButtonClick={(index) => startAssignment(index)}
             onStickClick={(index) => startAssignment(1000 + index)}

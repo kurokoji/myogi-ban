@@ -177,3 +177,8 @@ body {
 	filter: brightness(1.5);
 	opacity: 0.8;
 }
+
+#preview .gamepad-button.button-selected {
+	outline: 3px solid #4dabf7;
+	outline-offset: 3px;
+}

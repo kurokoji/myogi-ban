@@ -53,7 +53,8 @@ export const resources = {
       pressAnyButton: 'Press Any Button',
       language: '言語',
       obsWidth: 'OBS W',
-      obsHeight: 'OBS H'
+      obsHeight: 'OBS H',
+      useCssButton: 'CSSボタンを使用'
     }
   },
   en: {
@@ -107,7 +108,8 @@ export const resources = {
       pressAnyButton: 'Press Any Button',
       language: 'Language',
       obsWidth: 'OBS W',
-      obsHeight: 'OBS H'
+      obsHeight: 'OBS H',
+      useCssButton: 'Use CSS button'
     }
   }
 };

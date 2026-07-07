@@ -10,6 +10,7 @@ export interface GamepadViewProps {
   inputHistory: number[][];
   backgroundOpacity?: number;
   editorMode?: boolean;
+  selectedButtonIndex?: number | null;
   onBackgroundSizeChange?: (width: number, height: number) => void;
   onButtonClick?: (index: number) => void;
   onStickClick?: (index: number) => void;
@@ -112,6 +113,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     inputHistory,
     backgroundOpacity = 1,
     editorMode = false,
+    selectedButtonIndex,
     onBackgroundSizeChange,
     onButtonClick,
     onStickClick,
@@ -222,28 +224,46 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
             {Array.from({ length: layout.totalbuttonshow }, (_, index) => {
               const button = layout.buttons[index] || defaultButton;
               const pressed = pressedButtons[index] || false;
-              const releasedImage = button.img || defaultButton.img;
-              const pressedImage = button.imgp || defaultButton.imgp;
-              const releasedWidth = button.w || defaultButton.w || '60';
-              const releasedHeight = button.h || defaultButton.h || '60';
-              const pressedWidth = button.wp || defaultButton.wp || releasedWidth;
-              const pressedHeight = button.hp || defaultButton.hp || releasedHeight;
+              const releasedImage = button.img === defaultButton.img ? '' : button.img;
+              const pressedImage = button.imgp === defaultButton.imgp ? '' : button.imgp;
+              const releasedWidth = button.w === defaultButton.w ? '' : button.w;
+              const releasedHeight = button.h === defaultButton.h ? '' : button.h;
+              const pressedWidth = button.wp === defaultButton.wp ? '' : button.wp;
+              const pressedHeight = button.hp === defaultButton.hp ? '' : button.hp;
+              
+              const useCss = button.useCss ?? defaultButton.useCss ?? false;
+              const useImage = pressed ? pressedImage : releasedImage;
+              const cssColor = button.cssColor ?? defaultButton.cssColor ?? '#cccccc';
+              const cssPressedColor = button.cssPressedColor ?? defaultButton.cssPressedColor ?? '#999999';
+              const cssTransition = button.cssTransition ?? defaultButton.cssTransition ?? '0.02';
+              const cssEasing = button.cssEasing ?? defaultButton.cssEasing ?? 'ease';
               const style: React.CSSProperties = {
                 left: `${button.x || defaultButton.x || 0}px`,
                 top: `${button.y || defaultButton.y || 0}px`,
-                width: `${pressed ? pressedWidth : releasedWidth}px`,
-                height: `${pressed ? pressedHeight : releasedHeight}px`,
-                ...getImageStyle(layout, pressed ? pressedImage : releasedImage),
-                cursor: editorMode ? 'move' : undefined
-              };
+                width: `${pressed ? (pressedWidth || defaultButton.wp || defaultButton.w || '60') : (releasedWidth || defaultButton.w || '60')}px`,
+                height: `${pressed ? (pressedHeight || defaultButton.hp || defaultButton.h || '60') : (releasedHeight || defaultButton.h || '60')}px`,
+                cursor: editorMode ? 'move' : undefined,
+                '--button-color': pressed ? cssPressedColor : cssColor,
+                '--button-shadow-color': pressed ? 'rgba(0, 0, 0, 0.4)' : 'rgba(0, 0, 0, 0.2)',
+                '--button-transition': `${cssTransition}s`,
+                '--button-easing': cssEasing
+              } as React.CSSProperties;
+
+              if (!useCss && useImage) {
+                style.backgroundImage = `url("${assetUrl(layout, useImage)}")`;
+              }
+
               if (pressed) {
                 if (button.xp || defaultButton.xp) style.left = `${button.xp || defaultButton.xp}px`;
                 if (button.yp || defaultButton.yp) style.top = `${button.yp || defaultButton.yp}px`;
               }
+
+              const className = `gamepad-button button${index} ${pressed ? 'button-pressed' : 'button-released'} ${useCss ? 'button-css' : ''} ${editorMode && selectedButtonIndex !== null && selectedButtonIndex !== undefined && selectedButtonIndex === index ? 'button-selected' : ''}`;
+
               return (
                 <div
                   id={`button${index}`}
-                  className={`gamepad-button button${index} ${pressed ? 'button-pressed' : 'button-released'}`}
+                  className={className}
                   key={index}
                   onClick={editorMode ? () => onButtonClick?.(index) : undefined}
                   onMouseDown={editorMode ? (e) => handleMouseDown(e, 'button', index, parseFloat(button.x || defaultButton.x || '0'), parseFloat(button.y || defaultButton.y || '0')) : undefined}

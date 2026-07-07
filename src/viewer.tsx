@@ -29,7 +29,11 @@ function ViewerApp(): React.ReactElement {
   const stickMappingsRef = useLatestRef(stickMappings);
 
   useEffect(() => {
-    apiRef.current.getLayout('default')
+    apiRef.current.getDefaultLayout()
+      .then((defaultLayout) => {
+        const layoutName = defaultLayout.name || 'preset';
+        return apiRef.current.getLayout(layoutName);
+      })
       .then((data) => {
         if (data && data.version) {
           const nextLayout = ensureLayoutDefaults(data);
