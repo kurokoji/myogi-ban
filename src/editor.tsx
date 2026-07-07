@@ -598,24 +598,28 @@ function EditorApp(): React.ReactElement {
             )}
             {selectedButtonIndex !== null && (
               <>
-                <TextInput
-                  size="xs"
-                  label={t('releasedImage')}
-                  value={layout.buttons[selectedButtonIndex]?.img === layout.defaultbuttons.img ? '' : (layout.buttons[selectedButtonIndex]?.img || '')}
-                  onChange={(event) => updateLayout((next) => { next.buttons[selectedButtonIndex].img = event.target.value; })}
-                  placeholder={layout.defaultbuttons.img || 'button-released.png'}
-                  rightSection={<Button size="compact-xs" variant="subtle" onClick={() => openImagePicker({ type: 'button', index: selectedButtonIndex, state: 'released' })}>{t('selectFile')}</Button>}
-                  rightSectionWidth={74}
-                />
-                <TextInput
-                  size="xs"
-                  label={t('pressedImage')}
-                  value={layout.buttons[selectedButtonIndex]?.imgp === layout.defaultbuttons.imgp ? '' : (layout.buttons[selectedButtonIndex]?.imgp || '')}
-                  onChange={(event) => updateLayout((next) => { next.buttons[selectedButtonIndex].imgp = event.target.value; })}
-                  placeholder={layout.defaultbuttons.imgp || 'button-pressed.png'}
-                  rightSection={<Button size="compact-xs" variant="subtle" onClick={() => openImagePicker({ type: 'button', index: selectedButtonIndex, state: 'pressed' })}>{t('selectFile')}</Button>}
-                  rightSectionWidth={74}
-                />
+                <Group gap="xs" align="end" wrap="nowrap">
+                  <TextInput
+                    size="xs"
+                    label={t('releasedImage')}
+                    value={layout.buttons[selectedButtonIndex]?.img === layout.defaultbuttons.img ? '' : (layout.buttons[selectedButtonIndex]?.img || '')}
+                    onChange={(event) => updateLayout((next) => { next.buttons[selectedButtonIndex].img = event.target.value; })}
+                    placeholder={layout.defaultbuttons.img || 'button-released.png'}
+                    className="grow"
+                  />
+                  <Button size="xs" variant="light" onClick={() => openImagePicker({ type: 'button', index: selectedButtonIndex, state: 'released' })}>{t('selectFile')}</Button>
+                </Group>
+                <Group gap="xs" align="end" wrap="nowrap">
+                  <TextInput
+                    size="xs"
+                    label={t('pressedImage')}
+                    value={layout.buttons[selectedButtonIndex]?.imgp === layout.defaultbuttons.imgp ? '' : (layout.buttons[selectedButtonIndex]?.imgp || '')}
+                    onChange={(event) => updateLayout((next) => { next.buttons[selectedButtonIndex].imgp = event.target.value; })}
+                    placeholder={layout.defaultbuttons.imgp || 'button-pressed.png'}
+                    className="grow"
+                  />
+                  <Button size="xs" variant="light" onClick={() => openImagePicker({ type: 'button', index: selectedButtonIndex, state: 'pressed' })}>{t('selectFile')}</Button>
+                </Group>
                 <Text size="xs" fw={600}>{t('releasedSize')}</Text>
                 <div className="control row">
                   <NumberInput size="xs" label="W" value={layout.buttons[selectedButtonIndex]?.w === layout.defaultbuttons.w ? '' : numericValue(layout.buttons[selectedButtonIndex]?.w || '')} onChange={(value) => updateLayout((next) => { next.buttons[selectedButtonIndex].w = String(value ?? ''); })} placeholder={layout.defaultbuttons.w || '60'} />
