@@ -25,14 +25,14 @@ export function createDefaultBackgroundConfig(overrides: Partial<BackgroundConfi
 
 export function createDefaultLayout(): Layout {
   const buttons: ButtonLayout[] = [
-    createDefaultButtonLayout({ x: '195', y: '80' }),
-    createDefaultButtonLayout({ x: '250', y: '80' }),
-    createDefaultButtonLayout({ x: '305', y: '80' }),
-    createDefaultButtonLayout({ x: '360', y: '80' }),
-    createDefaultButtonLayout({ x: '195', y: '135' }),
-    createDefaultButtonLayout({ x: '250', y: '135' }),
-    createDefaultButtonLayout({ x: '305', y: '135' }),
-    createDefaultButtonLayout({ x: '360', y: '135' }),
+    createDefaultButtonLayout({ x: '230', y: '80' }),
+    createDefaultButtonLayout({ x: '270', y: '80' }),
+    createDefaultButtonLayout({ x: '310', y: '80' }),
+    createDefaultButtonLayout({ x: '350', y: '80' }),
+    createDefaultButtonLayout({ x: '230', y: '135' }),
+    createDefaultButtonLayout({ x: '270', y: '135' }),
+    createDefaultButtonLayout({ x: '310', y: '135' }),
+    createDefaultButtonLayout({ x: '350', y: '135' }),
   ];
 
   for (let i = buttons.length; i < TOTAL_BUTTONS; i++) {
@@ -44,7 +44,7 @@ export function createDefaultLayout(): Layout {
     name: 'default',
     totalbuttonshow: 8,
     showstick: true,
-    stick: createDefaultStickLayout({ x: '85', y: '105', w: '100', h: '100', useCss: true, cssColor: '#e03131', cssPlateColor: '#868e96' }),
+    stick: createDefaultStickLayout({ x: '150', y: '105', w: '100', h: '100', useCss: true, cssColor: '#e03131', cssPlateColor: '#868e96' }),
     defaultbuttons: createDefaultButtonLayout({
       w: '48', h: '48', useCss: true,
       cssColor: '#e03131', cssPressedColor: '#c2251c',
