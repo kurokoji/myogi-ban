@@ -274,9 +274,10 @@ function EditorApp(): React.ReactElement {
 
   const loadLayout = async () => {
     if (!selectedLayout) return;
+    const name = selectedLayout.replace(/:builtin$|:user$/, '');
     try {
-      const data = await apiRef.current.getLayout(selectedLayout);
-      applyLayout(data, selectedLayout);
+      const data = await apiRef.current.getLayout(name);
+      applyLayout(data, name);
     } catch (error) {
       console.error('Failed to load layout:', error);
     }
@@ -706,7 +707,7 @@ function EditorApp(): React.ReactElement {
           <Stack gap="xs">
             <Title order={2}>{t('layout')}</Title>
             <Group gap="xs" align="end" wrap="nowrap">
-              <NativeSelect size="xs" value={selectedLayout} onChange={(event) => setSelectedLayout(event.target.value)} data={layoutNames.map((entry) => ({ value: entry.name, label: `${entry.name}${entry.builtin ? '' : ' *'}` }))} className="grow" />
+              <NativeSelect size="xs" value={selectedLayout} onChange={(event) => setSelectedLayout(event.target.value)} data={layoutNames.map((entry) => ({ value: `${entry.name}:${entry.builtin ? 'builtin' : 'user'}`, label: `${entry.name}${entry.builtin ? '' : ' *'}` }))} className="grow" />
               <Button size="xs" variant="light" onClick={loadLayout}>{t('load')}</Button>
             </Group>
             <Group gap="xs" align="end" wrap="nowrap">
