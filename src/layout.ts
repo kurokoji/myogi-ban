@@ -25,16 +25,12 @@ export function createDefaultBackgroundConfig(overrides: Partial<BackgroundConfi
 
 export function createDefaultLayout(): Layout {
   const buttons: ButtonLayout[] = [
-    createDefaultButtonLayout({ x: '250', y: '115' }),
-    createDefaultButtonLayout({ x: '310', y: '85' }),
-    createDefaultButtonLayout({ x: '375', y: '85' }),
-    createDefaultButtonLayout({ x: '440', y: '85' }),
-    createDefaultButtonLayout({ x: '240', y: '185' }),
-    createDefaultButtonLayout({ x: '300', y: '155' }),
-    createDefaultButtonLayout({ x: '365', y: '155' }),
-    createDefaultButtonLayout({ x: '430', y: '155' }),
-    createDefaultButtonLayout({ x: '390', y: '30', w: '40', h: '40' }),
-    createDefaultButtonLayout({ x: '440', y: '30', w: '40', h: '40' }),
+    createDefaultButtonLayout({ x: '250', y: '90' }),
+    createDefaultButtonLayout({ x: '310', y: '90' }),
+    createDefaultButtonLayout({ x: '370', y: '90' }),
+    createDefaultButtonLayout({ x: '250', y: '145' }),
+    createDefaultButtonLayout({ x: '310', y: '145' }),
+    createDefaultButtonLayout({ x: '370', y: '145' }),
   ];
 
   for (let i = buttons.length; i < TOTAL_BUTTONS; i++) {
@@ -43,14 +39,14 @@ export function createDefaultLayout(): Layout {
 
   return {
     version: '210124',
-    name: 'preset',
-    totalbuttonshow: 10,
+    name: 'default',
+    totalbuttonshow: 6,
     showstick: true,
-    stick: createDefaultStickLayout({ x: '110', y: '125', w: '100', h: '100' }),
+    stick: createDefaultStickLayout({ x: '85', y: '105', w: '100', h: '100', useCss: true, cssColor: '#e03131', cssPlateColor: '#868e96' }),
     defaultbuttons: createDefaultButtonLayout({
-      w: '60', h: '60',
-      img: 'button-released.png',
-      imgp: 'button-pressed.png'
+      w: '48', h: '48', useCss: true,
+      cssColor: '#e03131', cssPressedColor: '#c2251c',
+      cssTransition: '0', cssEasing: 'linear'
     }),
     buttons,
     background: createDefaultBackgroundConfig()
