@@ -10,7 +10,30 @@ const PORT = 33770;
 let latestState: any = null;
 const PID_FILE = path.join(__dirname, '..', 'server.pid');
 const LAYOUT_BASE = path.join(__dirname, '..', 'public', 'layout');
+const USER_LAYOUT_BASE = path.join(__dirname, '..', 'public', 'user-layouts');
 const DEFAULT_LAYOUT_FILE = path.join(__dirname, '..', 'default-layout.json');
+
+function getUserLayoutDirs(): string[] {
+  if (!fs.existsSync(USER_LAYOUT_BASE)) return [];
+  return fs.readdirSync(USER_LAYOUT_BASE, { withFileTypes: true })
+    .filter(d => d.isDirectory())
+    .map(d => d.name);
+}
+
+function getBuiltinLayoutDirs(): string[] {
+  if (!fs.existsSync(LAYOUT_BASE)) return [];
+  return fs.readdirSync(LAYOUT_BASE, { withFileTypes: true })
+    .filter(d => d.isDirectory())
+    .map(d => d.name);
+}
+
+function findLayoutPath(name: string): string | null {
+  const userPath = path.join(USER_LAYOUT_BASE, name);
+  if (fs.existsSync(userPath)) return userPath;
+  const builtinPath = path.join(LAYOUT_BASE, name);
+  if (fs.existsSync(builtinPath)) return builtinPath;
+  return null;
+}
 
 function collectLayoutAssets(layout: any): string[] {
   const assets = new Set<string>();
@@ -31,18 +54,21 @@ function collectLayoutAssets(layout: any): string[] {
 }
 
 function copyLayoutAssets(layout: any, sourceLayoutName: string, targetLayoutName: string): void {
-  const targetDir = path.join(LAYOUT_BASE, targetLayoutName);
-  const layoutDirs = fs.existsSync(LAYOUT_BASE)
-    ? fs.readdirSync(LAYOUT_BASE, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name)
-    : [];
-  const sourceDirs = [sourceLayoutName, ...layoutDirs].filter(Boolean);
+  const targetDir = path.join(USER_LAYOUT_BASE, targetLayoutName);
+  const userDirs = getUserLayoutDirs();
+  const builtinDirs = getBuiltinLayoutDirs();
+  const sourceLayoutPath = findLayoutPath(sourceLayoutName);
+  const sourceDirs: string[] = [];
+  if (sourceLayoutPath) sourceDirs.push(sourceLayoutPath);
+  sourceDirs.push(...userDirs.map(d => path.join(USER_LAYOUT_BASE, d)));
+  sourceDirs.push(...builtinDirs.map(d => path.join(LAYOUT_BASE, d)));
 
   for (const asset of collectLayoutAssets(layout)) {
     const targetPath = path.join(targetDir, asset);
     if (fs.existsSync(targetPath)) continue;
 
     for (const sourceDir of sourceDirs) {
-      const sourcePath = path.join(LAYOUT_BASE, sourceDir, asset);
+      const sourcePath = path.join(sourceDir, asset);
       if (fs.existsSync(sourcePath)) {
         fs.copyFileSync(sourcePath, targetPath);
         break;
@@ -74,7 +100,7 @@ function createServer(): void {
 
   expressApp.post('/api/layout/save', (req, res) => {
     const layoutName = req.body.name || 'custom';
-    const layoutDir = path.join(LAYOUT_BASE, layoutName);
+    const layoutDir = path.join(USER_LAYOUT_BASE, layoutName);
     if (!fs.existsSync(layoutDir)) {
       fs.mkdirSync(layoutDir, { recursive: true });
     }
@@ -86,23 +112,27 @@ function createServer(): void {
   });
 
   expressApp.get('/api/layouts', (req, res) => {
-    const dirs = fs.readdirSync(LAYOUT_BASE, { withFileTypes: true })
-      .filter(d => d.isDirectory())
-      .map(d => d.name);
-    res.json(dirs);
+    const builtin = getBuiltinLayoutDirs();
+    const user = getUserLayoutDirs();
+    const all = [...new Set([...builtin, ...user])];
+    res.json(all);
   });
 
   expressApp.get('/api/layout/:name', (req, res) => {
-    const layoutDir = path.join(__dirname, '..', 'public', 'layout', req.params.name);
+    const layoutPath = findLayoutPath(req.params.name);
+    if (!layoutPath) {
+      res.json({});
+      return;
+    }
 
-    const jsonPath = path.join(layoutDir, 'layout.json');
+    const jsonPath = path.join(layoutPath, 'layout.json');
     if (fs.existsSync(jsonPath)) {
       const data = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
       res.json(data);
       return;
     }
 
-    const savPath = path.join(layoutDir, 'layout.sav');
+    const savPath = path.join(layoutPath, 'layout.sav');
     if (fs.existsSync(savPath)) {
       const content = fs.readFileSync(savPath, 'utf8');
       const match = content.match(/onLoadLayout\(([\s\S]+)\);?/);
@@ -123,7 +153,7 @@ function createServer(): void {
   expressApp.post('/api/upload-image', (req, res) => {
     const { data, layoutName, fileName } = req.body;
     const safeFileName = path.basename(fileName);
-    const layoutDir = path.join(__dirname, '..', 'public', 'layout', layoutName || 'custom');
+    const layoutDir = path.join(USER_LAYOUT_BASE, layoutName || 'custom');
     
     if (!fs.existsSync(layoutDir)) {
       fs.mkdirSync(layoutDir, { recursive: true });
