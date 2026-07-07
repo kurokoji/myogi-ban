@@ -174,7 +174,12 @@ function startServer(): void {
     }
   });
 
-  server.listen(PORT);
+  server.listen(PORT, onServerReady);
+}
+
+function onServerReady(): void {
+  fs.writeFileSync(PID_FILE, process.pid.toString());
+  createWindow();
 }
 
 function broadcastState(state: any): void {
@@ -204,8 +209,6 @@ function createWindow(): void {
 
 app.whenReady().then(() => {
   startServer();
-  fs.writeFileSync(PID_FILE, process.pid.toString());
-  createWindow();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
