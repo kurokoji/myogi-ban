@@ -1,5 +1,5 @@
 {
-  "name": "fightstick-viewer",
+  "name": "myogi-ban",
   "version": "1.0.0",
   "description": "Fighting game controller viewer for OBS",
   "main": "dist/electron.js",

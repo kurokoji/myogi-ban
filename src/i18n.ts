@@ -4,7 +4,7 @@ import { initReactI18next } from 'react-i18next';
 export const resources = {
   ja: {
     translation: {
-      appTitle: 'FightStick Viewer',
+      appTitle: 'Myogi Ban',
       obs: 'OBS',
       copy: 'コピー',
       display: '表示',
@@ -62,7 +62,7 @@ export const resources = {
   },
   en: {
     translation: {
-      appTitle: 'FightStick Viewer',
+      appTitle: 'Myogi Ban',
       obs: 'OBS',
       copy: 'Copy',
       display: 'Display',
