@@ -5,3 +5,4 @@ server.pid
 .libs/
 *.afphoto
 *.psd
+public/user-layouts/
