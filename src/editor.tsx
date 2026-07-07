@@ -491,7 +491,6 @@ function EditorApp(): React.ReactElement {
           <Stack gap="xs">
             <Title order={2}>{t('buttons')}</Title>
             <NumberInput size="xs" label={t('count')} min={0} max={48} value={layout.totalbuttonshow} onChange={(value) => updateLayout((next) => { next.totalbuttonshow = Math.max(0, Math.min(48, Number(value) || 0)); while (next.buttons.length < next.totalbuttonshow) next.buttons.push({ x: '', y: '', w: '', h: '', img: '', xp: '', yp: '', wp: '', hp: '', imgp: '' }); })} />
-            <Button size="xs" variant="light" fullWidth onClick={() => updateLayout((next) => { next.buttons = next.buttons.map((b) => ({ x: b.x, y: b.y, w: next.defaultbuttons.w, h: next.defaultbuttons.h, img: next.defaultbuttons.img, xp: next.defaultbuttons.xp, yp: next.defaultbuttons.yp, wp: next.defaultbuttons.wp, hp: next.defaultbuttons.hp, imgp: next.defaultbuttons.imgp, useCss: next.defaultbuttons.useCss, cssColor: next.defaultbuttons.cssColor, cssPressedColor: next.defaultbuttons.cssPressedColor, cssTransition: next.defaultbuttons.cssTransition, cssEasing: next.defaultbuttons.cssEasing })); })}>{t('resetAllToDefault')}</Button>
             <Switch
               size="sm"
               label={t('useCssButton')}
@@ -612,6 +611,14 @@ function EditorApp(): React.ReactElement {
                   }}
                 >
                   {t('resetToDefault')}
+                </Button>
+                <Button
+                  size="xs"
+                  variant="light"
+                  color="gray"
+                  onClick={() => updateLayout((next) => { next.buttons = next.buttons.map((b) => ({ x: b.x, y: b.y, w: next.defaultbuttons.w, h: next.defaultbuttons.h, img: next.defaultbuttons.img, xp: next.defaultbuttons.xp, yp: next.defaultbuttons.yp, wp: next.defaultbuttons.wp, hp: next.defaultbuttons.hp, imgp: next.defaultbuttons.imgp, useCss: next.defaultbuttons.useCss, cssColor: next.defaultbuttons.cssColor, cssPressedColor: next.defaultbuttons.cssPressedColor, cssTransition: next.defaultbuttons.cssTransition, cssEasing: next.defaultbuttons.cssEasing })); })}
+                >
+                  {t('resetAllToDefault')}
                 </Button>
               </Group>
             )}
