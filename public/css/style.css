@@ -1,0 +1,262 @@
+* {
+	box-sizing: border-box;
+}
+
+body {
+	background-color: rgba(0, 0, 0, 0);
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	margin: 0;
+	padding: 0;
+}
+
+#container {
+	position: relative;
+}
+
+.gamepad-background {
+	width: 100%;
+	height: 100%;
+	position: relative;
+}
+
+.gamepad-disconnected {
+	background-color: #fff;
+	opacity: 1;
+	transition: opacity 0.4s, visibility 0.4s;
+	width: 500px;
+	height: 250px;
+	position: absolute;
+	z-index: 40;
+	visibility: visible;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.disconnected-text {
+	font-size: 32px;
+	font-weight: bold;
+	color: #333;
+}
+
+.gamepad-disconnected.gamepad-connected {
+	opacity: 0;
+	visibility: hidden;
+}
+
+.gamepad-area-background {
+	background-image: url("../layout/preset/background.png");
+	background-size: 100% 100%;
+	width: 500px;
+	height: 250px;
+	position: relative;
+}
+
+.gamepad-area {
+	position: relative;
+	width: 500px;
+	height: 250px;
+}
+
+.stick-area {
+	background-image: url("../layout/preset/stick-back.png");
+	background-size: 150px 150px;
+	width: 250px;
+	height: 250px;
+	position: absolute;
+	transform: translate(-50%, -50%);
+}
+
+[class="stick"] {
+	background-image: url("../layout/preset/stick-center.png");
+	background-size: 100% 100%;
+	width: 150px;
+	height: 150px;
+	left: calc(50% - 75px);
+	top: calc(50% - 75px);
+}
+
+.stick:not([class="stick"]) {
+	background-image: url("../layout/preset/stick-up.png");
+	background-size: 100% 100%;
+	width: 150px;
+	height: 150px;
+	left: calc(50% - 75px);
+	top: calc(50% - 75px);
+}
+
+.stick.stick-up { transform: rotate(0deg); }
+.stick.stick-down { transform: rotate(180deg); }
+.stick.stick-left { transform: rotate(270deg); }
+.stick.stick-right { transform: rotate(90deg); }
+.stick.stick-up.stick-left { transform: rotate(315deg); }
+.stick.stick-up.stick-right { transform: rotate(45deg); }
+.stick.stick-down.stick-left { transform: rotate(225deg); }
+.stick.stick-down.stick-right { transform: rotate(135deg); }
+
+.stick {
+	background-size: 100% 100%;
+	position: absolute;
+}
+
+.stick-block {
+	width: 60px;
+	height: 60px;
+	left: calc(50% - 30px);
+	top: calc(50% - 30px);
+	background-size: 100%;
+	position: absolute;
+}
+
+.stick-block.stick-up { transform: rotate(0deg) translateY(-60px); }
+.stick-block.stick-down { transform: rotate(180deg) translateY(-60px); }
+.stick-block.stick-left { transform: rotate(270deg) translateY(-60px); }
+.stick-block.stick-right { transform: rotate(90deg) translateY(-60px); }
+
+.button {
+	width: 60px;
+	height: 60px;
+	transform: translate(-50%, -50%);
+	background-size: 100% 100%;
+	position: absolute;
+}
+
+.button0 { left: 250px; top: 115px; }
+.button1 { left: 310px; top: 85px; }
+.button2 { left: 375px; top: 85px; }
+.button3 { left: 440px; top: 85px; }
+.button4 { left: 240px; top: 185px; }
+.button5 { left: 300px; top: 155px; }
+.button6 { left: 365px; top: 155px; }
+.button7 { left: 430px; top: 155px; }
+.button8 { left: 390px; top: 30px; width: 40px; height: 40px; }
+.button9 { left: 440px; top: 30px; width: 40px; height: 40px; }
+
+.button-released {
+	background-image: url("../layout/preset/button-released.png");
+}
+
+.button-pressed {
+	background-image: url("../layout/preset/button-pressed.png");
+}
+
+.hide {
+	display: none !important;
+}
+
+/* Input history */
+.inputlistchild {
+	height: 30px;
+}
+
+.inputlistchildalign {
+	position: absolute;
+	margin-left: 30px;
+}
+
+.inputlistelement {
+	width: 30px;
+	height: 30px;
+	background-image: url("../layout/inputhistory/input-select.png");
+	background-size: 100% 100%;
+	float: left;
+}
+
+.inputlistelement.inputarrow {
+	background-image: url("../layout/inputhistory/btn-up.png");
+	float: none;
+	margin-left: -30px;
+}
+
+.inputlistelement.inputlistelement1 { background-image: url("../layout/inputhistory/btn-1.png"); }
+.inputlistelement.inputlistelement2 { background-image: url("../layout/inputhistory/btn-2.png"); }
+.inputlistelement.inputlistelement3 { background-image: url("../layout/inputhistory/btn-3.png"); }
+.inputlistelement.inputlistelement4 { background-image: url("../layout/inputhistory/btn-4.png"); }
+.inputlistelement.inputlistelement5 { background-image: url("../layout/inputhistory/btn-5.png"); }
+.inputlistelement.inputlistelement6 { background-image: url("../layout/inputhistory/btn-6.png"); }
+.inputlistelement.inputlistelement7 { background-image: url("../layout/inputhistory/btn-7.png"); }
+.inputlistelement.inputlistelement8 { background-image: url("../layout/inputhistory/btn-8.png"); }
+.inputlistelement.inputlistelement9 { background-image: url("../layout/inputhistory/btn-9.png"); }
+.inputlistelement.inputlistelement10 { background-image: url("../layout/inputhistory/btn-10.png"); }
+
+.inputlistelement.inputlistelement1001 { }
+.inputlistelement.inputlistelement1002 { transform: rotate(180deg); }
+.inputlistelement.inputlistelement1003 { transform: rotate(270deg); }
+.inputlistelement.inputlistelement1004 { transform: rotate(90deg); }
+.inputlistelement.inputlistelement1005 { transform: rotate(315deg); }
+.inputlistelement.inputlistelement1006 { transform: rotate(225deg); }
+.inputlistelement.inputlistelement1007 { transform: rotate(45deg); }
+.inputlistelement.inputlistelement1008 { transform: rotate(135deg); }
+
+.inputlist.horizontal {
+	height: calc(30px * 10);
+	white-space: nowrap;
+	display: inline-block;
+}
+
+.horizontal .inputlistchild {
+	height: 100%;
+	width: 30px;
+	display: inline-flex;
+	position: relative;
+	float: right;
+}
+
+.horizontal .inputlistchildalign {
+	bottom: 0;
+	margin-left: initial;
+	margin-bottom: 30px;
+}
+
+.horizontal .inputlistelement {
+	float: none;
+}
+
+.horizontal .inputlistelement.inputarrow {
+	margin-left: initial;
+	margin-bottom: -30px;
+}
+
+.horizontal.up .inputlistchildalign {
+	top: 0;
+	margin-top: 30px;
+	margin-bottom: 0;
+}
+
+.horizontal.up .inputlistelement.inputarrow {
+	position: absolute;
+	top: -30px;
+}
+
+/* Combination */
+.inputlistchild.combination .inputlistelement.inputarrow {
+	background-image: url("../layout/inputhistorycombination/btn-up.png");
+}
+
+.inputlistchild.combination .inputlistelement.inputlistelement1 { background-image: url("../layout/inputhistorycombination/btn-1.png"); }
+.inputlistchild.combination .inputlistelement.inputlistelement2 { background-image: url("../layout/inputhistorycombination/btn-2.png"); }
+.inputlistchild.combination .inputlistelement.inputlistelement3 { background-image: url("../layout/inputhistorycombination/btn-3.png"); }
+.inputlistchild.combination .inputlistelement.inputlistelement4 { background-image: url("../layout/inputhistorycombination/btn-4.png"); }
+.inputlistchild.combination .inputlistelement.inputlistelement1-2 { background-image: url("../layout/inputhistorycombination/btn-1+2.png"); }
+.inputlistchild.combination .inputlistelement.inputlistelement1-2-3 { background-image: url("../layout/inputhistorycombination/btn-1+2+3.png"); }
+.inputlistchild.combination .inputlistelement.inputlistelement1-2-3-4 { background-image: url("../layout/inputhistorycombination/btn-1+2+3+4.png"); }
+.inputlistchild.combination .inputlistelement.inputlistelement1-2-4 { background-image: url("../layout/inputhistorycombination/btn-1+2+4.png"); }
+.inputlistchild.combination .inputlistelement.inputlistelement1-3 { background-image: url("../layout/inputhistorycombination/btn-1+3.png"); }
+.inputlistchild.combination .inputlistelement.inputlistelement1-3-4 { background-image: url("../layout/inputhistorycombination/btn-1+3+4.png"); }
+.inputlistchild.combination .inputlistelement.inputlistelement1-4 { background-image: url("../layout/inputhistorycombination/btn-1+4.png"); }
+.inputlistchild.combination .inputlistelement.inputlistelement2-3 { background-image: url("../layout/inputhistorycombination/btn-2+3.png"); }
+.inputlistchild.combination .inputlistelement.inputlistelement2-3-4 { background-image: url("../layout/inputhistorycombination/btn-2+3+4.png"); }
+.inputlistchild.combination .inputlistelement.inputlistelement2-4 { background-image: url("../layout/inputhistorycombination/btn-2+4.png"); }
+.inputlistchild.combination .inputlistelement.inputlistelement3-4 { background-image: url("../layout/inputhistorycombination/btn-3+4.png"); }
+
+/* Z-index */
+.gamepad-area-background { z-index: 1; }
+.stick-area { z-index: 2; }
+.stick { z-index: 20; }
+.stick-block { z-index: 30; }
+.button { z-index: 10; }
+
+#gamepad0, #gamepad0 * {
+	background-repeat: no-repeat;
+	background-position: center;
+}

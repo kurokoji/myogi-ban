@@ -1,0 +1,7 @@
+node_modules/
+dist/
+public/js/
+server.pid
+.libs/
+*.afphoto
+*.psd

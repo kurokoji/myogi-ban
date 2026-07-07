@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<title>Gamepad Test</title>
+	<style>
+		body {
+			font-family: monospace;
+			background: #1a1a2e;
+			color: #eee;
+			padding: 20px;
+		}
+		.gamepad {
+			background: #16213e;
+			padding: 20px;
+			border-radius: 8px;
+			margin: 10px 0;
+		}
+		.connected {
+			border-left: 4px solid #4caf50;
+		}
+		.disconnected {
+			border-left: 4px solid #f44336;
+		}
+		.buttons {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 5px;
+			margin: 10px 0;
+		}
+		.button {
+			width: 40px;
+			height: 40px;
+			background: #333;
+			border-radius: 4px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 12px;
+		}
+		.button.pressed {
+			background: #4caf50;
+		}
+		.axes {
+			margin: 10px 0;
+		}
+		.axis {
+			margin: 5px 0;
+		}
+		.axis-bar {
+			width: 300px;
+			height: 20px;
+			background: #333;
+			position: relative;
+			border-radius: 4px;
+		}
+		.axis-indicator {
+			width: 10px;
+			height: 20px;
+			background: #e94560;
+			position: absolute;
+			left: 50%;
+			border-radius: 2px;
+		}
+	</style>
+</head>
+<body>
+	<h1>Gamepad API Test</h1>
+	<div id="status">ゲームパッドのボタンを押してください...</div>
+	<div id="gamepads"></div>
+
+	<script>
+		window.addEventListener("gamepadconnected", (e) => {
+			console.log("Gamepad connected:", e.gamepad);
+			updateStatus();
+		});
+
+		window.addEventListener("gamepaddisconnected", (e) => {
+			console.log("Gamepad disconnected:", e.gamepad);
+			updateStatus();
+		});
+
+		function updateStatus() {
+			const gamepads = navigator.getGamepads();
+			const container = document.getElementById("gamepads");
+			container.innerHTML = "";
+
+			let connected = false;
+			for (let gp of gamepads) {
+				if (gp) {
+					connected = true;
+					const div = document.createElement("div");
+					div.className = "gamepad connected";
+					div.innerHTML = `
+						<h3>${gp.id}</h3>
+						<p>Index: ${gp.index}, Connected: ${gp.connected}</p>
+						<div class="buttons"></div>
+						<div class="axes"></div>
+					`;
+					container.appendChild(div);
+				}
+			}
+
+			if (!connected) {
+				const div = document.createElement("div");
+				div.className = "gamepad disconnected";
+				div.innerHTML = "<p>ゲームパッドが接続されていません</p>";
+				container.appendChild(div);
+			}
+		}
+
+		function updateGamepadState() {
+			const gamepads = navigator.getGamepads();
+			const containers = document.querySelectorAll(".gamepad.connected");
+
+			let idx = 0;
+			for (let gp of gamepads) {
+				if (gp && containers[idx]) {
+					const buttonsDiv = containers[idx].querySelector(".buttons");
+					buttonsDiv.innerHTML = "";
+					for (let i = 0; i < gp.buttons.length; i++) {
+						const btn = document.createElement("div");
+						btn.className = "button" + (gp.buttons[i].pressed ? " pressed" : "");
+						btn.textContent = i;
+						buttonsDiv.appendChild(btn);
+					}
+
+					const axesDiv = containers[idx].querySelector(".axes");
+					axesDiv.innerHTML = "";
+					for (let i = 0; i < gp.axes.length; i++) {
+						const axis = document.createElement("div");
+						axis.className = "axis";
+						axis.innerHTML = `
+							<span>Axis ${i}: ${gp.axes[i].toFixed(3)}</span>
+							<div class="axis-bar">
+								<div class="axis-indicator" style="left: ${((gp.axes[i] + 1) / 2) * 100}%"></div>
+							</div>
+						`;
+						axesDiv.appendChild(axis);
+					}
+					idx++;
+				}
+			}
+
+			requestAnimationFrame(updateGamepadState);
+		}
+
+		updateStatus();
+		updateGamepadState();
+
+		setInterval(updateStatus, 1000);
+	</script>
+</body>
+</html>

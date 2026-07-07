@@ -1,0 +1,32 @@
+{
+  "name": "fightstick-viewer",
+  "version": "1.0.0",
+  "description": "Fighting game controller viewer for OBS",
+  "main": "dist/electron.js",
+  "scripts": {
+    "build": "npm run build:server && npm run build:electron && npm run build:editor && npm run build:viewer",
+    "build:server": "esbuild src/server.ts --bundle --platform=node --outfile=dist/server.js --external:ws --external:express",
+    "build:electron": "esbuild src/electron.ts --bundle --platform=node --outfile=dist/electron.js --external:electron --external:ws --external:express",
+    "build:editor": "esbuild src/editor.ts --bundle --outfile=public/js/editor.js",
+    "build:viewer": "esbuild src/viewer.ts --bundle --outfile=public/js/viewer.js",
+    "start": "npm run build && LD_LIBRARY_PATH=$PWD/.libs/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH electron .",
+    "start:web": "npm run build && node dist/server.js",
+    "stop": "node -e \"const fs = require('fs'); const path = require('path'); const pidFile = path.join(__dirname, 'server.pid'); if (fs.existsSync(pidFile)) { const pid = fs.readFileSync(pidFile, 'utf8'); try { process.kill(parseInt(pid), 'SIGTERM'); console.log('Server stopped (PID: ' + pid + ')'); } catch (e) { console.log('Server not running'); } if (fs.existsSync(pidFile)) { fs.unlinkSync(pidFile); } } else { console.log('Server not running (no PID file)'); }\"",
+    "dev": "npm run build && LD_LIBRARY_PATH=$PWD/.libs/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH electron . --dev"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/ws": "^8.5.10",
+    "electron": "^43.0.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.3.3"
+  },
+  "allowScripts": {
+    "electron@43.0.0": true,
+    "esbuild@0.20.2": true
+  }
+}
