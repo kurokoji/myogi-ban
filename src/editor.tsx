@@ -612,16 +612,16 @@ function EditorApp(): React.ReactElement {
                 >
                   {t('resetToDefault')}
                 </Button>
-                <Button
-                  size="xs"
-                  variant="light"
-                  color="gray"
-                  onClick={() => updateLayout((next) => { next.buttons = next.buttons.map((b) => ({ x: b.x, y: b.y, w: next.defaultbuttons.w, h: next.defaultbuttons.h, img: next.defaultbuttons.img, xp: next.defaultbuttons.xp, yp: next.defaultbuttons.yp, wp: next.defaultbuttons.wp, hp: next.defaultbuttons.hp, imgp: next.defaultbuttons.imgp, useCss: next.defaultbuttons.useCss, cssColor: next.defaultbuttons.cssColor, cssPressedColor: next.defaultbuttons.cssPressedColor, cssTransition: next.defaultbuttons.cssTransition, cssEasing: next.defaultbuttons.cssEasing })); })}
-                >
-                  {t('resetAllToDefault')}
-                </Button>
               </Group>
             )}
+            <Button
+              size="xs"
+              variant="light"
+              color="gray"
+              onClick={() => updateLayout((next) => { next.buttons = next.buttons.map((b) => ({ x: b.x, y: b.y, w: next.defaultbuttons.w, h: next.defaultbuttons.h, img: next.defaultbuttons.img, xp: next.defaultbuttons.xp, yp: next.defaultbuttons.yp, wp: next.defaultbuttons.wp, hp: next.defaultbuttons.hp, imgp: next.defaultbuttons.imgp, useCss: next.defaultbuttons.useCss, cssColor: next.defaultbuttons.cssColor, cssPressedColor: next.defaultbuttons.cssPressedColor, cssTransition: next.defaultbuttons.cssTransition, cssEasing: next.defaultbuttons.cssEasing })); })}
+            >
+              {t('resetAllToDefault')}
+            </Button>
             {selectedButtonIndex !== null && (layout.buttons[selectedButtonIndex]?.useCss ?? layout.defaultbuttons.useCss ?? false) && (
               <div className="control row">
                 <div>
