@@ -68,7 +68,7 @@ function EditorApp(): React.ReactElement {
   const imageUploadTargetRef = useRef<ImageUploadTarget>({ type: 'background' });
   const [layout, setLayout] = useState<Layout>(() => createDefaultLayout());
   const [layoutNames, setLayoutNames] = useState<string[]>([]);
-  const [selectedLayout, setSelectedLayout] = useState('default');
+  const [selectedLayout, setSelectedLayout] = useState('');
   const [layoutName, setLayoutName] = useState('mypreset');
   const [buttonMappings, setButtonMappings] = useState<ButtonMapping[]>(() => GamepadManager.createDefaultButtonMappings());
   const [stickMappings, setStickMappings] = useState<StickMapping[]>(() => GamepadManager.createDefaultStickMappings());
@@ -99,7 +99,6 @@ function EditorApp(): React.ReactElement {
     try {
       const layouts = await apiRef.current.getLayouts();
       setLayoutNames(layouts);
-      if (layouts.length > 0) setSelectedLayout((current) => current || layouts[0]);
     } catch (error) {
       console.error('Failed to load layout list:', error);
     }
@@ -116,18 +115,26 @@ function EditorApp(): React.ReactElement {
   }, []);
 
   useEffect(() => {
-    refreshLayouts();
-    apiRef.current.getDefaultLayout()
-      .then((defaultLayout) => {
+    let cancelled = false;
+    const loadDefaultLayout = async () => {
+      try {
+        const defaultLayout = await apiRef.current.getDefaultLayout();
         const layoutName = defaultLayout.name || 'preset';
-        return apiRef.current.getLayout(layoutName)
-          .then((data) => {
-            if (data && data.version) applyLayout(data, layoutName);
-          });
-      })
-      .catch(() => {
+        const data = await apiRef.current.getLayout(layoutName);
+        if (!cancelled && data) {
+          applyLayout(data, layoutName);
+          setSelectedLayout(layoutName);
+        }
+        await refreshLayouts();
+      } catch {
         console.log('No default layout found, using built-in default');
-      });
+        await refreshLayouts();
+      }
+    };
+    loadDefaultLayout();
+    return () => {
+      cancelled = true;
+    };
   }, [applyLayout, refreshLayouts]);
 
   useEffect(() => {
@@ -481,14 +488,18 @@ function EditorApp(): React.ReactElement {
                 />
               </div>
             )}
-            <Group gap="xs" align="end" wrap="nowrap">
-              <TextInput size="xs" label={t('defaultReleasedImage')} value={layout.defaultbuttons.img} onChange={(event) => updateLayout((next) => { next.defaultbuttons.img = event.target.value; })} placeholder="button-released.png" className="grow" />
-              <Button size="xs" variant="light" onClick={() => openImagePicker({ type: 'defaultButton', state: 'released' })}>{t('selectFile')}</Button>
-            </Group>
-            <Group gap="xs" align="end" wrap="nowrap">
-              <TextInput size="xs" label={t('defaultPressedImage')} value={layout.defaultbuttons.imgp} onChange={(event) => updateLayout((next) => { next.defaultbuttons.imgp = event.target.value; })} placeholder="button-pressed.png" className="grow" />
-              <Button size="xs" variant="light" onClick={() => openImagePicker({ type: 'defaultButton', state: 'pressed' })}>{t('selectFile')}</Button>
-            </Group>
+            {!layout.defaultbuttons.useCss && (
+              <>
+                <Group gap="xs" align="end" wrap="nowrap">
+                  <TextInput size="xs" label={t('defaultReleasedImage')} value={layout.defaultbuttons.img} onChange={(event) => updateLayout((next) => { next.defaultbuttons.img = event.target.value; })} placeholder="button-released.png" className="grow" />
+                  <Button size="xs" variant="light" onClick={() => openImagePicker({ type: 'defaultButton', state: 'released' })}>{t('selectFile')}</Button>
+                </Group>
+                <Group gap="xs" align="end" wrap="nowrap">
+                  <TextInput size="xs" label={t('defaultPressedImage')} value={layout.defaultbuttons.imgp} onChange={(event) => updateLayout((next) => { next.defaultbuttons.imgp = event.target.value; })} placeholder="button-pressed.png" className="grow" />
+                  <Button size="xs" variant="light" onClick={() => openImagePicker({ type: 'defaultButton', state: 'pressed' })}>{t('selectFile')}</Button>
+                </Group>
+              </>
+            )}
             <Text size="xs" fw={600}>{t('defaultButtonSize')}</Text>
             <div className="control row">
               <NumberInput size="xs" label="W" value={numericValue(layout.defaultbuttons.w)} onChange={(value) => updateLayout((next) => { next.defaultbuttons.w = String(value ?? ''); })} />
@@ -596,7 +607,7 @@ function EditorApp(): React.ReactElement {
                 />
               </div>
             )}
-            {selectedButtonIndex !== null && (
+            {selectedButtonIndex !== null && !(layout.buttons[selectedButtonIndex]?.useCss ?? layout.defaultbuttons.useCss ?? false) && (
               <>
                 <Group gap="xs" align="end" wrap="nowrap">
                   <TextInput

@@ -54,7 +54,7 @@ export const resources = {
       language: '言語',
       obsWidth: 'OBS W',
       obsHeight: 'OBS H',
-      useCssButton: 'CSSボタンを使用'
+      useCssButton: '画像を使わない'
     }
   },
   en: {
@@ -109,7 +109,7 @@ export const resources = {
       language: 'Language',
       obsWidth: 'OBS W',
       obsHeight: 'OBS H',
-      useCssButton: 'Use CSS button'
+      useCssButton: 'Disable images'
     }
   }
 };
