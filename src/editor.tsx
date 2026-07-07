@@ -700,6 +700,15 @@ function EditorApp(): React.ReactElement {
               </>
             )}
             <Text size="xs" c="dimmed">{t('useDefaultWhenBlank')}</Text>
+            <Title order={2}>{t('buttonMapping')}</Title>
+            <Text size="xs" c="dimmed">{t('clickPreviewToAssign')}</Text>
+            {assigningTarget !== null && (
+              <div className="mapping-status">
+                <p>{t('assigning')}: <span>{assignmentName}</span></p>
+                <Text size="xs" c="dimmed">{t('pressButtonOrHoldAxis')}</Text>
+                <Button size="xs" variant="light" onClick={() => setAssigningTarget(null)}>{t('cancel')}</Button>
+              </div>
+            )}
           </Stack>
         </Paper>
 
@@ -749,18 +758,6 @@ function EditorApp(): React.ReactElement {
           <Text size="xs" className={connected ? 'status-connected' : 'status-disconnected'}>
             {connected ? t('connected', { name: gamepadName }) : t('notConnected')}
           </Text>
-        </Paper>
-
-        <Paper className="panel" withBorder>
-          <Title order={2}>{t('buttonMapping')}</Title>
-          <Text size="xs" c="dimmed">{t('clickPreviewToAssign')}</Text>
-          {assigningTarget !== null && (
-            <div className="mapping-status">
-              <p>{t('assigning')}: <span>{assignmentName}</span></p>
-              <Text size="xs" c="dimmed">{t('pressButtonOrHoldAxis')}</Text>
-              <Button size="xs" variant="light" onClick={() => setAssigningTarget(null)}>{t('cancel')}</Button>
-            </div>
-          )}
         </Paper>
       </aside>
 
