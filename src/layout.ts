@@ -25,14 +25,14 @@ export function createDefaultBackgroundConfig(overrides: Partial<BackgroundConfi
 
 export function createDefaultLayout(): Layout {
   const buttons: ButtonLayout[] = [
-    createDefaultButtonLayout({ x: '225', y: '78' }),
-    createDefaultButtonLayout({ x: '280', y: '74' }),
-    createDefaultButtonLayout({ x: '335', y: '76' }),
-    createDefaultButtonLayout({ x: '390', y: '82' }),
-    createDefaultButtonLayout({ x: '217', y: '129' }),
-    createDefaultButtonLayout({ x: '272', y: '125' }),
-    createDefaultButtonLayout({ x: '327', y: '127' }),
-    createDefaultButtonLayout({ x: '382', y: '133' }),
+    createDefaultButtonLayout({ x: '225', y: '80' }),
+    createDefaultButtonLayout({ x: '280', y: '68' }),
+    createDefaultButtonLayout({ x: '335', y: '74' }),
+    createDefaultButtonLayout({ x: '390', y: '86' }),
+    createDefaultButtonLayout({ x: '217', y: '131' }),
+    createDefaultButtonLayout({ x: '272', y: '119' }),
+    createDefaultButtonLayout({ x: '327', y: '125' }),
+    createDefaultButtonLayout({ x: '382', y: '137' }),
   ];
 
   for (let i = buttons.length; i < TOTAL_BUTTONS; i++) {
