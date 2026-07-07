@@ -128,6 +128,22 @@ function startServer(): void {
     res.json({ ok: true, fileName: safeFileName });
   });
 
+  const DEFAULT_LAYOUT_FILE = path.join(__dirname, '..', 'default-layout.json');
+  expressApp.get('/api/default-layout', (req, res) => {
+    if (fs.existsSync(DEFAULT_LAYOUT_FILE)) {
+      const data = JSON.parse(fs.readFileSync(DEFAULT_LAYOUT_FILE, 'utf8'));
+      res.json(data);
+    } else {
+      res.json({ name: 'preset' });
+    }
+  });
+
+  expressApp.post('/api/default-layout', (req, res) => {
+    const { name } = req.body;
+    fs.writeFileSync(DEFAULT_LAYOUT_FILE, JSON.stringify({ name }, null, 2));
+    res.json({ ok: true });
+  });
+
   wss = new WebSocket.Server({ server });
 
   wss.on('connection', (ws) => {

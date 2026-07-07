@@ -410,6 +410,36 @@ function EditorApp(): React.ReactElement {
               <NumberInput size="xs" label="W%" value={numericValue(layout.stick.w)} onChange={(value) => updateLayout((next) => { next.stick.w = String(value ?? ''); })} />
               <NumberInput size="xs" label="H%" value={numericValue(layout.stick.h)} onChange={(value) => updateLayout((next) => { next.stick.h = String(value ?? ''); })} />
             </div>
+            <Switch
+              size="sm"
+              label={t('useCssStick')}
+              checked={layout.stick.useCss ?? false}
+              onChange={(event) => updateLayout((next) => { next.stick.useCss = event.target.checked; })}
+            />
+            {layout.stick.useCss && (
+              <>
+                <div className="control row">
+                  <div>
+                    <label style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>台座</label>
+                    <input
+                      type="color"
+                      value={layout.stick.cssPlateColor || '#888888'}
+                      onChange={(e) => updateLayout((next) => { next.stick.cssPlateColor = e.target.value; })}
+                      style={{ width: '100%', height: '30px', cursor: 'pointer' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>ノブ・シャフト</label>
+                    <input
+                      type="color"
+                      value={layout.stick.cssColor || '#cccccc'}
+                      onChange={(e) => updateLayout((next) => { next.stick.cssColor = e.target.value; })}
+                      style={{ width: '100%', height: '30px', cursor: 'pointer' }}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
           </Stack>
         </Paper>
 

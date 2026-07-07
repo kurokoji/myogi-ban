@@ -54,7 +54,8 @@ export const resources = {
       language: '言語',
       obsWidth: 'OBS W',
       obsHeight: 'OBS H',
-      useCssButton: '画像を使わない'
+      useCssButton: '画像を使わない',
+      useCssStick: '画像を使わない'
     }
   },
   en: {
@@ -109,7 +110,8 @@ export const resources = {
       language: 'Language',
       obsWidth: 'OBS W',
       obsHeight: 'OBS H',
-      useCssButton: 'Disable images'
+      useCssButton: 'Disable images',
+      useCssStick: 'Disable images'
     }
   }
 };

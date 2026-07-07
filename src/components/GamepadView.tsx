@@ -125,6 +125,8 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
   const stickScaleX = layout.stick.w ? parseFloat(layout.stick.w) / 100 : 1;
   const stickScaleY = layout.stick.h ? parseFloat(layout.stick.h) / 100 : 1;
 
+  const stickCss = layout.stick.useCss ?? false;
+
   const [dragState, setDragState] = useState<{
     type: 'button' | 'stick';
     index: number;
@@ -200,17 +202,27 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
           />
           <div
             id="stick-area"
-            className="stick-area"
+            className={`stick-area ${stickCss ? 'stick-css' : ''}`}
             style={{
               left: layout.stick.x ? `${layout.stick.x}px` : undefined,
               top: layout.stick.y ? `${layout.stick.y}px` : undefined,
               transform: `translate(-50%,-50%) scale(${stickScaleX},${stickScaleY})`,
               display: layout.showstick ? undefined : 'none',
-              cursor: editorMode ? 'move' : undefined
+              cursor: editorMode ? 'move' : undefined,
+              ...(stickCss ? {
+                '--stick-color': layout.stick.cssColor ?? '#cccccc',
+                '--stick-plate-color': layout.stick.cssPlateColor ?? '#888888',
+                '--stick-transition': `${layout.stick.cssTransition ?? '0.02'}s`,
+                '--stick-easing': layout.stick.cssEasing ?? 'ease'
+              } as React.CSSProperties : {})
             }}
             onMouseDown={editorMode ? (e) => handleMouseDown(e, 'stick', 0, parseFloat(layout.stick.x) || 110, parseFloat(layout.stick.y) || 125) : undefined}
           >
-            <div id="stick" className={stickClass} />
+            {stickCss && (() => {
+              const dir = stickClass.startsWith('stick ') ? stickClass.slice(6) : '';
+              return <div id="stick-shaft" className={`stick-shaft${dir ? ' ' + dir : ''}`} />;
+            })()}
+            <div id="stick" className={stickCss ? `${stickClass} stick-css` : stickClass} />
             {STICK_NAMES.map((name, index) => (
               <div
                 id={name}

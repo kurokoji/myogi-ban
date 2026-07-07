@@ -21,6 +21,11 @@ export interface StickLayout {
   y: string;
   w: string;
   h: string;
+  useCss?: boolean;
+  cssColor?: string;
+  cssPlateColor?: string;
+  cssTransition?: string;
+  cssEasing?: string;
 }
 
 export interface BackgroundConfig {

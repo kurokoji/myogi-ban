@@ -11,7 +11,12 @@ export function createDefaultButtonLayout(overrides: Partial<ButtonLayout> = {})
 }
 
 export function createDefaultStickLayout(overrides: Partial<StickLayout> = {}): StickLayout {
-  return { x: '0', y: '0', w: '', h: '', ...overrides };
+  return {
+    x: '0', y: '0', w: '', h: '', useCss: false,
+    cssColor: '#cccccc', cssPlateColor: '#888888',
+    cssTransition: '0.02', cssEasing: 'ease',
+    ...overrides
+  };
 }
 
 export function createDefaultBackgroundConfig(overrides: Partial<BackgroundConfig> = {}): BackgroundConfig {
