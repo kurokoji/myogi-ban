@@ -83,6 +83,7 @@ function startServer(): void {
   server = http.createServer(expressApp);
 
   expressApp.use('/layout', express.static(USER_LAYOUT_BASE));
+  expressApp.use('/layout', (req, res) => { res.status(404).end(); });
   expressApp.use(express.static(path.join(__dirname, '..', 'public')));
   expressApp.use(express.json({ limit: '100mb' }));
 
