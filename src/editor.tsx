@@ -413,7 +413,7 @@ function EditorApp(): React.ReactElement {
               <>
                 <div className="control row">
                   <div>
-                    <label style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>台座</label>
+                    <label style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>{t('stickPlateColor')}</label>
                     <input
                       type="color"
                       value={layout.stick.cssPlateColor || '#888888'}
@@ -422,7 +422,7 @@ function EditorApp(): React.ReactElement {
                     />
                   </div>
                   <div>
-                    <label style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>ノブ・シャフト</label>
+                    <label style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>{t('stickKnobShaft')}</label>
                     <input
                       type="color"
                       value={layout.stick.cssColor || '#cccccc'}
@@ -450,7 +450,7 @@ function EditorApp(): React.ReactElement {
             {layout.background.useCss ? (
               <>
                 <div>
-                  <label style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>色</label>
+                  <label style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>{t('bgColor')}</label>
                   <input
                     type="color"
                     value={layout.background.cssColor || '#0b0f14'}
@@ -458,7 +458,7 @@ function EditorApp(): React.ReactElement {
                     style={{ width: '100%', height: '30px', cursor: 'pointer' }}
                   />
                 </div>
-                <NumberInput size="xs" label="角丸" min={0} max={999} value={layout.background.cssBorderRadius ?? 0} onChange={(value) => updateLayout((next) => { next.background.cssBorderRadius = Number(value) || 0; })} />
+                <NumberInput size="xs" label={t('borderRadius')} min={0} max={999} value={layout.background.cssBorderRadius ?? 0} onChange={(value) => updateLayout((next) => { next.background.cssBorderRadius = Number(value) || 0; })} />
               </>
             ) : (
               <Group gap="xs" align="end" wrap="nowrap">
@@ -487,7 +487,7 @@ function EditorApp(): React.ReactElement {
             {layout.defaultbuttons.useCss && (
               <div className="control row">
                 <div>
-                  <label style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>通常色</label>
+                  <label style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>{t('colorNormal')}</label>
                   <input
                     type="color"
                     value={layout.defaultbuttons.cssColor || '#cccccc'}
@@ -496,7 +496,7 @@ function EditorApp(): React.ReactElement {
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>押下時色</label>
+                  <label style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>{t('colorPressed')}</label>
                   <input
                     type="color"
                     value={layout.defaultbuttons.cssPressedColor || '#999999'}
@@ -559,7 +559,7 @@ function EditorApp(): React.ReactElement {
               value={selectedButtonIndex === null ? '' : String(selectedButtonIndex)}
               onChange={(event) => setSelectedButtonIndex(event.target.value === '' ? null : parseInt(event.target.value))}
               data={[
-                { value: '', label: '選択してください' },
+                { value: '', label: t('select') },
                 ...Array.from({ length: Math.max(1, layout.totalbuttonshow) }, (_, index) => ({ value: String(index), label: `Button ${index + 1}` }))
               ]}
             />
@@ -597,14 +597,14 @@ function EditorApp(): React.ReactElement {
                     });
                   }}
                 >
-                  標準に戻す
+                  {t('resetToDefault')}
                 </Button>
               </Group>
             )}
             {selectedButtonIndex !== null && (layout.buttons[selectedButtonIndex]?.useCss ?? layout.defaultbuttons.useCss ?? false) && (
               <div className="control row">
                 <div>
-                  <label style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>通常色</label>
+                  <label style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>{t('colorNormal')}</label>
                   <input
                     type="color"
                     value={layout.buttons[selectedButtonIndex]?.cssColor === layout.defaultbuttons.cssColor ? '#cccccc' : (layout.buttons[selectedButtonIndex]?.cssColor ?? layout.defaultbuttons.cssColor ?? '#cccccc')}
@@ -613,7 +613,7 @@ function EditorApp(): React.ReactElement {
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>押下時色</label>
+                  <label style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>{t('colorPressed')}</label>
                   <input
                     type="color"
                     value={layout.buttons[selectedButtonIndex]?.cssPressedColor === layout.defaultbuttons.cssPressedColor ? '#999999' : (layout.buttons[selectedButtonIndex]?.cssPressedColor ?? layout.defaultbuttons.cssPressedColor ?? '#999999')}
