@@ -13,7 +13,27 @@
     "start": "npm run build && LD_LIBRARY_PATH=$PWD/.libs/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH electron .",
     "start:web": "npm run build && node dist/server.js",
     "stop": "node -e \"const fs = require('fs'); const path = require('path'); const pidFile = path.join(__dirname, 'server.pid'); if (fs.existsSync(pidFile)) { const pid = fs.readFileSync(pidFile, 'utf8'); try { process.kill(parseInt(pid), 'SIGTERM'); console.log('Server stopped (PID: ' + pid + ')'); } catch (e) { console.log('Server not running'); } if (fs.existsSync(pidFile)) { fs.unlinkSync(pidFile); } } else { console.log('Server not running (no PID file)'); }\"",
-    "dev": "npm run build && LD_LIBRARY_PATH=$PWD/.libs/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH electron . --dev"
+    "dev": "npm run build && LD_LIBRARY_PATH=$PWD/.libs/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH electron . --dev",
+    "build:dist": "npm run build && npx electron-builder --linux"
+  },
+  "build": {
+    "appId": "myogi-ban",
+    "productName": "Myogi Ban",
+    "files": [
+      "dist/**/*",
+      "public/**/*",
+      "default-layout.json",
+      "package.json"
+    ],
+    "linux": {
+      "target": ["AppImage", "deb"]
+    },
+    "win": {
+      "target": ["nsis"]
+    },
+    "mac": {
+      "target": ["dmg"]
+    }
   },
   "dependencies": {
     "@mantine/core": "^9.4.1",
@@ -31,11 +51,13 @@
     "@types/react-dom": "^19.2.3",
     "@types/ws": "^8.5.10",
     "electron": "^43.0.0",
+    "electron-builder": "^26.15.3",
     "esbuild": "^0.20.0",
     "typescript": "^5.3.3"
   },
   "allowScripts": {
     "electron@43.0.0": true,
-    "esbuild@0.20.2": true
+    "esbuild@0.20.2": true,
+    "electron-winstaller@5.4.0": true
   }
 }
