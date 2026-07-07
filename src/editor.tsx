@@ -734,7 +734,6 @@ function EditorApp(): React.ReactElement {
               <NativeSelect size="xs" value={selectedLayout} onChange={(event) => setSelectedLayout(event.target.value)} data={layoutNames.map((entry) => ({ value: `${entry.name}:${entry.builtin ? 'builtin' : 'user'}`, label: entry.builtin ? `${entry.name} (built-in)` : entry.name }))} className="grow" />
               <Button size="xs" variant="light" onClick={loadLayout}>{t('load')}</Button>
             </Group>
-            <Text size="xs" c="dimmed">{t('currentLayout')}: {layout.name || '—'}</Text>
             <Group gap="xs" align="end" wrap="nowrap">
               <TextInput size="xs" value={layoutName} onChange={(event) => setLayoutName(event.target.value)} placeholder="name" className="grow" />
               <Button size="xs" onClick={saveLayout}>{t('save')}</Button>
