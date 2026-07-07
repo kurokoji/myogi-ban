@@ -131,18 +131,6 @@ function startServer(): void {
       return;
     }
 
-    const savPath = path.join(layoutPath, 'layout.sav');
-    if (fs.existsSync(savPath)) {
-      const content = fs.readFileSync(savPath, 'utf8');
-      const match = content.match(/onLoadLayout\(([\s\S]+)\);?/);
-      if (match) {
-        try {
-          res.json(JSON.parse(match[1]));
-          return;
-        } catch { /* parse failed */ }
-      }
-    }
-
     res.json({});
   });
 
