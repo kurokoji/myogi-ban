@@ -36,7 +36,6 @@ function cloneLayout(layout: Layout): Layout {
     stick: { ...layout.stick },
     defaultbuttons: { ...layout.defaultbuttons },
     background: { ...layout.background },
-    inputhistorymode: { ...layout.inputhistorymode, btnmapping: [...layout.inputhistorymode.btnmapping] },
     buttons: layout.buttons.map((button) => ({ ...button })),
     buttonMappings: layout.buttonMappings ? [...layout.buttonMappings] : undefined,
     stickMappings: layout.stickMappings ? [...layout.stickMappings] : undefined
@@ -75,7 +74,6 @@ function EditorApp(): React.ReactElement {
   const [connected, setConnected] = useState(false);
   const [gamepadName, setGamepadName] = useState('');
   const [snapshot, setSnapshot] = useState(() => createEmptySnapshot(createDefaultLayout()));
-  const [inputHistory, setInputHistory] = useState<number[][]>([]);
   const [previewScale, setPreviewScale] = useState(1);
   const [backgroundOpacity, setBackgroundOpacity] = useState(1);
   const [assigningTarget, setAssigningTarget] = useState<AssigningTarget>(null);
@@ -108,7 +106,6 @@ function EditorApp(): React.ReactElement {
     const nextLayout = ensureLayoutDefaults(data);
     setLayout(nextLayout);
     setSnapshot(createEmptySnapshot(nextLayout));
-    setInputHistory([]);
     setButtonMappings(data.buttonMappings || GamepadManager.createDefaultButtonMappings());
     setStickMappings(data.stickMappings || GamepadManager.createDefaultStickMappings());
     if (name) setLayoutName(name);
@@ -196,14 +193,10 @@ function EditorApp(): React.ReactElement {
             stickMappingsRef.current
           );
           setSnapshot(nextSnapshot);
-          if (layoutRef.current.inputhistorymode.toggle && nextSnapshot.statusChanged) {
-            setInputHistory((current) => [nextSnapshot.inputs, ...current].slice(0, layoutRef.current.inputhistorymode.count));
-          }
 
           const state: GamepadState = {
             stick: nextSnapshot.stickClass,
             buttons: nextSnapshot.pressedButtons,
-            input: layoutRef.current.inputhistorymode.toggle ? nextSnapshot.inputs : [],
             connected: true,
             layout: layoutRef.current
           };
@@ -679,20 +672,6 @@ function EditorApp(): React.ReactElement {
 
         <Paper className="panel" withBorder>
           <Stack gap="xs">
-            <Title order={2}>{t('inputHistory')}</Title>
-            <Switch size="sm" label={t('enable')} checked={layout.inputhistorymode.toggle} onChange={(event) => updateLayout((next) => { next.inputhistorymode.toggle = event.target.checked; })} />
-            {layout.inputhistorymode.toggle && (
-              <>
-                <NativeSelect size="xs" label={t('direction')} value={String(layout.inputhistorymode.direction)} onChange={(event) => updateLayout((next) => { next.inputhistorymode.direction = parseInt(event.target.value); })} data={[{ value: '0', label: t('vertical') }, { value: '1', label: t('horizontalDown') }, { value: '2', label: t('horizontalUp') }]} />
-                <NumberInput size="xs" label={t('count')} min={1} max={50} value={layout.inputhistorymode.count} onChange={(value) => updateLayout((next) => { next.inputhistorymode.count = Number(value) || 20; })} />
-                <NativeSelect size="xs" label={t('game')} value={layout.inputhistorymode.game} onChange={(event) => updateLayout((next) => { next.inputhistorymode.game = event.target.value; })} data={[{ value: 'default', label: 'Default' }, { value: 'combination', label: 'Combination' }]} />
-              </>
-            )}
-          </Stack>
-        </Paper>
-
-        <Paper className="panel" withBorder>
-          <Stack gap="xs">
             <Title order={2}>{t('layout')}</Title>
             <Group gap="xs" align="end" wrap="nowrap">
               <NativeSelect size="xs" value={selectedLayout} onChange={(event) => setSelectedLayout(event.target.value)} data={layoutNames.map((name) => ({ value: name, label: name }))} className="grow" />
@@ -733,7 +712,6 @@ function EditorApp(): React.ReactElement {
             stickClass={snapshot.stickClass}
             pressedButtons={snapshot.pressedButtons}
             connected={connected}
-            inputHistory={inputHistory}
             backgroundOpacity={backgroundOpacity}
             editorMode
             selectedButtonIndex={selectedButtonIndex}

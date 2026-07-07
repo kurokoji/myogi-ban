@@ -1,4 +1,4 @@
-import { Layout, ButtonLayout, StickLayout, BackgroundConfig, InputHistoryMode, TOTAL_BUTTONS } from './types';
+import { Layout, ButtonLayout, StickLayout, BackgroundConfig, TOTAL_BUTTONS } from './types';
 
 export function createDefaultButtonLayout(overrides: Partial<ButtonLayout> = {}): ButtonLayout {
   return {
@@ -23,17 +23,6 @@ export function createDefaultBackgroundConfig(overrides: Partial<BackgroundConfi
   return { show: true, image: '', scale: '1', w: '', h: '', ...overrides };
 }
 
-export function createDefaultInputHistoryMode(overrides: Partial<InputHistoryMode> = {}): InputHistoryMode {
-  return {
-    toggle: false,
-    direction: 0,
-    count: 20,
-    game: 'default',
-    btnmapping: ['1', '2', '3', '4', ...Array(16).fill('0')],
-    ...overrides
-  };
-}
-
 export function createDefaultLayout(): Layout {
   const buttons: ButtonLayout[] = [
     createDefaultButtonLayout({ x: '250', y: '115' }),
@@ -55,7 +44,6 @@ export function createDefaultLayout(): Layout {
   return {
     version: '210124',
     name: 'preset',
-    inputhistorymode: createDefaultInputHistoryMode(),
     totalbuttonshow: 10,
     showstick: true,
     stick: createDefaultStickLayout({ x: '110', y: '125', w: '100', h: '100' }),
@@ -91,7 +79,6 @@ export function ensureLayoutDefaults(layout: Partial<Layout>): Layout {
   return {
     ...defaults,
     ...layout,
-    inputhistorymode: { ...defaults.inputhistorymode, ...(layout.inputhistorymode || {}) },
     stick: { ...defaults.stick, ...(layout.stick || {}) },
     defaultbuttons,
     background,

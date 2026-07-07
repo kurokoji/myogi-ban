@@ -7,7 +7,6 @@ export interface GamepadViewProps {
   stickClass: string;
   pressedButtons: boolean[];
   connected: boolean;
-  inputHistory: number[][];
   backgroundOpacity?: number;
   editorMode?: boolean;
   selectedButtonIndex?: number | null;
@@ -75,34 +74,6 @@ function useBackgroundSize(layout: Layout, onChange?: (width: number, height: nu
   return size;
 }
 
-function InputHistory({ layout, history }: { layout: Layout; history: number[][] }): React.ReactElement {
-  const classes = ['inputlist'];
-  if (!layout.inputhistorymode.toggle) classes.push('hide');
-  if (layout.inputhistorymode.direction === 1) classes.push('horizontal');
-  if (layout.inputhistorymode.direction === 2) classes.push('horizontal', 'up');
-
-  return (
-    <div id="inputlist" className={classes.join(' ')}>
-      {history.map((inputs, index) => (
-        <div className={`inputlistchild${layout.inputhistorymode.game === 'combination' ? ' combination' : ''}`} key={`${index}-${inputs.join('-')}`}>
-          <div className="inputlistchildalign">
-            {inputs.map((input, inputIndex) => {
-              const isArrow = input >= 1000 && input < 2000;
-              const displayInput = input < 999 ? input + 1 : input;
-              return (
-                <div
-                  className={`inputlistelement inputlistelement${displayInput}${isArrow ? ' inputarrow' : ''}`}
-                  key={`${input}-${inputIndex}`}
-                />
-              );
-            })}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export function GamepadView(props: GamepadViewProps): React.ReactElement {
   const { t } = useTranslation();
   const {
@@ -110,7 +81,6 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     stickClass,
     pressedButtons,
     connected,
-    inputHistory,
     backgroundOpacity = 1,
     editorMode = false,
     selectedButtonIndex,
@@ -286,7 +256,6 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
           </div>
         </div>
       </div>
-      <InputHistory layout={layout} history={inputHistory} />
     </>
   );
 }

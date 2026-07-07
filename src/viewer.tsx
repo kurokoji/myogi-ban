@@ -23,7 +23,6 @@ function ViewerApp(): React.ReactElement {
   const [stickMappings, setStickMappings] = useState<StickMapping[]>(() => GamepadManager.createDefaultStickMappings());
   const [connected, setConnected] = useState(false);
   const [snapshot, setSnapshot] = useState(() => createEmptySnapshot(createDefaultLayout()));
-  const [inputHistory, setInputHistory] = useState<number[][]>([]);
   const layoutRef = useLatestRef(layout);
   const buttonMappingsRef = useLatestRef(buttonMappings);
   const stickMappingsRef = useLatestRef(stickMappings);
@@ -67,9 +66,6 @@ function ViewerApp(): React.ReactElement {
           stickMappingsRef.current
         );
         setSnapshot(nextSnapshot);
-        if (layoutRef.current.inputhistorymode.toggle && nextSnapshot.statusChanged) {
-          setInputHistory((current) => [nextSnapshot.inputs, ...current].slice(0, layoutRef.current.inputhistorymode.count));
-        }
       }
       frame = window.requestAnimationFrame(updateLoop);
     };
@@ -88,7 +84,6 @@ function ViewerApp(): React.ReactElement {
         stickClass={snapshot.stickClass}
         pressedButtons={snapshot.pressedButtons}
         connected={connected}
-        inputHistory={inputHistory}
       />
     </div>
   );

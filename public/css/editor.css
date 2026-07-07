@@ -152,10 +152,6 @@ body {
 	display: none;
 }
 
-#inputlist.hide {
-	display: none;
-}
-
 #preview .gamepad-button {
 	cursor: pointer;
 }

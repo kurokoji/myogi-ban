@@ -36,18 +36,9 @@ export interface BackgroundConfig {
   h: string;
 }
 
-export interface InputHistoryMode {
-  toggle: boolean;
-  direction: number;
-  count: number;
-  game: string;
-  btnmapping: string[];
-}
-
 export interface Layout {
   version: string;
   name: string;
-  inputhistorymode: InputHistoryMode;
   totalbuttonshow: number;
   showstick: boolean;
   stick: StickLayout;
@@ -61,7 +52,6 @@ export interface Layout {
 export interface GamepadState {
   stick: string;
   buttons: boolean[];
-  input: number[];
   connected: boolean;
   layout: Layout;
 }

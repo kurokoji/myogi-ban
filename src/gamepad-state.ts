@@ -47,19 +47,5 @@ export function readGamepadSnapshot(
     return pressed;
   });
 
-  if (layout.inputhistorymode.toggle && statusChanged) {
-    let direction = 0;
-    if (stickStatus[0] && stickStatus[2]) direction = 1005;
-    else if (stickStatus[1] && stickStatus[2]) direction = 1006;
-    else if (stickStatus[0] && stickStatus[3]) direction = 1007;
-    else if (stickStatus[1] && stickStatus[3]) direction = 1008;
-    else if (stickStatus[0]) direction = 1001;
-    else if (stickStatus[1]) direction = 1002;
-    else if (stickStatus[2]) direction = 1003;
-    else if (stickStatus[3]) direction = 1004;
-
-    if (direction > 0) inputs.push(direction);
-  }
-
   return { stickClass, stickStatus, pressedButtons, inputs, statusChanged };
 }
