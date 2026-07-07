@@ -19,7 +19,7 @@ import './i18n';
 import i18n from './i18n';
 import { ApiClient } from './api';
 import { GamepadManager, ButtonMapping, StickMapping } from './gamepad';
-import { createDefaultLayout, createDefaultButtonLayout, ensureLayoutDefaults } from './layout';
+import { createDefaultLayout, ensureLayoutDefaults } from './layout';
 import { GamepadState, Layout, SERVER_URL } from './types';
 import { createEmptySnapshot, readGamepadSnapshot } from './gamepad-state';
 import { GamepadView } from './components/GamepadView';
@@ -254,7 +254,7 @@ function EditorApp(): React.ReactElement {
   const handleButtonPositionChange = useCallback((index: number, x: number, y: number) => {
     setLayout((current) => {
       const next = cloneLayout(current);
-      if (!next.buttons[index]) next.buttons[index] = createDefaultButtonLayout();
+      if (!next.buttons[index]) next.buttons[index] = { x: '', y: '', w: '', h: '', img: '', xp: '', yp: '', wp: '', hp: '', imgp: '' };
       next.buttons[index].x = String(x);
       next.buttons[index].y = String(y);
       return next;
@@ -440,7 +440,7 @@ function EditorApp(): React.ReactElement {
         <Paper className="panel" withBorder>
           <Stack gap="xs">
             <Title order={2}>{t('buttons')}</Title>
-            <NumberInput size="xs" label={t('count')} min={0} max={48} value={layout.totalbuttonshow} onChange={(value) => updateLayout((next) => { next.totalbuttonshow = Math.max(0, Math.min(48, Number(value) || 0)); while (next.buttons.length < next.totalbuttonshow) next.buttons.push(createDefaultButtonLayout()); })} />
+            <NumberInput size="xs" label={t('count')} min={0} max={48} value={layout.totalbuttonshow} onChange={(value) => updateLayout((next) => { next.totalbuttonshow = Math.max(0, Math.min(48, Number(value) || 0)); while (next.buttons.length < next.totalbuttonshow) next.buttons.push({ x: '', y: '', w: '', h: '', img: '', xp: '', yp: '', wp: '', hp: '', imgp: '' }); })} />
             <Switch size="sm" label={t('showBackground')} checked={layout.background.show} onChange={(event) => updateLayout((next) => { next.background.show = event.target.checked; })} />
             <Switch
               size="sm"
