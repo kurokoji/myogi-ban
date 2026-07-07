@@ -11,7 +11,6 @@ let latestState: any = null;
 const PID_FILE = path.join(__dirname, '..', 'server.pid');
 const LAYOUT_BASE = path.join(__dirname, '..', 'public', 'layout');
 const USER_LAYOUT_BASE = path.join(__dirname, '..', 'public', 'user-layouts');
-const UPLOAD_DIR = path.join(__dirname, '..', 'public', '_uploads');
 const DEFAULT_LAYOUT_FILE = path.join(__dirname, '..', 'default-layout.json');
 
 function getUserLayoutDirs(): string[] {
@@ -108,14 +107,6 @@ function createServer(): void {
     }
     const data = { ...req.body.data, name: layoutName };
     copyLayoutAssets(req.body.data, req.body.data?.name || layoutName, layoutName);
-    // copy uploaded images to the layout dir
-    if (fs.existsSync(UPLOAD_DIR)) {
-      for (const file of fs.readdirSync(UPLOAD_DIR)) {
-        const src = path.join(UPLOAD_DIR, file);
-        const dst = path.join(layoutDir, file);
-        if (!fs.existsSync(dst)) fs.copyFileSync(src, dst);
-      }
-    }
     const filePath = path.join(layoutDir, 'layout.json');
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
     res.json({ ok: true });
@@ -148,16 +139,16 @@ function createServer(): void {
   });
 
   expressApp.post('/api/upload-image', (req, res) => {
-    const { data, fileName } = req.body;
+    const { data, layoutName, fileName } = req.body;
     const safeFileName = path.basename(fileName);
-    const uploadDir = UPLOAD_DIR;
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+    const layoutDir = path.join(USER_LAYOUT_BASE, layoutName || 'custom');
+    if (!fs.existsSync(layoutDir)) {
+      fs.mkdirSync(layoutDir, { recursive: true });
     }
 
     const base64Data = data.replace(/^data:image\/[^;]+;base64,/, '');
     const buffer = Buffer.from(base64Data, 'base64');
-    fs.writeFileSync(path.join(uploadDir, safeFileName), buffer);
+    fs.writeFileSync(path.join(layoutDir, safeFileName), buffer);
 
     res.json({ ok: true, fileName: safeFileName });
   });

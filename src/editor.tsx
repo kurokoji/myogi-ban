@@ -319,7 +319,7 @@ function EditorApp(): React.ReactElement {
   const uploadImage = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    const uploadLayoutName = layoutName || layout.name || 'custom';
+    const uploadLayoutName = layout.name || 'custom';
     const dataUrl = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(String(reader.result));
