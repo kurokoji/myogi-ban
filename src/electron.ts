@@ -150,7 +150,7 @@ function startServer(): void {
     res.json({ ok: true, fileName: safeFileName });
   });
 
-  const DEFAULT_LAYOUT_FILE = path.join(__dirname, '..', 'default-layout.json');
+  const DEFAULT_LAYOUT_FILE = path.join(__dirname, '..', 'public', 'default-layout.json');
   expressApp.get('/api/default-layout', (req, res) => {
     if (fs.existsSync(DEFAULT_LAYOUT_FILE)) {
       const data = JSON.parse(fs.readFileSync(DEFAULT_LAYOUT_FILE, 'utf8'));

@@ -11,7 +11,7 @@ let latestState: any = null;
 const PID_FILE = path.join(__dirname, '..', 'server.pid');
 const LAYOUT_BASE = path.join(__dirname, '..', 'public', 'layout');
 const USER_LAYOUT_BASE = path.join(__dirname, '..', 'public', 'user-layouts');
-const DEFAULT_LAYOUT_FILE = path.join(__dirname, '..', 'default-layout.json');
+const DEFAULT_LAYOUT_FILE = path.join(__dirname, '..', 'public', 'default-layout.json');
 
 function getUserLayoutDirs(): string[] {
   if (!fs.existsSync(USER_LAYOUT_BASE)) return [];

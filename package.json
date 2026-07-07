@@ -22,7 +22,6 @@
     "files": [
       "dist/**/*",
       "public/**/*",
-      "default-layout.json",
       "package.json"
     ],
     "linux": {
