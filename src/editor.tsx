@@ -712,6 +712,32 @@ function EditorApp(): React.ReactElement {
               <Button size="xs" onClick={saveLayout}>{t('save')}</Button>
             </Group>
             <Button size="xs" fullWidth onClick={setDefaultLayout}>{t('setDefault')}</Button>
+            <Group gap="xs" align="end" wrap="nowrap">
+              <Button size="xs" variant="light" fullWidth onClick={() => {
+                const data = cloneLayout(layout);
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${layoutName || 'layout'}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}>{t('export')}</Button>
+              <Button size="xs" variant="light" fullWidth onClick={() => document.getElementById('import-layout-input')?.click()}>{t('import')}</Button>
+            </Group>
+            <input id="import-layout-input" type="file" accept=".json" hidden onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = () => {
+                try {
+                  const data = JSON.parse(String(reader.result));
+                  applyLayout(data, data.name || 'imported');
+                } catch { window.alert('Invalid layout file'); }
+              };
+              reader.readAsText(file);
+              event.target.value = '';
+            }} />
           </Stack>
         </Paper>
 
