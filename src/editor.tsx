@@ -472,6 +472,12 @@ function EditorApp(): React.ReactElement {
                   <Button size="xs" variant="light" onClick={() => openImagePicker({ type: 'background' })}>{t('selectFile')}</Button>
                 </Group>
                 <NumberInput size="xs" label={t('bgScale')} min={0.1} max={5} step={0.1} value={numericValue(layout.background.scale || '1')} onChange={(value) => updateLayout((next) => { next.background.scale = String(value ?? ''); })} />
+                {layout.background.image && (
+                  <div className="control row obs-size-row">
+                    <label>{t('obsWidth')}</label><span className="readonly-value">{layout.background.w || '500'}</span>
+                    <label>{t('obsHeight')}</label><span className="readonly-value">{layout.background.h || '250'}</span>
+                  </div>
+                )}
               </>
             )}
             <input ref={fileInputRef} type="file" accept="image/*" onChange={uploadImage} hidden />
