@@ -64,8 +64,9 @@ export function createDefaultLayout(): Layout {
 
 export function ensureLayoutDefaults(layout: Partial<Layout>): Layout {
   const defaults = createDefaultLayout();
-  const background = { ...defaults.background, ...(layout.background || {}) };
-  if (layout.background && !('scale' in layout.background) && (layout.background.w || layout.background.h)) {
+  const incomingBackground = layout.background as Partial<BackgroundConfig> | undefined;
+  const background = { ...defaults.background, ...(incomingBackground || {}) };
+  if (incomingBackground && !('scale' in incomingBackground) && (incomingBackground.w || incomingBackground.h)) {
     background.scale = '';
   }
   return {

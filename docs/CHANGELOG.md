@@ -2,6 +2,11 @@
 
 ## [1.0.0] - 2026-07-07
 
+### 変更
+- フロントエンドをReact + TypeScriptへ移行
+- Mantineを導入
+- i18next/react-i18nextによる日本語/英語切り替えを追加
+
 ### 追加
 - 初期リリース
 - TypeScriptベースの実装
@@ -20,7 +25,7 @@
 ### 技術的変更
 - Electron → ブラウザベースに変更
 - JavaScript → TypeScriptに移行
-- モジュール分割（server, editor, viewer, types, layout, gamepad, renderer, api, dom）
+- モジュール分割（server, editor, viewer, types, layout, gamepad, api, React components）
 - esbuildによる高速ビルド
 - Express + WebSocketサーバー
 - REST API実装

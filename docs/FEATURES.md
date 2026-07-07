@@ -164,11 +164,14 @@
 
 ## 開発者機能
 
-### TypeScript
+### React + TypeScript
 
-- **型安全**: 完全なTypeScript実装
+- **状態管理**: React stateによるUI同期
+- **型安全**: TypeScript実装
 - **型定義**: `types.ts`にすべての型を定義
 - **コンパイルチェック**: `tsc --noEmit`で型チェック
+- **多言語対応**: i18nextで日本語/英語を切り替え
+- **UI Framework**: MantineをフォームUIの基礎として利用
 
 ### ビルド
 

@@ -9,6 +9,46 @@ let wss: WebSocket.Server;
 const PORT = 33770;
 let latestState: any = null;
 const PID_FILE = path.join(__dirname, '..', 'server.pid');
+const LAYOUT_BASE = path.join(__dirname, '..', 'public', 'layout');
+
+function collectLayoutAssets(layout: any): string[] {
+  const assets = new Set<string>();
+  const add = (fileName: unknown) => {
+    if (typeof fileName === 'string' && fileName.trim()) {
+      assets.add(path.basename(fileName));
+    }
+  };
+
+  add(layout?.background?.image);
+  add(layout?.defaultbuttons?.img);
+  add(layout?.defaultbuttons?.imgp);
+  for (const button of layout?.buttons || []) {
+    add(button?.img);
+    add(button?.imgp);
+  }
+  return [...assets];
+}
+
+function copyLayoutAssets(layout: any, sourceLayoutName: string, targetLayoutName: string): void {
+  const targetDir = path.join(LAYOUT_BASE, targetLayoutName);
+  const layoutDirs = fs.existsSync(LAYOUT_BASE)
+    ? fs.readdirSync(LAYOUT_BASE, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name)
+    : [];
+  const sourceDirs = [sourceLayoutName, ...layoutDirs].filter(Boolean);
+
+  for (const asset of collectLayoutAssets(layout)) {
+    const targetPath = path.join(targetDir, asset);
+    if (fs.existsSync(targetPath)) continue;
+
+    for (const sourceDir of sourceDirs) {
+      const sourcePath = path.join(LAYOUT_BASE, sourceDir, asset);
+      if (fs.existsSync(sourcePath)) {
+        fs.copyFileSync(sourcePath, targetPath);
+        break;
+      }
+    }
+  }
+}
 
 function createServer(): void {
   const expressApp = express();
@@ -33,18 +73,19 @@ function createServer(): void {
 
   expressApp.post('/api/layout/save', (req, res) => {
     const layoutName = req.body.name || 'custom';
-    const layoutDir = path.join(__dirname, '..', 'public', 'layout', layoutName);
+    const layoutDir = path.join(LAYOUT_BASE, layoutName);
     if (!fs.existsSync(layoutDir)) {
       fs.mkdirSync(layoutDir, { recursive: true });
     }
+    const data = { ...req.body.data, name: layoutName };
+    copyLayoutAssets(req.body.data, req.body.data?.name || layoutName, layoutName);
     const filePath = path.join(layoutDir, 'layout.json');
-    fs.writeFileSync(filePath, JSON.stringify(req.body.data, null, 2));
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
     res.json({ ok: true });
   });
 
   expressApp.get('/api/layouts', (req, res) => {
-    const layoutBase = path.join(__dirname, '..', 'public', 'layout');
-    const dirs = fs.readdirSync(layoutBase, { withFileTypes: true })
+    const dirs = fs.readdirSync(LAYOUT_BASE, { withFileTypes: true })
       .filter(d => d.isDirectory())
       .map(d => d.name);
     res.json(dirs);
@@ -80,18 +121,19 @@ function createServer(): void {
 
   expressApp.post('/api/upload-image', (req, res) => {
     const { data, layoutName, fileName } = req.body;
+    const safeFileName = path.basename(fileName);
     const layoutDir = path.join(__dirname, '..', 'public', 'layout', layoutName || 'custom');
     
     if (!fs.existsSync(layoutDir)) {
       fs.mkdirSync(layoutDir, { recursive: true });
     }
 
-    const base64Data = data.replace(/^data:image\/\w+;base64,/, '');
+    const base64Data = data.replace(/^data:image\/[^;]+;base64,/, '');
     const buffer = Buffer.from(base64Data, 'base64');
-    const filePath = path.join(layoutDir, fileName);
+    const filePath = path.join(layoutDir, safeFileName);
     fs.writeFileSync(filePath, buffer);
 
-    res.json({ ok: true, fileName });
+    res.json({ ok: true, fileName: safeFileName });
   });
 
   wss = new WebSocket.Server({ server });

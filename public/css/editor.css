@@ -1,144 +1,125 @@
 * {
 	box-sizing: border-box;
-	margin: 0;
-	padding: 0;
 }
 
 body {
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-	display: flex;
+	margin: 0;
 	height: 100vh;
-	background: #1a1a2e;
-	color: #eee;
 	overflow: hidden;
+	font-family: var(--mantine-font-family);
+}
+
+#root {
+	display: flex;
+	width: 100%;
+	height: 100vh;
 }
 
 #sidebar {
 	width: 320px;
-	background: #16213e;
-	padding: 20px;
+	padding: 10px;
 	overflow-y: auto;
-	border-right: 1px solid #0f3460;
+	border-right: 1px solid var(--mantine-color-gray-3);
+	background: var(--mantine-color-body);
 }
 
 .sidebar-header {
-	margin-bottom: 24px;
-	padding-bottom: 16px;
-	border-bottom: 1px solid #0f3460;
-}
-
-.sidebar-header h1 {
-	font-size: 18px;
-	color: #e94560;
-	margin-bottom: 8px;
-}
-
-.server-url {
-	font-size: 11px;
-	color: #888;
-	word-break: break-all;
-}
-
-.server-url button {
-	font-size: 10px;
-	padding: 2px 8px;
-	margin-left: 4px;
-	background: #0f3460;
-	border: none;
-	color: #eee;
-	border-radius: 3px;
-	cursor: pointer;
-}
-
-.server-url button:hover {
-	background: #e94560;
-}
-
-.panel {
-	margin-bottom: 20px;
-	padding: 16px;
-	background: #0f3460;
-	border-radius: 8px;
-}
-
-.panel h2 {
-	font-size: 13px;
-	color: #e94560;
-	margin-bottom: 12px;
-	text-transform: uppercase;
-	letter-spacing: 1px;
-}
-
-.control {
 	margin-bottom: 10px;
 }
 
-.control label {
-	display: block;
+.sidebar-header h1 {
+	margin: 0 0 4px;
+	font-size: 18px;
+	line-height: 1.2;
+}
+
+.server-url {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0;
+	color: var(--mantine-color-dimmed);
+	font-size: 11px;
+	word-break: break-all;
+}
+
+.panel {
+	margin-bottom: 8px;
+	padding: 10px;
+	border-radius: 6px;
+	box-shadow: none;
+}
+
+.panel h2 {
+	margin: 0;
 	font-size: 12px;
-	color: #aaa;
-	margin-bottom: 4px;
+	line-height: 1.2;
+	text-transform: uppercase;
 }
 
-.control input[type="range"] {
-	width: 100%;
-	accent-color: #e94560;
-}
-
-.control input[type="number"],
-.control input[type="text"],
-.control select {
-	width: 100%;
-	padding: 6px 10px;
-	background: #1a1a2e;
-	border: 1px solid #333;
-	border-radius: 4px;
-	color: #eee;
-	font-size: 12px;
-}
-
-.control input[type="checkbox"] {
-	accent-color: #e94560;
-	margin-right: 6px;
+.control {
+	margin-bottom: 0;
 }
 
 .control.row {
-	display: flex;
-	gap: 8px;
-	align-items: center;
-	flex-wrap: wrap;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	gap: 6px;
+	align-items: end;
 }
 
-.control.row label {
-	margin: 0;
+.control.row .mantine-InputWrapper-label {
 	font-size: 11px;
-	min-width: 30px;
 }
 
-.control.row input {
-	width: 60px;
+.obs-size-row {
+	grid-template-columns: auto auto auto auto;
+	justify-content: start;
+	gap: 6px;
+	align-items: baseline;
+	color: var(--mantine-color-dimmed);
+	font-size: 12px;
 }
 
 .readonly-value {
 	min-width: 36px;
-	color: #eee;
-	font-size: 12px;
 	font-weight: 600;
 	text-align: right;
+	color: var(--mantine-color-text);
 }
 
-.control button {
-	padding: 6px 14px;
-	background: #e94560;
-	border: none;
-	color: #fff;
-	border-radius: 4px;
-	cursor: pointer;
+.range-label {
+	display: grid;
+	gap: 4px;
 	font-size: 12px;
 }
 
-.control button:hover {
-	background: #ff6b6b;
+.range-label span {
+	display: flex;
+	justify-content: space-between;
+	color: var(--mantine-color-text);
+}
+
+.range-label input {
+	width: 100%;
+}
+
+.grow {
+	flex: 1;
+}
+
+.mapping-status {
+	display: grid;
+	gap: 6px;
+	margin-top: 8px;
+	padding: 8px;
+	border: 1px solid var(--mantine-color-gray-3);
+	border-radius: 6px;
+}
+
+.mapping-status p {
+	margin: 0;
+	font-size: 12px;
 }
 
 .hide {
@@ -146,13 +127,11 @@ body {
 }
 
 .status-connected {
-	color: #4caf50;
-	font-size: 12px;
+	color: var(--mantine-color-green-7);
 }
 
 .status-disconnected {
-	color: #888;
-	font-size: 12px;
+	color: var(--mantine-color-dimmed);
 }
 
 #preview {
@@ -160,14 +139,12 @@ body {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: #0a0a15;
+	background: #0b0f14;
 	overflow: auto;
-	padding: 40px;
+	padding: 16px;
 }
 
 #preview-container {
-	background: #222;
-	border-radius: 8px;
 	padding: 0;
 }
 
@@ -175,22 +152,15 @@ body {
 	display: none;
 }
 
-#inputlist {
-	background: #222;
-	border-radius: 8px;
-	padding: 20px;
-}
-
 #inputlist.hide {
 	display: none;
 }
 
-/* Editor-only gamepad interaction styles */
-#preview .button {
+#preview .gamepad-button {
 	cursor: pointer;
 }
 
-#preview .button:hover {
+#preview .gamepad-button:hover {
 	filter: brightness(1.2);
 }
 

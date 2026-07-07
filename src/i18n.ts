@@ -1,0 +1,126 @@
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+
+export const resources = {
+  ja: {
+    translation: {
+      appTitle: 'FightStick Viewer',
+      obs: 'OBS',
+      copy: 'コピー',
+      display: '表示',
+      scale: '表示倍率',
+      bgOpacity: '背景透明度',
+      stick: 'スティック',
+      showStick: 'スティックを表示',
+      buttons: 'ボタン',
+      buttonImages: 'ボタン画像',
+      defaultReleasedImage: '標準 通常画像',
+      defaultPressedImage: '標準 押下画像',
+      defaultButtonSize: '標準サイズ',
+      editButton: '編集ボタン',
+      releasedImage: '通常画像',
+      pressedImage: '押下画像',
+      releasedSize: '通常サイズ',
+      pressedSize: '押下サイズ',
+      useDefaultWhenBlank: '空欄なら標準画像を使用',
+      count: '表示数',
+      showBackground: '背景を表示',
+      bgScale: '背景倍率',
+      bgImage: '背景画像',
+      selectFile: 'ファイル選択',
+      inputHistory: '入力履歴',
+      enable: '有効',
+      direction: '方向',
+      vertical: '縦',
+      horizontalDown: '横 下寄せ',
+      horizontalUp: '横 上寄せ',
+      game: 'ゲーム',
+      layout: 'レイアウト',
+      load: '読込',
+      save: '保存',
+      setDefault: 'デフォルトに設定',
+      gamepad: 'ゲームパッド',
+      notConnected: '未接続',
+      connected: '接続中: {{name}}',
+      buttonMapping: 'ボタン割り当て',
+      clickPreviewToAssign: 'プレビューのボタンをクリックして割り当て',
+      assigning: '割り当て中',
+      pressButtonOrHoldAxis: 'ボタンを押すか軸を1秒ホールド',
+      cancel: 'キャンセル',
+      connectGamepadFirst: '先にゲームパッドを接続してください',
+      saved: '保存しました',
+      defaultSaved: 'デフォルトに設定しました',
+      pressAnyButton: 'Press Any Button',
+      language: '言語',
+      obsWidth: 'OBS W',
+      obsHeight: 'OBS H'
+    }
+  },
+  en: {
+    translation: {
+      appTitle: 'FightStick Viewer',
+      obs: 'OBS',
+      copy: 'Copy',
+      display: 'Display',
+      scale: 'Scale',
+      bgOpacity: 'BG Opacity',
+      stick: 'Stick',
+      showStick: 'Show Stick',
+      buttons: 'Buttons',
+      buttonImages: 'Button Images',
+      defaultReleasedImage: 'Default released image',
+      defaultPressedImage: 'Default pressed image',
+      defaultButtonSize: 'Default size',
+      editButton: 'Edit button',
+      releasedImage: 'Released image',
+      pressedImage: 'Pressed image',
+      releasedSize: 'Released size',
+      pressedSize: 'Pressed size',
+      useDefaultWhenBlank: 'Blank fields use default images',
+      count: 'Count',
+      showBackground: 'Show Background',
+      bgScale: 'BG Scale',
+      bgImage: 'BG Image',
+      selectFile: 'Select File',
+      inputHistory: 'Input History',
+      enable: 'Enable',
+      direction: 'Direction',
+      vertical: 'Vertical',
+      horizontalDown: 'Horizontal (Down)',
+      horizontalUp: 'Horizontal (Up)',
+      game: 'Game',
+      layout: 'Layout',
+      load: 'Load',
+      save: 'Save',
+      setDefault: 'Set as Default',
+      gamepad: 'Gamepad',
+      notConnected: 'Not connected',
+      connected: 'Connected: {{name}}',
+      buttonMapping: 'Button Mapping',
+      clickPreviewToAssign: 'Click a button on the preview to assign',
+      assigning: 'Assigning',
+      pressButtonOrHoldAxis: 'Press a button or hold an axis for 1 second',
+      cancel: 'Cancel',
+      connectGamepadFirst: 'Connect a gamepad first',
+      saved: 'Saved!',
+      defaultSaved: 'Set as default layout!',
+      pressAnyButton: 'Press Any Button',
+      language: 'Language',
+      obsWidth: 'OBS W',
+      obsHeight: 'OBS H'
+    }
+  }
+};
+
+const savedLanguage = localStorage.getItem('language') || 'ja';
+
+i18n.use(initReactI18next).init({
+  resources,
+  lng: savedLanguage,
+  fallbackLng: 'ja',
+  interpolation: {
+    escapeValue: false
+  }
+});
+
+export default i18n;

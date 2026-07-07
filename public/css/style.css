@@ -113,7 +113,7 @@ body {
 .stick-block.stick-left { transform: rotate(270deg) translateY(-60px); }
 .stick-block.stick-right { transform: rotate(90deg) translateY(-60px); }
 
-.button {
+.gamepad-button {
 	width: 60px;
 	height: 60px;
 	transform: translate(-50%, -50%);
@@ -254,7 +254,7 @@ body {
 .stick-area { z-index: 2; }
 .stick { z-index: 20; }
 .stick-block { z-index: 30; }
-.button { z-index: 10; }
+.gamepad-button { z-index: 10; }
 
 #gamepad0, #gamepad0 * {
 	background-repeat: no-repeat;

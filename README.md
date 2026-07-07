@@ -79,7 +79,9 @@ npm run build:viewer
 ## 技術スタック
 
 - **Backend**: Node.js + Express + WebSocket
-- **Frontend**: TypeScript
+- **Frontend**: React + TypeScript
+- **UI Framework**: Mantine
+- **i18n**: i18next + react-i18next
 - **Build Tool**: esbuild
 - **Gamepad API**: Web Gamepad API
 
@@ -89,14 +91,15 @@ npm run build:viewer
 fightstick-viewer/
 ├── src/                    # ソースコード
 │   ├── server.ts          # サーバー
-│   ├── editor.ts          # 編集画面
-│   ├── viewer.ts          # ビューア
+│   ├── editor.tsx         # React編集画面
+│   ├── viewer.tsx         # Reactビューア
 │   ├── types.ts           # 型定義
 │   ├── layout.ts          # レイアウト管理
 │   ├── gamepad.ts         # ゲームパッド管理
-│   ├── renderer.ts        # 描画処理
+│   ├── gamepad-state.ts   # 入力状態の計算
+│   ├── components/        # Reactコンポーネント
+│   ├── i18n.ts            # 多言語設定
 │   ├── api.ts             # APIクライアント
-│   └── dom.ts             # DOM操作
 ├── public/                 # 静的ファイル
 │   ├── index.html         # 編集画面HTML
 │   ├── view.html          # ビューアHTML

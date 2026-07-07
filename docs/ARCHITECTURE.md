@@ -44,22 +44,23 @@ Express + WebSocketサーバー。以下の機能を提供：
 | POST | `/api/state` | ゲームパッド状態送信 |
 | GET | `/api/state` | 現在の状態取得 |
 
-### 編集画面 (editor.ts)
+### 編集画面 (editor.tsx)
 
-TypeScriptで実装された設定画面。以下のクラスで構成：
+React + TypeScriptで実装された設定画面。以下の要素で構成：
 
-- **EditorApp**: メインアプリケーションクラス
+- **EditorApp**: メインReactコンポーネント
 - **GamepadManager**: ゲームパッドの入力管理
-- **Renderer**: レイアウトの描画
+- **GamepadView**: レイアウトの描画
 - **ApiClient**: サーバーAPIとの通信
+- **i18next**: 日本語/英語の表示切り替え
 
-### ビューア (viewer.ts)
+### ビューア (viewer.tsx)
 
 OBS表示用の軽量クライアント。
 
-- **ViewerApp**: メインアプリケーションクラス
+- **ViewerApp**: メインReactコンポーネント
 - **GamepadManager**: ゲームパッドの入力管理
-- **Renderer**: レイアウトの描画
+- **GamepadView**: レイアウトの描画
 - **ApiClient**: サーバーAPIとの通信
 
 ## データフロー
@@ -69,9 +70,9 @@ OBS表示用の軽量クライアント。
 ```
 1. ユーザーが設定を変更
    ↓
-2. EditorAppが状態を更新
+2. EditorAppがReact stateを更新
    ↓
-3. Rendererがプレビューを更新
+3. GamepadViewがプレビューを更新
    ↓
 4. 「Save」ボタンでサーバーに送信
    ↓
@@ -91,7 +92,7 @@ OBS表示用の軽量クライアント。
    ↓
 4. 入力検出時に状態を更新
    ↓
-5. Rendererが描画を更新
+5. GamepadViewが描画を更新
    ↓
 6. 状態をサーバーに送信（オプション）
 ```
@@ -159,11 +160,11 @@ stickMappings = [12, 13, 14, 15]
 
 ## 描画システム
 
-### Renderer
+### GamepadView
 
-CSSとDOM操作を使用してレイアウトを描画：
+ReactコンポーネントとCSSを使用してレイアウトを描画：
 
-- **動的スタイル生成**: `<style>`タグを動的に生成
+- **状態駆動描画**: React stateから背景、スティック、ボタンを描画
 - **ボタン描画**: 絶対位置で配置
 - **スティック描画**: 回転transformで方向を表現
 - **背景描画**: 背景画像の設定
@@ -220,13 +221,13 @@ SIGTERM/SIGINT受信
 
 1. **型定義**: `types.ts`にインターフェースを追加
 2. **API**: `server.ts`にエンドポイントを追加
-3. **クライアント**: `editor.ts`/`viewer.ts`にロジックを追加
+3. **クライアント**: `editor.tsx`/`viewer.tsx`にロジックを追加
 4. **UI**: `index.html`/`view.html`に要素を追加
 
 ### カスタムレイアウト
 
 - `layout.ts`の`createDefaultLayout()`を拡張
-- `renderer.ts`の描画ロジックを更新
+- `components/GamepadView.tsx`の描画ロジックを更新
 - CSSファイルにスタイルを追加
 
 ## トラブルシューティング
