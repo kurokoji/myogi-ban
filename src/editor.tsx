@@ -442,8 +442,7 @@ function EditorApp(): React.ReactElement {
 
         <Paper className="panel" withBorder>
           <Stack gap="xs">
-            <Title order={2}>{t('buttons')}</Title>
-            <NumberInput size="xs" label={t('count')} min={0} max={48} value={layout.totalbuttonshow} onChange={(value) => updateLayout((next) => { next.totalbuttonshow = Math.max(0, Math.min(48, Number(value) || 0)); while (next.buttons.length < next.totalbuttonshow) next.buttons.push({ x: '', y: '', w: '', h: '', img: '', xp: '', yp: '', wp: '', hp: '', imgp: '' }); })} />
+            <Title order={2}>{t('background')}</Title>
             <Switch size="sm" label={t('showBackground')} checked={layout.background.show} onChange={(event) => updateLayout((next) => { next.background.show = event.target.checked; })} />
             <Switch
               size="sm"
@@ -489,7 +488,8 @@ function EditorApp(): React.ReactElement {
 
         <Paper className="panel" withBorder>
           <Stack gap="xs">
-            <Title order={2}>{t('buttonImages')}</Title>
+            <Title order={2}>{t('buttons')}</Title>
+            <NumberInput size="xs" label={t('count')} min={0} max={48} value={layout.totalbuttonshow} onChange={(value) => updateLayout((next) => { next.totalbuttonshow = Math.max(0, Math.min(48, Number(value) || 0)); while (next.buttons.length < next.totalbuttonshow) next.buttons.push({ x: '', y: '', w: '', h: '', img: '', xp: '', yp: '', wp: '', hp: '', imgp: '' }); })} />
             <Switch
               size="sm"
               label={t('useCssButton')}
