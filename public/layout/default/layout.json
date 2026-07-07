@@ -49,6 +49,6 @@
     "cssColor": "#ffffff",
     "cssBorderRadius": 20
   },
-  "buttonMappings": [0,1,2,3,4,5,6,7],
+  "buttonMappings": [2,3,5,4,0,1,7,6],
   "stickMappings": [12,13,14,15]
 }
