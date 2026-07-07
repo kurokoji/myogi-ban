@@ -29,10 +29,10 @@ export function createDefaultLayout(): Layout {
     createDefaultButtonLayout({ x: '280', y: '68' }),
     createDefaultButtonLayout({ x: '335', y: '74' }),
     createDefaultButtonLayout({ x: '390', y: '86' }),
-    createDefaultButtonLayout({ x: '217', y: '131' }),
-    createDefaultButtonLayout({ x: '272', y: '119' }),
-    createDefaultButtonLayout({ x: '327', y: '125' }),
-    createDefaultButtonLayout({ x: '382', y: '137' }),
+    createDefaultButtonLayout({ x: '221', y: '139' }),
+    createDefaultButtonLayout({ x: '276', y: '127' }),
+    createDefaultButtonLayout({ x: '331', y: '133' }),
+    createDefaultButtonLayout({ x: '386', y: '145' }),
   ];
 
   for (let i = buttons.length; i < TOTAL_BUTTONS; i++) {
