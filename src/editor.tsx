@@ -707,7 +707,7 @@ function EditorApp(): React.ReactElement {
           <Stack gap="xs">
             <Title order={2}>{t('layout')}</Title>
             <Group gap="xs" align="end" wrap="nowrap">
-              <NativeSelect size="xs" value={selectedLayout} onChange={(event) => setSelectedLayout(event.target.value)} data={layoutNames.map((entry) => ({ value: `${entry.name}:${entry.builtin ? 'builtin' : 'user'}`, label: `${entry.name}${entry.builtin ? '' : ' *'}` }))} className="grow" />
+              <NativeSelect size="xs" value={selectedLayout} onChange={(event) => setSelectedLayout(event.target.value)} data={layoutNames.map((entry) => ({ value: `${entry.name}:${entry.builtin ? 'builtin' : 'user'}`, label: entry.builtin ? `${entry.name} (built-in)` : entry.name }))} className="grow" />
               <Button size="xs" variant="light" onClick={loadLayout}>{t('load')}</Button>
             </Group>
             <Group gap="xs" align="end" wrap="nowrap">
