@@ -98,9 +98,12 @@ function EditorApp(): React.ReactElement {
   const refreshLayouts = useCallback(async () => {
     try {
       const layouts = await apiRef.current.getLayouts();
-      setLayoutNames(layouts.map((entry: any) => typeof entry === 'string' ? { name: entry, builtin: true } : entry));
+      const entries = layouts.map((entry: any) => typeof entry === 'string' ? { name: entry, builtin: true } : entry);
+      setLayoutNames(entries);
+      return entries;
     } catch (error) {
       console.error('Failed to load layout list:', error);
+      return [];
     }
   }, []);
 
@@ -122,9 +125,12 @@ function EditorApp(): React.ReactElement {
         const data = await apiRef.current.getLayout(layoutName);
         if (!cancelled && data) {
           applyLayout(data, layoutName);
-          setSelectedLayout(layoutName);
         }
-        await refreshLayouts();
+        const entries = await refreshLayouts();
+        if (!cancelled) {
+          const entry = entries.find(e => e.name === layoutName);
+          setSelectedLayout(entry ? `${entry.name}:${entry.builtin ? 'builtin' : 'user'}` : layoutName);
+        }
       } catch {
         console.log('No default layout found, using built-in default');
         await refreshLayouts();
@@ -728,6 +734,7 @@ function EditorApp(): React.ReactElement {
               <NativeSelect size="xs" value={selectedLayout} onChange={(event) => setSelectedLayout(event.target.value)} data={layoutNames.map((entry) => ({ value: `${entry.name}:${entry.builtin ? 'builtin' : 'user'}`, label: entry.builtin ? `${entry.name} (built-in)` : entry.name }))} className="grow" />
               <Button size="xs" variant="light" onClick={loadLayout}>{t('load')}</Button>
             </Group>
+            <Text size="xs" c="dimmed">{t('currentLayout')}: {layout.name || '—'}</Text>
             <Group gap="xs" align="end" wrap="nowrap">
               <TextInput size="xs" value={layoutName} onChange={(event) => setLayoutName(event.target.value)} placeholder="name" className="grow" />
               <Button size="xs" onClick={saveLayout}>{t('save')}</Button>
