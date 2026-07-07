@@ -378,6 +378,7 @@ function EditorApp(): React.ReactElement {
             {t('obs')}: <span>{obsUrl}</span>
             <ActionIcon size="sm" variant="light" aria-label={t('copy')} onClick={() => navigator.clipboard.writeText(obsUrl)}>⧉</ActionIcon>
           </p>
+          <Text size="xs" c="dimmed">{t('obsTip')}</Text>
         </div>
 
         <Paper className="panel" withBorder>
