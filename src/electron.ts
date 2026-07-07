@@ -114,8 +114,10 @@ function startServer(): void {
   expressApp.get('/api/layouts', (req, res) => {
     const builtin = getBuiltinLayoutDirs();
     const user = getUserLayoutDirs();
-    const all = [...new Set([...builtin, ...user])];
-    res.json(all);
+    const result: { name: string; builtin: boolean }[] = [];
+    for (const name of builtin) result.push({ name, builtin: true });
+    for (const name of user) result.push({ name, builtin: false });
+    res.json(result);
   });
 
   expressApp.get('/api/layout/:name', (req, res) => {

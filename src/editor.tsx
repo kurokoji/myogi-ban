@@ -59,6 +59,8 @@ function useLatestRef<T>(value: T): React.MutableRefObject<T> {
   return ref;
 }
 
+interface LayoutEntry { name: string; builtin: boolean; }
+
 function EditorApp(): React.ReactElement {
   const { t } = useTranslation();
   const apiRef = useRef(new ApiClient());
@@ -66,7 +68,7 @@ function EditorApp(): React.ReactElement {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const imageUploadTargetRef = useRef<ImageUploadTarget>({ type: 'background' });
   const [layout, setLayout] = useState<Layout>(() => createDefaultLayout());
-  const [layoutNames, setLayoutNames] = useState<string[]>([]);
+  const [layoutNames, setLayoutNames] = useState<LayoutEntry[]>([]);
   const [selectedLayout, setSelectedLayout] = useState('');
   const [layoutName, setLayoutName] = useState('mypreset');
   const [buttonMappings, setButtonMappings] = useState<ButtonMapping[]>(() => GamepadManager.createDefaultButtonMappings());
@@ -704,7 +706,7 @@ function EditorApp(): React.ReactElement {
           <Stack gap="xs">
             <Title order={2}>{t('layout')}</Title>
             <Group gap="xs" align="end" wrap="nowrap">
-              <NativeSelect size="xs" value={selectedLayout} onChange={(event) => setSelectedLayout(event.target.value)} data={layoutNames.map((name) => ({ value: name, label: name }))} className="grow" />
+              <NativeSelect size="xs" value={selectedLayout} onChange={(event) => setSelectedLayout(event.target.value)} data={layoutNames.map((entry) => ({ value: entry.name, label: `${entry.name}${entry.builtin ? '' : ' *'}` }))} className="grow" />
               <Button size="xs" variant="light" onClick={loadLayout}>{t('load')}</Button>
             </Group>
             <Group gap="xs" align="end" wrap="nowrap">
