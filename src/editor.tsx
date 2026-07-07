@@ -373,7 +373,7 @@ function EditorApp(): React.ReactElement {
           <Title order={1}>{t('appTitle')}</Title>
           <p className="server-url">
             {t('obs')}: <span>{obsUrl}</span>
-            <ActionIcon size="sm" variant="light" aria-label={t('copy')} onClick={() => { try { navigator.clipboard.writeText(obsUrl); } catch {} }}>⧉</ActionIcon>
+            <ActionIcon size="sm" variant="light" aria-label={t('copy')} onClick={() => navigator.clipboard.writeText(obsUrl)}>⧉</ActionIcon>
           </p>
         </div>
 
