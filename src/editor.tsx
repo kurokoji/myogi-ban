@@ -98,7 +98,7 @@ function EditorApp(): React.ReactElement {
   const refreshLayouts = useCallback(async () => {
     try {
       const layouts = await apiRef.current.getLayouts();
-      setLayoutNames(layouts);
+      setLayoutNames(layouts.map((entry: any) => typeof entry === 'string' ? { name: entry, builtin: true } : entry));
     } catch (error) {
       console.error('Failed to load layout list:', error);
     }
