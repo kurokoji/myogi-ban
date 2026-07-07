@@ -156,7 +156,7 @@ function startServer(): void {
       const data = JSON.parse(fs.readFileSync(DEFAULT_LAYOUT_FILE, 'utf8'));
       res.json(data);
     } else {
-      res.json({ name: 'preset' });
+      res.json({ name: 'default' });
     }
   });
 
