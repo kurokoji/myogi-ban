@@ -271,4 +271,5 @@ body {
 .background-css {
 	background-image: none !important;
 	background-color: var(--bg-color, #0b0f14);
+	border-radius: var(--bg-radius, 0px);
 }

@@ -36,6 +36,7 @@ export interface BackgroundConfig {
   h: string;
   useCss?: boolean;
   cssColor?: string;
+  cssBorderRadius?: number;
 }
 
 export interface Layout {

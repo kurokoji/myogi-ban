@@ -164,7 +164,8 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
             className={`gamepad-area-background${layout.background.useCss ? ' background-css' : ''}`}
             style={{
               ...(layout.background.useCss ? {
-                '--bg-color': layout.background.cssColor ?? '#0b0f14'
+                '--bg-color': layout.background.cssColor ?? '#0b0f14',
+                '--bg-radius': `${layout.background.cssBorderRadius ?? 0}px`
               } as React.CSSProperties : getImageStyle(layout, layout.background.image)),
               width: backgroundSize.width,
               height: backgroundSize.height,

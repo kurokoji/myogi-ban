@@ -448,15 +448,18 @@ function EditorApp(): React.ReactElement {
               onChange={(event) => updateLayout((next) => { next.background.useCss = event.target.checked; })}
             />
             {layout.background.useCss ? (
-              <div>
-                <label style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>色</label>
-                <input
-                  type="color"
-                  value={layout.background.cssColor || '#0b0f14'}
-                  onChange={(e) => updateLayout((next) => { next.background.cssColor = e.target.value; })}
-                  style={{ width: '100%', height: '30px', cursor: 'pointer' }}
-                />
-              </div>
+              <>
+                <div>
+                  <label style={{ fontSize: '11px', display: 'block', marginBottom: '4px' }}>色</label>
+                  <input
+                    type="color"
+                    value={layout.background.cssColor || '#0b0f14'}
+                    onChange={(e) => updateLayout((next) => { next.background.cssColor = e.target.value; })}
+                    style={{ width: '100%', height: '30px', cursor: 'pointer' }}
+                  />
+                </div>
+                <NumberInput size="xs" label="角丸" min={0} max={999} value={layout.background.cssBorderRadius ?? 0} onChange={(value) => updateLayout((next) => { next.background.cssBorderRadius = Number(value) || 0; })} />
+              </>
             ) : (
               <Group gap="xs" align="end" wrap="nowrap">
                 <TextInput size="xs" label={t('bgImage')} value={layout.background.image} onChange={(event) => updateLayout((next) => { next.background.image = event.target.value; })} placeholder="filename.png" className="grow" />

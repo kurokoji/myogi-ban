@@ -20,7 +20,7 @@ export function createDefaultStickLayout(overrides: Partial<StickLayout> = {}): 
 }
 
 export function createDefaultBackgroundConfig(overrides: Partial<BackgroundConfig> = {}): BackgroundConfig {
-  return { show: true, image: '', scale: '1', w: '', h: '', useCss: true, cssColor: '#0b0f14', ...overrides };
+  return { show: true, image: '', scale: '1', w: '', h: '', useCss: true, cssColor: '#0b0f14', cssBorderRadius: 0, ...overrides };
 }
 
 export function createDefaultLayout(): Layout {
