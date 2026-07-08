@@ -27,7 +27,6 @@ interface UseEditorGamepadOptions {
   stickMappings: StickMapping[];
   setButtonMappings: Dispatch<SetStateAction<ButtonMapping[]>>;
   setStickMappings: Dispatch<SetStateAction<StickMapping[]>>;
-  connectGamepadMessage: string;
   buttonLabel: string;
   stickLabel: string;
 }
@@ -40,7 +39,6 @@ export function useEditorGamepad(options: UseEditorGamepadOptions) {
     stickMappings,
     setButtonMappings,
     setStickMappings,
-    connectGamepadMessage,
     buttonLabel,
     stickLabel,
   } = options;
@@ -168,18 +166,11 @@ export function useEditorGamepad(options: UseEditorGamepadOptions) {
     stickMappingsRef,
   ]);
 
-  const startAssignment = useCallback(
-    (target: number) => {
-      if (!gamepadRef.current?.isConnected()) {
-        window.alert(connectGamepadMessage);
-        return;
-      }
-      setAssigningTarget(target);
-      axisHoldCounterRef.current = 0;
-      axisHoldTargetRef.current = null;
-    },
-    [connectGamepadMessage],
-  );
+  const startAssignment = useCallback((target: number) => {
+    setAssigningTarget(target);
+    axisHoldCounterRef.current = 0;
+    axisHoldTargetRef.current = null;
+  }, []);
 
   const cancelAssignment = useCallback(() => {
     setAssigningTarget(null);

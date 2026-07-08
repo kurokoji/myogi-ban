@@ -12,6 +12,8 @@ export interface GamepadViewProps {
   onBackgroundSizeChange?: (width: number, height: number) => void;
   onButtonClick?: (index: number) => void;
   onStickClick?: (index: number) => void;
+  onLayoutDragStart?: () => void;
+  onLayoutDragEnd?: () => void;
   onButtonPositionChange?: (index: number, x: number, y: number) => void;
   onStickPositionChange?: (x: number, y: number) => void;
 }
@@ -112,6 +114,8 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     onBackgroundSizeChange,
     onButtonClick,
     onStickClick,
+    onLayoutDragStart,
+    onLayoutDragEnd,
     onButtonPositionChange,
     onStickPositionChange,
   } = props;
@@ -141,6 +145,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     ) => {
       if (!editorMode) return;
       e.stopPropagation();
+      onLayoutDragStart?.();
       setDragState({
         type,
         index,
@@ -150,7 +155,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
         initialY,
       });
     },
-    [editorMode],
+    [editorMode, onLayoutDragStart],
   );
 
   useEffect(() => {
@@ -171,6 +176,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
 
     const handleMouseUp = () => {
       setDragState(null);
+      onLayoutDragEnd?.();
     };
 
     document.addEventListener("mousemove", handleMouseMove);
@@ -180,7 +186,12 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [dragState, onButtonPositionChange, onStickPositionChange]);
+  }, [
+    dragState,
+    onButtonPositionChange,
+    onLayoutDragEnd,
+    onStickPositionChange,
+  ]);
 
   return (
     <div id="gamepad0" className="gamepad-background">

@@ -1,4 +1,10 @@
-import { ActionIcon, MantineProvider, Text, Title } from "@mantine/core";
+import {
+  ActionIcon,
+  MantineProvider,
+  Text,
+  Title,
+  Tooltip,
+} from "@mantine/core";
 import type React from "react";
 import {
   type ChangeEvent,
@@ -41,6 +47,7 @@ import { type Layout, type LayoutEntry, SERVER_URL } from "./types";
 const MIN_PREVIEW_SCALE = 0.1;
 const MAX_PREVIEW_SCALE = 3;
 const PREVIEW_SCALE_STEP = 0.1;
+const MAX_LAYOUT_HISTORY = 100;
 
 function clampPreviewScale(scale: number): number {
   const nextScale = Math.min(
@@ -54,6 +61,17 @@ function layoutSizeValue(value: string | undefined, fallback: number): number {
   if (!value) return fallback;
   const parsed = Number.parseFloat(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function sameLayout(a: Layout, b: Layout): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function isEditableTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  return Boolean(
+    target.closest("input, textarea, select, [contenteditable='true']"),
+  );
 }
 
 function EditorApp(): React.ReactElement {
@@ -79,6 +97,14 @@ function EditorApp(): React.ReactElement {
     null,
   );
   const [language, setLanguage] = useState(i18n.language);
+  const [historyAvailability, setHistoryAvailability] = useState({
+    canUndo: false,
+    canRedo: false,
+  });
+  const layoutRef = useRef(layout);
+  const undoStackRef = useRef<Layout[]>([]);
+  const redoStackRef = useRef<Layout[]>([]);
+  const dragHistoryStartRef = useRef<Layout | null>(null);
   const {
     assigningTarget,
     assignmentName,
@@ -95,7 +121,6 @@ function EditorApp(): React.ReactElement {
     stickMappings,
     setButtonMappings,
     setStickMappings,
-    connectGamepadMessage: t("connectGamepadFirst"),
     buttonLabel: t("buttonLabel"),
     stickLabel: t("stickLabel"),
   });
@@ -115,6 +140,65 @@ function EditorApp(): React.ReactElement {
     setPreviewScale((current) => clampPreviewScale(current + delta));
   }, []);
 
+  useEffect(() => {
+    layoutRef.current = layout;
+  }, [layout]);
+
+  const syncLayoutHistoryAvailability = useCallback(() => {
+    setHistoryAvailability({
+      canUndo: undoStackRef.current.length > 0,
+      canRedo: redoStackRef.current.length > 0,
+    });
+  }, []);
+
+  const clearLayoutHistory = useCallback(() => {
+    undoStackRef.current = [];
+    redoStackRef.current = [];
+    dragHistoryStartRef.current = null;
+    syncLayoutHistoryAvailability();
+  }, [syncLayoutHistoryAvailability]);
+
+  const pushUndoSnapshot = useCallback(
+    (snapshot: Layout) => {
+      const nextStack = [...undoStackRef.current, cloneLayout(snapshot)];
+      if (nextStack.length > MAX_LAYOUT_HISTORY) {
+        nextStack.shift();
+      }
+      undoStackRef.current = nextStack;
+      syncLayoutHistoryAvailability();
+    },
+    [syncLayoutHistoryAvailability],
+  );
+
+  const restoreLayout = useCallback(
+    (nextLayout: Layout) => {
+      layoutRef.current = nextLayout;
+      setLayout(nextLayout);
+      resetSnapshot(nextLayout);
+    },
+    [resetSnapshot],
+  );
+
+  const undoLayout = useCallback(() => {
+    const previous = undoStackRef.current.pop();
+    if (!previous) return;
+
+    const current = cloneLayout(layoutRef.current);
+    redoStackRef.current = [...redoStackRef.current, current];
+    restoreLayout(previous);
+    syncLayoutHistoryAvailability();
+  }, [restoreLayout, syncLayoutHistoryAvailability]);
+
+  const redoLayout = useCallback(() => {
+    const next = redoStackRef.current.pop();
+    if (!next) return;
+
+    const current = cloneLayout(layoutRef.current);
+    pushUndoSnapshot(current);
+    restoreLayout(next);
+    syncLayoutHistoryAvailability();
+  }, [pushUndoSnapshot, restoreLayout, syncLayoutHistoryAvailability]);
+
   const refreshLayouts = useCallback(async () => {
     try {
       const layouts = await apiRef.current.getLayouts();
@@ -129,8 +213,10 @@ function EditorApp(): React.ReactElement {
   const applyLayout = useCallback(
     (data: Layout, name?: string) => {
       const nextLayout = ensureLayoutDefaults(data);
+      layoutRef.current = nextLayout;
       setLayout(nextLayout);
       resetSnapshot(nextLayout);
+      clearLayoutHistory();
       setButtonMappings(
         data.buttonMappings || GamepadManager.createDefaultButtonMappings(),
       );
@@ -139,8 +225,26 @@ function EditorApp(): React.ReactElement {
       );
       if (name) setLayoutName(name);
     },
-    [resetSnapshot],
+    [clearLayoutHistory, resetSnapshot],
   );
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (isEditableTarget(event.target)) return;
+      if (!event.ctrlKey || event.altKey || event.metaKey) return;
+      if (event.key.toLowerCase() !== "z") return;
+
+      event.preventDefault();
+      if (event.shiftKey) {
+        redoLayout();
+      } else {
+        undoLayout();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [redoLayout, undoLayout]);
 
   useEffect(() => {
     let cancelled = false;
@@ -179,13 +283,21 @@ function EditorApp(): React.ReactElement {
     });
   }, [layout.totalbuttonshow]);
 
-  const updateLayout = useCallback((updater: (layout: Layout) => void) => {
-    setLayout((current) => {
-      const next = cloneLayout(current);
-      updater(next);
-      return next;
-    });
-  }, []);
+  const updateLayout = useCallback(
+    (updater: (layout: Layout) => void) => {
+      setLayout((current) => {
+        const next = cloneLayout(current);
+        updater(next);
+        if (sameLayout(current, next)) return current;
+        pushUndoSnapshot(current);
+        redoStackRef.current = [];
+        syncLayoutHistoryAvailability();
+        layoutRef.current = next;
+        return next;
+      });
+    },
+    [pushUndoSnapshot, syncLayoutHistoryAvailability],
+  );
 
   const updateBackgroundSize = useCallback((width: number, height: number) => {
     setLayout((current) => {
@@ -197,6 +309,7 @@ function EditorApp(): React.ReactElement {
       const next = cloneLayout(current);
       next.background.w = String(width);
       next.background.h = String(height);
+      layoutRef.current = next;
       return next;
     });
   }, []);
@@ -209,6 +322,7 @@ function EditorApp(): React.ReactElement {
           next.buttons[index] = createEmptyButtonLayout();
         next.buttons[index].x = String(x);
         next.buttons[index].y = String(y);
+        layoutRef.current = next;
         return next;
       });
     },
@@ -220,9 +334,23 @@ function EditorApp(): React.ReactElement {
       const next = cloneLayout(current);
       next.stick.x = String(x);
       next.stick.y = String(y);
+      layoutRef.current = next;
       return next;
     });
   }, []);
+
+  const beginLayoutDrag = useCallback(() => {
+    dragHistoryStartRef.current = cloneLayout(layoutRef.current);
+  }, []);
+
+  const endLayoutDrag = useCallback(() => {
+    const startLayout = dragHistoryStartRef.current;
+    dragHistoryStartRef.current = null;
+    if (!startLayout || sameLayout(startLayout, layoutRef.current)) return;
+    pushUndoSnapshot(startLayout);
+    redoStackRef.current = [];
+    syncLayoutHistoryAvailability();
+  }, [pushUndoSnapshot, syncLayoutHistoryAvailability]);
 
   const loadLayout = async () => {
     if (!selectedLayout) return;
@@ -411,6 +539,30 @@ function EditorApp(): React.ReactElement {
       </aside>
 
       <main id="preview">
+        <div className="preview-history-toolbar" role="toolbar">
+          <Tooltip label={t("undo")} openDelay={300}>
+            <ActionIcon
+              size="sm"
+              variant="light"
+              aria-label={t("undo")}
+              onClick={undoLayout}
+              disabled={!historyAvailability.canUndo}
+            >
+              <span className="preview-history-icon">↶</span>
+            </ActionIcon>
+          </Tooltip>
+          <Tooltip label={t("redo")} openDelay={300}>
+            <ActionIcon
+              size="sm"
+              variant="light"
+              aria-label={t("redo")}
+              onClick={redoLayout}
+              disabled={!historyAvailability.canRedo}
+            >
+              <span className="preview-history-icon">↷</span>
+            </ActionIcon>
+          </Tooltip>
+        </div>
         <div
           className="preview-toolbar"
           role="toolbar"
@@ -470,6 +622,8 @@ function EditorApp(): React.ReactElement {
                 onBackgroundSizeChange={updateBackgroundSize}
                 onButtonClick={(index) => startAssignment(index)}
                 onStickClick={(index) => startAssignment(1000 + index)}
+                onLayoutDragStart={beginLayoutDrag}
+                onLayoutDragEnd={endLayoutDrag}
                 onButtonPositionChange={handleButtonPositionChange}
                 onStickPositionChange={handleStickPositionChange}
               />
