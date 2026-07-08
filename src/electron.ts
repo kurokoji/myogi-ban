@@ -10,8 +10,8 @@ let server: http.Server | null = null;
 
 function createWindow(): void {
   mainWindow = new BrowserWindow({
-    width: 900,
-    height: 750,
+    width: 1200,
+    height: 850,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
