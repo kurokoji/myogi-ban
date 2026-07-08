@@ -33,7 +33,7 @@ Myogi Banはローカルサーバー上でREST APIとWebSocketを提供します
 
 ```json
 {
-  "version": "v1.0.1",
+  "version": "v1.0.2",
   "name": "default",
   "totalbuttonshow": 8,
   "showstick": true,
@@ -95,7 +95,7 @@ Myogi Banはローカルサーバー上でREST APIとWebSocketを提供します
 {
   "name": "mypreset",
   "data": {
-    "version": "v1.0.1",
+    "version": "v1.0.2",
     "name": "mypreset",
     "totalbuttonshow": 8
   }
