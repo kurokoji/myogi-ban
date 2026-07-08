@@ -330,7 +330,7 @@ export function BackgroundSettingsPanel(
                     next.background.image = event.target.value;
                   })
                 }
-                placeholder="filename.png"
+                placeholder="background.png"
                 className="grow"
               />
               <Button
@@ -520,7 +520,7 @@ export function ButtonSettingsPanel(
                     next.defaultbuttons.img = event.target.value;
                   })
                 }
-                placeholder="button-released.png"
+                placeholder="released.png"
                 className="grow"
               />
               <Button
@@ -546,7 +546,7 @@ export function ButtonSettingsPanel(
                     next.defaultbuttons.imgp = event.target.value;
                   })
                 }
-                placeholder="button-pressed.png"
+                placeholder="pressed.png"
                 className="grow"
               />
               <Button
@@ -857,7 +857,7 @@ export function ButtonSettingsPanel(
                     })
                   }
                   placeholder={
-                    layout.defaultbuttons.img || "button-released.png"
+                    layout.defaultbuttons.img || "released.png"
                   }
                   className="grow"
                 />
@@ -892,7 +892,7 @@ export function ButtonSettingsPanel(
                     })
                   }
                   placeholder={
-                    layout.defaultbuttons.imgp || "button-pressed.png"
+                    layout.defaultbuttons.imgp || "pressed.png"
                   }
                   className="grow"
                 />
