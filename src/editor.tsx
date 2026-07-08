@@ -38,6 +38,24 @@ import i18n from "./i18n";
 import { createDefaultLayout, ensureLayoutDefaults } from "./layout";
 import { type Layout, type LayoutEntry, SERVER_URL } from "./types";
 
+const MIN_PREVIEW_SCALE = 0.1;
+const MAX_PREVIEW_SCALE = 3;
+const PREVIEW_SCALE_STEP = 0.1;
+
+function clampPreviewScale(scale: number): number {
+  const nextScale = Math.min(
+    MAX_PREVIEW_SCALE,
+    Math.max(MIN_PREVIEW_SCALE, scale),
+  );
+  return Math.round(nextScale * 10) / 10;
+}
+
+function layoutSizeValue(value: string | undefined, fallback: number): number {
+  if (!value) return fallback;
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
 function EditorApp(): React.ReactElement {
   const { t } = useTranslation();
   const apiRef = useRef(new ApiClient());
@@ -83,6 +101,19 @@ function EditorApp(): React.ReactElement {
   });
 
   const obsUrl = `${SERVER_URL}/view`;
+  const zoomPercent = Math.round(previewScale * 100);
+  const previewWidth = layoutSizeValue(layout.background.w, 500);
+  const previewHeight = layoutSizeValue(layout.background.h, 250);
+  const scaledPreviewWidth = Math.ceil(previewWidth * previewScale);
+  const scaledPreviewHeight = Math.ceil(previewHeight * previewScale);
+
+  const changePreviewScale = useCallback((scale: number) => {
+    setPreviewScale(clampPreviewScale(scale));
+  }, []);
+
+  const zoomPreview = useCallback((delta: number) => {
+    setPreviewScale((current) => clampPreviewScale(current + delta));
+  }, []);
 
   const refreshLayouts = useCallback(async () => {
     try {
@@ -338,7 +369,7 @@ function EditorApp(): React.ReactElement {
           previewScale={previewScale}
           backgroundOpacity={backgroundOpacity}
           onLanguageChange={changeLanguage}
-          onPreviewScaleChange={setPreviewScale}
+          onPreviewScaleChange={changePreviewScale}
           onBackgroundOpacityChange={setBackgroundOpacity}
         />
 
@@ -381,26 +412,70 @@ function EditorApp(): React.ReactElement {
 
       <main id="preview">
         <div
-          id="preview-container"
-          style={{
-            transform: `scale(${previewScale})`,
-            transformOrigin: "top left",
-          }}
+          className="preview-toolbar"
+          role="toolbar"
+          aria-label={t("previewZoom")}
         >
-          <GamepadView
-            layout={layout}
-            stickClass={snapshot.stickClass}
-            pressedButtons={snapshot.pressedButtons}
-            connected={connected}
-            backgroundOpacity={backgroundOpacity}
-            editorMode
-            selectedButtonIndex={selectedButtonIndex}
-            onBackgroundSizeChange={updateBackgroundSize}
-            onButtonClick={(index) => startAssignment(index)}
-            onStickClick={(index) => startAssignment(1000 + index)}
-            onButtonPositionChange={handleButtonPositionChange}
-            onStickPositionChange={handleStickPositionChange}
-          />
+          <ActionIcon
+            size="sm"
+            variant="light"
+            aria-label={t("zoomOut")}
+            onClick={() => zoomPreview(-PREVIEW_SCALE_STEP)}
+            disabled={previewScale <= MIN_PREVIEW_SCALE}
+          >
+            <span className="preview-zoom-icon preview-zoom-minus" />
+          </ActionIcon>
+          <Text className="preview-zoom-value" size="xs" fw={600}>
+            {zoomPercent}%
+          </Text>
+          <ActionIcon
+            size="sm"
+            variant="light"
+            aria-label={t("zoomIn")}
+            onClick={() => zoomPreview(PREVIEW_SCALE_STEP)}
+            disabled={previewScale >= MAX_PREVIEW_SCALE}
+          >
+            <span className="preview-zoom-icon preview-zoom-plus" />
+          </ActionIcon>
+          <ActionIcon
+            size="sm"
+            variant="subtle"
+            aria-label={t("resetZoom")}
+            onClick={() => changePreviewScale(1)}
+          >
+            <span className="preview-reset-icon">1x</span>
+          </ActionIcon>
+        </div>
+        <div id="preview-scroll">
+          <div
+            id="preview-container"
+            style={{
+              width: scaledPreviewWidth,
+              height: scaledPreviewHeight,
+            }}
+          >
+            <div
+              id="preview-frame"
+              style={{
+                transform: `scale(${previewScale})`,
+              }}
+            >
+              <GamepadView
+                layout={layout}
+                stickClass={snapshot.stickClass}
+                pressedButtons={snapshot.pressedButtons}
+                connected={connected}
+                backgroundOpacity={backgroundOpacity}
+                editorMode
+                selectedButtonIndex={selectedButtonIndex}
+                onBackgroundSizeChange={updateBackgroundSize}
+                onButtonClick={(index) => startAssignment(index)}
+                onStickClick={(index) => startAssignment(1000 + index)}
+                onButtonPositionChange={handleButtonPositionChange}
+                onStickPositionChange={handleStickPositionChange}
+              />
+            </div>
+          </div>
         </div>
       </main>
     </MantineProvider>
