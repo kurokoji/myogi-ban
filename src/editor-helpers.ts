@@ -1,5 +1,6 @@
 import { ButtonLayout, Layout } from './types';
 
+export type EditorLayoutUpdater = (updater: (layout: Layout) => void) => void;
 export type AssigningTarget = number | null;
 export type ImageUploadTarget =
   | { type: 'background' }
