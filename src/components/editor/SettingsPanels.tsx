@@ -212,7 +212,7 @@ export function ButtonSettingsPanel(props: ButtonSettingsPanelProps): React.Reac
           <div className="control row">
             <NumberInput
               size="xs"
-              label="Transition (秒)"
+              label={t('transition')}
               min={0}
               max={1}
               step={0.01}
@@ -221,7 +221,7 @@ export function ButtonSettingsPanel(props: ButtonSettingsPanelProps): React.Reac
             />
             <NativeSelect
               size="xs"
-              label="Easing"
+              label={t('easing')}
               value={layout.defaultbuttons.cssEasing || 'ease'}
               onChange={(event) => updateLayout((next) => { next.defaultbuttons.cssEasing = event.target.value; })}
               data={[
@@ -248,12 +248,12 @@ export function ButtonSettingsPanel(props: ButtonSettingsPanelProps): React.Reac
         )}
         <Text size="xs" fw={600}>{t('defaultButtonSize')}</Text>
         <div className="control row">
-          <NumberInput size="xs" label="W" value={numericValue(layout.defaultbuttons.w)} onChange={(value) => updateLayout((next) => { next.defaultbuttons.w = String(value ?? ''); })} />
-          <NumberInput size="xs" label="H" value={numericValue(layout.defaultbuttons.h)} onChange={(value) => updateLayout((next) => { next.defaultbuttons.h = String(value ?? ''); })} />
+          <NumberInput size="xs" label={t('width')} value={numericValue(layout.defaultbuttons.w)} onChange={(value) => updateLayout((next) => { next.defaultbuttons.w = String(value ?? ''); })} />
+          <NumberInput size="xs" label={t('height')} value={numericValue(layout.defaultbuttons.h)} onChange={(value) => updateLayout((next) => { next.defaultbuttons.h = String(value ?? ''); })} />
         </div>
         <div className="control row">
-          <NumberInput size="xs" label="Pressed W" value={numericValue(layout.defaultbuttons.wp)} onChange={(value) => updateLayout((next) => { next.defaultbuttons.wp = String(value ?? ''); })} />
-          <NumberInput size="xs" label="Pressed H" value={numericValue(layout.defaultbuttons.hp)} onChange={(value) => updateLayout((next) => { next.defaultbuttons.hp = String(value ?? ''); })} />
+          <NumberInput size="xs" label={t('pressedWidth')} value={numericValue(layout.defaultbuttons.wp)} onChange={(value) => updateLayout((next) => { next.defaultbuttons.wp = String(value ?? ''); })} />
+          <NumberInput size="xs" label={t('pressedHeight')} value={numericValue(layout.defaultbuttons.hp)} onChange={(value) => updateLayout((next) => { next.defaultbuttons.hp = String(value ?? ''); })} />
         </div>
         <NativeSelect
           size="xs"
@@ -262,7 +262,7 @@ export function ButtonSettingsPanel(props: ButtonSettingsPanelProps): React.Reac
           onChange={(event) => props.setSelectedButtonIndex(event.target.value === '' ? null : parseInt(event.target.value))}
           data={[
             { value: '', label: t('select') },
-            ...Array.from({ length: Math.max(1, layout.totalbuttonshow) }, (_, index) => ({ value: String(index), label: `Button ${index + 1}` }))
+            ...Array.from({ length: Math.max(1, layout.totalbuttonshow) }, (_, index) => ({ value: String(index), label: `${t('buttonLabel')} ${index + 1}` }))
           ]}
         />
         {selectedButtonIndex !== null && (
@@ -337,7 +337,7 @@ export function ButtonSettingsPanel(props: ButtonSettingsPanelProps): React.Reac
           <div className="control row">
             <NumberInput
               size="xs"
-              label="Transition (秒)"
+              label={t('transition')}
               min={0}
               max={1}
               step={0.01}
@@ -347,11 +347,11 @@ export function ButtonSettingsPanel(props: ButtonSettingsPanelProps): React.Reac
             />
             <NativeSelect
               size="xs"
-              label="Easing"
+              label={t('easing')}
               value={layout.buttons[selectedButtonIndex]?.cssEasing === layout.defaultbuttons.cssEasing ? '' : (layout.buttons[selectedButtonIndex]?.cssEasing ?? layout.defaultbuttons.cssEasing ?? 'ease')}
               onChange={(event) => updateLayout((next) => { next.buttons[selectedButtonIndex].cssEasing = event.target.value; })}
               data={[
-                { value: '', label: '標準準拠' },
+                { value: '', label: t('inheritDefault') },
                 { value: 'ease', label: 'ease' },
                 { value: 'linear', label: 'linear' },
                 { value: 'ease-in', label: 'ease-in' },
@@ -387,13 +387,13 @@ export function ButtonSettingsPanel(props: ButtonSettingsPanelProps): React.Reac
             </Group>
             <Text size="xs" fw={600}>{t('releasedSize')}</Text>
             <div className="control row">
-              <NumberInput size="xs" label="W" value={layout.buttons[selectedButtonIndex]?.w === layout.defaultbuttons.w ? '' : numericValue(layout.buttons[selectedButtonIndex]?.w || '')} onChange={(value) => updateLayout((next) => { next.buttons[selectedButtonIndex].w = String(value ?? ''); })} placeholder={layout.defaultbuttons.w || '60'} />
-              <NumberInput size="xs" label="H" value={layout.buttons[selectedButtonIndex]?.h === layout.defaultbuttons.h ? '' : numericValue(layout.buttons[selectedButtonIndex]?.h || '')} onChange={(value) => updateLayout((next) => { next.buttons[selectedButtonIndex].h = String(value ?? ''); })} placeholder={layout.defaultbuttons.h || '60'} />
+              <NumberInput size="xs" label={t('width')} value={layout.buttons[selectedButtonIndex]?.w === layout.defaultbuttons.w ? '' : numericValue(layout.buttons[selectedButtonIndex]?.w || '')} onChange={(value) => updateLayout((next) => { next.buttons[selectedButtonIndex].w = String(value ?? ''); })} placeholder={layout.defaultbuttons.w || '60'} />
+              <NumberInput size="xs" label={t('height')} value={layout.buttons[selectedButtonIndex]?.h === layout.defaultbuttons.h ? '' : numericValue(layout.buttons[selectedButtonIndex]?.h || '')} onChange={(value) => updateLayout((next) => { next.buttons[selectedButtonIndex].h = String(value ?? ''); })} placeholder={layout.defaultbuttons.h || '60'} />
             </div>
             <Text size="xs" fw={600}>{t('pressedSize')}</Text>
             <div className="control row">
-              <NumberInput size="xs" label="W" value={layout.buttons[selectedButtonIndex]?.wp === layout.defaultbuttons.wp ? '' : numericValue(layout.buttons[selectedButtonIndex]?.wp || '')} onChange={(value) => updateLayout((next) => { next.buttons[selectedButtonIndex].wp = String(value ?? ''); })} placeholder={layout.defaultbuttons.wp || '60'} />
-              <NumberInput size="xs" label="H" value={layout.buttons[selectedButtonIndex]?.hp === layout.defaultbuttons.hp ? '' : numericValue(layout.buttons[selectedButtonIndex]?.hp || '')} onChange={(value) => updateLayout((next) => { next.buttons[selectedButtonIndex].hp = String(value ?? ''); })} placeholder={layout.defaultbuttons.hp || '60'} />
+              <NumberInput size="xs" label={t('pressedWidth')} value={layout.buttons[selectedButtonIndex]?.wp === layout.defaultbuttons.wp ? '' : numericValue(layout.buttons[selectedButtonIndex]?.wp || '')} onChange={(value) => updateLayout((next) => { next.buttons[selectedButtonIndex].wp = String(value ?? ''); })} placeholder={layout.defaultbuttons.wp || '60'} />
+              <NumberInput size="xs" label={t('pressedHeight')} value={layout.buttons[selectedButtonIndex]?.hp === layout.defaultbuttons.hp ? '' : numericValue(layout.buttons[selectedButtonIndex]?.hp || '')} onChange={(value) => updateLayout((next) => { next.buttons[selectedButtonIndex].hp = String(value ?? ''); })} placeholder={layout.defaultbuttons.hp || '60'} />
             </div>
           </>
         )}
@@ -433,11 +433,11 @@ export function LayoutSettingsPanel(props: LayoutSettingsPanelProps): React.Reac
       <Stack gap="xs">
         <Title order={2}>{t('layout')}</Title>
         <Group gap="xs" align="end" wrap="nowrap">
-          <NativeSelect size="xs" value={props.selectedLayout} onChange={(event) => props.setSelectedLayout(event.target.value)} data={props.layoutNames.map((entry) => ({ value: `${entry.name}:${entry.builtin ? 'builtin' : 'user'}`, label: entry.builtin ? `${entry.name} (built-in)` : entry.name }))} className="grow" />
+          <NativeSelect size="xs" value={props.selectedLayout} onChange={(event) => props.setSelectedLayout(event.target.value)} data={props.layoutNames.map((entry) => ({ value: `${entry.name}:${entry.builtin ? 'builtin' : 'user'}`, label: entry.builtin ? `${entry.name} (${t('builtIn')})` : entry.name }))} className="grow" />
           <Button size="xs" variant="light" onClick={props.loadLayout}>{t('load')}</Button>
         </Group>
         <Group gap="xs" align="end" wrap="nowrap">
-          <TextInput size="xs" value={props.layoutName} onChange={(event) => props.setLayoutName(event.target.value)} placeholder="name" className="grow" />
+          <TextInput size="xs" value={props.layoutName} onChange={(event) => props.setLayoutName(event.target.value)} placeholder={t('layoutNamePlaceholder')} className="grow" />
           <Button size="xs" onClick={props.saveLayout}>{t('save')}</Button>
         </Group>
         <Button size="xs" fullWidth onClick={props.setDefaultLayout}>{t('setDefault')}</Button>

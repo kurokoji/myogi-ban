@@ -63,7 +63,9 @@ function EditorApp(): React.ReactElement {
     stickMappings,
     setButtonMappings,
     setStickMappings,
-    connectGamepadMessage: t('connectGamepadFirst')
+    connectGamepadMessage: t('connectGamepadFirst'),
+    buttonLabel: t('buttonLabel'),
+    stickLabel: t('stickLabel')
   });
 
   const obsUrl = `${SERVER_URL}/view`;
@@ -261,7 +263,7 @@ function EditorApp(): React.ReactElement {
         const data = JSON.parse(String(reader.result));
         applyLayout(data, data.name || 'imported');
       } catch {
-        window.alert('Invalid layout file');
+        window.alert(t('invalidLayoutFile'));
       }
     };
     reader.readAsText(file);

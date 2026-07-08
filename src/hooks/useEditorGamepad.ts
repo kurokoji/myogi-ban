@@ -14,6 +14,8 @@ interface UseEditorGamepadOptions {
   setButtonMappings: Dispatch<SetStateAction<ButtonMapping[]>>;
   setStickMappings: Dispatch<SetStateAction<StickMapping[]>>;
   connectGamepadMessage: string;
+  buttonLabel: string;
+  stickLabel: string;
 }
 
 export function useEditorGamepad(options: UseEditorGamepadOptions) {
@@ -24,7 +26,9 @@ export function useEditorGamepad(options: UseEditorGamepadOptions) {
     stickMappings,
     setButtonMappings,
     setStickMappings,
-    connectGamepadMessage
+    connectGamepadMessage,
+    buttonLabel,
+    stickLabel
   } = options;
   const gamepadRef = useRef<GamepadManager | null>(null);
   const axisHoldCounterRef = useRef(0);
@@ -153,7 +157,7 @@ export function useEditorGamepad(options: UseEditorGamepadOptions) {
 
   return {
     assigningTarget,
-    assignmentName: assignmentNameForTarget(assigningTarget),
+    assignmentName: assignmentNameForTarget(assigningTarget, buttonLabel, stickLabel),
     cancelAssignment,
     connected,
     gamepadName,

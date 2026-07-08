@@ -57,12 +57,24 @@ export const resources = {
       connectGamepadFirst: '先にゲームパッドを接続してください',
       saved: '保存しました',
       defaultSaved: 'デフォルトに設定しました',
-      pressAnyButton: 'Press Any Button',
+      pressAnyButton: 'ボタンを押してください',
       language: '言語',
       obsWidth: '幅',
       obsHeight: '高さ',
       useCssButton: '画像を使わない',
-      useCssStick: '画像を使わない'
+      useCssStick: '画像を使わない',
+      transition: '遷移時間（秒）',
+      easing: 'イージング',
+      inheritDefault: '標準準拠',
+      builtIn: '組み込み',
+      buttonLabel: 'ボタン',
+      stickLabel: 'スティック',
+      invalidLayoutFile: 'レイアウトファイルが不正です',
+      width: '幅',
+      height: '高さ',
+      pressedWidth: '押下時の幅',
+      pressedHeight: '押下時の高さ',
+      layoutNamePlaceholder: 'レイアウト名'
     }
   },
   en: {
@@ -125,7 +137,19 @@ export const resources = {
       obsWidth: 'Width',
       obsHeight: 'Height',
       useCssButton: 'Disable images',
-      useCssStick: 'Disable images'
+      useCssStick: 'Disable images',
+      transition: 'Transition (sec)',
+      easing: 'Easing',
+      inheritDefault: 'Use default',
+      builtIn: 'built-in',
+      buttonLabel: 'Button',
+      stickLabel: 'Stick',
+      invalidLayoutFile: 'Invalid layout file',
+      width: 'Width',
+      height: 'Height',
+      pressedWidth: 'Pressed width',
+      pressedHeight: 'Pressed height',
+      layoutNamePlaceholder: 'name'
     }
   }
 };

@@ -28,10 +28,10 @@ export function numericValue(value: string | number): number | string {
   return text === '' ? '' : Number(text);
 }
 
-export function assignmentNameForTarget(target: AssigningTarget): string {
+export function assignmentNameForTarget(target: AssigningTarget, buttonLabel = 'Button', stickLabel = 'Stick'): string {
   if (target === null) return '';
-  if (target < 1000) return `Button ${target + 1}`;
-  return `Stick ${['Up', 'Down', 'Left', 'Right'][target - 1000]}`;
+  if (target < 1000) return `${buttonLabel} ${target + 1}`;
+  return `${stickLabel} ${['Up', 'Down', 'Left', 'Right'][target - 1000]}`;
 }
 
 export function layoutNameFromSelection(selectedLayout: string): string {
