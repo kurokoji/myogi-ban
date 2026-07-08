@@ -9,6 +9,7 @@ export const resources = {
       obsTip:
         "OBSのブラウザソースで上記URLを設定し、背景セクションの幅・高さをOBS側でも設定してください。",
       copy: "コピー",
+      copied: "コピーしました！",
       display: "表示",
       scale: "表示倍率",
       previewZoom: "プレビュー拡大率",
@@ -89,6 +90,7 @@ export const resources = {
       obsTip:
         "Set the above URL in OBS Browser Source, and match the width/height from the Background section in OBS.",
       copy: "Copy",
+      copied: "Copied!",
       display: "Display",
       scale: "Scale",
       previewZoom: "Preview zoom",

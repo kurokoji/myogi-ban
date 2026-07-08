@@ -48,6 +48,7 @@ const MIN_PREVIEW_SCALE = 0.1;
 const MAX_PREVIEW_SCALE = 3;
 const PREVIEW_SCALE_STEP = 0.1;
 const MAX_LAYOUT_HISTORY = 100;
+const APP_VERSION = process.env.npm_package_version ?? "0.0.0";
 
 function clampPreviewScale(scale: number): number {
   const nextScale = Math.min(
@@ -96,11 +97,16 @@ function EditorApp(): React.ReactElement {
   const [selectedButtonIndex, setSelectedButtonIndex] = useState<number | null>(
     null,
   );
+  const [selectedButtonIndexes, setSelectedButtonIndexes] = useState<number[]>(
+    [],
+  );
+  const [selectedStick, setSelectedStick] = useState(false);
   const [language, setLanguage] = useState(i18n.language);
   const [historyAvailability, setHistoryAvailability] = useState({
     canUndo: false,
     canRedo: false,
   });
+  const [copiedObsUrl, setCopiedObsUrl] = useState(false);
   const layoutRef = useRef(layout);
   const undoStackRef = useRef<Layout[]>([]);
   const redoStackRef = useRef<Layout[]>([]);
@@ -217,6 +223,8 @@ function EditorApp(): React.ReactElement {
       setLayout(nextLayout);
       resetSnapshot(nextLayout);
       clearLayoutHistory();
+      setSelectedButtonIndexes([]);
+      setSelectedStick(false);
       setButtonMappings(
         data.buttonMappings || GamepadManager.createDefaultButtonMappings(),
       );
@@ -281,6 +289,9 @@ function EditorApp(): React.ReactElement {
       if (current === null) return null;
       return Math.min(current, Math.max(0, layout.totalbuttonshow - 1));
     });
+    setSelectedButtonIndexes((current) =>
+      current.filter((index) => index < layout.totalbuttonshow),
+    );
   }, [layout.totalbuttonshow]);
 
   const updateLayout = useCallback(
@@ -351,6 +362,58 @@ function EditorApp(): React.ReactElement {
     redoStackRef.current = [];
     syncLayoutHistoryAvailability();
   }, [pushUndoSnapshot, syncLayoutHistoryAvailability]);
+
+  const updateSelection = useCallback(
+    (selection: { buttonIndexes: number[]; stick: boolean }) => {
+      setSelectedButtonIndexes(selection.buttonIndexes);
+      setSelectedStick(selection.stick);
+      setSelectedButtonIndex(selection.buttonIndexes[0] ?? null);
+    },
+    [],
+  );
+
+  const selectButtonAndStartAssignment = useCallback(
+    (index: number) => {
+      setSelectedButtonIndexes([index]);
+      setSelectedStick(false);
+      setSelectedButtonIndex(index);
+      startAssignment(index);
+    },
+    [startAssignment],
+  );
+
+  const selectStickAndStartAssignment = useCallback(
+    (index: number) => {
+      setSelectedButtonIndexes([]);
+      setSelectedStick(true);
+      setSelectedButtonIndex(null);
+      startAssignment(1000 + index);
+    },
+    [startAssignment],
+  );
+
+  const clearSelection = useCallback(() => {
+    setSelectedButtonIndexes([]);
+    setSelectedStick(false);
+    setSelectedButtonIndex(null);
+  }, []);
+
+  const clearSelectionOnPreviewOutsideClick = useCallback(
+    (event: React.MouseEvent<HTMLElement>) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      if (target.closest("#preview-container")) return;
+      if (target.closest(".preview-history-toolbar, .preview-toolbar")) return;
+      clearSelection();
+    },
+    [clearSelection],
+  );
+
+  const copyObsUrl = useCallback(async () => {
+    await navigator.clipboard.writeText(obsUrl);
+    setCopiedObsUrl(true);
+    window.setTimeout(() => setCopiedObsUrl(false), 2000);
+  }, [obsUrl]);
 
   const loadLayout = async () => {
     if (!selectedLayout) return;
@@ -475,17 +538,22 @@ function EditorApp(): React.ReactElement {
     <MantineProvider defaultColorScheme="auto">
       <aside id="sidebar">
         <div className="sidebar-header">
-          <Title order={1}>{t("appTitle")}</Title>
+          <Title order={1}>
+            {t("appTitle")} <span className="app-version">v{APP_VERSION}</span>
+          </Title>
           <p className="server-url">
             {t("obs")}: <span>{obsUrl}</span>
             <ActionIcon
               size="sm"
               variant="light"
               aria-label={t("copy")}
-              onClick={() => navigator.clipboard.writeText(obsUrl)}
+              onClick={copyObsUrl}
             >
               ⧉
             </ActionIcon>
+            {copiedObsUrl && (
+              <span className="copy-feedback">{t("copied")}</span>
+            )}
           </p>
           <Text size="xs" c="dimmed">
             {t("obsTip")}
@@ -538,7 +606,7 @@ function EditorApp(): React.ReactElement {
         <GamepadStatusPanel connected={connected} gamepadName={gamepadName} />
       </aside>
 
-      <main id="preview">
+      <main id="preview" onClick={clearSelectionOnPreviewOutsideClick}>
         <div className="preview-history-toolbar" role="toolbar">
           <Tooltip label={t("undo")} openDelay={300}>
             <ActionIcon
@@ -619,9 +687,12 @@ function EditorApp(): React.ReactElement {
                 backgroundOpacity={backgroundOpacity}
                 editorMode
                 selectedButtonIndex={selectedButtonIndex}
+                selectedButtonIndexes={selectedButtonIndexes}
+                selectedStick={selectedStick}
                 onBackgroundSizeChange={updateBackgroundSize}
-                onButtonClick={(index) => startAssignment(index)}
-                onStickClick={(index) => startAssignment(1000 + index)}
+                onButtonClick={selectButtonAndStartAssignment}
+                onStickClick={selectStickAndStartAssignment}
+                onSelectionChange={updateSelection}
                 onLayoutDragStart={beginLayoutDrag}
                 onLayoutDragEnd={endLayoutDrag}
                 onButtonPositionChange={handleButtonPositionChange}

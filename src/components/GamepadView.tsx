@@ -1,6 +1,9 @@
 import type React from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type Layout, STICK_NAMES } from "../types";
+
+const STICK_SELECTION_SIZE = 96;
+const SELECTION_BOUNDS_PADDING = 12;
 
 export interface GamepadViewProps {
   layout: Layout;
@@ -9,14 +12,51 @@ export interface GamepadViewProps {
   backgroundOpacity?: number;
   editorMode?: boolean;
   selectedButtonIndex?: number | null;
+  selectedButtonIndexes?: number[];
+  selectedStick?: boolean;
   onBackgroundSizeChange?: (width: number, height: number) => void;
   onButtonClick?: (index: number) => void;
   onStickClick?: (index: number) => void;
+  onSelectionChange?: (selection: {
+    buttonIndexes: number[];
+    stick: boolean;
+  }) => void;
   onLayoutDragStart?: () => void;
   onLayoutDragEnd?: () => void;
   onButtonPositionChange?: (index: number, x: number, y: number) => void;
   onStickPositionChange?: (x: number, y: number) => void;
 }
+
+interface Rect {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+}
+
+type DragState =
+  | {
+      type: "button" | "stick";
+      index: number;
+      startX: number;
+      startY: number;
+      initialX: number;
+      initialY: number;
+    }
+  | {
+      type: "group";
+      startX: number;
+      startY: number;
+      buttons: Array<{ index: number; initialX: number; initialY: number }>;
+      stick: { initialX: number; initialY: number } | null;
+    }
+  | {
+      type: "selection";
+      startX: number;
+      startY: number;
+      currentX: number;
+      currentY: number;
+    };
 
 function assetUrl(layout: Layout, fileName: string): string {
   return `layout/${layout.name}/${fileName}`;
@@ -26,6 +66,56 @@ function getImageStyle(layout: Layout, fileName: string): React.CSSProperties {
   return fileName
     ? { backgroundImage: `url("${assetUrl(layout, fileName)}")` }
     : {};
+}
+
+function rectsIntersect(a: Rect, b: Rect): boolean {
+  return (
+    a.left <= b.right &&
+    a.right >= b.left &&
+    a.top <= b.bottom &&
+    a.bottom >= b.top
+  );
+}
+
+function normalizedRect(
+  startX: number,
+  startY: number,
+  endX: number,
+  endY: number,
+): Rect {
+  return {
+    left: Math.min(startX, endX),
+    top: Math.min(startY, endY),
+    right: Math.max(startX, endX),
+    bottom: Math.max(startY, endY),
+  };
+}
+
+function unionRects(rects: Rect[]): Rect | null {
+  if (rects.length === 0) return null;
+  return rects.reduce(
+    (current, rect) => ({
+      left: Math.min(current.left, rect.left),
+      top: Math.min(current.top, rect.top),
+      right: Math.max(current.right, rect.right),
+      bottom: Math.max(current.bottom, rect.bottom),
+    }),
+    rects[0],
+  );
+}
+
+function pointerToLocal(
+  event: { clientX: number; clientY: number },
+  element: HTMLElement,
+  size: { width: number; height: number },
+): { x: number; y: number } {
+  const rect = element.getBoundingClientRect();
+  const scaleX = rect.width ? size.width / rect.width : 1;
+  const scaleY = rect.height ? size.height / rect.height : 1;
+  return {
+    x: (event.clientX - rect.left) * scaleX,
+    y: (event.clientY - rect.top) * scaleY,
+  };
 }
 
 function useBackgroundSize(
@@ -111,9 +201,12 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     backgroundOpacity = 1,
     editorMode = false,
     selectedButtonIndex,
+    selectedButtonIndexes = [],
+    selectedStick = false,
     onBackgroundSizeChange,
     onButtonClick,
     onStickClick,
+    onSelectionChange,
     onLayoutDragStart,
     onLayoutDragEnd,
     onButtonPositionChange,
@@ -126,14 +219,99 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
 
   const stickCss = layout.stick.useCss ?? false;
 
-  const [dragState, setDragState] = useState<{
-    type: "button" | "stick";
-    index: number;
-    startX: number;
-    startY: number;
-    initialX: number;
-    initialY: number;
-  } | null>(null);
+  const selectedButtonSet = useMemo(
+    () => new Set(selectedButtonIndexes),
+    [selectedButtonIndexes],
+  );
+  const dragMovedRef = useRef(false);
+  const [dragState, setDragState] = useState<DragState | null>(null);
+
+  const buttonRects = useMemo(
+    () =>
+      Array.from({ length: layout.totalbuttonshow }, (_, index) => {
+        const button = layout.buttons[index] || defaultButton;
+        const width = parseFloat(button.w || defaultButton.w || "60") || 60;
+        const height = parseFloat(button.h || defaultButton.h || "60") || 60;
+        const centerX = parseFloat(button.x || defaultButton.x || "0") || 0;
+        const centerY = parseFloat(button.y || defaultButton.y || "0") || 0;
+        const left = centerX - width / 2;
+        const top = centerY - height / 2;
+        return {
+          index,
+          left,
+          top,
+          right: left + width,
+          bottom: top + height,
+        };
+      }),
+    [defaultButton, layout.buttons, layout.totalbuttonshow],
+  );
+
+  const stickRect = useMemo(() => {
+    const centerX = parseFloat(layout.stick.x) || 110;
+    const centerY = parseFloat(layout.stick.y) || 125;
+    const width = STICK_SELECTION_SIZE * stickScaleX;
+    const height = STICK_SELECTION_SIZE * stickScaleY;
+    return {
+      left: centerX - width / 2,
+      top: centerY - height / 2,
+      right: centerX + width / 2,
+      bottom: centerY + height / 2,
+    };
+  }, [layout.stick.x, layout.stick.y, stickScaleX, stickScaleY]);
+
+  const selectionRect =
+    dragState?.type === "selection"
+      ? normalizedRect(
+          dragState.startX,
+          dragState.startY,
+          dragState.currentX,
+          dragState.currentY,
+        )
+      : null;
+  const selectedGroupRect =
+    editorMode && !selectionRect
+      ? unionRects([
+          ...buttonRects.filter((button) =>
+            selectedButtonSet.has(button.index),
+          ),
+          ...(selectedStick && layout.showstick ? [stickRect] : []),
+        ])
+      : null;
+
+  const createGroupDragState = useCallback(
+    (local: { x: number; y: number }): DragState => {
+      const buttons = Array.from(selectedButtonSet, (selectedIndex) => {
+        const button = layout.buttons[selectedIndex] || defaultButton;
+        return {
+          index: selectedIndex,
+          initialX: parseFloat(button.x || defaultButton.x || "0"),
+          initialY: parseFloat(button.y || defaultButton.y || "0"),
+        };
+      });
+      const stick = selectedStick
+        ? {
+            initialX: parseFloat(layout.stick.x) || 110,
+            initialY: parseFloat(layout.stick.y) || 125,
+          }
+        : null;
+      return {
+        type: "group",
+        startX: local.x,
+        startY: local.y,
+        buttons,
+        stick,
+      };
+    },
+    [
+      defaultButton,
+      layout.buttons,
+      layout.stick.x,
+      layout.stick.y,
+      selectedButtonSet,
+      selectedStick,
+    ],
+  );
 
   const handleMouseDown = useCallback(
     (
@@ -145,25 +323,137 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     ) => {
       if (!editorMode) return;
       e.stopPropagation();
+      const area = document.getElementById("gamepad-area");
+      if (!area) return;
+      const local = pointerToLocal(e, area, backgroundSize);
+      dragMovedRef.current = false;
       onLayoutDragStart?.();
+
+      if (
+        (type === "button" && selectedButtonSet.has(index)) ||
+        (type === "stick" && selectedStick)
+      ) {
+        setDragState(createGroupDragState(local));
+        return;
+      }
+
       setDragState({
         type,
         index,
-        startX: e.clientX,
-        startY: e.clientY,
+        startX: local.x,
+        startY: local.y,
         initialX,
         initialY,
       });
     },
-    [editorMode, onLayoutDragStart],
+    [
+      backgroundSize,
+      createGroupDragState,
+      editorMode,
+      onLayoutDragStart,
+      selectedButtonSet,
+      selectedStick,
+    ],
+  );
+
+  const handleGroupBoundsMouseDown = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!editorMode || event.button !== 0) return;
+      event.stopPropagation();
+      const area = document.getElementById("gamepad-area");
+      if (!area) return;
+      const local = pointerToLocal(event, area, backgroundSize);
+      dragMovedRef.current = false;
+      onLayoutDragStart?.();
+      setDragState(createGroupDragState(local));
+    },
+    [backgroundSize, createGroupDragState, editorMode, onLayoutDragStart],
+  );
+
+  const handleSelectionMouseDown = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!editorMode || event.button !== 0) return;
+      const target = event.target;
+      const canStartSelection =
+        event.currentTarget === target ||
+        (target instanceof HTMLElement &&
+          target.id === "gamepad-area-background");
+      if (!canStartSelection) return;
+      const local = pointerToLocal(event, event.currentTarget, backgroundSize);
+      dragMovedRef.current = false;
+      setDragState({
+        type: "selection",
+        startX: local.x,
+        startY: local.y,
+        currentX: local.x,
+        currentY: local.y,
+      });
+    },
+    [backgroundSize, editorMode],
+  );
+
+  const handleSelectionClick = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!editorMode || dragMovedRef.current) return;
+      const target = event.target;
+      const canClearSelection =
+        event.currentTarget === target ||
+        (target instanceof HTMLElement &&
+          target.id === "gamepad-area-background");
+      if (!canClearSelection) return;
+      onSelectionChange?.({ buttonIndexes: [], stick: false });
+    },
+    [editorMode, onSelectionChange],
   );
 
   useEffect(() => {
     if (!dragState) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      const deltaX = e.clientX - dragState.startX;
-      const deltaY = e.clientY - dragState.startY;
+      if (dragState.type === "selection") {
+        const area = document.getElementById("gamepad-area");
+        if (!area) return;
+        const local = pointerToLocal(e, area, backgroundSize);
+        if (
+          Math.abs(local.x - dragState.startX) > 2 ||
+          Math.abs(local.y - dragState.startY) > 2
+        ) {
+          dragMovedRef.current = true;
+        }
+        setDragState((current) =>
+          current?.type === "selection"
+            ? { ...current, currentX: local.x, currentY: local.y }
+            : current,
+        );
+        return;
+      }
+
+      const area = document.getElementById("gamepad-area");
+      if (!area) return;
+      const local = pointerToLocal(e, area, backgroundSize);
+      const deltaX = local.x - dragState.startX;
+      const deltaY = local.y - dragState.startY;
+      if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {
+        dragMovedRef.current = true;
+      }
+
+      if (dragState.type === "group") {
+        for (const button of dragState.buttons) {
+          onButtonPositionChange?.(
+            button.index,
+            Math.round(button.initialX + deltaX),
+            Math.round(button.initialY + deltaY),
+          );
+        }
+        if (dragState.stick) {
+          onStickPositionChange?.(
+            Math.round(dragState.stick.initialX + deltaX),
+            Math.round(dragState.stick.initialY + deltaY),
+          );
+        }
+        return;
+      }
+
       const newX = Math.round(dragState.initialX + deltaX);
       const newY = Math.round(dragState.initialY + deltaY);
 
@@ -175,6 +465,31 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     };
 
     const handleMouseUp = () => {
+      if (dragState.type === "selection") {
+        const selectedRect = normalizedRect(
+          dragState.startX,
+          dragState.startY,
+          dragState.currentX,
+          dragState.currentY,
+        );
+        const isClickSelection =
+          Math.abs(dragState.currentX - dragState.startX) < 3 &&
+          Math.abs(dragState.currentY - dragState.startY) < 3;
+        if (isClickSelection) {
+          onSelectionChange?.({ buttonIndexes: [], stick: false });
+          setDragState(null);
+          return;
+        }
+        const buttonIndexes = buttonRects
+          .filter((button) => rectsIntersect(selectedRect, button))
+          .map((button) => button.index);
+        onSelectionChange?.({
+          buttonIndexes,
+          stick: layout.showstick && rectsIntersect(selectedRect, stickRect),
+        });
+        setDragState(null);
+        return;
+      }
       setDragState(null);
       onLayoutDragEnd?.();
     };
@@ -188,10 +503,37 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     };
   }, [
     dragState,
+    backgroundSize,
+    buttonRects,
+    layout.showstick,
     onButtonPositionChange,
     onLayoutDragEnd,
+    onSelectionChange,
     onStickPositionChange,
+    stickRect,
   ]);
+
+  const handleButtonClick = useCallback(
+    (index: number) => {
+      if (dragMovedRef.current) {
+        dragMovedRef.current = false;
+        return;
+      }
+      onButtonClick?.(index);
+    },
+    [onButtonClick],
+  );
+
+  const handleStickClick = useCallback(
+    (index: number) => {
+      if (dragMovedRef.current) {
+        dragMovedRef.current = false;
+        return;
+      }
+      onStickClick?.(index);
+    },
+    [onStickClick],
+  );
 
   return (
     <div id="gamepad0" className="gamepad-background">
@@ -199,6 +541,8 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
         id="gamepad-area"
         className="gamepad-area"
         style={{ width: backgroundSize.width, height: backgroundSize.height }}
+        onMouseDown={handleSelectionMouseDown}
+        onClick={handleSelectionClick}
       >
         <div
           id="gamepad-area-background"
@@ -218,7 +562,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
         />
         <div
           id="stick-area"
-          className={`stick-area ${stickCss ? "stick-css" : ""}`}
+          className={`stick-area ${stickCss ? "stick-css" : ""} ${editorMode && selectedStick ? "stick-selected" : ""}`}
           style={{
             left: layout.stick.x ? `${layout.stick.x}px` : undefined,
             top: layout.stick.y ? `${layout.stick.y}px` : undefined,
@@ -235,19 +579,21 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
                 } as React.CSSProperties)
               : {}),
           }}
-          onMouseDown={
-            editorMode
-              ? (e) =>
-                  handleMouseDown(
-                    e,
-                    "stick",
-                    0,
-                    parseFloat(layout.stick.x) || 110,
-                    parseFloat(layout.stick.y) || 125,
-                  )
-              : undefined
-          }
         >
+          {editorMode && (
+            <div
+              className="stick-drag-handle"
+              onMouseDown={(e) =>
+                handleMouseDown(
+                  e,
+                  "stick",
+                  0,
+                  parseFloat(layout.stick.x) || 110,
+                  parseFloat(layout.stick.y) || 125,
+                )
+              }
+            />
+          )}
           {stickCss &&
             (() => {
               const dir = stickClass.startsWith("stick ")
@@ -269,7 +615,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
               id={name}
               className={`stick-block ${name}`}
               key={name}
-              onClick={editorMode ? () => onStickClick?.(index) : undefined}
+              onClick={editorMode ? () => handleStickClick(index) : undefined}
             />
           ))}
         </div>
@@ -325,14 +671,16 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
                 style.top = `${button.yp || defaultButton.yp}px`;
             }
 
-            const className = `gamepad-button button${index} ${pressed ? "button-pressed" : "button-released"} ${useCss ? "button-css" : ""} ${editorMode && selectedButtonIndex !== null && selectedButtonIndex !== undefined && selectedButtonIndex === index ? "button-selected" : ""}`;
+            const className = `gamepad-button button${index} ${pressed ? "button-pressed" : "button-released"} ${useCss ? "button-css" : ""} ${editorMode && ((selectedButtonIndex !== null && selectedButtonIndex !== undefined && selectedButtonIndex === index) || selectedButtonSet.has(index)) ? "button-selected" : ""}`;
 
             return (
               <div
                 id={`button${index}`}
                 className={className}
                 key={index}
-                onClick={editorMode ? () => onButtonClick?.(index) : undefined}
+                onClick={
+                  editorMode ? () => handleButtonClick(index) : undefined
+                }
                 onMouseDown={
                   editorMode
                     ? (e) =>
@@ -350,6 +698,35 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
             );
           })}
         </div>
+        {selectionRect && (
+          <div
+            className="selection-box"
+            style={{
+              left: selectionRect.left,
+              top: selectionRect.top,
+              width: selectionRect.right - selectionRect.left,
+              height: selectionRect.bottom - selectionRect.top,
+            }}
+          />
+        )}
+        {selectedGroupRect && (
+          <div
+            className="selection-bounds"
+            onMouseDown={handleGroupBoundsMouseDown}
+            style={{
+              left: selectedGroupRect.left - SELECTION_BOUNDS_PADDING,
+              top: selectedGroupRect.top - SELECTION_BOUNDS_PADDING,
+              width:
+                selectedGroupRect.right -
+                selectedGroupRect.left +
+                SELECTION_BOUNDS_PADDING * 2,
+              height:
+                selectedGroupRect.bottom -
+                selectedGroupRect.top +
+                SELECTION_BOUNDS_PADDING * 2,
+            }}
+          />
+        )}
       </div>
     </div>
   );
