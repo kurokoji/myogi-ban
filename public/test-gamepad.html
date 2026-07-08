@@ -86,7 +86,7 @@
 			container.innerHTML = "";
 
 			let connected = false;
-			for (let gp of gamepads) {
+			for (const gp of gamepads) {
 				if (gp) {
 					connected = true;
 					const div = document.createElement("div");
@@ -114,13 +114,13 @@
 			const containers = document.querySelectorAll(".gamepad.connected");
 
 			let idx = 0;
-			for (let gp of gamepads) {
+			for (const gp of gamepads) {
 				if (gp && containers[idx]) {
 					const buttonsDiv = containers[idx].querySelector(".buttons");
 					buttonsDiv.innerHTML = "";
 					for (let i = 0; i < gp.buttons.length; i++) {
 						const btn = document.createElement("div");
-						btn.className = "button" + (gp.buttons[i].pressed ? " pressed" : "");
+						btn.className = `button${gp.buttons[i].pressed ? " pressed" : ""}`;
 						btn.textContent = i;
 						buttonsDiv.appendChild(btn);
 					}

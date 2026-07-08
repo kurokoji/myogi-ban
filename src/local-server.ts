@@ -1,9 +1,9 @@
-import express from 'express';
-import * as fs from 'fs';
-import * as http from 'http';
-import * as path from 'path';
-import WebSocket from 'ws';
-import type { GamepadState, Layout, LayoutEntry } from './types';
+import express from "express";
+import * as fs from "fs";
+import * as http from "http";
+import * as path from "path";
+import WebSocket from "ws";
+import type { GamepadState, Layout, LayoutEntry } from "./types";
 
 export interface LocalServerOptions {
   port: number;
@@ -17,12 +17,16 @@ export interface LocalServerOptions {
 
 function getLayoutDirs(baseDir: string): string[] {
   if (!fs.existsSync(baseDir)) return [];
-  return fs.readdirSync(baseDir, { withFileTypes: true })
+  return fs
+    .readdirSync(baseDir, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name);
 }
 
-function findLayoutPath(name: string, options: LocalServerOptions): string | null {
+function findLayoutPath(
+  name: string,
+  options: LocalServerOptions,
+): string | null {
   const userPath = path.join(options.userLayoutDir, name);
   if (fs.existsSync(userPath)) return userPath;
 
@@ -36,7 +40,7 @@ function collectLayoutAssets(layout: unknown): string[] {
   const data = layout as Partial<Layout> | null;
   const assets = new Set<string>();
   const add = (fileName: unknown) => {
-    if (typeof fileName === 'string' && fileName.trim()) {
+    if (typeof fileName === "string" && fileName.trim()) {
       assets.add(path.basename(fileName));
     }
   };
@@ -72,15 +76,23 @@ function copyLayoutAssets(
   layout: unknown,
   sourceLayoutName: string,
   targetLayoutName: string,
-  options: LocalServerOptions
+  options: LocalServerOptions,
 ): void {
   const targetDir = path.join(options.userLayoutDir, targetLayoutName);
   const sourceLayoutPath = findLayoutPath(sourceLayoutName, options);
   const sourceDirs: string[] = [];
 
   if (sourceLayoutPath) sourceDirs.push(sourceLayoutPath);
-  sourceDirs.push(...getLayoutDirs(options.userLayoutDir).map((name) => path.join(options.userLayoutDir, name)));
-  sourceDirs.push(...getLayoutDirs(options.builtinLayoutDir).map((name) => path.join(options.builtinLayoutDir, name)));
+  sourceDirs.push(
+    ...getLayoutDirs(options.userLayoutDir).map((name) =>
+      path.join(options.userLayoutDir, name),
+    ),
+  );
+  sourceDirs.push(
+    ...getLayoutDirs(options.builtinLayoutDir).map((name) =>
+      path.join(options.builtinLayoutDir, name),
+    ),
+  );
 
   for (const asset of collectLayoutAssets(layout)) {
     const targetPath = path.join(targetDir, asset);
@@ -100,16 +112,22 @@ function readLayout(name: string, options: LocalServerOptions): unknown {
   const layoutPath = findLayoutPath(name, options);
   if (!layoutPath) return {};
 
-  const jsonPath = path.join(layoutPath, 'layout.json');
+  const jsonPath = path.join(layoutPath, "layout.json");
   if (!fs.existsSync(jsonPath)) return {};
 
-  return JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+  return JSON.parse(fs.readFileSync(jsonPath, "utf8"));
 }
 
 function listLayouts(options: LocalServerOptions): LayoutEntry[] {
   return [
-    ...getLayoutDirs(options.builtinLayoutDir).map((name) => ({ name, builtin: true })),
-    ...getLayoutDirs(options.userLayoutDir).map((name) => ({ name, builtin: false }))
+    ...getLayoutDirs(options.builtinLayoutDir).map((name) => ({
+      name,
+      builtin: true,
+    })),
+    ...getLayoutDirs(options.userLayoutDir).map((name) => ({
+      name,
+      builtin: false,
+    })),
   ];
 }
 
@@ -120,7 +138,7 @@ export function createLocalServer(options: LocalServerOptions): http.Server {
   let latestState: GamepadState | null = null;
 
   const broadcastState = (state: GamepadState): void => {
-    const message = JSON.stringify({ type: 'state', data: state });
+    const message = JSON.stringify({ type: "state", data: state });
     wss.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {
         client.send(message);
@@ -128,70 +146,78 @@ export function createLocalServer(options: LocalServerOptions): http.Server {
     });
   };
 
-  expressApp.use('/layout', express.static(options.userLayoutDir));
+  expressApp.use("/layout", express.static(options.userLayoutDir));
   expressApp.use(express.static(options.publicDir));
-  expressApp.use(express.json({ limit: '100mb' }));
+  expressApp.use(express.json({ limit: "100mb" }));
 
-  expressApp.get('/view', (_req, res) => {
-    res.sendFile(path.join(options.publicDir, 'view.html'));
+  expressApp.get("/view", (_req, res) => {
+    res.sendFile(path.join(options.publicDir, "view.html"));
   });
 
-  expressApp.post('/api/state', (req, res) => {
+  expressApp.post("/api/state", (req, res) => {
     latestState = req.body as GamepadState;
     broadcastState(latestState);
     res.json({ ok: true });
   });
 
-  expressApp.get('/api/state', (_req, res) => {
+  expressApp.get("/api/state", (_req, res) => {
     res.json(latestState || {});
   });
 
-  expressApp.post('/api/layout/save', (req, res) => {
-    const layoutName = req.body.name || 'custom';
+  expressApp.post("/api/layout/save", (req, res) => {
+    const layoutName = req.body.name || "custom";
     const layoutDir = path.join(options.userLayoutDir, layoutName);
     ensureDir(layoutDir);
 
     const data = { ...req.body.data, name: layoutName };
-    copyLayoutAssets(req.body.data, req.body.data?.name || layoutName, layoutName, options);
-    writeJson(path.join(layoutDir, 'layout.json'), data);
+    copyLayoutAssets(
+      req.body.data,
+      req.body.data?.name || layoutName,
+      layoutName,
+      options,
+    );
+    writeJson(path.join(layoutDir, "layout.json"), data);
     res.json({ ok: true });
   });
 
-  expressApp.get('/api/layouts', (_req, res) => {
+  expressApp.get("/api/layouts", (_req, res) => {
     res.json(listLayouts(options));
   });
 
-  expressApp.get('/api/layout/:name', (req, res) => {
+  expressApp.get("/api/layout/:name", (req, res) => {
     res.json(readLayout(req.params.name, options));
   });
 
-  expressApp.post('/api/upload-image', (req, res) => {
+  expressApp.post("/api/upload-image", (req, res) => {
     const { data, layoutName, fileName } = req.body;
     const safeFileName = path.basename(fileName);
-    const layoutDir = path.join(options.userLayoutDir, layoutName || 'custom');
+    const layoutDir = path.join(options.userLayoutDir, layoutName || "custom");
     ensureDir(layoutDir);
 
-    const base64Data = data.replace(/^data:image\/[^;]+;base64,/, '');
-    fs.writeFileSync(path.join(layoutDir, safeFileName), Buffer.from(base64Data, 'base64'));
+    const base64Data = data.replace(/^data:image\/[^;]+;base64,/, "");
+    fs.writeFileSync(
+      path.join(layoutDir, safeFileName),
+      Buffer.from(base64Data, "base64"),
+    );
     res.json({ ok: true, fileName: safeFileName });
   });
 
-  expressApp.get('/api/default-layout', (_req, res) => {
+  expressApp.get("/api/default-layout", (_req, res) => {
     if (fs.existsSync(options.defaultLayoutFile)) {
-      res.json(JSON.parse(fs.readFileSync(options.defaultLayoutFile, 'utf8')));
+      res.json(JSON.parse(fs.readFileSync(options.defaultLayoutFile, "utf8")));
     } else {
-      res.json({ name: 'default' });
+      res.json({ name: "default" });
     }
   });
 
-  expressApp.post('/api/default-layout', (req, res) => {
+  expressApp.post("/api/default-layout", (req, res) => {
     writeJson(options.defaultLayoutFile, { name: req.body.name });
     res.json({ ok: true });
   });
 
-  wss.on('connection', (ws) => {
+  wss.on("connection", (ws) => {
     if (latestState) {
-      ws.send(JSON.stringify({ type: 'state', data: latestState }));
+      ws.send(JSON.stringify({ type: "state", data: latestState }));
     }
   });
 

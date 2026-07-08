@@ -1,4 +1,9 @@
-import { Layout, GamepadState, LayoutEntry, SERVER_URL } from './types';
+import {
+  type GamepadState,
+  type Layout,
+  type LayoutEntry,
+  SERVER_URL,
+} from "./types";
 
 export class ApiClient {
   async getLayouts(): Promise<LayoutEntry[]> {
@@ -13,18 +18,18 @@ export class ApiClient {
 
   async saveLayout(name: string, data: Layout): Promise<void> {
     await fetch(`${SERVER_URL}/api/layout/save`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, data })
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, data }),
     });
   }
 
   async sendState(state: GamepadState): Promise<void> {
     try {
       await fetch(`${SERVER_URL}/api/state`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(state)
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(state),
       });
     } catch {
       // ignore errors
@@ -38,9 +43,9 @@ export class ApiClient {
 
   async setDefaultLayout(name: string): Promise<void> {
     await fetch(`${SERVER_URL}/api/default-layout`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name })
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name }),
     });
   }
 }

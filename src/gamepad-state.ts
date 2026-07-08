@@ -1,5 +1,5 @@
-import { Layout, STICK_NAMES } from './types';
-import { GamepadManager, ButtonMapping, StickMapping } from './gamepad';
+import type { ButtonMapping, GamepadManager, StickMapping } from "./gamepad";
+import { type Layout, STICK_NAMES } from "./types";
 
 export interface GamepadSnapshot {
   stickClass: string;
@@ -11,11 +11,11 @@ export interface GamepadSnapshot {
 
 export function createEmptySnapshot(layout: Layout): GamepadSnapshot {
   return {
-    stickClass: 'stick',
+    stickClass: "stick",
     stickStatus: [false, false, false, false],
     pressedButtons: Array.from({ length: layout.totalbuttonshow }, () => false),
     inputs: [],
-    statusChanged: false
+    statusChanged: false,
   };
 }
 
@@ -24,9 +24,9 @@ export function readGamepadSnapshot(
   gamepad: Gamepad,
   layout: Layout,
   buttonMappings: ButtonMapping[],
-  stickMappings: StickMapping[]
+  stickMappings: StickMapping[],
 ): GamepadSnapshot {
-  let stickClass = 'stick';
+  let stickClass = "stick";
   const stickStatus = [false, false, false, false];
 
   for (let i = 0; i < 4; i++) {
@@ -38,14 +38,20 @@ export function readGamepadSnapshot(
 
   const inputs: number[] = [];
   let statusChanged = false;
-  const pressedButtons = Array.from({ length: layout.totalbuttonshow }, (_, i) => {
-    const pressed = gamepadManager.isButtonPressed(buttonMappings[i], gamepad);
-    if (pressed) {
-      inputs.push(i);
-      statusChanged = true;
-    }
-    return pressed;
-  });
+  const pressedButtons = Array.from(
+    { length: layout.totalbuttonshow },
+    (_, i) => {
+      const pressed = gamepadManager.isButtonPressed(
+        buttonMappings[i],
+        gamepad,
+      );
+      if (pressed) {
+        inputs.push(i);
+        statusChanged = true;
+      }
+      return pressed;
+    },
+  );
 
   return { stickClass, stickStatus, pressedButtons, inputs, statusChanged };
 }

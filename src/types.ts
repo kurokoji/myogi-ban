@@ -78,7 +78,12 @@ export interface LayoutEntry {
   builtin: boolean;
 }
 
-export const STICK_NAMES = ["stick-up", "stick-down", "stick-left", "stick-right"] as const;
+export const STICK_NAMES = [
+  "stick-up",
+  "stick-down",
+  "stick-left",
+  "stick-right",
+] as const;
 export const DPAD_NAMES = ["Up", "Down", "Left", "Right"] as const;
 export const TOTAL_BUTTONS = 52;
 export const PORT = 33770;

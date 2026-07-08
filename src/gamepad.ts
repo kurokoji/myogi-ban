@@ -1,4 +1,4 @@
-import { STICK_NAMES, TOTAL_BUTTONS } from './types';
+import { TOTAL_BUTTONS } from "./types";
 
 export type ButtonMapping = number; // 0-51: button index, 1000000+: axis code
 export type StickMapping = number;
@@ -14,7 +14,7 @@ export class GamepadManager {
   }
 
   private setupEventListeners(): void {
-    window.addEventListener('gamepadconnected', (e) => {
+    window.addEventListener("gamepadconnected", (e) => {
       if (this.activeGamepadIndex === -1) {
         this.activeGamepadIndex = e.gamepad.index;
         this.axesCenter = [...e.gamepad.axes];
@@ -22,7 +22,7 @@ export class GamepadManager {
       }
     });
 
-    window.addEventListener('gamepaddisconnected', (e) => {
+    window.addEventListener("gamepaddisconnected", (e) => {
       if (e.gamepad.index === this.activeGamepadIndex) {
         this.activeGamepadIndex = -1;
         this.axesCenter = [];
@@ -71,8 +71,6 @@ export class GamepadManager {
 
   private isAxisTriggered(code: number, gamepad: Gamepad): boolean {
     let sign: number;
-    let axis: number;
-    let val: number;
 
     if (code >= 2000000) {
       sign = -1;
@@ -82,14 +80,14 @@ export class GamepadManager {
       code -= 1000000;
     }
 
-    axis = Math.floor(code / 10000);
-    val = (code - axis * 10000) * sign / 100;
+    const axis = Math.floor(code / 10000);
+    const val = ((code - axis * 10000) * sign) / 100;
 
     if (axis >= gamepad.axes.length) return false;
 
     const gamepadAxis = gamepad.axes[axis];
     const min = (val - (this.axesCenter[axis] || 0)) * 0.55;
-    const max = val + (0.05 * sign);
+    const max = val + 0.05 * sign;
     const realMin = Math.min(min, max);
     const realMax = Math.max(min, max);
 

@@ -1,275 +1,388 @@
 * {
-	box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 body {
-	background-color: rgba(0, 0, 0, 0);
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-	margin: 0;
-	padding: 0;
+  background-color: rgba(0, 0, 0, 0);
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
 #container {
-	position: relative;
+  position: relative;
 }
 
 .gamepad-background {
-	width: 100%;
-	height: 100%;
-	position: relative;
+  width: 100%;
+  height: 100%;
+  position: relative;
 }
 
 .gamepad-disconnected {
-	background-color: #fff;
-	opacity: 1;
-	transition: opacity 0.4s, visibility 0.4s;
-	width: 500px;
-	height: 250px;
-	position: absolute;
-	z-index: 40;
-	visibility: visible;
-	display: flex;
-	align-items: center;
-	justify-content: center;
+  background-color: #fff;
+  opacity: 1;
+  transition:
+    opacity 0.4s,
+    visibility 0.4s;
+  width: 500px;
+  height: 250px;
+  position: absolute;
+  z-index: 40;
+  visibility: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .disconnected-text {
-	font-size: 32px;
-	font-weight: bold;
-	color: #333;
+  font-size: 32px;
+  font-weight: bold;
+  color: #333;
 }
 
 .gamepad-disconnected.gamepad-connected {
-	opacity: 0;
-	visibility: hidden;
+  opacity: 0;
+  visibility: hidden;
 }
 
 .gamepad-area-background {
-	background-image: url("../layout/preset/background.png");
-	background-size: 100% 100%;
-	width: 500px;
-	height: 250px;
-	position: relative;
+  background-image: url("../layout/preset/background.png");
+  background-size: 100% 100%;
+  width: 500px;
+  height: 250px;
+  position: relative;
 }
 
 .gamepad-area {
-	position: relative;
-	width: 500px;
-	height: 250px;
+  position: relative;
+  width: 500px;
+  height: 250px;
 }
 
 .stick-area {
-	background-image: url("../layout/preset/stick-back.png");
-	background-size: 150px 150px;
-	width: 250px;
-	height: 250px;
-	position: absolute;
-	transform: translate(-50%, -50%);
+  background-image: url("../layout/preset/stick-back.png");
+  background-size: 150px 150px;
+  width: 250px;
+  height: 250px;
+  position: absolute;
+  transform: translate(-50%, -50%);
 }
 
 [class="stick"] {
-	background-image: url("../layout/preset/stick-center.png");
-	background-size: 100% 100%;
-	width: 150px;
-	height: 150px;
-	left: calc(50% - 75px);
-	top: calc(50% - 75px);
+  background-image: url("../layout/preset/stick-center.png");
+  background-size: 100% 100%;
+  width: 150px;
+  height: 150px;
+  left: calc(50% - 75px);
+  top: calc(50% - 75px);
 }
 
 .stick:not([class="stick"]) {
-	background-image: url("../layout/preset/stick-up.png");
-	background-size: 100% 100%;
-	width: 150px;
-	height: 150px;
-	left: calc(50% - 75px);
-	top: calc(50% - 75px);
+  background-image: url("../layout/preset/stick-up.png");
+  background-size: 100% 100%;
+  width: 150px;
+  height: 150px;
+  left: calc(50% - 75px);
+  top: calc(50% - 75px);
 }
 
-.stick.stick-up { transform: rotate(0deg); }
-.stick.stick-down { transform: rotate(180deg); }
-.stick.stick-left { transform: rotate(270deg); }
-.stick.stick-right { transform: rotate(90deg); }
-.stick.stick-up.stick-left { transform: rotate(315deg); }
-.stick.stick-up.stick-right { transform: rotate(45deg); }
-.stick.stick-down.stick-left { transform: rotate(225deg); }
-.stick.stick-down.stick-right { transform: rotate(135deg); }
+.stick.stick-up {
+  transform: rotate(0deg);
+}
+.stick.stick-down {
+  transform: rotate(180deg);
+}
+.stick.stick-left {
+  transform: rotate(270deg);
+}
+.stick.stick-right {
+  transform: rotate(90deg);
+}
+.stick.stick-up.stick-left {
+  transform: rotate(315deg);
+}
+.stick.stick-up.stick-right {
+  transform: rotate(45deg);
+}
+.stick.stick-down.stick-left {
+  transform: rotate(225deg);
+}
+.stick.stick-down.stick-right {
+  transform: rotate(135deg);
+}
 
 .stick {
-	background-size: 100% 100%;
-	position: absolute;
+  background-size: 100% 100%;
+  position: absolute;
 }
 
 .stick-block {
-	width: 60px;
-	height: 60px;
-	left: calc(50% - 30px);
-	top: calc(50% - 30px);
-	background-size: 100%;
-	position: absolute;
+  width: 60px;
+  height: 60px;
+  left: calc(50% - 30px);
+  top: calc(50% - 30px);
+  background-size: 100%;
+  position: absolute;
 }
 
-.stick-block.stick-up { transform: rotate(0deg) translateY(-60px); }
-.stick-block.stick-down { transform: rotate(180deg) translateY(-60px); }
-.stick-block.stick-left { transform: rotate(270deg) translateY(-60px); }
-.stick-block.stick-right { transform: rotate(90deg) translateY(-60px); }
+.stick-block.stick-up {
+  transform: rotate(0deg) translateY(-60px);
+}
+.stick-block.stick-down {
+  transform: rotate(180deg) translateY(-60px);
+}
+.stick-block.stick-left {
+  transform: rotate(270deg) translateY(-60px);
+}
+.stick-block.stick-right {
+  transform: rotate(90deg) translateY(-60px);
+}
 
 .gamepad-button {
-	transform: translate(-50%, -50%);
-	background-size: 100% 100%;
-	position: absolute;
+  transform: translate(-50%, -50%);
+  background-size: 100% 100%;
+  position: absolute;
 }
 
-.button0 { left: 250px; top: 115px; }
-.button1 { left: 310px; top: 85px; }
-.button2 { left: 375px; top: 85px; }
-.button3 { left: 440px; top: 85px; }
-.button4 { left: 240px; top: 185px; }
-.button5 { left: 300px; top: 155px; }
-.button6 { left: 365px; top: 155px; }
-.button7 { left: 430px; top: 155px; }
-.button8 { left: 390px; top: 30px; width: 40px; height: 40px; }
-.button9 { left: 440px; top: 30px; width: 40px; height: 40px; }
+.button0 {
+  left: 250px;
+  top: 115px;
+}
+.button1 {
+  left: 310px;
+  top: 85px;
+}
+.button2 {
+  left: 375px;
+  top: 85px;
+}
+.button3 {
+  left: 440px;
+  top: 85px;
+}
+.button4 {
+  left: 240px;
+  top: 185px;
+}
+.button5 {
+  left: 300px;
+  top: 155px;
+}
+.button6 {
+  left: 365px;
+  top: 155px;
+}
+.button7 {
+  left: 430px;
+  top: 155px;
+}
+.button8 {
+  left: 390px;
+  top: 30px;
+  width: 40px;
+  height: 40px;
+}
+.button9 {
+  left: 440px;
+  top: 30px;
+  width: 40px;
+  height: 40px;
+}
 
 .button-released {
-	background-image: url("../layout/preset/button-released.png");
+  background-image: url("../layout/preset/button-released.png");
 }
 
 .button-pressed {
-	background-image: url("../layout/preset/button-pressed.png");
+  background-image: url("../layout/preset/button-pressed.png");
 }
 
 /* CSS描画ボタン（画像なしの場合） */
 .button-css {
-	border-radius: 50%;
-	background: 
-		radial-gradient(circle at 50% 50%, 
-			color-mix(in srgb, var(--button-color, #cccccc) 95%, white) 0%,
-			var(--button-color, #cccccc) 70%,
-			color-mix(in srgb, var(--button-color, #cccccc) 85%, black) 100%);
-	border: 3px solid var(--button-color, #cccccc);
-	box-shadow: 
-		inset 0 0 0 2px color-mix(in srgb, var(--button-color, #cccccc) 40%, black),
-		inset 0 2px 4px rgba(255, 255, 255, 0.5),
-		inset 0 -2px 4px rgba(0, 0, 0, 0.3),
-		0 3px 6px rgba(0, 0, 0, 0.4);
-	transition: all var(--button-transition, 0.02s) var(--button-easing, ease);
+  border-radius: 50%;
+  background-image: radial-gradient(
+    circle at 50% 50%,
+    color-mix(in srgb, var(--button-color, #cccccc) 95%, white) 0%,
+    var(--button-color, #cccccc) 70%,
+    color-mix(in srgb, var(--button-color, #cccccc) 85%, black) 100%
+  );
+  border: 3px solid var(--button-color, #cccccc);
+  box-shadow:
+    inset 0 0 0 2px color-mix(in srgb, var(--button-color, #cccccc) 40%, black),
+    inset 0 2px 4px rgba(255, 255, 255, 0.5),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+    0 3px 6px rgba(0, 0, 0, 0.4);
+  transition: all var(--button-transition, 0.02s) var(--button-easing, ease);
 }
 
 .button-css.button-pressed {
-	background: 
-		radial-gradient(circle at 50% 50%, 
-			color-mix(in srgb, var(--button-color, #999999) 95%, white) 0%,
-			var(--button-color, #999999) 70%,
-			color-mix(in srgb, var(--button-color, #999999) 85%, black) 100%);
-	box-shadow: 
-		inset 0 0 0 2px color-mix(in srgb, var(--button-color, #999999) 40%, black),
-		inset 0 1px 2px rgba(255, 255, 255, 0.4),
-		inset 0 -1px 2px rgba(0, 0, 0, 0.3),
-		0 1px 3px rgba(0, 0, 0, 0.4);
-	transform: translate(-50%, -50%) translateY(2px);
+  background-image: radial-gradient(
+    circle at 50% 50%,
+    color-mix(in srgb, var(--button-color, #999999) 95%, white) 0%,
+    var(--button-color, #999999) 70%,
+    color-mix(in srgb, var(--button-color, #999999) 85%, black) 100%
+  );
+  box-shadow:
+    inset 0 0 0 2px color-mix(in srgb, var(--button-color, #999999) 40%, black),
+    inset 0 1px 2px rgba(255, 255, 255, 0.4),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.3),
+    0 1px 3px rgba(0, 0, 0, 0.4);
+  transform: translate(-50%, -50%) translateY(2px);
 }
 
 /* Z-index */
-.gamepad-area-background { z-index: 1; }
-.stick-area { z-index: 2; }
-.stick { z-index: 20; }
-.stick-shaft { z-index: 15; }
-.stick-block { z-index: 30; }
-.gamepad-button { z-index: 10; }
+.gamepad-area-background {
+  z-index: 1;
+}
+.stick-area {
+  z-index: 2;
+}
+.stick {
+  z-index: 20;
+}
+.stick-shaft {
+  z-index: 15;
+}
+.stick-block {
+  z-index: 30;
+}
+.gamepad-button {
+  z-index: 10;
+}
 
-#gamepad0, #gamepad0 * {
-	background-repeat: no-repeat;
-	background-position: center;
+#gamepad0,
+#gamepad0 * {
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 /* CSS描画スティック（画像なしの場合） */
 .stick-area.stick-css {
-	background-image: none;
-	border-radius: 50%;
-	width: 40px;
-	height: 40px;
-	background: 
-		radial-gradient(circle at 50% 50%,
-			color-mix(in srgb, var(--stick-plate-color, #888888) 80%, black) 0%,
-			color-mix(in srgb, var(--stick-plate-color, #888888) 50%, black) 100%);
-	border: 3px solid color-mix(in srgb, var(--stick-plate-color, #888888) 60%, black);
-	box-shadow: 
-		inset 0 2px 6px rgba(0, 0, 0, 0.5),
-		0 2px 8px rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  background-image: radial-gradient(
+    circle at 50% 50%,
+    color-mix(in srgb, var(--stick-plate-color, #888888) 80%, black) 0%,
+    color-mix(in srgb, var(--stick-plate-color, #888888) 50%, black) 100%
+  );
+  border: 3px solid
+    color-mix(in srgb, var(--stick-plate-color, #888888) 60%, black);
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.5),
+    0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .stick-area.stick-css::after {
-	content: '';
-	position: absolute;
-	width: 14px;
-	height: 14px;
-	left: calc(50% - 7px);
-	top: calc(50% - 7px);
-	border-radius: 50%;
-	background: radial-gradient(circle at 40% 35%,
-		color-mix(in srgb, var(--stick-color, #cccccc) 85%, white) 0%,
-		var(--stick-color, #cccccc) 60%,
-		color-mix(in srgb, var(--stick-color, #cccccc) 65%, black) 100%);
-	box-shadow: inset 0 -1px 2px rgba(0, 0, 0, 0.3);
-	z-index: 1;
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  left: calc(50% - 7px);
+  top: calc(50% - 7px);
+  border-radius: 50%;
+  background-image: radial-gradient(
+    circle at 40% 35%,
+    color-mix(in srgb, var(--stick-color, #cccccc) 85%, white) 0%,
+    var(--stick-color, #cccccc) 60%,
+    color-mix(in srgb, var(--stick-color, #cccccc) 65%, black) 100%
+  );
+  box-shadow: inset 0 -1px 2px rgba(0, 0, 0, 0.3);
+  z-index: 1;
 }
 
 .stick.stick-css {
-	background-image: none;
-	border-radius: 50%;
-	background: 
-		radial-gradient(circle at 40% 35%, 
-			color-mix(in srgb, var(--stick-color, #cccccc) 95%, white) 0%,
-			var(--stick-color, #cccccc) 60%,
-			color-mix(in srgb, var(--stick-color, #cccccc) 70%, black) 100%);
-	border: 2px solid color-mix(in srgb, var(--stick-color, #cccccc) 80%, black);
-	box-shadow: 
-		inset 0 -2px 4px rgba(0, 0, 0, 0.3),
-		0 2px 4px rgba(0, 0, 0, 0.3);
-	width: 56px;
-	height: 56px;
-	left: calc(50% - 28px);
-	top: calc(50% - 28px);
-	transform: none;
+  border-radius: 50%;
+  background-image: radial-gradient(
+    circle at 40% 35%,
+    color-mix(in srgb, var(--stick-color, #cccccc) 95%, white) 0%,
+    var(--stick-color, #cccccc) 60%,
+    color-mix(in srgb, var(--stick-color, #cccccc) 70%, black) 100%
+  );
+  border: 2px solid color-mix(in srgb, var(--stick-color, #cccccc) 80%, black);
+  box-shadow:
+    inset 0 -2px 4px rgba(0, 0, 0, 0.3),
+    0 2px 4px rgba(0, 0, 0, 0.3);
+  width: 56px;
+  height: 56px;
+  left: calc(50% - 28px);
+  top: calc(50% - 28px);
+  transform: none;
 }
 
-.stick.stick-css.stick-up { transform: translateY(-35px); }
-.stick.stick-css.stick-down { transform: translateY(35px); }
-.stick.stick-css.stick-left { transform: translateX(-35px); }
-.stick.stick-css.stick-right { transform: translateX(35px); }
-.stick.stick-css.stick-up.stick-left { transform: translate(-25px, -25px); }
-.stick.stick-css.stick-up.stick-right { transform: translate(25px, -25px); }
-.stick.stick-css.stick-down.stick-left { transform: translate(-25px, 25px); }
-.stick.stick-css.stick-down.stick-right { transform: translate(25px, 25px); }
+.stick.stick-css.stick-up {
+  transform: translateY(-35px);
+}
+.stick.stick-css.stick-down {
+  transform: translateY(35px);
+}
+.stick.stick-css.stick-left {
+  transform: translateX(-35px);
+}
+.stick.stick-css.stick-right {
+  transform: translateX(35px);
+}
+.stick.stick-css.stick-up.stick-left {
+  transform: translate(-25px, -25px);
+}
+.stick.stick-css.stick-up.stick-right {
+  transform: translate(25px, -25px);
+}
+.stick.stick-css.stick-down.stick-left {
+  transform: translate(-25px, 25px);
+}
+.stick.stick-css.stick-down.stick-right {
+  transform: translate(25px, 25px);
+}
 
 .stick-shaft {
-	position: absolute;
-	width: 10px;
-	height: 28px;
-	left: calc(50% - 5px);
-	top: calc(50% - 28px);
-	border-radius: 5px;
-	background: linear-gradient(to right,
-		color-mix(in srgb, var(--stick-color, #cccccc) 60%, black) 0%,
-		var(--stick-color, #cccccc) 30%,
-		var(--stick-color, #cccccc) 70%,
-		color-mix(in srgb, var(--stick-color, #cccccc) 60%, black) 100%);
-	transform-origin: center 28px;
-	z-index: 15;
-	pointer-events: none;
+  position: absolute;
+  width: 10px;
+  height: 28px;
+  left: calc(50% - 5px);
+  top: calc(50% - 28px);
+  border-radius: 5px;
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--stick-color, #cccccc) 60%, black) 0%,
+    var(--stick-color, #cccccc) 30%,
+    var(--stick-color, #cccccc) 70%,
+    color-mix(in srgb, var(--stick-color, #cccccc) 60%, black) 100%
+  );
+  transform-origin: center 28px;
+  z-index: 15;
+  pointer-events: none;
 }
 
-.stick-shaft.stick-up { transform: rotate(0deg); }
-.stick-shaft.stick-down { transform: rotate(180deg); }
-.stick-shaft.stick-left { transform: rotate(-90deg); }
-.stick-shaft.stick-right { transform: rotate(90deg); }
-.stick-shaft.stick-up.stick-left { transform: rotate(-45deg); }
-.stick-shaft.stick-up.stick-right { transform: rotate(45deg); }
-.stick-shaft.stick-down.stick-left { transform: rotate(-135deg); }
-.stick-shaft.stick-down.stick-right { transform: rotate(135deg); }
+.stick-shaft.stick-up {
+  transform: rotate(0deg);
+}
+.stick-shaft.stick-down {
+  transform: rotate(180deg);
+}
+.stick-shaft.stick-left {
+  transform: rotate(-90deg);
+}
+.stick-shaft.stick-right {
+  transform: rotate(90deg);
+}
+.stick-shaft.stick-up.stick-left {
+  transform: rotate(-45deg);
+}
+.stick-shaft.stick-up.stick-right {
+  transform: rotate(45deg);
+}
+.stick-shaft.stick-down.stick-left {
+  transform: rotate(-135deg);
+}
+.stick-shaft.stick-down.stick-right {
+  transform: rotate(135deg);
+}
 
 .background-css {
-	background-image: none !important;
-	background-color: var(--bg-color, #0b0f14);
-	border-radius: var(--bg-radius, 0px);
+  background-image: none !important;
+  background-color: var(--bg-color, #0b0f14);
+  border-radius: var(--bg-radius, 0px);
 }

@@ -1,10 +1,24 @@
-import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
-import { ApiClient } from '../api';
-import { ButtonMapping, GamepadManager, StickMapping } from '../gamepad';
-import { createEmptySnapshot, readGamepadSnapshot } from '../gamepad-state';
-import { AssigningTarget, assignmentNameForTarget } from '../editor-helpers';
-import { GamepadState, Layout } from '../types';
-import { useLatestRef } from './useLatestRef';
+import {
+  type Dispatch,
+  type SetStateAction,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import type { ApiClient } from "../api";
+import {
+  type AssigningTarget,
+  assignmentNameForTarget,
+} from "../editor-helpers";
+import {
+  type ButtonMapping,
+  GamepadManager,
+  type StickMapping,
+} from "../gamepad";
+import { createEmptySnapshot, readGamepadSnapshot } from "../gamepad-state";
+import type { GamepadState, Layout } from "../types";
+import { useLatestRef } from "./useLatestRef";
 
 interface UseEditorGamepadOptions {
   api: ApiClient;
@@ -28,13 +42,15 @@ export function useEditorGamepad(options: UseEditorGamepadOptions) {
     setStickMappings,
     connectGamepadMessage,
     buttonLabel,
-    stickLabel
+    stickLabel,
   } = options;
   const gamepadRef = useRef<GamepadManager | null>(null);
   const axisHoldCounterRef = useRef(0);
-  const axisHoldTargetRef = useRef<{ axis: number; value: number } | null>(null);
+  const axisHoldTargetRef = useRef<{ axis: number; value: number } | null>(
+    null,
+  );
   const [connected, setConnected] = useState(false);
-  const [gamepadName, setGamepadName] = useState('');
+  const [gamepadName, setGamepadName] = useState("");
   const [snapshot, setSnapshot] = useState(() => createEmptySnapshot(layout));
   const [assigningTarget, setAssigningTarget] = useState<AssigningTarget>(null);
   const layoutRef = useLatestRef(layout);
@@ -46,26 +62,29 @@ export function useEditorGamepad(options: UseEditorGamepadOptions) {
     setSnapshot(createEmptySnapshot(nextLayout));
   }, []);
 
-  const completeAssignment = useCallback((target: number, code: number) => {
-    if (target < 1000) {
-      setButtonMappings((current) => {
-        const next = [...current];
-        next[target] = code;
-        return next;
-      });
-    } else {
-      const directionIndex = target - 1000;
-      setStickMappings((current) => {
-        const next = [...current];
-        next[directionIndex] = code;
-        return next;
-      });
-    }
+  const completeAssignment = useCallback(
+    (target: number, code: number) => {
+      if (target < 1000) {
+        setButtonMappings((current) => {
+          const next = [...current];
+          next[target] = code;
+          return next;
+        });
+      } else {
+        const directionIndex = target - 1000;
+        setStickMappings((current) => {
+          const next = [...current];
+          next[directionIndex] = code;
+          return next;
+        });
+      }
 
-    setAssigningTarget(null);
-    axisHoldCounterRef.current = 0;
-    axisHoldTargetRef.current = null;
-  }, [setButtonMappings, setStickMappings]);
+      setAssigningTarget(null);
+      axisHoldCounterRef.current = 0;
+      axisHoldTargetRef.current = null;
+    },
+    [setButtonMappings, setStickMappings],
+  );
 
   useEffect(() => {
     const manager = new GamepadManager();
@@ -76,7 +95,7 @@ export function useEditorGamepad(options: UseEditorGamepadOptions) {
     });
     manager.onDisconnect(() => {
       setConnected(false);
-      setGamepadName('');
+      setGamepadName("");
       setSnapshot(createEmptySnapshot(layoutRef.current));
     });
 
@@ -100,7 +119,10 @@ export function useEditorGamepad(options: UseEditorGamepadOptions) {
             ) {
               axisHoldCounterRef.current += 1;
               if (axisHoldCounterRef.current >= 60) {
-                completeAssignment(target, GamepadManager.axisToCode(axisHold.axis, axisHold.value));
+                completeAssignment(
+                  target,
+                  GamepadManager.axisToCode(axisHold.axis, axisHold.value),
+                );
               }
             } else if (axisHold) {
               axisHoldTargetRef.current = axisHold;
@@ -116,7 +138,7 @@ export function useEditorGamepad(options: UseEditorGamepadOptions) {
             gamepad,
             layoutRef.current,
             buttonMappingsRef.current,
-            stickMappingsRef.current
+            stickMappingsRef.current,
           );
           setSnapshot(nextSnapshot);
 
@@ -124,7 +146,7 @@ export function useEditorGamepad(options: UseEditorGamepadOptions) {
             stick: nextSnapshot.stickClass,
             buttons: nextSnapshot.pressedButtons,
             connected: true,
-            layout: layoutRef.current
+            layout: layoutRef.current,
           };
           api.sendState(state);
         }
@@ -137,17 +159,27 @@ export function useEditorGamepad(options: UseEditorGamepadOptions) {
       window.clearInterval(pollTimer);
       window.cancelAnimationFrame(frame);
     };
-  }, [api, assigningTargetRef, buttonMappingsRef, completeAssignment, layoutRef, stickMappingsRef]);
+  }, [
+    api,
+    assigningTargetRef,
+    buttonMappingsRef,
+    completeAssignment,
+    layoutRef,
+    stickMappingsRef,
+  ]);
 
-  const startAssignment = useCallback((target: number) => {
-    if (!gamepadRef.current?.isConnected()) {
-      window.alert(connectGamepadMessage);
-      return;
-    }
-    setAssigningTarget(target);
-    axisHoldCounterRef.current = 0;
-    axisHoldTargetRef.current = null;
-  }, [connectGamepadMessage]);
+  const startAssignment = useCallback(
+    (target: number) => {
+      if (!gamepadRef.current?.isConnected()) {
+        window.alert(connectGamepadMessage);
+        return;
+      }
+      setAssigningTarget(target);
+      axisHoldCounterRef.current = 0;
+      axisHoldTargetRef.current = null;
+    },
+    [connectGamepadMessage],
+  );
 
   const cancelAssignment = useCallback(() => {
     setAssigningTarget(null);
@@ -157,12 +189,16 @@ export function useEditorGamepad(options: UseEditorGamepadOptions) {
 
   return {
     assigningTarget,
-    assignmentName: assignmentNameForTarget(assigningTarget, buttonLabel, stickLabel),
+    assignmentName: assignmentNameForTarget(
+      assigningTarget,
+      buttonLabel,
+      stickLabel,
+    ),
     cancelAssignment,
     connected,
     gamepadName,
     resetSnapshot,
     snapshot,
-    startAssignment
+    startAssignment,
   };
 }

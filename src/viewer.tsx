@@ -1,12 +1,17 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { createRoot } from 'react-dom/client';
-import './i18n';
-import { ApiClient } from './api';
-import { GamepadManager, ButtonMapping, StickMapping } from './gamepad';
-import { createDefaultLayout, ensureLayoutDefaults } from './layout';
-import { Layout } from './types';
-import { createEmptySnapshot, readGamepadSnapshot } from './gamepad-state';
-import { GamepadView } from './components/GamepadView';
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
+import { createRoot } from "react-dom/client";
+import "./i18n";
+import { ApiClient } from "./api";
+import { GamepadView } from "./components/GamepadView";
+import {
+  type ButtonMapping,
+  GamepadManager,
+  type StickMapping,
+} from "./gamepad";
+import { createEmptySnapshot, readGamepadSnapshot } from "./gamepad-state";
+import { createDefaultLayout, ensureLayoutDefaults } from "./layout";
+import type { Layout } from "./types";
 
 function useLatestRef<T>(value: T): React.MutableRefObject<T> {
   const ref = useRef(value);
@@ -19,27 +24,38 @@ function useLatestRef<T>(value: T): React.MutableRefObject<T> {
 function ViewerApp(): React.ReactElement {
   const apiRef = useRef(new ApiClient());
   const [layout, setLayout] = useState<Layout>(() => createDefaultLayout());
-  const [buttonMappings, setButtonMappings] = useState<ButtonMapping[]>(() => GamepadManager.createDefaultButtonMappings());
-  const [stickMappings, setStickMappings] = useState<StickMapping[]>(() => GamepadManager.createDefaultStickMappings());
+  const [buttonMappings, setButtonMappings] = useState<ButtonMapping[]>(() =>
+    GamepadManager.createDefaultButtonMappings(),
+  );
+  const [stickMappings, setStickMappings] = useState<StickMapping[]>(() =>
+    GamepadManager.createDefaultStickMappings(),
+  );
   const [connected, setConnected] = useState(false);
-  const [snapshot, setSnapshot] = useState(() => createEmptySnapshot(createDefaultLayout()));
+  const [snapshot, setSnapshot] = useState(() =>
+    createEmptySnapshot(createDefaultLayout()),
+  );
   const layoutRef = useLatestRef(layout);
   const buttonMappingsRef = useLatestRef(buttonMappings);
   const stickMappingsRef = useLatestRef(stickMappings);
 
   useEffect(() => {
-    apiRef.current.getDefaultLayout()
+    apiRef.current
+      .getDefaultLayout()
       .then((defaultLayout) => {
-        const layoutName = defaultLayout.name || 'preset';
+        const layoutName = defaultLayout.name || "preset";
         return apiRef.current.getLayout(layoutName);
       })
       .then((data) => {
-        if (data && data.version) {
+        if (data?.version) {
           const nextLayout = ensureLayoutDefaults(data);
           setLayout(nextLayout);
           setSnapshot(createEmptySnapshot(nextLayout));
-          setButtonMappings(data.buttonMappings || GamepadManager.createDefaultButtonMappings());
-          setStickMappings(data.stickMappings || GamepadManager.createDefaultStickMappings());
+          setButtonMappings(
+            data.buttonMappings || GamepadManager.createDefaultButtonMappings(),
+          );
+          setStickMappings(
+            data.stickMappings || GamepadManager.createDefaultStickMappings(),
+          );
         }
       })
       .catch(() => undefined);
@@ -63,7 +79,7 @@ function ViewerApp(): React.ReactElement {
           gamepad,
           layoutRef.current,
           buttonMappingsRef.current,
-          stickMappingsRef.current
+          stickMappingsRef.current,
         );
         setSnapshot(nextSnapshot);
       }
@@ -89,7 +105,7 @@ function ViewerApp(): React.ReactElement {
   );
 }
 
-const root = document.getElementById('root');
+const root = document.getElementById("root");
 if (root) {
   createRoot(root).render(<ViewerApp />);
 }
