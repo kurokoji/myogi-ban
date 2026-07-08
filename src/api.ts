@@ -1,7 +1,7 @@
-import { Layout, GamepadState, SERVER_URL } from './types';
+import { Layout, GamepadState, LayoutEntry, SERVER_URL } from './types';
 
 export class ApiClient {
-  async getLayouts(): Promise<{ name: string; builtin: boolean }[]> {
+  async getLayouts(): Promise<LayoutEntry[]> {
     const res = await fetch(`${SERVER_URL}/api/layouts`);
     return res.json();
   }

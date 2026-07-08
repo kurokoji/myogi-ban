@@ -20,7 +20,7 @@ import i18n from './i18n';
 import { ApiClient } from './api';
 import { GamepadManager, ButtonMapping, StickMapping } from './gamepad';
 import { createDefaultLayout, ensureLayoutDefaults } from './layout';
-import { GamepadState, Layout, SERVER_URL } from './types';
+import { GamepadState, Layout, LayoutEntry, SERVER_URL } from './types';
 import { createEmptySnapshot, readGamepadSnapshot } from './gamepad-state';
 import { GamepadView } from './components/GamepadView';
 
@@ -59,8 +59,6 @@ function useLatestRef<T>(value: T): React.MutableRefObject<T> {
   return ref;
 }
 
-interface LayoutEntry { name: string; builtin: boolean; }
-
 function EditorApp(): React.ReactElement {
   const { t } = useTranslation();
   const apiRef = useRef(new ApiClient());
@@ -98,9 +96,8 @@ function EditorApp(): React.ReactElement {
   const refreshLayouts = useCallback(async () => {
     try {
       const layouts = await apiRef.current.getLayouts();
-      const entries = layouts.map((entry: any) => typeof entry === 'string' ? { name: entry, builtin: true } : entry);
-      setLayoutNames(entries);
-      return entries;
+      setLayoutNames(layouts);
+      return layouts;
     } catch (error) {
       console.error('Failed to load layout list:', error);
       return [];

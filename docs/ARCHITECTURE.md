@@ -27,6 +27,7 @@ Myogi BanはローカルHTTPサーバー、編集画面、OBSビューアで構�
 
 - `src/electron.ts`: Electronアプリ起動用。Express/WebSocketサーバーを起動し、編集画面をBrowserWindowで開く
 - `src/server.ts`: Webサーバー単体起動用。Express/WebSocketサーバーだけを起動する
+- `src/local-server.ts`: Electron/Webサーバーで共有するExpress API、静的配信、WebSocket、レイアウト保存処理
 - `src/editor.tsx`: 編集画面のReactエントリ
 - `src/viewer.tsx`: OBSビューアのReactエントリ
 
@@ -60,6 +61,7 @@ WebSocketは同じポートで待ち受け、`POST /api/state` された状態�
 - `ApiClient`: REST API呼び出し
 - `GamepadManager`: Gamepad APIの接続、ポーリング、ボタン/軸検出
 - `GamepadView`: 背景、レバー、ボタンの描画
+- `local-server.ts`: ローカルサーバーの共通実装
 - `layout.ts`: デフォルトレイアウト生成と既存JSONへのデフォルト補完
 - `i18n.ts`: 日本語/英語リソース
 
