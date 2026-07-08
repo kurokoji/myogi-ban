@@ -9,6 +9,7 @@
     "includes": [
       "biome.json",
       "package.json",
+      "scripts/**",
       "tsconfig.json",
       "src/**",
       "public/*.html",
