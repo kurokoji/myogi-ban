@@ -464,7 +464,6 @@ function EditorApp(): React.ReactElement {
                 layout={layout}
                 stickClass={snapshot.stickClass}
                 pressedButtons={snapshot.pressedButtons}
-                connected={connected}
                 backgroundOpacity={backgroundOpacity}
                 editorMode
                 selectedButtonIndex={selectedButtonIndex}

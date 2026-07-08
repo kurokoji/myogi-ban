@@ -30,7 +30,6 @@ function ViewerApp(): React.ReactElement {
   const [stickMappings, setStickMappings] = useState<StickMapping[]>(() =>
     GamepadManager.createDefaultStickMappings(),
   );
-  const [connected, setConnected] = useState(false);
   const [snapshot, setSnapshot] = useState(() =>
     createEmptySnapshot(createDefaultLayout()),
   );
@@ -63,9 +62,7 @@ function ViewerApp(): React.ReactElement {
 
   useEffect(() => {
     const manager = new GamepadManager();
-    manager.onConnect(() => setConnected(true));
     manager.onDisconnect(() => {
-      setConnected(false);
       setSnapshot(createEmptySnapshot(layoutRef.current));
     });
 
@@ -99,7 +96,6 @@ function ViewerApp(): React.ReactElement {
         layout={layout}
         stickClass={snapshot.stickClass}
         pressedButtons={snapshot.pressedButtons}
-        connected={connected}
       />
     </div>
   );

@@ -1,13 +1,11 @@
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { type Layout, STICK_NAMES } from "../types";
 
 export interface GamepadViewProps {
   layout: Layout;
   stickClass: string;
   pressedButtons: boolean[];
-  connected: boolean;
   backgroundOpacity?: number;
   editorMode?: boolean;
   selectedButtonIndex?: number | null;
@@ -104,12 +102,10 @@ function useBackgroundSize(
 }
 
 export function GamepadView(props: GamepadViewProps): React.ReactElement {
-  const { t } = useTranslation();
   const {
     layout,
     stickClass,
     pressedButtons,
-    connected,
     backgroundOpacity = 1,
     editorMode = false,
     selectedButtonIndex,
@@ -188,13 +184,6 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
 
   return (
     <div id="gamepad0" className="gamepad-background">
-      <div
-        id="gamepad-background-image"
-        className={`gamepad-disconnected${connected ? " gamepad-connected" : ""}`}
-        style={{ width: backgroundSize.width, height: backgroundSize.height }}
-      >
-        <div className="disconnected-text">{t("pressAnyButton")}</div>
-      </div>
       <div
         id="gamepad-area"
         className="gamepad-area"

@@ -20,33 +20,6 @@ body {
   position: relative;
 }
 
-.gamepad-disconnected {
-  background-color: #fff;
-  opacity: 1;
-  transition:
-    opacity 0.4s,
-    visibility 0.4s;
-  width: 500px;
-  height: 250px;
-  position: absolute;
-  z-index: 40;
-  visibility: visible;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.disconnected-text {
-  font-size: 32px;
-  font-weight: bold;
-  color: #333;
-}
-
-.gamepad-disconnected.gamepad-connected {
-  opacity: 0;
-  visibility: hidden;
-}
-
 .gamepad-area-background {
   background-image: url("../layout/preset/background.png");
   background-size: 100% 100%;
