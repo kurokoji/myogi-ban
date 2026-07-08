@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   ActionIcon,
@@ -20,49 +20,22 @@ import i18n from './i18n';
 import { ApiClient } from './api';
 import { GamepadManager, ButtonMapping, StickMapping } from './gamepad';
 import { createDefaultLayout, ensureLayoutDefaults } from './layout';
-import { GamepadState, Layout, LayoutEntry, SERVER_URL } from './types';
-import { createEmptySnapshot, readGamepadSnapshot } from './gamepad-state';
+import { Layout, LayoutEntry, SERVER_URL } from './types';
 import { GamepadView } from './components/GamepadView';
-
-type AssigningTarget = number | null;
-type ImageUploadTarget =
-  | { type: 'background' }
-  | { type: 'defaultButton'; state: 'released' | 'pressed' }
-  | { type: 'button'; index: number; state: 'released' | 'pressed' };
-
-function cloneLayout(layout: Layout): Layout {
-  return {
-    ...layout,
-    stick: { ...layout.stick },
-    defaultbuttons: { ...layout.defaultbuttons },
-    background: { ...layout.background },
-    buttons: layout.buttons.map((button) => ({ ...button })),
-    buttonMappings: layout.buttonMappings ? [...layout.buttonMappings] : undefined,
-    stickMappings: layout.stickMappings ? [...layout.stickMappings] : undefined
-  };
-}
-
-function numberInputValue(value: string | number): string {
-  return value === undefined || value === null ? '' : String(value);
-}
-
-function numericValue(value: string | number): number | string {
-  const text = numberInputValue(value);
-  return text === '' ? '' : Number(text);
-}
-
-function useLatestRef<T>(value: T): React.MutableRefObject<T> {
-  const ref = useRef(value);
-  useEffect(() => {
-    ref.current = value;
-  }, [value]);
-  return ref;
-}
+import {
+  ImageUploadTarget,
+  cloneLayout,
+  createEmptyButtonLayout,
+  layoutNameFromSelection,
+  layoutSelectionValue,
+  numericValue,
+  readFileAsDataUrl
+} from './editor-helpers';
+import { useEditorGamepad } from './hooks/useEditorGamepad';
 
 function EditorApp(): React.ReactElement {
   const { t } = useTranslation();
   const apiRef = useRef(new ApiClient());
-  const gamepadRef = useRef<GamepadManager | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const imageUploadTargetRef = useRef<ImageUploadTarget>({ type: 'background' });
   const [layout, setLayout] = useState<Layout>(() => createDefaultLayout());
@@ -71,27 +44,30 @@ function EditorApp(): React.ReactElement {
   const [layoutName, setLayoutName] = useState('mypreset');
   const [buttonMappings, setButtonMappings] = useState<ButtonMapping[]>(() => GamepadManager.createDefaultButtonMappings());
   const [stickMappings, setStickMappings] = useState<StickMapping[]>(() => GamepadManager.createDefaultStickMappings());
-  const [connected, setConnected] = useState(false);
-  const [gamepadName, setGamepadName] = useState('');
-  const [snapshot, setSnapshot] = useState(() => createEmptySnapshot(createDefaultLayout()));
   const [previewScale, setPreviewScale] = useState(1);
   const [backgroundOpacity, setBackgroundOpacity] = useState(1);
-  const [assigningTarget, setAssigningTarget] = useState<AssigningTarget>(null);
   const [selectedButtonIndex, setSelectedButtonIndex] = useState<number | null>(null);
   const [language, setLanguage] = useState(i18n.language);
-  const axisHoldCounterRef = useRef(0);
-  const axisHoldTargetRef = useRef<{ axis: number; value: number } | null>(null);
-  const layoutRef = useLatestRef(layout);
-  const buttonMappingsRef = useLatestRef(buttonMappings);
-  const stickMappingsRef = useLatestRef(stickMappings);
-  const assigningTargetRef = useLatestRef(assigningTarget);
+  const {
+    assigningTarget,
+    assignmentName,
+    cancelAssignment,
+    connected,
+    gamepadName,
+    resetSnapshot,
+    snapshot,
+    startAssignment
+  } = useEditorGamepad({
+    api: apiRef.current,
+    layout,
+    buttonMappings,
+    stickMappings,
+    setButtonMappings,
+    setStickMappings,
+    connectGamepadMessage: t('connectGamepadFirst')
+  });
 
   const obsUrl = `${SERVER_URL}/view`;
-  const assignmentName = useMemo(() => {
-    if (assigningTarget === null) return '';
-    if (assigningTarget < 1000) return `Button ${assigningTarget + 1}`;
-    return `Stick ${['Up', 'Down', 'Left', 'Right'][assigningTarget - 1000]}`;
-  }, [assigningTarget]);
 
   const refreshLayouts = useCallback(async () => {
     try {
@@ -107,11 +83,11 @@ function EditorApp(): React.ReactElement {
   const applyLayout = useCallback((data: Layout, name?: string) => {
     const nextLayout = ensureLayoutDefaults(data);
     setLayout(nextLayout);
-    setSnapshot(createEmptySnapshot(nextLayout));
+    resetSnapshot(nextLayout);
     setButtonMappings(data.buttonMappings || GamepadManager.createDefaultButtonMappings());
     setStickMappings(data.stickMappings || GamepadManager.createDefaultStickMappings());
     if (name) setLayoutName(name);
-  }, []);
+  }, [resetSnapshot]);
 
   useEffect(() => {
     let cancelled = false;
@@ -126,7 +102,7 @@ function EditorApp(): React.ReactElement {
         const entries = await refreshLayouts();
         if (!cancelled) {
           const entry = entries.find(e => e.name === layoutName);
-          setSelectedLayout(entry ? `${entry.name}:${entry.builtin ? 'builtin' : 'user'}` : layoutName);
+          setSelectedLayout(entry ? layoutSelectionValue(entry.name, entry.builtin) : layoutName);
         }
       } catch {
         console.log('No default layout found, using built-in default');
@@ -145,98 +121,6 @@ function EditorApp(): React.ReactElement {
       return Math.min(current, Math.max(0, layout.totalbuttonshow - 1));
     });
   }, [layout.totalbuttonshow]);
-
-  useEffect(() => {
-    const manager = new GamepadManager();
-    gamepadRef.current = manager;
-    manager.onConnect((gamepad) => {
-      setConnected(true);
-      setGamepadName(gamepad.id);
-    });
-    manager.onDisconnect(() => {
-      setConnected(false);
-      setGamepadName('');
-      setSnapshot(createEmptySnapshot(layoutRef.current));
-    });
-
-    const pollTimer = window.setInterval(() => manager.pollConnection(), 100);
-    let frame = 0;
-    const updateLoop = () => {
-      const gamepad = manager.getGamepad();
-      if (gamepad) {
-        const target = assigningTargetRef.current;
-        if (target !== null) {
-          const buttonPress = manager.detectButtonPress();
-          if (buttonPress !== null) {
-            completeAssignment(target, buttonPress);
-          } else {
-            const axisHold = manager.detectAxisHold();
-            if (
-              axisHold &&
-              axisHoldTargetRef.current &&
-              axisHoldTargetRef.current.axis === axisHold.axis &&
-              Math.abs(axisHoldTargetRef.current.value - axisHold.value) < 0.1
-            ) {
-              axisHoldCounterRef.current += 1;
-              if (axisHoldCounterRef.current >= 60) {
-                completeAssignment(target, GamepadManager.axisToCode(axisHold.axis, axisHold.value));
-              }
-            } else if (axisHold) {
-              axisHoldTargetRef.current = axisHold;
-              axisHoldCounterRef.current = 1;
-            } else {
-              axisHoldTargetRef.current = null;
-              axisHoldCounterRef.current = 0;
-            }
-          }
-        } else {
-          const nextSnapshot = readGamepadSnapshot(
-            manager,
-            gamepad,
-            layoutRef.current,
-            buttonMappingsRef.current,
-            stickMappingsRef.current
-          );
-          setSnapshot(nextSnapshot);
-
-          const state: GamepadState = {
-            stick: nextSnapshot.stickClass,
-            buttons: nextSnapshot.pressedButtons,
-            connected: true,
-            layout: layoutRef.current
-          };
-          apiRef.current.sendState(state);
-        }
-      }
-      frame = window.requestAnimationFrame(updateLoop);
-    };
-    frame = window.requestAnimationFrame(updateLoop);
-
-    return () => {
-      window.clearInterval(pollTimer);
-      window.cancelAnimationFrame(frame);
-    };
-  }, [assigningTargetRef, buttonMappingsRef, layoutRef, stickMappingsRef]);
-
-  const completeAssignment = useCallback((target: number, code: number) => {
-    if (target < 1000) {
-      setButtonMappings((current) => {
-        const next = [...current];
-        next[target] = code;
-        return next;
-      });
-    } else {
-      const directionIndex = target - 1000;
-      setStickMappings((current) => {
-        const next = [...current];
-        next[directionIndex] = code;
-        return next;
-      });
-    }
-    setAssigningTarget(null);
-    axisHoldCounterRef.current = 0;
-    axisHoldTargetRef.current = null;
-  }, []);
 
   const updateLayout = useCallback((updater: (layout: Layout) => void) => {
     setLayout((current) => {
@@ -259,7 +143,7 @@ function EditorApp(): React.ReactElement {
   const handleButtonPositionChange = useCallback((index: number, x: number, y: number) => {
     setLayout((current) => {
       const next = cloneLayout(current);
-      if (!next.buttons[index]) next.buttons[index] = { x: '', y: '', w: '', h: '', img: '', xp: '', yp: '', wp: '', hp: '', imgp: '' };
+      if (!next.buttons[index]) next.buttons[index] = createEmptyButtonLayout();
       next.buttons[index].x = String(x);
       next.buttons[index].y = String(y);
       return next;
@@ -277,7 +161,7 @@ function EditorApp(): React.ReactElement {
 
   const loadLayout = async () => {
     if (!selectedLayout) return;
-    const name = selectedLayout.replace(/:builtin$|:user$/, '');
+    const name = layoutNameFromSelection(selectedLayout);
     try {
       const data = await apiRef.current.getLayout(name);
       applyLayout(data, name);
@@ -323,12 +207,7 @@ function EditorApp(): React.ReactElement {
     const file = event.target.files?.[0];
     if (!file) return;
     const uploadLayoutName = layout.name || 'custom';
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result));
-      reader.onerror = () => reject(reader.error);
-      reader.readAsDataURL(file);
-    });
+    const dataUrl = await readFileAsDataUrl(file);
 
     try {
       const response = await fetch(`${SERVER_URL}/api/upload-image`, {
@@ -354,16 +233,6 @@ function EditorApp(): React.ReactElement {
     } catch (error) {
       console.error('Failed to upload image:', error);
     }
-  };
-
-  const startAssignment = (target: number) => {
-    if (!gamepadRef.current?.isConnected()) {
-      window.alert(t('connectGamepadFirst'));
-      return;
-    }
-    setAssigningTarget(target);
-    axisHoldCounterRef.current = 0;
-    axisHoldTargetRef.current = null;
   };
 
   const changeLanguage = (nextLanguage: string) => {
@@ -718,7 +587,7 @@ function EditorApp(): React.ReactElement {
               <div className="mapping-status">
                 <p>{t('assigning')}: <span>{assignmentName}</span></p>
                 <Text size="xs" c="dimmed">{t('pressButtonOrHoldAxis')}</Text>
-                <Button size="xs" variant="light" onClick={() => setAssigningTarget(null)}>{t('cancel')}</Button>
+                <Button size="xs" variant="light" onClick={cancelAssignment}>{t('cancel')}</Button>
               </div>
             )}
           </Stack>
