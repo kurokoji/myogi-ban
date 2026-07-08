@@ -285,14 +285,17 @@ function EditorApp(): React.ReactElement {
   }, [applyLayout, refreshLayouts]);
 
   useEffect(() => {
-    setSelectedButtonIndex((current) => {
-      if (current === null) return null;
-      return Math.min(current, Math.max(0, layout.totalbuttonshow - 1));
-    });
     setSelectedButtonIndexes((current) =>
       current.filter((index) => index < layout.totalbuttonshow),
     );
-  }, [layout.totalbuttonshow]);
+    if (
+      selectedButtonIndex !== null &&
+      selectedButtonIndex >= layout.totalbuttonshow
+    ) {
+      setSelectedButtonIndex(null);
+      cancelAssignment();
+    }
+  }, [cancelAssignment, layout.totalbuttonshow, selectedButtonIndex]);
 
   const updateLayout = useCallback(
     (updater: (layout: Layout) => void) => {
@@ -368,8 +371,30 @@ function EditorApp(): React.ReactElement {
       setSelectedButtonIndexes(selection.buttonIndexes);
       setSelectedStick(selection.stick);
       setSelectedButtonIndex(selection.buttonIndexes[0] ?? null);
+      cancelAssignment();
     },
-    [],
+    [cancelAssignment],
+  );
+
+  const clearSelection = useCallback(() => {
+    setSelectedButtonIndexes([]);
+    setSelectedStick(false);
+    setSelectedButtonIndex(null);
+    cancelAssignment();
+  }, [cancelAssignment]);
+
+  const selectButtonForSettings = useCallback(
+    (index: number | null) => {
+      if (index === null) {
+        clearSelection();
+        return;
+      }
+      setSelectedButtonIndexes([index]);
+      setSelectedStick(false);
+      setSelectedButtonIndex(index);
+      cancelAssignment();
+    },
+    [cancelAssignment, clearSelection],
   );
 
   const selectButtonAndStartAssignment = useCallback(
@@ -391,12 +416,6 @@ function EditorApp(): React.ReactElement {
     },
     [startAssignment],
   );
-
-  const clearSelection = useCallback(() => {
-    setSelectedButtonIndexes([]);
-    setSelectedStick(false);
-    setSelectedButtonIndex(null);
-  }, []);
 
   const clearSelectionOnPreviewOutsideClick = useCallback(
     (event: React.MouseEvent<HTMLElement>) => {
@@ -585,7 +604,7 @@ function EditorApp(): React.ReactElement {
           assignmentName={assignmentName}
           selectedButtonIndex={selectedButtonIndex}
           updateLayout={updateLayout}
-          setSelectedButtonIndex={setSelectedButtonIndex}
+          onSelectedButtonChange={selectButtonForSettings}
           openImagePicker={openImagePicker}
           cancelAssignment={cancelAssignment}
         />

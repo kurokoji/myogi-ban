@@ -10,7 +10,7 @@ import {
   TextInput,
   Title,
 } from "@mantine/core";
-import type { ChangeEvent, Dispatch, RefObject, SetStateAction } from "react";
+import type { ChangeEvent, RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import {
   type AssigningTarget,
@@ -386,7 +386,7 @@ interface ButtonSettingsPanelProps {
   assignmentName: string;
   selectedButtonIndex: number | null;
   updateLayout: EditorLayoutUpdater;
-  setSelectedButtonIndex: Dispatch<SetStateAction<number | null>>;
+  onSelectedButtonChange: (index: number | null) => void;
   openImagePicker: (target: ImageUploadTarget) => void;
   cancelAssignment: () => void;
 }
@@ -618,7 +618,7 @@ export function ButtonSettingsPanel(
             selectedButtonIndex === null ? "" : String(selectedButtonIndex)
           }
           onChange={(event) =>
-            props.setSelectedButtonIndex(
+            props.onSelectedButtonChange(
               event.target.value === ""
                 ? null
                 : parseInt(event.target.value, 10),
