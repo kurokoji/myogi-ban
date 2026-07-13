@@ -105,9 +105,15 @@ export function createDefaultLayout(): Layout {
     }),
     buttons,
     background: createDefaultBackgroundConfig({
+      w: "500",
+      h: "250",
       cssColor: "#ffffff",
       cssBorderRadius: 20,
     }),
+    guides: {
+      vertical: [],
+      horizontal: [],
+    },
   };
 }
 
@@ -150,5 +156,11 @@ export function ensureLayoutDefaults(layout: Partial<Layout>): Layout {
     defaultbuttons,
     background,
     buttons,
+    guides: {
+      vertical: [...(layout.guides?.vertical || defaults.guides.vertical)],
+      horizontal: [
+        ...(layout.guides?.horizontal || defaults.guides.horizontal),
+      ],
+    },
   };
 }

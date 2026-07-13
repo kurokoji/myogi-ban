@@ -14,6 +14,10 @@ export function cloneLayout(layout: Layout): Layout {
     defaultbuttons: { ...layout.defaultbuttons },
     background: { ...layout.background },
     buttons: layout.buttons.map((button) => ({ ...button })),
+    guides: {
+      vertical: [...layout.guides.vertical],
+      horizontal: [...layout.guides.horizontal],
+    },
     buttonMappings: layout.buttonMappings
       ? [...layout.buttonMappings]
       : undefined,

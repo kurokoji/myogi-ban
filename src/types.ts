@@ -43,6 +43,11 @@ export interface BackgroundConfig {
   cssBorderRadius?: number;
 }
 
+export interface LayoutGuides {
+  vertical: number[];
+  horizontal: number[];
+}
+
 export interface Layout {
   version: string;
   name: string;
@@ -52,6 +57,7 @@ export interface Layout {
   defaultbuttons: ButtonLayout;
   buttons: ButtonLayout[];
   background: BackgroundConfig;
+  guides: LayoutGuides;
   buttonMappings?: number[];
   stickMappings?: number[];
 }

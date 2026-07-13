@@ -72,11 +72,15 @@ Myogi Banはローカルサーバー上でREST APIとWebSocketを提供します
     "show": true,
     "image": "",
     "scale": "1",
-    "w": "",
-    "h": "",
+    "w": "500",
+    "h": "250",
     "useCss": true,
     "cssColor": "#ffffff",
     "cssBorderRadius": 20
+  },
+  "guides": {
+    "vertical": [],
+    "horizontal": []
   },
   "buttonMappings": [1, 2, 3, 6, 0, 4, 5, 7],
   "stickMappings": [12, 13, 14, 15]

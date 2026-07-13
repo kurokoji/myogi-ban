@@ -251,8 +251,9 @@ body {
 
 #preview-scroll {
   display: grid;
-  grid-template-columns: minmax(16px, 1fr) max-content minmax(16px, 1fr);
-  grid-template-rows: minmax(16px, 1fr) max-content minmax(16px, 1fr);
+  grid-template-columns: minmax(4px, 1fr) max-content minmax(4px, 1fr);
+  grid-template-rows: minmax(4px, 1fr) max-content minmax(4px, 1fr);
+  place-items: stretch;
 }
 
 #preview-container {
@@ -260,6 +261,129 @@ body {
   grid-row: 2;
   position: relative;
   padding: 0;
+}
+
+.preview-ruler {
+  position: absolute;
+  z-index: 40;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  user-select: none;
+}
+
+.preview-ruler-horizontal {
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 34px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.36);
+  background: rgba(11, 15, 20, 0.72);
+  cursor: row-resize;
+}
+
+.preview-ruler-vertical {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 34px;
+  border-right: 1px solid rgba(255, 255, 255, 0.36);
+  background: rgba(11, 15, 20, 0.72);
+  cursor: col-resize;
+}
+
+.preview-ruler-tick {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.55);
+  pointer-events: none;
+}
+
+.preview-ruler-horizontal .preview-ruler-tick {
+  bottom: 0;
+  width: 1px;
+  height: 6px;
+}
+
+.preview-ruler-horizontal .preview-ruler-tick-major {
+  height: 20px;
+}
+
+.preview-ruler-vertical .preview-ruler-tick {
+  right: 0;
+  width: 6px;
+  height: 1px;
+}
+
+.preview-ruler-vertical .preview-ruler-tick-major {
+  width: 12px;
+}
+
+.preview-ruler-label {
+  pointer-events: none;
+}
+
+.preview-ruler-horizontal .preview-ruler-label {
+  position: absolute;
+  top: 4px;
+  left: 3px;
+}
+
+.preview-ruler-vertical .preview-ruler-label {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  max-width: 28px;
+  overflow: hidden;
+  text-align: right;
+}
+
+.preview-guides {
+  position: absolute;
+  inset: 0;
+  z-index: 35;
+  pointer-events: none;
+}
+
+.preview-guide {
+  position: absolute;
+  background: rgba(255, 235, 59, 0.95);
+  box-shadow: 0 0 0 1px rgba(11, 15, 20, 0.35);
+  pointer-events: auto;
+}
+
+.preview-guide-vertical {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  cursor: col-resize;
+}
+
+.preview-guide-horizontal {
+  right: 0;
+  left: 0;
+  height: 1px;
+  cursor: row-resize;
+}
+
+.preview-guide::before {
+  position: absolute;
+  content: "";
+}
+
+.preview-guide-vertical::before {
+  top: 0;
+  bottom: 0;
+  left: -5px;
+  width: 11px;
+}
+
+.preview-guide-horizontal::before {
+  top: -5px;
+  right: 0;
+  left: 0;
+  height: 11px;
 }
 
 #preview-frame {
