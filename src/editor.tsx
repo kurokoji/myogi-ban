@@ -449,6 +449,13 @@ function EditorApp(): React.ReactElement {
     [pushUndoSnapshot, syncLayoutHistoryAvailability],
   );
 
+  const clearGuides = useCallback(() => {
+    updateLayout((next) => {
+      next.guides.vertical = [];
+      next.guides.horizontal = [];
+    });
+  }, [updateLayout]);
+
   const updateBackgroundSize = useCallback((width: number, height: number) => {
     setLayout((current) => {
       if (
@@ -719,8 +726,13 @@ function EditorApp(): React.ReactElement {
         <DisplaySettingsPanel
           language={language}
           previewScale={previewScale}
+          hasGuides={
+            layout.guides.vertical.length > 0 ||
+            layout.guides.horizontal.length > 0
+          }
           onLanguageChange={changeLanguage}
           onPreviewScaleChange={changePreviewScale}
+          onClearGuides={clearGuides}
         />
 
         <LayoutSettingsPanel

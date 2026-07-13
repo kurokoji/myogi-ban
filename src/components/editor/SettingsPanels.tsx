@@ -24,8 +24,10 @@ import type { ButtonShape, Layout, LayoutEntry } from "../../types";
 interface DisplaySettingsPanelProps {
   language: string;
   previewScale: number;
+  hasGuides: boolean;
   onLanguageChange: (language: string) => void;
   onPreviewScaleChange: (scale: number) => void;
+  onClearGuides: () => void;
 }
 
 export function DisplaySettingsPanel(
@@ -62,6 +64,15 @@ export function DisplaySettingsPanel(
             }
           />
         </label>
+        <Button
+          size="xs"
+          variant="light"
+          color="gray"
+          onClick={props.onClearGuides}
+          disabled={!props.hasGuides}
+        >
+          {t("clearGuides")}
+        </Button>
       </Stack>
     </Paper>
   );
