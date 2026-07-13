@@ -33,7 +33,7 @@ Myogi Banはローカルサーバー上でREST APIとWebSocketを提供します
 
 ```json
 {
-  "version": "v1.0.3",
+  "version": "v1.0.4",
   "name": "default",
   "totalbuttonshow": 8,
   "showstick": true,
@@ -62,8 +62,10 @@ Myogi Banはローカルサーバー上でREST APIとWebSocketを提供します
     "useCss": true,
     "cssColor": "#e03131",
     "cssPressedColor": "#c2251c",
+    "rotation": "0",
     "cssTransition": "0",
-    "cssEasing": "linear"
+    "cssEasing": "linear",
+    "cssShape": "circle"
   },
   "buttons": [],
   "background": {
@@ -95,7 +97,7 @@ Myogi Banはローカルサーバー上でREST APIとWebSocketを提供します
 {
   "name": "mypreset",
   "data": {
-    "version": "v1.0.3",
+    "version": "v1.0.4",
     "name": "mypreset",
     "totalbuttonshow": 8
   }

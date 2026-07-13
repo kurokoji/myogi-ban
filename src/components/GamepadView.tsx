@@ -1,9 +1,20 @@
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { type Layout, STICK_NAMES } from "../types";
+import { type ButtonShape, type Layout, STICK_NAMES } from "../types";
 
 const STICK_SELECTION_SIZE = 96;
 const SELECTION_BOUNDS_PADDING = 12;
+
+function buttonRadiusForShape(shape: ButtonShape): string {
+  switch (shape) {
+    case "square":
+      return "0";
+    case "rounded":
+      return "8px";
+    case "circle":
+      return "50%";
+  }
+}
 
 export interface GamepadViewProps {
   layout: Layout;
@@ -646,6 +657,9 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
               button.cssTransition ?? defaultButton.cssTransition ?? "0.02";
             const cssEasing =
               button.cssEasing ?? defaultButton.cssEasing ?? "ease";
+            const cssShape =
+              button.cssShape ?? defaultButton.cssShape ?? "circle";
+            const rotation = button.rotation ?? defaultButton.rotation ?? "0";
             const style: React.CSSProperties = {
               left: `${button.x || defaultButton.x || 0}px`,
               top: `${button.y || defaultButton.y || 0}px`,
@@ -656,6 +670,8 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
               "--button-shadow-color": pressed
                 ? "rgba(0, 0, 0, 0.4)"
                 : "rgba(0, 0, 0, 0.2)",
+              "--button-rotation": `${rotation}deg`,
+              "--button-radius": buttonRadiusForShape(cssShape),
               "--button-transition": `${cssTransition}s`,
               "--button-easing": cssEasing,
             } as React.CSSProperties;

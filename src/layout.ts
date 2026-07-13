@@ -79,7 +79,7 @@ export function createDefaultLayout(): Layout {
   }
 
   return {
-    version: "v1.0.3",
+    version: "v1.0.4",
     name: "default",
     totalbuttonshow: 8,
     showstick: true,
@@ -98,8 +98,10 @@ export function createDefaultLayout(): Layout {
       useCss: true,
       cssColor: "#e03131",
       cssPressedColor: "#c2251c",
+      rotation: "0",
       cssTransition: "0",
       cssEasing: "linear",
+      cssShape: "circle",
     }),
     buttons,
     background: createDefaultBackgroundConfig({
@@ -136,6 +138,8 @@ export function ensureLayoutDefaults(layout: Partial<Layout>): Layout {
     if (b.h === defaultbuttons.h) b.h = "";
     if (b.img === defaultbuttons.img) b.img = "";
     if (b.imgp === defaultbuttons.imgp) b.imgp = "";
+    if (b.rotation === defaultbuttons.rotation) delete b.rotation;
+    if (b.cssShape === defaultbuttons.cssShape) delete b.cssShape;
     return b;
   });
 

@@ -1,3 +1,5 @@
+export type ButtonShape = "circle" | "rounded" | "square";
+
 export interface ButtonLayout {
   x: string;
   y: string;
@@ -9,11 +11,13 @@ export interface ButtonLayout {
   wp: string;
   hp: string;
   imgp: string;
+  rotation?: string;
   useCss?: boolean;
   cssColor?: string;
   cssPressedColor?: string;
   cssTransition?: string;
   cssEasing?: string;
+  cssShape?: ButtonShape;
 }
 
 export interface StickLayout {

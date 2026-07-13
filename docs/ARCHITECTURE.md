@@ -87,6 +87,8 @@ interface Layout {
 ```
 
 `ensureLayoutDefaults()` が古い/不足したレイアウトJSONに対して現在のデフォルト値を補完します。
+CSS描画ボタンは `cssShape` で `"circle"`、`"rounded"`、`"square"` を指定できます。
+ボタンの `rotation` は度数文字列で、画像ボタンとCSS描画ボタンの両方に適用されます。
 
 ## 保存場所
 

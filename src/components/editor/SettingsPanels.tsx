@@ -19,7 +19,7 @@ import {
   type ImageUploadTarget,
   numericValue,
 } from "../../editor-helpers";
-import type { Layout, LayoutEntry } from "../../types";
+import type { ButtonShape, Layout, LayoutEntry } from "../../types";
 
 interface DisplaySettingsPanelProps {
   language: string;
@@ -476,6 +476,29 @@ export function ButtonSettingsPanel(
         )}
         {layout.defaultbuttons.useCss && (
           <div className="control row">
+            <NativeSelect
+              size="xs"
+              label={t("buttonShape")}
+              value={layout.defaultbuttons.cssShape || "circle"}
+              onChange={(event) =>
+                updateLayout((next) => {
+                  const previousShape =
+                    next.defaultbuttons.cssShape ?? "circle";
+                  next.defaultbuttons.cssShape = event.target
+                    .value as ButtonShape;
+                  for (const button of next.buttons) {
+                    if ((button.cssShape ?? previousShape) === previousShape) {
+                      delete button.cssShape;
+                    }
+                  }
+                })
+              }
+              data={[
+                { value: "circle", label: t("shapeCircle") },
+                { value: "rounded", label: t("shapeRounded") },
+                { value: "square", label: t("shapeSquare") },
+              ]}
+            />
             <NumberInput
               size="xs"
               label={t("transition")}
@@ -489,24 +512,26 @@ export function ButtonSettingsPanel(
                 })
               }
             />
-            <NativeSelect
-              size="xs"
-              label={t("easing")}
-              value={layout.defaultbuttons.cssEasing || "ease"}
-              onChange={(event) =>
-                updateLayout((next) => {
-                  next.defaultbuttons.cssEasing = event.target.value;
-                })
-              }
-              data={[
-                { value: "ease", label: "ease" },
-                { value: "linear", label: "linear" },
-                { value: "ease-in", label: "ease-in" },
-                { value: "ease-out", label: "ease-out" },
-                { value: "ease-in-out", label: "ease-in-out" },
-              ]}
-            />
           </div>
+        )}
+        {layout.defaultbuttons.useCss && (
+          <NativeSelect
+            size="xs"
+            label={t("easing")}
+            value={layout.defaultbuttons.cssEasing || "ease"}
+            onChange={(event) =>
+              updateLayout((next) => {
+                next.defaultbuttons.cssEasing = event.target.value;
+              })
+            }
+            data={[
+              { value: "ease", label: "ease" },
+              { value: "linear", label: "linear" },
+              { value: "ease-in", label: "ease-in" },
+              { value: "ease-out", label: "ease-out" },
+              { value: "ease-in-out", label: "ease-in-out" },
+            ]}
+          />
         )}
         {!layout.defaultbuttons.useCss && (
           <>
@@ -611,6 +636,27 @@ export function ButtonSettingsPanel(
             }
           />
         </div>
+        <NumberInput
+          size="xs"
+          label={t("rotation")}
+          min={-180}
+          max={180}
+          step={1}
+          value={numericValue(layout.defaultbuttons.rotation || "0")}
+          onChange={(value) =>
+            updateLayout((next) => {
+              const previousRotation = next.defaultbuttons.rotation ?? "0";
+              next.defaultbuttons.rotation = String(value ?? 0);
+              for (const button of next.buttons) {
+                if (
+                  (button.rotation ?? previousRotation) === previousRotation
+                ) {
+                  delete button.rotation;
+                }
+              }
+            })
+          }
+        />
         <NativeSelect
           size="xs"
           label={t("editButton")}
@@ -669,6 +715,7 @@ export function ButtonSettingsPanel(
                     wp: next.defaultbuttons.wp,
                     hp: next.defaultbuttons.hp,
                     imgp: next.defaultbuttons.imgp,
+                    rotation: next.defaultbuttons.rotation,
                     useCss: next.defaultbuttons.useCss,
                     cssColor: next.defaultbuttons.cssColor,
                     cssPressedColor: next.defaultbuttons.cssPressedColor,
@@ -699,6 +746,7 @@ export function ButtonSettingsPanel(
                 wp: next.defaultbuttons.wp,
                 hp: next.defaultbuttons.hp,
                 imgp: next.defaultbuttons.imgp,
+                rotation: next.defaultbuttons.rotation,
                 useCss: next.defaultbuttons.useCss,
                 cssColor: next.defaultbuttons.cssColor,
                 cssPressedColor: next.defaultbuttons.cssPressedColor,
@@ -780,6 +828,32 @@ export function ButtonSettingsPanel(
             layout.defaultbuttons.useCss ??
             false) && (
             <div className="control row">
+              <NativeSelect
+                size="xs"
+                label={t("buttonShape")}
+                value={
+                  layout.buttons[selectedButtonIndex]?.cssShape ===
+                  layout.defaultbuttons.cssShape
+                    ? ""
+                    : (layout.buttons[selectedButtonIndex]?.cssShape ?? "")
+                }
+                onChange={(event) =>
+                  updateLayout((next) => {
+                    if (event.target.value === "") {
+                      delete next.buttons[selectedButtonIndex].cssShape;
+                    } else {
+                      next.buttons[selectedButtonIndex].cssShape = event.target
+                        .value as ButtonShape;
+                    }
+                  })
+                }
+                data={[
+                  { value: "", label: t("inheritDefault") },
+                  { value: "circle", label: t("shapeCircle") },
+                  { value: "rounded", label: t("shapeRounded") },
+                  { value: "square", label: t("shapeSquare") },
+                ]}
+              />
               <NumberInput
                 size="xs"
                 label={t("transition")}
@@ -805,33 +879,42 @@ export function ButtonSettingsPanel(
                 }
                 placeholder={layout.defaultbuttons.cssTransition || "0.02"}
               />
-              <NativeSelect
-                size="xs"
-                label={t("easing")}
-                value={
-                  layout.buttons[selectedButtonIndex]?.cssEasing ===
-                  layout.defaultbuttons.cssEasing
-                    ? ""
-                    : (layout.buttons[selectedButtonIndex]?.cssEasing ??
-                      layout.defaultbuttons.cssEasing ??
-                      "ease")
-                }
-                onChange={(event) =>
-                  updateLayout((next) => {
+            </div>
+          )}
+        {selectedButtonIndex !== null &&
+          (layout.buttons[selectedButtonIndex]?.useCss ??
+            layout.defaultbuttons.useCss ??
+            false) && (
+            <NativeSelect
+              size="xs"
+              label={t("easing")}
+              value={
+                layout.buttons[selectedButtonIndex]?.cssEasing ===
+                layout.defaultbuttons.cssEasing
+                  ? ""
+                  : (layout.buttons[selectedButtonIndex]?.cssEasing ??
+                    layout.defaultbuttons.cssEasing ??
+                    "ease")
+              }
+              onChange={(event) =>
+                updateLayout((next) => {
+                  if (event.target.value === "") {
+                    delete next.buttons[selectedButtonIndex].cssEasing;
+                  } else {
                     next.buttons[selectedButtonIndex].cssEasing =
                       event.target.value;
-                  })
-                }
-                data={[
-                  { value: "", label: t("inheritDefault") },
-                  { value: "ease", label: "ease" },
-                  { value: "linear", label: "linear" },
-                  { value: "ease-in", label: "ease-in" },
-                  { value: "ease-out", label: "ease-out" },
-                  { value: "ease-in-out", label: "ease-in-out" },
-                ]}
-              />
-            </div>
+                  }
+                })
+              }
+              data={[
+                { value: "", label: t("inheritDefault") },
+                { value: "ease", label: "ease" },
+                { value: "linear", label: "linear" },
+                { value: "ease-in", label: "ease-in" },
+                { value: "ease-out", label: "ease-out" },
+                { value: "ease-in-out", label: "ease-in-out" },
+              ]}
+            />
           )}
         {selectedButtonIndex !== null &&
           !(
@@ -856,9 +939,7 @@ export function ButtonSettingsPanel(
                         event.target.value;
                     })
                   }
-                  placeholder={
-                    layout.defaultbuttons.img || "released.png"
-                  }
+                  placeholder={layout.defaultbuttons.img || "released.png"}
                   className="grow"
                 />
                 <Button
@@ -891,9 +972,7 @@ export function ButtonSettingsPanel(
                         event.target.value;
                     })
                   }
-                  placeholder={
-                    layout.defaultbuttons.imgp || "pressed.png"
-                  }
+                  placeholder={layout.defaultbuttons.imgp || "pressed.png"}
                   className="grow"
                 />
                 <Button
@@ -910,94 +989,115 @@ export function ButtonSettingsPanel(
                   {t("selectFile")}
                 </Button>
               </Group>
-              <Text size="xs" fw={600}>
-                {t("releasedSize")}
-              </Text>
-              <div className="control row">
-                <NumberInput
-                  size="xs"
-                  label={t("width")}
-                  value={
-                    layout.buttons[selectedButtonIndex]?.w ===
-                    layout.defaultbuttons.w
-                      ? ""
-                      : numericValue(
-                          layout.buttons[selectedButtonIndex]?.w || "",
-                        )
-                  }
-                  onChange={(value) =>
-                    updateLayout((next) => {
-                      next.buttons[selectedButtonIndex].w = String(value ?? "");
-                    })
-                  }
-                  placeholder={layout.defaultbuttons.w || "60"}
-                />
-                <NumberInput
-                  size="xs"
-                  label={t("height")}
-                  value={
-                    layout.buttons[selectedButtonIndex]?.h ===
-                    layout.defaultbuttons.h
-                      ? ""
-                      : numericValue(
-                          layout.buttons[selectedButtonIndex]?.h || "",
-                        )
-                  }
-                  onChange={(value) =>
-                    updateLayout((next) => {
-                      next.buttons[selectedButtonIndex].h = String(value ?? "");
-                    })
-                  }
-                  placeholder={layout.defaultbuttons.h || "60"}
-                />
-              </div>
-              <Text size="xs" fw={600}>
-                {t("pressedSize")}
-              </Text>
-              <div className="control row">
-                <NumberInput
-                  size="xs"
-                  label={t("pressedWidth")}
-                  value={
-                    layout.buttons[selectedButtonIndex]?.wp ===
-                    layout.defaultbuttons.wp
-                      ? ""
-                      : numericValue(
-                          layout.buttons[selectedButtonIndex]?.wp || "",
-                        )
-                  }
-                  onChange={(value) =>
-                    updateLayout((next) => {
-                      next.buttons[selectedButtonIndex].wp = String(
-                        value ?? "",
-                      );
-                    })
-                  }
-                  placeholder={layout.defaultbuttons.wp || "60"}
-                />
-                <NumberInput
-                  size="xs"
-                  label={t("pressedHeight")}
-                  value={
-                    layout.buttons[selectedButtonIndex]?.hp ===
-                    layout.defaultbuttons.hp
-                      ? ""
-                      : numericValue(
-                          layout.buttons[selectedButtonIndex]?.hp || "",
-                        )
-                  }
-                  onChange={(value) =>
-                    updateLayout((next) => {
-                      next.buttons[selectedButtonIndex].hp = String(
-                        value ?? "",
-                      );
-                    })
-                  }
-                  placeholder={layout.defaultbuttons.hp || "60"}
-                />
-              </div>
             </>
           )}
+        {selectedButtonIndex !== null && (
+          <>
+            <Text size="xs" fw={600}>
+              {t("releasedSize")}
+            </Text>
+            <div className="control row">
+              <NumberInput
+                size="xs"
+                label={t("width")}
+                value={
+                  layout.buttons[selectedButtonIndex]?.w ===
+                  layout.defaultbuttons.w
+                    ? ""
+                    : numericValue(layout.buttons[selectedButtonIndex]?.w || "")
+                }
+                onChange={(value) =>
+                  updateLayout((next) => {
+                    next.buttons[selectedButtonIndex].w = String(value ?? "");
+                  })
+                }
+                placeholder={layout.defaultbuttons.w || "60"}
+              />
+              <NumberInput
+                size="xs"
+                label={t("height")}
+                value={
+                  layout.buttons[selectedButtonIndex]?.h ===
+                  layout.defaultbuttons.h
+                    ? ""
+                    : numericValue(layout.buttons[selectedButtonIndex]?.h || "")
+                }
+                onChange={(value) =>
+                  updateLayout((next) => {
+                    next.buttons[selectedButtonIndex].h = String(value ?? "");
+                  })
+                }
+                placeholder={layout.defaultbuttons.h || "60"}
+              />
+            </div>
+            <Text size="xs" fw={600}>
+              {t("pressedSize")}
+            </Text>
+            <div className="control row">
+              <NumberInput
+                size="xs"
+                label={t("pressedWidth")}
+                value={
+                  layout.buttons[selectedButtonIndex]?.wp ===
+                  layout.defaultbuttons.wp
+                    ? ""
+                    : numericValue(
+                        layout.buttons[selectedButtonIndex]?.wp || "",
+                      )
+                }
+                onChange={(value) =>
+                  updateLayout((next) => {
+                    next.buttons[selectedButtonIndex].wp = String(value ?? "");
+                  })
+                }
+                placeholder={layout.defaultbuttons.wp || "60"}
+              />
+              <NumberInput
+                size="xs"
+                label={t("pressedHeight")}
+                value={
+                  layout.buttons[selectedButtonIndex]?.hp ===
+                  layout.defaultbuttons.hp
+                    ? ""
+                    : numericValue(
+                        layout.buttons[selectedButtonIndex]?.hp || "",
+                      )
+                }
+                onChange={(value) =>
+                  updateLayout((next) => {
+                    next.buttons[selectedButtonIndex].hp = String(value ?? "");
+                  })
+                }
+                placeholder={layout.defaultbuttons.hp || "60"}
+              />
+            </div>
+            <NumberInput
+              size="xs"
+              label={t("rotation")}
+              min={-180}
+              max={180}
+              step={1}
+              value={
+                layout.buttons[selectedButtonIndex]?.rotation ===
+                layout.defaultbuttons.rotation
+                  ? ""
+                  : numericValue(
+                      layout.buttons[selectedButtonIndex]?.rotation ?? "",
+                    )
+              }
+              onChange={(value) =>
+                updateLayout((next) => {
+                  if (value === "" || value === null) {
+                    delete next.buttons[selectedButtonIndex].rotation;
+                  } else {
+                    next.buttons[selectedButtonIndex].rotation = String(value);
+                  }
+                })
+              }
+              placeholder={layout.defaultbuttons.rotation || "0"}
+            />
+          </>
+        )}
         <Text size="xs" c="dimmed">
           {t("useDefaultWhenBlank")}
         </Text>

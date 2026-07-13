@@ -1,15 +1,15 @@
 {
   "version": "v1.0.4",
-  "name": "default",
-  "totalbuttonshow": 8,
+  "name": "PWS FS-24",
+  "totalbuttonshow": 10,
   "showstick": true,
   "stick": {
-    "x": "130",
-    "y": "105",
+    "x": "181",
+    "y": "132",
     "w": "100",
     "h": "100",
     "useCss": true,
-    "cssColor": "#e03131",
+    "cssColor": "#8000ff",
     "cssPlateColor": "#868e96",
     "cssTransition": "0.02",
     "cssEasing": "ease"
@@ -26,104 +26,19 @@
     "hp": "",
     "imgp": "",
     "useCss": true,
-    "cssColor": "#e03131",
-    "cssPressedColor": "#c2251c",
+    "cssColor": "#a0a0a0",
+    "cssPressedColor": "#f2f2f2",
     "cssTransition": "0",
     "cssEasing": "linear",
-    "cssShape": "circle",
-    "rotation": "0"
+    "rotation": "0",
+    "cssShape": "circle"
   },
   "buttons": [
     {
-      "x": "225",
-      "y": "80",
-      "w": "48",
-      "h": "48",
-      "img": "",
-      "xp": "",
-      "yp": "",
-      "wp": "",
-      "hp": "",
-      "imgp": "",
-      "useCss": true,
-      "cssColor": "#e03131",
-      "cssPressedColor": "#c2251c",
-      "cssTransition": "0",
-      "cssEasing": "linear"
-    },
-    {
-      "x": "280",
-      "y": "68",
-      "w": "48",
-      "h": "48",
-      "img": "",
-      "xp": "",
-      "yp": "",
-      "wp": "",
-      "hp": "",
-      "imgp": "",
-      "useCss": true,
-      "cssColor": "#e03131",
-      "cssPressedColor": "#c2251c",
-      "cssTransition": "0",
-      "cssEasing": "linear"
-    },
-    {
-      "x": "335",
-      "y": "74",
-      "w": "48",
-      "h": "48",
-      "img": "",
-      "xp": "",
-      "yp": "",
-      "wp": "",
-      "hp": "",
-      "imgp": "",
-      "useCss": true,
-      "cssColor": "#e03131",
-      "cssPressedColor": "#c2251c",
-      "cssTransition": "0",
-      "cssEasing": "linear"
-    },
-    {
-      "x": "390",
-      "y": "86",
-      "w": "48",
-      "h": "48",
-      "img": "",
-      "xp": "",
-      "yp": "",
-      "wp": "",
-      "hp": "",
-      "imgp": "",
-      "useCss": true,
-      "cssColor": "#e03131",
-      "cssPressedColor": "#c2251c",
-      "cssTransition": "0",
-      "cssEasing": "linear"
-    },
-    {
-      "x": "221",
-      "y": "139",
-      "w": "48",
-      "h": "48",
-      "img": "",
-      "xp": "",
-      "yp": "",
-      "wp": "",
-      "hp": "",
-      "imgp": "",
-      "useCss": true,
-      "cssColor": "#e03131",
-      "cssPressedColor": "#c2251c",
-      "cssTransition": "0",
-      "cssEasing": "linear"
-    },
-    {
       "x": "276",
-      "y": "127",
-      "w": "48",
-      "h": "48",
+      "y": "105",
+      "w": "",
+      "h": "",
       "img": "",
       "xp": "",
       "yp": "",
@@ -131,16 +46,16 @@
       "hp": "",
       "imgp": "",
       "useCss": true,
-      "cssColor": "#e03131",
-      "cssPressedColor": "#c2251c",
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
       "cssTransition": "0",
       "cssEasing": "linear"
     },
     {
-      "x": "331",
-      "y": "133",
-      "w": "48",
-      "h": "48",
+      "x": "332",
+      "y": "84",
+      "w": "",
+      "h": "",
       "img": "",
       "xp": "",
       "yp": "",
@@ -148,16 +63,16 @@
       "hp": "",
       "imgp": "",
       "useCss": true,
-      "cssColor": "#e03131",
-      "cssPressedColor": "#c2251c",
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
       "cssTransition": "0",
       "cssEasing": "linear"
     },
     {
       "x": "386",
-      "y": "145",
-      "w": "48",
-      "h": "48",
+      "y": "87",
+      "w": "",
+      "h": "",
       "img": "",
       "xp": "",
       "yp": "",
@@ -165,8 +80,127 @@
       "hp": "",
       "imgp": "",
       "useCss": true,
-      "cssColor": "#e03131",
-      "cssPressedColor": "#c2251c",
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
+    },
+    {
+      "x": "441",
+      "y": "99",
+      "w": "",
+      "h": "",
+      "img": "",
+      "xp": "",
+      "yp": "",
+      "wp": "",
+      "hp": "",
+      "imgp": "",
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
+    },
+    {
+      "x": "272",
+      "y": "164",
+      "w": "",
+      "h": "",
+      "img": "",
+      "xp": "",
+      "yp": "",
+      "wp": "",
+      "hp": "",
+      "imgp": "",
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
+    },
+    {
+      "x": "328",
+      "y": "143",
+      "w": "",
+      "h": "",
+      "img": "",
+      "xp": "",
+      "yp": "",
+      "wp": "",
+      "hp": "",
+      "imgp": "",
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
+    },
+    {
+      "x": "382",
+      "y": "146",
+      "w": "",
+      "h": "",
+      "img": "",
+      "xp": "",
+      "yp": "",
+      "wp": "",
+      "hp": "",
+      "imgp": "",
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
+    },
+    {
+      "x": "437",
+      "y": "158",
+      "w": "",
+      "h": "",
+      "img": "",
+      "xp": "",
+      "yp": "",
+      "wp": "",
+      "hp": "",
+      "imgp": "",
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
+    },
+    {
+      "x": "262",
+      "y": "224",
+      "w": "",
+      "h": "",
+      "img": "",
+      "xp": "",
+      "yp": "",
+      "wp": "",
+      "hp": "",
+      "imgp": "",
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
+    },
+    {
+      "x": "313",
+      "y": "208",
+      "w": "",
+      "h": "",
+      "img": "",
+      "xp": "",
+      "yp": "",
+      "wp": "",
+      "hp": "",
+      "imgp": "",
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
       "cssTransition": "0",
       "cssEasing": "linear"
     },
@@ -181,11 +215,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -198,11 +232,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -215,11 +249,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -232,11 +266,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -249,11 +283,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -266,11 +300,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -283,11 +317,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -300,11 +334,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -317,11 +351,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -334,11 +368,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -351,11 +385,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -368,11 +402,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -385,11 +419,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -402,11 +436,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -419,11 +453,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -436,11 +470,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -453,11 +487,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -470,11 +504,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -487,11 +521,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -504,11 +538,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -521,11 +555,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -538,11 +572,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -555,11 +589,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -572,11 +606,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -589,11 +623,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -606,11 +640,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -623,11 +657,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -640,11 +674,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -657,11 +691,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -674,11 +708,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -691,11 +725,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -708,11 +742,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -725,11 +759,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -742,11 +776,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -759,11 +793,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -776,11 +810,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -793,11 +827,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -810,11 +844,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -827,11 +861,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -844,11 +878,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -861,11 +895,11 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     },
     {
       "x": "0",
@@ -878,68 +912,34 @@
       "wp": "",
       "hp": "",
       "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
-    },
-    {
-      "x": "0",
-      "y": "0",
-      "w": "",
-      "h": "",
-      "img": "",
-      "xp": "",
-      "yp": "",
-      "wp": "",
-      "hp": "",
-      "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
-    },
-    {
-      "x": "0",
-      "y": "0",
-      "w": "",
-      "h": "",
-      "img": "",
-      "xp": "",
-      "yp": "",
-      "wp": "",
-      "hp": "",
-      "imgp": "",
-      "useCss": false,
-      "cssColor": "#cccccc",
-      "cssPressedColor": "#999999",
-      "cssTransition": "0.02",
-      "cssEasing": "ease"
+      "useCss": true,
+      "cssColor": "#a0a0a0",
+      "cssPressedColor": "#f2f2f2",
+      "cssTransition": "0",
+      "cssEasing": "linear"
     }
   ],
   "background": {
     "show": true,
     "image": "",
     "scale": "1",
-    "w": "",
-    "h": "",
+    "w": "550",
+    "h": "300",
     "useCss": true,
-    "cssColor": "#ffffff",
-    "cssBorderRadius": 20
+    "cssColor": "#ba82ca",
+    "cssBorderRadius": 10
   },
   "buttonMappings": [
-    1,
     2,
     3,
-    6,
-    0,
-    4,
     5,
+    4,
+    0,
+    1,
     7,
-    8,
-    9,
+    6,
+    10,
+    11,
     10,
     11,
     12,
