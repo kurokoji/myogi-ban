@@ -79,7 +79,7 @@ export function createDefaultLayout(): Layout {
   }
 
   return {
-    version: "v1.0.4",
+    version: "v1.0.5",
     name: "default",
     totalbuttonshow: 8,
     showstick: true,
