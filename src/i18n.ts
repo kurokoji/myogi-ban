@@ -5,7 +5,7 @@ export const resources = {
   ja: {
     translation: {
       appTitle: "Myogi Ban",
-      obs: "OBS",
+      obs: "ビューワー",
       obsTip:
         "OBSのブラウザソースで上記URLを設定し、背景セクションの幅・高さをOBS側でも設定してください。",
       copy: "コピー",
@@ -91,7 +91,7 @@ export const resources = {
   en: {
     translation: {
       appTitle: "Myogi Ban",
-      obs: "OBS",
+      obs: "Viewer",
       obsTip:
         "Set the above URL in OBS Browser Source, and match the width/height from the Background section in OBS.",
       copy: "Copy",

@@ -719,10 +719,8 @@ function EditorApp(): React.ReactElement {
         <DisplaySettingsPanel
           language={language}
           previewScale={previewScale}
-          backgroundOpacity={backgroundOpacity}
           onLanguageChange={changeLanguage}
           onPreviewScaleChange={changePreviewScale}
-          onBackgroundOpacityChange={setBackgroundOpacity}
         />
 
         <LayoutSettingsPanel
@@ -740,8 +738,10 @@ function EditorApp(): React.ReactElement {
 
         <BackgroundSettingsPanel
           layout={layout}
+          backgroundOpacity={backgroundOpacity}
           fileInputRef={fileInputRef}
           updateLayout={updateLayout}
+          onBackgroundOpacityChange={setBackgroundOpacity}
           uploadImage={uploadImage}
           openImagePicker={openImagePicker}
         />

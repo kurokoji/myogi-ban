@@ -24,10 +24,8 @@ import type { ButtonShape, Layout, LayoutEntry } from "../../types";
 interface DisplaySettingsPanelProps {
   language: string;
   previewScale: number;
-  backgroundOpacity: number;
   onLanguageChange: (language: string) => void;
   onPreviewScaleChange: (scale: number) => void;
-  onBackgroundOpacityChange: (opacity: number) => void;
 }
 
 export function DisplaySettingsPanel(
@@ -61,21 +59,6 @@ export function DisplaySettingsPanel(
             value={props.previewScale}
             onChange={(event) =>
               props.onPreviewScaleChange(parseFloat(event.target.value))
-            }
-          />
-        </label>
-        <label className="range-label">
-          <span>
-            {t("bgOpacity")} <b>{props.backgroundOpacity.toFixed(1)}</b>
-          </span>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.1"
-            value={props.backgroundOpacity}
-            onChange={(event) =>
-              props.onBackgroundOpacityChange(parseFloat(event.target.value))
             }
           />
         </label>
@@ -220,8 +203,10 @@ export function StickSettingsPanel({
 
 interface BackgroundSettingsPanelProps {
   layout: Layout;
+  backgroundOpacity: number;
   fileInputRef: RefObject<HTMLInputElement | null>;
   updateLayout: EditorLayoutUpdater;
+  onBackgroundOpacityChange: (opacity: number) => void;
   uploadImage: (event: ChangeEvent<HTMLInputElement>) => void;
   openImagePicker: (target: ImageUploadTarget) => void;
 }
@@ -236,6 +221,21 @@ export function BackgroundSettingsPanel(
     <Paper className="panel" withBorder>
       <Stack gap="xs">
         <Title order={2}>{t("background")}</Title>
+        <label className="range-label">
+          <span>
+            {t("bgOpacity")} <b>{props.backgroundOpacity.toFixed(1)}</b>
+          </span>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.1"
+            value={props.backgroundOpacity}
+            onChange={(event) =>
+              props.onBackgroundOpacityChange(parseFloat(event.target.value))
+            }
+          />
+        </label>
         <Switch
           size="sm"
           label={t("showBackground")}
