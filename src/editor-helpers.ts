@@ -5,7 +5,56 @@ export type AssigningTarget = number | null;
 export type ImageUploadTarget =
   | { type: "background" }
   | { type: "defaultButton"; state: "released" | "pressed" }
-  | { type: "button"; index: number; state: "released" | "pressed" };
+  | { type: "button"; indexes: number[]; state: "released" | "pressed" };
+
+const BULK_EDITABLE_BUTTON_KEYS: Array<keyof ButtonLayout> = [
+  "w",
+  "h",
+  "img",
+  "xp",
+  "yp",
+  "wp",
+  "hp",
+  "imgp",
+  "rotation",
+  "useCss",
+  "cssColor",
+  "cssPressedColor",
+  "cssTransition",
+  "cssEasing",
+  "cssShape",
+];
+
+export function updateSelectedButtonSettings(
+  layout: Layout,
+  selectedIndexes: number[],
+  updater: (layout: Layout) => void,
+): void {
+  const primaryIndex = selectedIndexes[0];
+  if (primaryIndex === undefined) return;
+  if (!layout.buttons[primaryIndex]) {
+    layout.buttons[primaryIndex] = createEmptyButtonLayout();
+  }
+  const before = { ...layout.buttons[primaryIndex] };
+  updater(layout);
+  const after = layout.buttons[primaryIndex];
+  const changedKeys = BULK_EDITABLE_BUTTON_KEYS.filter(
+    (key) => before[key] !== after[key],
+  );
+
+  for (const index of selectedIndexes.slice(1)) {
+    if (!layout.buttons[index]) {
+      layout.buttons[index] = createEmptyButtonLayout();
+    }
+    for (const key of changedKeys) {
+      if (after[key] === undefined) {
+        delete layout.buttons[index][key];
+      } else {
+        Object.assign(layout.buttons[index], { [key]: after[key] });
+      }
+    }
+  }
+}
 
 export function cloneLayout(layout: Layout): Layout {
   return {

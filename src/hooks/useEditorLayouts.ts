@@ -277,9 +277,10 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
           next.defaultbuttons[target.state === "pressed" ? "imgp" : "img"] =
             fileName;
         } else {
-          next.buttons[target.index][
-            target.state === "pressed" ? "imgp" : "img"
-          ] = fileName;
+          for (const index of target.indexes) {
+            next.buttons[index][target.state === "pressed" ? "imgp" : "img"] =
+              fileName;
+          }
         }
       });
     } catch (error) {

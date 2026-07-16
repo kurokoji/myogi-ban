@@ -20,7 +20,11 @@ import {
   StickSettingsPanel,
 } from "./components/editor/SettingsPanels";
 import { GamepadView } from "./components/GamepadView";
-import { cloneLayout, createEmptyButtonLayout } from "./editor-helpers";
+import {
+  cloneLayout,
+  createEmptyButtonLayout,
+  updateSelectedButtonSettings,
+} from "./editor-helpers";
 import {
   type ButtonMapping,
   GamepadManager,
@@ -175,6 +179,23 @@ function EditorApp(): React.ReactElement {
     });
   }, [updateLayout]);
 
+  const updateSelectedButtons = useCallback(
+    (updater: (layout: Layout) => void) => {
+      updateLayout((next) => {
+        updateSelectedButtonSettings(
+          next,
+          selectedButtonIndexes.length > 0
+            ? selectedButtonIndexes
+            : selectedButtonIndex === null
+              ? []
+              : [selectedButtonIndex],
+          updater,
+        );
+      });
+    },
+    [selectedButtonIndex, selectedButtonIndexes, updateLayout],
+  );
+
   const updateBackgroundSize = useCallback((width: number, height: number) => {
     setLayout((current) => {
       if (
@@ -247,23 +268,39 @@ function EditorApp(): React.ReactElement {
   );
 
   const selectButtonAndStartAssignment = useCallback(
-    (index: number) => {
+    (index: number, toggleSelection: boolean) => {
+      if (toggleSelection) {
+        setSelectedButtonIndexes((current) => {
+          const next = current.includes(index)
+            ? current.filter((selectedIndex) => selectedIndex !== index)
+            : [...current, index];
+          setSelectedButtonIndex(next[0] ?? null);
+          return next;
+        });
+        cancelAssignment();
+        return;
+      }
       setSelectedButtonIndexes([index]);
       setSelectedStick(false);
       setSelectedButtonIndex(index);
       startAssignment(index);
     },
-    [startAssignment],
+    [cancelAssignment, startAssignment],
   );
 
   const selectStickAndStartAssignment = useCallback(
-    (index: number) => {
+    (index: number, toggleSelection: boolean) => {
+      if (toggleSelection) {
+        setSelectedStick((current) => !current);
+        cancelAssignment();
+        return;
+      }
       setSelectedButtonIndexes([]);
       setSelectedStick(true);
       setSelectedButtonIndex(null);
       startAssignment(1000 + index);
     },
-    [startAssignment],
+    [cancelAssignment, startAssignment],
   );
 
   const clearSelectionOnPreviewOutsideClick = useCallback(
@@ -359,7 +396,9 @@ function EditorApp(): React.ReactElement {
           assigningTarget={assigningTarget}
           assignmentName={assignmentName}
           selectedButtonIndex={selectedButtonIndex}
+          selectedButtonIndexes={selectedButtonIndexes}
           updateLayout={updateLayout}
+          updateSelectedButtons={updateSelectedButtons}
           onSelectedButtonChange={selectButtonForSettings}
           openImagePicker={openImagePicker}
           cancelAssignment={cancelAssignment}

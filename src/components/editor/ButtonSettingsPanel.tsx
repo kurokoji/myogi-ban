@@ -26,7 +26,9 @@ interface ButtonSettingsPanelProps {
   assigningTarget: AssigningTarget;
   assignmentName: string;
   selectedButtonIndex: number | null;
+  selectedButtonIndexes: number[];
   updateLayout: EditorLayoutUpdater;
+  updateSelectedButtons: EditorLayoutUpdater;
   onSelectedButtonChange: (index: number | null) => void;
   openImagePicker: (target: ImageUploadTarget) => void;
   cancelAssignment: () => void;
@@ -299,61 +301,71 @@ export function ButtonSettingsPanel(
           ]}
         />
         {selectedButtonIndex !== null && (
-          <Group gap="xs">
-            <Switch
-              size="sm"
-              label={t("useCssButton")}
-              checked={
-                !(
-                  layout.buttons[selectedButtonIndex]?.useCss ??
-                  layout.defaultbuttons.useCss ??
-                  false
-                )
-              }
-              onChange={(event) =>
-                updateLayout((next) => {
-                  next.buttons[selectedButtonIndex].useCss =
-                    !event.target.checked;
-                })
-              }
-            />
-            <Button
-              size="xs"
-              variant="light"
-              color="gray"
-              onClick={() => {
-                updateLayout((next) => {
-                  next.buttons[selectedButtonIndex] = {
-                    x: next.buttons[selectedButtonIndex].x,
-                    y: next.buttons[selectedButtonIndex].y,
-                    w: next.defaultbuttons.w,
-                    h: next.defaultbuttons.h,
-                    img: next.defaultbuttons.img,
-                    xp: next.defaultbuttons.xp,
-                    yp: next.defaultbuttons.yp,
-                    wp: next.defaultbuttons.wp,
-                    hp: next.defaultbuttons.hp,
-                    imgp: next.defaultbuttons.imgp,
-                    rotation: next.defaultbuttons.rotation,
-                    useCss: next.defaultbuttons.useCss,
-                    cssColor: next.defaultbuttons.cssColor,
-                    cssPressedColor: next.defaultbuttons.cssPressedColor,
-                    cssTransition: next.defaultbuttons.cssTransition,
-                    cssEasing: next.defaultbuttons.cssEasing,
-                  };
-                });
-              }}
-            >
-              {t("resetToDefault")}
-            </Button>
-          </Group>
+          <Stack gap="xs">
+            {props.selectedButtonIndexes.length > 1 && (
+              <Text size="xs" c="blue" fw={600}>
+                {t("buttonsSelected", {
+                  count: props.selectedButtonIndexes.length,
+                })}
+              </Text>
+            )}
+            <Group gap="xs">
+              <Switch
+                size="sm"
+                label={t("useCssButton")}
+                checked={
+                  !(
+                    layout.buttons[selectedButtonIndex]?.useCss ??
+                    layout.defaultbuttons.useCss ??
+                    false
+                  )
+                }
+                onChange={(event) =>
+                  props.updateSelectedButtons((next) => {
+                    next.buttons[selectedButtonIndex].useCss =
+                      !event.target.checked;
+                  })
+                }
+              />
+              <Button
+                size="xs"
+                variant="light"
+                color="gray"
+                onClick={() => {
+                  props.updateSelectedButtons((next) => {
+                    next.buttons[selectedButtonIndex] = {
+                      x: next.buttons[selectedButtonIndex].x,
+                      y: next.buttons[selectedButtonIndex].y,
+                      w: next.defaultbuttons.w,
+                      h: next.defaultbuttons.h,
+                      img: next.defaultbuttons.img,
+                      xp: next.defaultbuttons.xp,
+                      yp: next.defaultbuttons.yp,
+                      wp: next.defaultbuttons.wp,
+                      hp: next.defaultbuttons.hp,
+                      imgp: next.defaultbuttons.imgp,
+                      rotation: next.defaultbuttons.rotation,
+                      useCss: next.defaultbuttons.useCss,
+                      cssColor: next.defaultbuttons.cssColor,
+                      cssPressedColor: next.defaultbuttons.cssPressedColor,
+                      cssTransition: next.defaultbuttons.cssTransition,
+                      cssEasing: next.defaultbuttons.cssEasing,
+                      cssShape: next.defaultbuttons.cssShape,
+                    };
+                  });
+                }}
+              >
+                {t("resetToDefault")}
+              </Button>
+            </Group>
+          </Stack>
         )}
         <Button
           size="xs"
           variant="light"
           color="gray"
           onClick={() =>
-            updateLayout((next) => {
+            props.updateSelectedButtons((next) => {
               next.buttons = next.buttons.map((b) => ({
                 x: b.x,
                 y: b.y,
@@ -371,6 +383,7 @@ export function ButtonSettingsPanel(
                 cssPressedColor: next.defaultbuttons.cssPressedColor,
                 cssTransition: next.defaultbuttons.cssTransition,
                 cssEasing: next.defaultbuttons.cssEasing,
+                cssShape: next.defaultbuttons.cssShape,
               }));
             })
           }
@@ -393,7 +406,7 @@ export function ButtonSettingsPanel(
                       "#cccccc")
                 }
                 onChange={(event) =>
-                  updateLayout((next) => {
+                  props.updateSelectedButtons((next) => {
                     next.buttons[selectedButtonIndex].cssColor =
                       event.target.value;
                   })
@@ -410,7 +423,7 @@ export function ButtonSettingsPanel(
                       "#999999")
                 }
                 onChange={(event) =>
-                  updateLayout((next) => {
+                  props.updateSelectedButtons((next) => {
                     next.buttons[selectedButtonIndex].cssPressedColor =
                       event.target.value;
                   })
@@ -433,7 +446,7 @@ export function ButtonSettingsPanel(
                     : (layout.buttons[selectedButtonIndex]?.cssShape ?? "")
                 }
                 onChange={(event) =>
-                  updateLayout((next) => {
+                  props.updateSelectedButtons((next) => {
                     if (event.target.value === "") {
                       delete next.buttons[selectedButtonIndex].cssShape;
                     } else {
@@ -466,7 +479,7 @@ export function ButtonSettingsPanel(
                       )
                 }
                 onChange={(value) =>
-                  updateLayout((next) => {
+                  props.updateSelectedButtons((next) => {
                     next.buttons[selectedButtonIndex].cssTransition = String(
                       value ?? 0.02,
                     );
@@ -492,7 +505,7 @@ export function ButtonSettingsPanel(
                     "ease")
               }
               onChange={(event) =>
-                updateLayout((next) => {
+                props.updateSelectedButtons((next) => {
                   if (event.target.value === "") {
                     delete next.buttons[selectedButtonIndex].cssEasing;
                   } else {
@@ -529,7 +542,7 @@ export function ButtonSettingsPanel(
                       : layout.buttons[selectedButtonIndex]?.img || ""
                   }
                   onChange={(event) =>
-                    updateLayout((next) => {
+                    props.updateSelectedButtons((next) => {
                       next.buttons[selectedButtonIndex].img =
                         event.target.value;
                     })
@@ -543,7 +556,7 @@ export function ButtonSettingsPanel(
                   onClick={() =>
                     props.openImagePicker({
                       type: "button",
-                      index: selectedButtonIndex,
+                      indexes: props.selectedButtonIndexes,
                       state: "released",
                     })
                   }
@@ -562,7 +575,7 @@ export function ButtonSettingsPanel(
                       : layout.buttons[selectedButtonIndex]?.imgp || ""
                   }
                   onChange={(event) =>
-                    updateLayout((next) => {
+                    props.updateSelectedButtons((next) => {
                       next.buttons[selectedButtonIndex].imgp =
                         event.target.value;
                     })
@@ -576,7 +589,7 @@ export function ButtonSettingsPanel(
                   onClick={() =>
                     props.openImagePicker({
                       type: "button",
-                      index: selectedButtonIndex,
+                      indexes: props.selectedButtonIndexes,
                       state: "pressed",
                     })
                   }
@@ -602,7 +615,7 @@ export function ButtonSettingsPanel(
                     : numericValue(layout.buttons[selectedButtonIndex]?.w || "")
                 }
                 onChange={(value) =>
-                  updateLayout((next) => {
+                  props.updateSelectedButtons((next) => {
                     next.buttons[selectedButtonIndex].w = String(value ?? "");
                   })
                 }
@@ -618,7 +631,7 @@ export function ButtonSettingsPanel(
                     : numericValue(layout.buttons[selectedButtonIndex]?.h || "")
                 }
                 onChange={(value) =>
-                  updateLayout((next) => {
+                  props.updateSelectedButtons((next) => {
                     next.buttons[selectedButtonIndex].h = String(value ?? "");
                   })
                 }
@@ -641,7 +654,7 @@ export function ButtonSettingsPanel(
                       )
                 }
                 onChange={(value) =>
-                  updateLayout((next) => {
+                  props.updateSelectedButtons((next) => {
                     next.buttons[selectedButtonIndex].wp = String(value ?? "");
                   })
                 }
@@ -659,7 +672,7 @@ export function ButtonSettingsPanel(
                       )
                 }
                 onChange={(value) =>
-                  updateLayout((next) => {
+                  props.updateSelectedButtons((next) => {
                     next.buttons[selectedButtonIndex].hp = String(value ?? "");
                   })
                 }
@@ -681,7 +694,7 @@ export function ButtonSettingsPanel(
                     )
               }
               onChange={(value) =>
-                updateLayout((next) => {
+                props.updateSelectedButtons((next) => {
                   if (value === "" || value === null) {
                     delete next.buttons[selectedButtonIndex].rotation;
                   } else {

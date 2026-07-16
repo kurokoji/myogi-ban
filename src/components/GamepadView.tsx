@@ -27,8 +27,8 @@ export interface GamepadViewProps {
   selectedStick?: boolean;
   selectionSurfaceRef?: React.RefObject<HTMLElement | null>;
   onBackgroundSizeChange?: (width: number, height: number) => void;
-  onButtonClick?: (index: number) => void;
-  onStickClick?: (index: number) => void;
+  onButtonClick?: (index: number, toggleSelection: boolean) => void;
+  onStickClick?: (index: number, toggleSelection: boolean) => void;
   onSelectionChange?: (selection: {
     buttonIndexes: number[];
     stick: boolean;
@@ -86,6 +86,15 @@ function rectsIntersect(a: Rect, b: Rect): boolean {
     a.right >= b.left &&
     a.top <= b.bottom &&
     a.bottom >= b.top
+  );
+}
+
+function rectContainsPoint(rect: Rect, point: { x: number; y: number }) {
+  return (
+    point.x >= rect.left &&
+    point.x <= rect.right &&
+    point.y >= rect.top &&
+    point.y <= rect.bottom
   );
 }
 
@@ -383,6 +392,37 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     [backgroundSize, createGroupDragState, editorMode, onLayoutDragStart],
   );
 
+  const handleGroupBoundsClick = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (!editorMode || (!event.ctrlKey && !event.metaKey)) return;
+      event.stopPropagation();
+      if (dragMovedRef.current) {
+        dragMovedRef.current = false;
+        return;
+      }
+      const area = document.getElementById("gamepad-area");
+      if (!area) return;
+      const local = pointerToLocal(event, area, backgroundSize);
+      const button = [...buttonRects]
+        .reverse()
+        .find((rect) => rectContainsPoint(rect, local));
+      if (button) {
+        onButtonClick?.(button.index, true);
+      } else if (layout.showstick && rectContainsPoint(stickRect, local)) {
+        onStickClick?.(0, true);
+      }
+    },
+    [
+      backgroundSize,
+      buttonRects,
+      editorMode,
+      layout.showstick,
+      onButtonClick,
+      onStickClick,
+      stickRect,
+    ],
+  );
+
   const handleSelectionMouseDown = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       if (!editorMode || event.button !== 0) return;
@@ -568,23 +608,23 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
   ]);
 
   const handleButtonClick = useCallback(
-    (index: number) => {
+    (index: number, event: React.MouseEvent) => {
       if (dragMovedRef.current) {
         dragMovedRef.current = false;
         return;
       }
-      onButtonClick?.(index);
+      onButtonClick?.(index, event.ctrlKey || event.metaKey);
     },
     [onButtonClick],
   );
 
   const handleStickClick = useCallback(
-    (index: number) => {
+    (index: number, event: React.MouseEvent) => {
       if (dragMovedRef.current) {
         dragMovedRef.current = false;
         return;
       }
-      onStickClick?.(index);
+      onStickClick?.(index, event.ctrlKey || event.metaKey);
     },
     [onStickClick],
   );
@@ -669,7 +709,11 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
               id={name}
               className={`stick-block ${name}`}
               key={name}
-              onClick={editorMode ? () => handleStickClick(index) : undefined}
+              onClick={
+                editorMode
+                  ? (event) => handleStickClick(index, event)
+                  : undefined
+              }
             />
           ))}
         </div>
@@ -738,7 +782,9 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
                 className={className}
                 key={index}
                 onClick={
-                  editorMode ? () => handleButtonClick(index) : undefined
+                  editorMode
+                    ? (event) => handleButtonClick(index, event)
+                    : undefined
                 }
                 onMouseDown={
                   editorMode
@@ -772,6 +818,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
           <div
             className="selection-bounds"
             onMouseDown={handleGroupBoundsMouseDown}
+            onClick={handleGroupBoundsClick}
             style={{
               left: selectedGroupRect.left - SELECTION_BOUNDS_PADDING,
               top: selectedGroupRect.top - SELECTION_BOUNDS_PADDING,

@@ -1,11 +1,32 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { cloneLayout, createSignedRulerTicks } from "../src/editor-helpers";
+import {
+  cloneLayout,
+  createSignedRulerTicks,
+  updateSelectedButtonSettings,
+} from "../src/editor-helpers";
 import { createDefaultLayout } from "../src/layout";
 
 test("createSignedRulerTicks creates symmetric ticks including zero", () => {
   assert.deepEqual(createSignedRulerTicks(25, 10), [-20, -10, 0, 10, 20]);
   assert.deepEqual(createSignedRulerTicks(0), [0]);
+});
+
+test("updateSelectedButtonSettings applies only changed settings", () => {
+  const layout = createDefaultLayout();
+  layout.buttons[0].cssColor = "#111111";
+  layout.buttons[1].cssColor = "#222222";
+  layout.buttons[0].w = "40";
+  layout.buttons[1].w = "80";
+
+  updateSelectedButtonSettings(layout, [0, 1], (next) => {
+    next.buttons[0].cssColor = "#abcdef";
+  });
+
+  assert.equal(layout.buttons[0].cssColor, "#abcdef");
+  assert.equal(layout.buttons[1].cssColor, "#abcdef");
+  assert.equal(layout.buttons[0].w, "40");
+  assert.equal(layout.buttons[1].w, "80");
 });
 
 test("cloneLayout creates independent nested collections", () => {
