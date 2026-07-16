@@ -42,6 +42,8 @@ interface UseEditorLayoutsOptions {
     invalidLayoutFile: string;
     operationFailed: string;
     discardChanges: string;
+    confirmDelete: string;
+    deleted: string;
   };
 }
 
@@ -130,8 +132,10 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
         const name = defaultLayout.name || "preset";
         const entries = await refreshLayouts();
         if (!cancelled) {
-          const entry = entries.find((item) => item.name === name);
-          const data = await api.getLayout(name);
+          const entry =
+            entries.find((item) => item.name === name && !item.builtin) ??
+            entries.find((item) => item.name === name);
+          const data = await api.getLayout(name, entry?.builtin ?? false);
           if (data) applyLayout(data, name, entry?.builtin ?? false);
           setSelectedLayout(
             entry ? layoutSelectionValue(entry.name, entry.builtin) : name,
@@ -158,7 +162,11 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
       const entry = layoutNames.find(
         (item) => layoutSelectionValue(item.name, item.builtin) === selection,
       );
-      applyLayout(await api.getLayout(name), name, entry?.builtin ?? false);
+      applyLayout(
+        await api.getLayout(name, entry?.builtin ?? false),
+        name,
+        entry?.builtin ?? false,
+      );
       setSelectedLayout(selection);
     } catch (error) {
       console.error("Failed to load layout:", error);
@@ -205,6 +213,38 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
       setStatus({ kind: "success", message: messages.defaultSaved });
     } catch (error) {
       console.error("Failed to set default layout:", error);
+      setStatus({ kind: "error", message: messages.operationFailed });
+    }
+  };
+
+  const deleteLayout = async () => {
+    if (currentBuiltin || !layoutName) return;
+    if (!window.confirm(messages.confirmDelete.replace("{{name}}", layoutName)))
+      return;
+    try {
+      const defaultLayout = await api.getDefaultLayout();
+      await api.deleteLayout(layoutName);
+      const entries = await refreshLayouts();
+      const fallback =
+        entries.find((entry) => entry.name === layoutName && entry.builtin) ??
+        entries[0];
+      if (fallback) {
+        const selection = layoutSelectionValue(fallback.name, fallback.builtin);
+        applyLayout(
+          await api.getLayout(fallback.name, fallback.builtin),
+          fallback.name,
+          fallback.builtin,
+        );
+        setSelectedLayout(selection);
+        if (defaultLayout.name === layoutName) {
+          await api.setDefaultLayout(fallback.name);
+        }
+      } else {
+        setSelectedLayout("");
+      }
+      setStatus({ kind: "success", message: messages.deleted });
+    } catch (error) {
+      console.error("Failed to delete layout:", error);
       setStatus({ kind: "error", message: messages.operationFailed });
     }
   };
@@ -277,6 +317,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
 
   return {
     currentBuiltin,
+    deleteLayout,
     exportLayout,
     fileInputRef,
     importLayout,

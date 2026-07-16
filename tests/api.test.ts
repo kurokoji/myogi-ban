@@ -33,3 +33,15 @@ test("ApiClient URL-encodes layout names", async (t) => {
   await new ApiClient().getLayout("player one");
   assert.match(String(fetchMock.mock.calls[0].arguments[0]), /player%20one$/);
 });
+
+test("ApiClient can explicitly request a built-in layout", async (t) => {
+  const fetchMock = t.mock.method(globalThis, "fetch", async () =>
+    Response.json({ version: "test" }),
+  );
+
+  await new ApiClient().getLayout("hit-box-ultra", true);
+  assert.match(
+    String(fetchMock.mock.calls[0].arguments[0]),
+    /hit-box-ultra\?builtin=true$/,
+  );
+});

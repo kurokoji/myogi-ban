@@ -43,12 +43,21 @@ export class ApiClient {
     return requestJson<LayoutEntry[]>("/api/layouts");
   }
 
-  async getLayout(name: string): Promise<Layout> {
-    return requestJson<Layout>(`/api/layout/${encodeURIComponent(name)}`);
+  async getLayout(name: string, builtin = false): Promise<Layout> {
+    const query = builtin ? "?builtin=true" : "";
+    return requestJson<Layout>(
+      `/api/layout/${encodeURIComponent(name)}${query}`,
+    );
   }
 
   async saveLayout(name: string, data: Layout): Promise<void> {
     await request("/api/layout/save", jsonRequest({ name, data }));
+  }
+
+  async deleteLayout(name: string): Promise<void> {
+    await request(`/api/layout/${encodeURIComponent(name)}`, {
+      method: "DELETE",
+    });
   }
 
   async sendState(state: GamepadState): Promise<void> {

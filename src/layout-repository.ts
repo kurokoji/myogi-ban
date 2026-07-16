@@ -98,8 +98,10 @@ export class LayoutRepository {
     ];
   }
 
-  read(name: string): unknown {
-    const layoutPath = this.findLayoutPath(name);
+  read(name: string, builtin = false): unknown {
+    const layoutPath = builtin
+      ? path.join(this.options.builtinLayoutDir, name)
+      : this.findLayoutPath(name);
     if (!layoutPath) return {};
     const jsonPath = path.join(layoutPath, "layout.json");
     return fs.existsSync(jsonPath)
@@ -112,6 +114,14 @@ export class LayoutRepository {
     ensureDir(layoutDir);
     this.copyAssets(layout, layout.name || name, name);
     writeJson(path.join(layoutDir, "layout.json"), { ...layout, name });
+  }
+
+  delete(name: string): boolean {
+    if (!name || path.basename(name) !== name) return false;
+    const layoutDir = path.join(this.options.userLayoutDir, name);
+    if (!fs.existsSync(layoutDir)) return false;
+    fs.rmSync(layoutDir, { recursive: true });
+    return true;
   }
 
   uploadImage(data: string, layoutName: string, fileName: string): string {

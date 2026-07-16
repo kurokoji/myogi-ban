@@ -69,6 +69,7 @@ export const resources = {
         "組み込みレイアウトは上書きできません。名前を付けて保存してください。",
       layoutName: "レイアウト名",
       setDefault: "デフォルトに設定",
+      deleteLayout: "このレイアウトを削除",
       gamepad: "ゲームパッド",
       notConnected: "未接続",
       connected: "接続中: {{name}}",
@@ -94,6 +95,9 @@ export const resources = {
       operationFailed: "操作に失敗しました",
       discardChanges:
         "未保存の変更があります。破棄して別のレイアウトを開きますか？",
+      confirmDelete:
+        "レイアウト「{{name}}」を削除しますか？この操作は元に戻せません。",
+      deleted: "レイアウトを削除しました",
       width: "幅",
       height: "高さ",
       pressedWidth: "押下時の幅",
@@ -168,6 +172,7 @@ export const resources = {
         "Built-in layouts cannot be overwritten. Save with a new name.",
       layoutName: "Layout name",
       setDefault: "Set as Default",
+      deleteLayout: "Delete this layout",
       gamepad: "Gamepad",
       notConnected: "Not connected",
       connected: "Connected: {{name}}",
@@ -193,6 +198,8 @@ export const resources = {
       operationFailed: "Operation failed",
       discardChanges:
         "You have unsaved changes. Discard them and open another layout?",
+      confirmDelete: "Delete layout “{{name}}”? This cannot be undone.",
+      deleted: "Layout deleted",
       width: "Width",
       height: "Height",
       pressedWidth: "Pressed width",

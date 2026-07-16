@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
+import { existsSync, mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import test from "node:test";
-import { collectLayoutAssets } from "../src/layout-repository";
+import {
+  collectLayoutAssets,
+  LayoutRepository,
+} from "../src/layout-repository";
 
 test("collectLayoutAssets returns safe unique image names", () => {
   const assets = collectLayoutAssets({
@@ -21,4 +27,24 @@ test("collectLayoutAssets returns safe unique image names", () => {
     "pressed.png",
     "button-pressed.png",
   ]);
+});
+
+test("LayoutRepository deletes user layouts only", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const builtinLayoutDir = join(root, "builtin");
+  const userLayoutDir = join(root, "user");
+  mkdirSync(join(builtinLayoutDir, "preset"), { recursive: true });
+  mkdirSync(join(userLayoutDir, "custom"), { recursive: true });
+  const repository = new LayoutRepository({
+    builtinLayoutDir,
+    userLayoutDir,
+    defaultLayoutFile: join(root, "default.json"),
+  });
+
+  assert.equal(repository.delete("custom"), true);
+  assert.equal(existsSync(join(userLayoutDir, "custom")), false);
+  assert.equal(repository.delete("preset"), false);
+  assert.equal(existsSync(join(builtinLayoutDir, "preset")), true);
+  assert.equal(repository.delete("../builtin"), false);
 });

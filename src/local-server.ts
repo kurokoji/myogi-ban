@@ -72,7 +72,15 @@ export function createLocalServer(options: LocalServerOptions): http.Server {
   });
 
   expressApp.get("/api/layout/:name", (req, res) => {
-    res.json(layouts.read(req.params.name));
+    res.json(layouts.read(req.params.name, req.query.builtin === "true"));
+  });
+
+  expressApp.delete("/api/layout/:name", (req, res) => {
+    if (!layouts.delete(req.params.name)) {
+      res.status(404).json({ ok: false });
+      return;
+    }
+    res.json({ ok: true });
   });
 
   expressApp.post("/api/upload-image", (req, res) => {

@@ -22,6 +22,7 @@ interface LayoutSettingsPanelProps {
   openLayout: (value: string) => void;
   saveLayout: () => void;
   saveLayoutAs: (name: string) => void;
+  deleteLayout: () => void;
   setDefaultLayout: () => void;
   exportLayout: () => void;
   importLayout: (event: ChangeEvent<HTMLInputElement>) => void;
@@ -131,6 +132,16 @@ export function LayoutSettingsPanel(
         )}
         <Button size="xs" fullWidth onClick={props.setDefaultLayout}>
           {t("setDefault")}
+        </Button>
+        <Button
+          size="xs"
+          variant="light"
+          color="red"
+          fullWidth
+          onClick={props.deleteLayout}
+          disabled={props.currentBuiltin}
+        >
+          {t("deleteLayout")}
         </Button>
         <Group gap="xs" align="end" wrap="nowrap">
           <Button

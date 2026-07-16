@@ -114,6 +114,7 @@ function EditorApp(): React.ReactElement {
   } = useEditorGuides({ layoutRef, previewScale, setLayout });
   const {
     currentBuiltin,
+    deleteLayout,
     exportLayout,
     fileInputRef,
     importLayout,
@@ -146,6 +147,8 @@ function EditorApp(): React.ReactElement {
       invalidLayoutFile: t("invalidLayoutFile"),
       operationFailed: t("operationFailed"),
       discardChanges: t("discardChanges"),
+      confirmDelete: t("confirmDelete"),
+      deleted: t("deleted"),
     },
   });
 
@@ -333,6 +336,7 @@ function EditorApp(): React.ReactElement {
           openLayout={openLayout}
           saveLayout={saveLayout}
           saveLayoutAs={saveLayoutAs}
+          deleteLayout={deleteLayout}
           setDefaultLayout={setDefaultLayout}
           exportLayout={exportLayout}
           importLayout={importLayout}
