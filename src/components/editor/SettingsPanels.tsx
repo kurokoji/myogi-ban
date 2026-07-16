@@ -19,64 +19,12 @@ import {
   type ImageUploadTarget,
   numericValue,
 } from "../../editor-helpers";
-import type { ButtonShape, Layout, LayoutEntry } from "../../types";
+import type { ButtonShape, Layout } from "../../types";
+import { ColorInput } from "./EditorInputs";
 
-interface DisplaySettingsPanelProps {
-  language: string;
-  previewScale: number;
-  hasGuides: boolean;
-  onLanguageChange: (language: string) => void;
-  onPreviewScaleChange: (scale: number) => void;
-  onClearGuides: () => void;
-}
-
-export function DisplaySettingsPanel(
-  props: DisplaySettingsPanelProps,
-): React.ReactElement {
-  const { t } = useTranslation();
-
-  return (
-    <Paper className="panel" withBorder>
-      <Stack gap="xs">
-        <Title order={2}>{t("display")}</Title>
-        <NativeSelect
-          size="xs"
-          label={t("language")}
-          value={props.language}
-          onChange={(event) => props.onLanguageChange(event.target.value)}
-          data={[
-            { value: "ja", label: "日本語" },
-            { value: "en", label: "English" },
-          ]}
-        />
-        <label className="range-label">
-          <span>
-            {t("scale")} <b>{props.previewScale.toFixed(1)}</b>
-          </span>
-          <input
-            type="range"
-            min="0.1"
-            max="3"
-            step="0.1"
-            value={props.previewScale}
-            onChange={(event) =>
-              props.onPreviewScaleChange(parseFloat(event.target.value))
-            }
-          />
-        </label>
-        <Button
-          size="xs"
-          variant="light"
-          color="gray"
-          onClick={props.onClearGuides}
-          disabled={!props.hasGuides}
-        >
-          {t("clearGuides")}
-        </Button>
-      </Stack>
-    </Paper>
-  );
-}
+export { DisplaySettingsPanel } from "./DisplaySettingsPanel";
+export { GamepadStatusPanel } from "./GamepadStatusPanel";
+export { LayoutSettingsPanel } from "./LayoutSettingsPanel";
 
 interface StickSettingsPanelProps {
   layout: Layout;
@@ -159,52 +107,26 @@ export function StickSettingsPanel({
         />
         {layout.stick.useCss && (
           <div className="control row">
-            <div>
-              <label
-                htmlFor="stick-plate-color"
-                style={{
-                  fontSize: "11px",
-                  display: "block",
-                  marginBottom: "4px",
-                }}
-              >
-                {t("stickPlateColor")}
-              </label>
-              <input
-                id="stick-plate-color"
-                type="color"
-                value={layout.stick.cssPlateColor || "#888888"}
-                onChange={(e) =>
-                  updateLayout((next) => {
-                    next.stick.cssPlateColor = e.target.value;
-                  })
-                }
-                style={{ width: "100%", height: "30px", cursor: "pointer" }}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="stick-knob-shaft-color"
-                style={{
-                  fontSize: "11px",
-                  display: "block",
-                  marginBottom: "4px",
-                }}
-              >
-                {t("stickKnobShaft")}
-              </label>
-              <input
-                id="stick-knob-shaft-color"
-                type="color"
-                value={layout.stick.cssColor || "#cccccc"}
-                onChange={(e) =>
-                  updateLayout((next) => {
-                    next.stick.cssColor = e.target.value;
-                  })
-                }
-                style={{ width: "100%", height: "30px", cursor: "pointer" }}
-              />
-            </div>
+            <ColorInput
+              id="stick-plate-color"
+              label={t("stickPlateColor")}
+              value={layout.stick.cssPlateColor || "#888888"}
+              onChange={(event) =>
+                updateLayout((next) => {
+                  next.stick.cssPlateColor = event.target.value;
+                })
+              }
+            />
+            <ColorInput
+              id="stick-knob-shaft-color"
+              label={t("stickKnobShaft")}
+              value={layout.stick.cssColor || "#cccccc"}
+              onChange={(event) =>
+                updateLayout((next) => {
+                  next.stick.cssColor = event.target.value;
+                })
+              }
+            />
           </div>
         )}
       </Stack>
@@ -269,29 +191,16 @@ export function BackgroundSettingsPanel(
         />
         {layout.background.useCss ? (
           <>
-            <div>
-              <label
-                htmlFor="background-color"
-                style={{
-                  fontSize: "11px",
-                  display: "block",
-                  marginBottom: "4px",
-                }}
-              >
-                {t("bgColor")}
-              </label>
-              <input
-                id="background-color"
-                type="color"
-                value={layout.background.cssColor || "#0b0f14"}
-                onChange={(e) =>
-                  updateLayout((next) => {
-                    next.background.cssColor = e.target.value;
-                  })
-                }
-                style={{ width: "100%", height: "30px", cursor: "pointer" }}
-              />
-            </div>
+            <ColorInput
+              id="background-color"
+              label={t("bgColor")}
+              value={layout.background.cssColor || "#0b0f14"}
+              onChange={(event) =>
+                updateLayout((next) => {
+                  next.background.cssColor = event.target.value;
+                })
+              }
+            />
             <NumberInput
               size="xs"
               label={t("borderRadius")}
@@ -441,48 +350,24 @@ export function ButtonSettingsPanel(
         />
         {layout.defaultbuttons.useCss && (
           <div className="control row">
-            <div>
-              <label
-                style={{
-                  fontSize: "11px",
-                  display: "block",
-                  marginBottom: "4px",
-                }}
-              >
-                {t("colorNormal")}
-              </label>
-              <input
-                type="color"
-                value={layout.defaultbuttons.cssColor || "#cccccc"}
-                onChange={(e) =>
-                  updateLayout((next) => {
-                    next.defaultbuttons.cssColor = e.target.value;
-                  })
-                }
-                style={{ width: "100%", height: "30px", cursor: "pointer" }}
-              />
-            </div>
-            <div>
-              <label
-                style={{
-                  fontSize: "11px",
-                  display: "block",
-                  marginBottom: "4px",
-                }}
-              >
-                {t("colorPressed")}
-              </label>
-              <input
-                type="color"
-                value={layout.defaultbuttons.cssPressedColor || "#999999"}
-                onChange={(e) =>
-                  updateLayout((next) => {
-                    next.defaultbuttons.cssPressedColor = e.target.value;
-                  })
-                }
-                style={{ width: "100%", height: "30px", cursor: "pointer" }}
-              />
-            </div>
+            <ColorInput
+              label={t("colorNormal")}
+              value={layout.defaultbuttons.cssColor || "#cccccc"}
+              onChange={(event) =>
+                updateLayout((next) => {
+                  next.defaultbuttons.cssColor = event.target.value;
+                })
+              }
+            />
+            <ColorInput
+              label={t("colorPressed")}
+              value={layout.defaultbuttons.cssPressedColor || "#999999"}
+              onChange={(event) =>
+                updateLayout((next) => {
+                  next.defaultbuttons.cssPressedColor = event.target.value;
+                })
+              }
+            />
           </div>
         )}
         {layout.defaultbuttons.useCss && (
@@ -774,64 +659,40 @@ export function ButtonSettingsPanel(
             layout.defaultbuttons.useCss ??
             false) && (
             <div className="control row">
-              <div>
-                <label
-                  style={{
-                    fontSize: "11px",
-                    display: "block",
-                    marginBottom: "4px",
-                  }}
-                >
-                  {t("colorNormal")}
-                </label>
-                <input
-                  type="color"
-                  value={
-                    layout.buttons[selectedButtonIndex]?.cssColor ===
-                    layout.defaultbuttons.cssColor
-                      ? "#cccccc"
-                      : (layout.buttons[selectedButtonIndex]?.cssColor ??
-                        layout.defaultbuttons.cssColor ??
-                        "#cccccc")
-                  }
-                  onChange={(e) =>
-                    updateLayout((next) => {
-                      next.buttons[selectedButtonIndex].cssColor =
-                        e.target.value;
-                    })
-                  }
-                  style={{ width: "100%", height: "30px", cursor: "pointer" }}
-                />
-              </div>
-              <div>
-                <label
-                  style={{
-                    fontSize: "11px",
-                    display: "block",
-                    marginBottom: "4px",
-                  }}
-                >
-                  {t("colorPressed")}
-                </label>
-                <input
-                  type="color"
-                  value={
-                    layout.buttons[selectedButtonIndex]?.cssPressedColor ===
-                    layout.defaultbuttons.cssPressedColor
-                      ? "#999999"
-                      : (layout.buttons[selectedButtonIndex]?.cssPressedColor ??
-                        layout.defaultbuttons.cssPressedColor ??
-                        "#999999")
-                  }
-                  onChange={(e) =>
-                    updateLayout((next) => {
-                      next.buttons[selectedButtonIndex].cssPressedColor =
-                        e.target.value;
-                    })
-                  }
-                  style={{ width: "100%", height: "30px", cursor: "pointer" }}
-                />
-              </div>
+              <ColorInput
+                label={t("colorNormal")}
+                value={
+                  layout.buttons[selectedButtonIndex]?.cssColor ===
+                  layout.defaultbuttons.cssColor
+                    ? "#cccccc"
+                    : (layout.buttons[selectedButtonIndex]?.cssColor ??
+                      layout.defaultbuttons.cssColor ??
+                      "#cccccc")
+                }
+                onChange={(event) =>
+                  updateLayout((next) => {
+                    next.buttons[selectedButtonIndex].cssColor =
+                      event.target.value;
+                  })
+                }
+              />
+              <ColorInput
+                label={t("colorPressed")}
+                value={
+                  layout.buttons[selectedButtonIndex]?.cssPressedColor ===
+                  layout.defaultbuttons.cssPressedColor
+                    ? "#999999"
+                    : (layout.buttons[selectedButtonIndex]?.cssPressedColor ??
+                      layout.defaultbuttons.cssPressedColor ??
+                      "#999999")
+                }
+                onChange={(event) =>
+                  updateLayout((next) => {
+                    next.buttons[selectedButtonIndex].cssPressedColor =
+                      event.target.value;
+                  })
+                }
+              />
             </div>
           )}
         {selectedButtonIndex !== null &&
@@ -1130,116 +991,6 @@ export function ButtonSettingsPanel(
           </div>
         )}
       </Stack>
-    </Paper>
-  );
-}
-
-interface LayoutSettingsPanelProps {
-  layoutNames: LayoutEntry[];
-  selectedLayout: string;
-  layoutName: string;
-  setSelectedLayout: (value: string) => void;
-  setLayoutName: (value: string) => void;
-  loadLayout: () => void;
-  saveLayout: () => void;
-  setDefaultLayout: () => void;
-  exportLayout: () => void;
-  importLayout: (event: ChangeEvent<HTMLInputElement>) => void;
-}
-
-export function LayoutSettingsPanel(
-  props: LayoutSettingsPanelProps,
-): React.ReactElement {
-  const { t } = useTranslation();
-
-  return (
-    <Paper className="panel" withBorder>
-      <Stack gap="xs">
-        <Title order={2}>{t("layout")}</Title>
-        <Group gap="xs" align="end" wrap="nowrap">
-          <NativeSelect
-            size="xs"
-            value={props.selectedLayout}
-            onChange={(event) => props.setSelectedLayout(event.target.value)}
-            data={props.layoutNames.map((entry) => ({
-              value: `${entry.name}:${entry.builtin ? "builtin" : "user"}`,
-              label: entry.builtin
-                ? `${entry.name} (${t("builtIn")})`
-                : entry.name,
-            }))}
-            className="grow"
-          />
-          <Button size="xs" variant="light" onClick={props.loadLayout}>
-            {t("load")}
-          </Button>
-        </Group>
-        <Group gap="xs" align="end" wrap="nowrap">
-          <TextInput
-            size="xs"
-            value={props.layoutName}
-            onChange={(event) => props.setLayoutName(event.target.value)}
-            placeholder={t("layoutNamePlaceholder")}
-            className="grow"
-          />
-          <Button size="xs" onClick={props.saveLayout}>
-            {t("save")}
-          </Button>
-        </Group>
-        <Button size="xs" fullWidth onClick={props.setDefaultLayout}>
-          {t("setDefault")}
-        </Button>
-        <Group gap="xs" align="end" wrap="nowrap">
-          <Button
-            size="xs"
-            variant="light"
-            fullWidth
-            onClick={props.exportLayout}
-          >
-            {t("export")}
-          </Button>
-          <Button
-            size="xs"
-            variant="light"
-            fullWidth
-            onClick={() =>
-              document.getElementById("import-layout-input")?.click()
-            }
-          >
-            {t("import")}
-          </Button>
-        </Group>
-        <input
-          id="import-layout-input"
-          type="file"
-          accept=".json"
-          hidden
-          onChange={props.importLayout}
-        />
-      </Stack>
-    </Paper>
-  );
-}
-
-interface GamepadStatusPanelProps {
-  connected: boolean;
-  gamepadName: string;
-}
-
-export function GamepadStatusPanel({
-  connected,
-  gamepadName,
-}: GamepadStatusPanelProps): React.ReactElement {
-  const { t } = useTranslation();
-
-  return (
-    <Paper className="panel" withBorder>
-      <Title order={2}>{t("gamepad")}</Title>
-      <Text
-        size="xs"
-        className={connected ? "status-connected" : "status-disconnected"}
-      >
-        {connected ? t("connected", { name: gamepadName }) : t("notConnected")}
-      </Text>
     </Paper>
   );
 }

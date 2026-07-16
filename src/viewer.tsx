@@ -1,4 +1,3 @@
-import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./i18n";
@@ -10,16 +9,9 @@ import {
   type StickMapping,
 } from "./gamepad";
 import { createEmptySnapshot, readGamepadSnapshot } from "./gamepad-state";
+import { useLatestRef } from "./hooks/useLatestRef";
 import { createDefaultLayout, ensureLayoutDefaults } from "./layout";
 import type { Layout } from "./types";
-
-function useLatestRef<T>(value: T): React.MutableRefObject<T> {
-  const ref = useRef(value);
-  useEffect(() => {
-    ref.current = value;
-  }, [value]);
-  return ref;
-}
 
 function ViewerApp(): React.ReactElement {
   const apiRef = useRef(new ApiClient());
