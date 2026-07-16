@@ -6,13 +6,7 @@ import {
   Tooltip,
 } from "@mantine/core";
 import type React from "react";
-import {
-  type ChangeEvent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { useTranslation } from "react-i18next";
 import "./i18n";
@@ -26,14 +20,7 @@ import {
   StickSettingsPanel,
 } from "./components/editor/SettingsPanels";
 import { GamepadView } from "./components/GamepadView";
-import {
-  cloneLayout,
-  createEmptyButtonLayout,
-  type ImageUploadTarget,
-  layoutNameFromSelection,
-  layoutSelectionValue,
-  readFileAsDataUrl,
-} from "./editor-helpers";
+import { cloneLayout, createEmptyButtonLayout } from "./editor-helpers";
 import {
   type ButtonMapping,
   GamepadManager,
@@ -41,11 +28,12 @@ import {
 } from "./gamepad";
 import { useEditorGamepad } from "./hooks/useEditorGamepad";
 import { useEditorGuides } from "./hooks/useEditorGuides";
+import { useEditorLayouts } from "./hooks/useEditorLayouts";
 import { useLayoutHistory } from "./hooks/useLayoutHistory";
 import { usePreviewViewport } from "./hooks/usePreviewViewport";
 import i18n from "./i18n";
-import { createDefaultLayout, ensureLayoutDefaults } from "./layout";
-import { type Layout, type LayoutEntry, SERVER_URL } from "./types";
+import { createDefaultLayout } from "./layout";
+import { type Layout, SERVER_URL } from "./types";
 
 const PREVIEW_SCALE_STEP = 0.1;
 const APP_VERSION = process.env.npm_package_version ?? "0.0.0";
@@ -54,14 +42,7 @@ const RULER_MAJOR_STEP = 50;
 function EditorApp(): React.ReactElement {
   const { t } = useTranslation();
   const apiRef = useRef(new ApiClient());
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const imageUploadTargetRef = useRef<ImageUploadTarget>({
-    type: "background",
-  });
   const [layout, setLayout] = useState<Layout>(() => createDefaultLayout());
-  const [layoutNames, setLayoutNames] = useState<LayoutEntry[]>([]);
-  const [selectedLayout, setSelectedLayout] = useState("");
-  const [layoutName, setLayoutName] = useState("mypreset");
   const [buttonMappings, setButtonMappings] = useState<ButtonMapping[]>(() =>
     GamepadManager.createDefaultButtonMappings(),
   );
@@ -132,66 +113,40 @@ function EditorApp(): React.ReactElement {
     startGuideDrag,
     updateRulerOrigin,
   } = useEditorGuides({ layoutRef, previewScale, setLayout });
+  const {
+    exportLayout,
+    fileInputRef,
+    importLayout,
+    layoutName,
+    layoutNames,
+    loadLayout,
+    openImagePicker,
+    saveLayout,
+    selectedLayout,
+    setDefaultLayout,
+    setLayoutName,
+    setSelectedLayout,
+    uploadImage,
+  } = useEditorLayouts({
+    api: apiRef.current,
+    layout,
+    buttonMappings,
+    stickMappings,
+    setButtonMappings,
+    setStickMappings,
+    setSelectedButtonIndexes,
+    setSelectedStick,
+    restoreLayout,
+    clearLayoutHistory,
+    updateLayout,
+    messages: {
+      saved: t("saved"),
+      defaultSaved: t("defaultSaved"),
+      invalidLayoutFile: t("invalidLayoutFile"),
+    },
+  });
 
   const obsUrl = `${SERVER_URL}/view`;
-  const refreshLayouts = useCallback(async () => {
-    try {
-      const layouts = await apiRef.current.getLayouts();
-      setLayoutNames(layouts);
-      return layouts;
-    } catch (error) {
-      console.error("Failed to load layout list:", error);
-      return [];
-    }
-  }, []);
-
-  const applyLayout = useCallback(
-    (data: Layout, name?: string) => {
-      const nextLayout = ensureLayoutDefaults(data);
-      restoreLayout(nextLayout);
-      clearLayoutHistory();
-      setSelectedButtonIndexes([]);
-      setSelectedStick(false);
-      setButtonMappings(
-        data.buttonMappings || GamepadManager.createDefaultButtonMappings(),
-      );
-      setStickMappings(
-        data.stickMappings || GamepadManager.createDefaultStickMappings(),
-      );
-      if (name) setLayoutName(name);
-    },
-    [clearLayoutHistory, restoreLayout],
-  );
-
-  useEffect(() => {
-    let cancelled = false;
-    const loadDefaultLayout = async () => {
-      try {
-        const defaultLayout = await apiRef.current.getDefaultLayout();
-        const layoutName = defaultLayout.name || "preset";
-        const data = await apiRef.current.getLayout(layoutName);
-        if (!cancelled && data) {
-          applyLayout(data, layoutName);
-        }
-        const entries = await refreshLayouts();
-        if (!cancelled) {
-          const entry = entries.find((e) => e.name === layoutName);
-          setSelectedLayout(
-            entry
-              ? layoutSelectionValue(entry.name, entry.builtin)
-              : layoutName,
-          );
-        }
-      } catch {
-        console.log("No default layout found, using built-in default");
-        await refreshLayouts();
-      }
-    };
-    loadDefaultLayout();
-    return () => {
-      cancelled = true;
-    };
-  }, [applyLayout, refreshLayouts]);
 
   useEffect(() => {
     setSelectedButtonIndexes((current) =>
@@ -322,116 +277,10 @@ function EditorApp(): React.ReactElement {
     window.setTimeout(() => setCopiedObsUrl(false), 2000);
   }, [obsUrl]);
 
-  const loadLayout = async () => {
-    if (!selectedLayout) return;
-    const name = layoutNameFromSelection(selectedLayout);
-    try {
-      const data = await apiRef.current.getLayout(name);
-      applyLayout(data, name);
-    } catch (error) {
-      console.error("Failed to load layout:", error);
-    }
-  };
-
-  const saveLayout = async () => {
-    const name = layoutName || layout.name || "custom";
-    const data = cloneLayout(layout);
-    data.name = name;
-    data.buttonMappings = buttonMappings;
-    data.stickMappings = stickMappings;
-    try {
-      await apiRef.current.saveLayout(name, data);
-      await refreshLayouts();
-      window.alert(t("saved"));
-    } catch (error) {
-      console.error("Failed to save layout:", error);
-    }
-  };
-
-  const setDefaultLayout = async () => {
-    const name = layoutName || layout.name || "custom";
-    try {
-      await apiRef.current.setDefaultLayout(name);
-      window.alert(t("defaultSaved"));
-    } catch (error) {
-      console.error("Failed to set default layout:", error);
-    }
-  };
-
-  const openImagePicker = (target: ImageUploadTarget) => {
-    imageUploadTargetRef.current = target;
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-      fileInputRef.current.click();
-    }
-  };
-
-  const uploadImage = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    const uploadLayoutName = layout.name || "custom";
-    const dataUrl = await readFileAsDataUrl(file);
-
-    try {
-      const result = await apiRef.current.uploadImage({
-        data: dataUrl,
-        layoutName: uploadLayoutName,
-        fileName: file.name,
-      });
-      const fileName = result.fileName || file.name;
-      const target = imageUploadTargetRef.current;
-      updateLayout((next) => {
-        next.name = uploadLayoutName;
-        if (target.type === "background") {
-          next.background.image = fileName;
-        } else if (target.type === "defaultButton") {
-          next.defaultbuttons[target.state === "pressed" ? "imgp" : "img"] =
-            fileName;
-        } else {
-          next.buttons[target.index][
-            target.state === "pressed" ? "imgp" : "img"
-          ] = fileName;
-        }
-      });
-    } catch (error) {
-      console.error("Failed to upload image:", error);
-    }
-  };
-
   const changeLanguage = (nextLanguage: string) => {
     setLanguage(nextLanguage);
     localStorage.setItem("language", nextLanguage);
     i18n.changeLanguage(nextLanguage);
-  };
-
-  const exportLayout = () => {
-    const data = cloneLayout(layout);
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${layoutName || "layout"}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const importLayout = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const data = JSON.parse(String(reader.result));
-        applyLayout(data, data.name || "imported");
-      } catch {
-        window.alert(t("invalidLayoutFile"));
-      }
-    };
-    reader.readAsText(file);
-    event.target.value = "";
   };
 
   return (
