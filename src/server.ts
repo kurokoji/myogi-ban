@@ -3,19 +3,22 @@ import { createLocalServer } from "./local-server";
 import { PORT } from "./types";
 
 const ROOT_DIR = path.join(__dirname, "..");
-const PID_FILE = path.join(ROOT_DIR, "server.pid");
+const dataDir = process.env.MYOGI_BAN_DATA_DIR
+  ? path.resolve(process.env.MYOGI_BAN_DATA_DIR)
+  : path.join(ROOT_DIR, "public");
+const pidFile = path.join(dataDir, "server.pid");
 
 const server = createLocalServer({
   port: PORT,
   publicDir: path.join(ROOT_DIR, "public"),
   builtinLayoutDir: path.join(ROOT_DIR, "public", "layout"),
-  userLayoutDir: path.join(ROOT_DIR, "public", "user-layouts"),
-  defaultLayoutFile: path.join(ROOT_DIR, "public", "default-layout.json"),
-  pidFile: PID_FILE,
+  userLayoutDir: path.join(dataDir, "user-layouts"),
+  defaultLayoutFile: path.join(dataDir, "default-layout.json"),
+  pidFile,
   onListening: () => {
     console.log(`Server running at http://localhost:${PORT}`);
     console.log(`OBS browser source URL: http://localhost:${PORT}/view`);
-    console.log(`PID: ${process.pid} (saved to ${PID_FILE})`);
+    console.log(`PID: ${process.pid} (saved to ${pidFile})`);
   },
 });
 

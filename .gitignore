@@ -6,4 +6,5 @@ server.pid
 *.afphoto
 *.psd
 public/user-layouts/
+.dev-data/
 public/default-layout.json

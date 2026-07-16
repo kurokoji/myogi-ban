@@ -26,7 +26,9 @@ function createWindow(): void {
 }
 
 function startServer(): void {
-  const userDataDir = app.getPath("userData");
+  const userDataDir = process.argv.includes("--dev")
+    ? path.join(__dirname, "..", ".dev-data")
+    : app.getPath("userData");
 
   server = createLocalServer({
     port: PORT,
@@ -50,7 +52,10 @@ app.whenReady().then(() => {
 app.on("window-all-closed", () => {
   if (server) server.close();
 
-  const pidFile = path.join(app.getPath("userData"), "server.pid");
+  const userDataDir = process.argv.includes("--dev")
+    ? path.join(__dirname, "..", ".dev-data")
+    : app.getPath("userData");
+  const pidFile = path.join(userDataDir, "server.pid");
   if (fs.existsSync(pidFile)) fs.unlinkSync(pidFile);
 
   if (process.platform !== "darwin") app.quit();

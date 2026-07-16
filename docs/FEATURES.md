@@ -62,7 +62,7 @@
 
 - `npm start`: Electronアプリとして起動
 - `npm run start:web`: ローカルWebサーバーとして起動
-- `npm run dev:web`: フロントエンドを自動ビルドしながらWebサーバーを起動
+- `npm run dev:web`: フロントエンドを自動ビルドしながら、開発用保存先 `.dev-data` を使用してWebサーバーを起動
 - `npm stop`: Webサーバー単体起動時のPIDファイルを使って停止
 - `npm run build:dist`: electron-builderで配布用パッケージを作成
 

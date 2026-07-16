@@ -39,6 +39,10 @@ await Promise.all([editor.watch(), viewer.watch()]);
 
 const serverProcess = spawn(process.execPath, ["dist/server.js"], {
   stdio: "inherit",
+  env: {
+    ...process.env,
+    MYOGI_BAN_DATA_DIR: ".dev-data",
+  },
 });
 
 async function shutdown() {
