@@ -4,12 +4,14 @@ import { ensureLayoutDefaults } from "../src/layout";
 
 test("ensureLayoutDefaults fills missing nested values", () => {
   const layout = ensureLayoutDefaults({
+    version: "v1.0.5",
     name: "legacy",
     background: { w: "640", h: "360" } as never,
     guides: { vertical: [10], horizontal: [] },
   });
 
   assert.equal(layout.name, "legacy");
+  assert.equal(layout.version, "v1.0.6");
   assert.equal(layout.background.w, "640");
   assert.equal(layout.background.opacity, 1);
   assert.equal(layout.background.scale, "");

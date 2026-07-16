@@ -79,7 +79,7 @@ export function createDefaultLayout(): Layout {
   }
 
   return {
-    version: "v1.0.5",
+    version: "v1.0.6",
     name: "default",
     totalbuttonshow: 8,
     showstick: true,
@@ -151,6 +151,7 @@ export function ensureLayoutDefaults(layout: Partial<Layout>): Layout {
   return {
     ...defaults,
     ...layout,
+    version: defaults.version,
     stick: { ...defaults.stick, ...(layout.stick || {}) },
     defaultbuttons,
     background,
