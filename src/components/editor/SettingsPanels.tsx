@@ -50,7 +50,7 @@ export function StickSettingsPanel({
         <div className="control row">
           <NumberInput
             size="xs"
-            label="X"
+            label="X (px)"
             value={numericValue(layout.stick.x)}
             onChange={(value) =>
               updateLayout((next) => {
@@ -60,7 +60,7 @@ export function StickSettingsPanel({
           />
           <NumberInput
             size="xs"
-            label="Y"
+            label="Y (px)"
             value={numericValue(layout.stick.y)}
             onChange={(value) =>
               updateLayout((next) => {
@@ -72,7 +72,7 @@ export function StickSettingsPanel({
         <div className="control row">
           <NumberInput
             size="xs"
-            label="W%"
+            label="W (%)"
             value={numericValue(layout.stick.w)}
             onChange={(value) =>
               updateLayout((next) => {
@@ -82,7 +82,7 @@ export function StickSettingsPanel({
           />
           <NumberInput
             size="xs"
-            label="H%"
+            label="H (%)"
             value={numericValue(layout.stick.h)}
             onChange={(value) =>
               updateLayout((next) => {
