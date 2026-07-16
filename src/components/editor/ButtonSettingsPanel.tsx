@@ -62,10 +62,10 @@ export function ButtonSettingsPanel(
         <Switch
           size="sm"
           label={t("useCssButton")}
-          checked={layout.defaultbuttons.useCss ?? false}
+          checked={!(layout.defaultbuttons.useCss ?? false)}
           onChange={(event) =>
             updateLayout((next) => {
-              next.defaultbuttons.useCss = event.target.checked;
+              next.defaultbuttons.useCss = !event.target.checked;
             })
           }
         />
@@ -304,14 +304,16 @@ export function ButtonSettingsPanel(
               size="sm"
               label={t("useCssButton")}
               checked={
-                layout.buttons[selectedButtonIndex]?.useCss ??
-                layout.defaultbuttons.useCss ??
-                false
+                !(
+                  layout.buttons[selectedButtonIndex]?.useCss ??
+                  layout.defaultbuttons.useCss ??
+                  false
+                )
               }
               onChange={(event) =>
                 updateLayout((next) => {
                   next.buttons[selectedButtonIndex].useCss =
-                    event.target.checked;
+                    !event.target.checked;
                 })
               }
             />

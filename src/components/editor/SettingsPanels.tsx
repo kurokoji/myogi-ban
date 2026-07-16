@@ -94,10 +94,10 @@ export function StickSettingsPanel({
         <Switch
           size="sm"
           label={t("useCssStick")}
-          checked={layout.stick.useCss ?? false}
+          checked={!(layout.stick.useCss ?? false)}
           onChange={(event) =>
             updateLayout((next) => {
-              next.stick.useCss = event.target.checked;
+              next.stick.useCss = !event.target.checked;
             })
           }
         />
@@ -178,10 +178,10 @@ export function BackgroundSettingsPanel(
         <Switch
           size="sm"
           label={t("useCssBg")}
-          checked={layout.background.useCss ?? true}
+          checked={!(layout.background.useCss ?? true)}
           onChange={(event) =>
             updateLayout((next) => {
-              next.background.useCss = event.target.checked;
+              next.background.useCss = !event.target.checked;
             })
           }
         />
