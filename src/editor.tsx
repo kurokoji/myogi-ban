@@ -113,19 +113,21 @@ function EditorApp(): React.ReactElement {
     updateRulerOrigin,
   } = useEditorGuides({ layoutRef, previewScale, setLayout });
   const {
+    currentBuiltin,
     exportLayout,
     fileInputRef,
     importLayout,
     layoutName,
     layoutNames,
-    loadLayout,
+    openLayout,
     openImagePicker,
     saveLayout,
+    saveLayoutAs,
     selectedLayout,
     setDefaultLayout,
-    setLayoutName,
-    setSelectedLayout,
+    status,
     uploadImage,
+    isDirty,
   } = useEditorLayouts({
     api: apiRef.current,
     layout,
@@ -142,6 +144,8 @@ function EditorApp(): React.ReactElement {
       saved: t("saved"),
       defaultSaved: t("defaultSaved"),
       invalidLayoutFile: t("invalidLayoutFile"),
+      operationFailed: t("operationFailed"),
+      discardChanges: t("discardChanges"),
     },
   });
 
@@ -321,16 +325,18 @@ function EditorApp(): React.ReactElement {
         />
 
         <LayoutSettingsPanel
+          currentBuiltin={currentBuiltin}
+          isDirty={isDirty}
           layoutNames={layoutNames}
           selectedLayout={selectedLayout}
           layoutName={layoutName}
-          setSelectedLayout={setSelectedLayout}
-          setLayoutName={setLayoutName}
-          loadLayout={loadLayout}
+          openLayout={openLayout}
           saveLayout={saveLayout}
+          saveLayoutAs={saveLayoutAs}
           setDefaultLayout={setDefaultLayout}
           exportLayout={exportLayout}
           importLayout={importLayout}
+          status={status}
         />
 
         <BackgroundSettingsPanel

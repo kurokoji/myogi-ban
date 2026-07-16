@@ -89,6 +89,11 @@ export interface LayoutEntry {
   builtin: boolean;
 }
 
+export type OperationStatus =
+  | { kind: "success"; message: string }
+  | { kind: "error"; message: string }
+  | null;
+
 export const STICK_NAMES = [
   "stick-up",
   "stick-down",

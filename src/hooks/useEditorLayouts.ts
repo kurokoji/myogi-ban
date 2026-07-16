@@ -22,7 +22,7 @@ import {
   type StickMapping,
 } from "../gamepad";
 import { ensureLayoutDefaults } from "../layout";
-import type { Layout, LayoutEntry } from "../types";
+import type { Layout, LayoutEntry, OperationStatus } from "../types";
 
 interface UseEditorLayoutsOptions {
   api: ApiClient;
@@ -40,7 +40,17 @@ interface UseEditorLayoutsOptions {
     saved: string;
     defaultSaved: string;
     invalidLayoutFile: string;
+    operationFailed: string;
+    discardChanges: string;
   };
+}
+
+function layoutSignature(
+  layout: Layout,
+  buttonMappings: ButtonMapping[],
+  stickMappings: StickMapping[],
+): string {
+  return JSON.stringify({ layout, buttonMappings, stickMappings });
 }
 
 export function useEditorLayouts(options: UseEditorLayoutsOptions) {
@@ -65,6 +75,9 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
   const [layoutNames, setLayoutNames] = useState<LayoutEntry[]>([]);
   const [selectedLayout, setSelectedLayout] = useState("");
   const [layoutName, setLayoutName] = useState("mypreset");
+  const [currentBuiltin, setCurrentBuiltin] = useState(false);
+  const [cleanSignature, setCleanSignature] = useState("");
+  const [status, setStatus] = useState<OperationStatus>(null);
 
   const refreshLayouts = useCallback(async () => {
     try {
@@ -78,18 +91,26 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
   }, [api]);
 
   const applyLayout = useCallback(
-    (data: Layout, name?: string) => {
-      restoreLayout(ensureLayoutDefaults(data));
+    (data: Layout, name?: string, builtin = false, markClean = true) => {
+      const nextLayout = ensureLayoutDefaults(data);
+      const nextButtonMappings =
+        data.buttonMappings || GamepadManager.createDefaultButtonMappings();
+      const nextStickMappings =
+        data.stickMappings || GamepadManager.createDefaultStickMappings();
+      restoreLayout(nextLayout);
       clearLayoutHistory();
       setSelectedButtonIndexes([]);
       setSelectedStick(false);
-      setButtonMappings(
-        data.buttonMappings || GamepadManager.createDefaultButtonMappings(),
-      );
-      setStickMappings(
-        data.stickMappings || GamepadManager.createDefaultStickMappings(),
-      );
+      setButtonMappings(nextButtonMappings);
+      setStickMappings(nextStickMappings);
       if (name) setLayoutName(name);
+      setCurrentBuiltin(builtin);
+      setStatus(null);
+      setCleanSignature(
+        markClean
+          ? layoutSignature(nextLayout, nextButtonMappings, nextStickMappings)
+          : "",
+      );
     },
     [
       clearLayoutHistory,
@@ -107,11 +128,11 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
       try {
         const defaultLayout = await api.getDefaultLayout();
         const name = defaultLayout.name || "preset";
-        const data = await api.getLayout(name);
-        if (!cancelled && data) applyLayout(data, name);
         const entries = await refreshLayouts();
         if (!cancelled) {
           const entry = entries.find((item) => item.name === name);
+          const data = await api.getLayout(name);
+          if (data) applyLayout(data, name, entry?.builtin ?? false);
           setSelectedLayout(
             entry ? layoutSelectionValue(entry.name, entry.builtin) : name,
           );
@@ -127,18 +148,25 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     };
   }, [api, applyLayout, refreshLayouts]);
 
-  const loadLayout = async () => {
-    if (!selectedLayout) return;
-    const name = layoutNameFromSelection(selectedLayout);
+  const openLayout = async (selection: string) => {
+    if (!selection || selection === selectedLayout) return;
+    const dirty =
+      cleanSignature !== layoutSignature(layout, buttonMappings, stickMappings);
+    if (dirty && !window.confirm(messages.discardChanges)) return;
+    const name = layoutNameFromSelection(selection);
     try {
-      applyLayout(await api.getLayout(name), name);
+      const entry = layoutNames.find(
+        (item) => layoutSelectionValue(item.name, item.builtin) === selection,
+      );
+      applyLayout(await api.getLayout(name), name, entry?.builtin ?? false);
+      setSelectedLayout(selection);
     } catch (error) {
       console.error("Failed to load layout:", error);
+      setStatus({ kind: "error", message: messages.operationFailed });
     }
   };
 
-  const saveLayout = async () => {
-    const name = layoutName || layout.name || "custom";
+  const saveToName = async (name: string) => {
     const data = cloneLayout(layout);
     data.name = name;
     data.buttonMappings = buttonMappings;
@@ -146,19 +174,38 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     try {
       await api.saveLayout(name, data);
       await refreshLayouts();
-      window.alert(messages.saved);
+      restoreLayout(data);
+      clearLayoutHistory();
+      setLayoutName(name);
+      setCurrentBuiltin(false);
+      setSelectedLayout(layoutSelectionValue(name, false));
+      setCleanSignature(layoutSignature(data, buttonMappings, stickMappings));
+      setStatus({ kind: "success", message: messages.saved });
     } catch (error) {
       console.error("Failed to save layout:", error);
+      setStatus({ kind: "error", message: messages.operationFailed });
     }
+  };
+
+  const saveLayout = async () => {
+    if (currentBuiltin) return;
+    await saveToName(layoutName || layout.name || "custom");
+  };
+
+  const saveLayoutAs = async (name: string) => {
+    const trimmedName = name.trim();
+    if (!trimmedName) return;
+    await saveToName(trimmedName);
   };
 
   const setDefaultLayout = async () => {
     const name = layoutName || layout.name || "custom";
     try {
       await api.setDefaultLayout(name);
-      window.alert(messages.defaultSaved);
+      setStatus({ kind: "success", message: messages.defaultSaved });
     } catch (error) {
       console.error("Failed to set default layout:", error);
+      setStatus({ kind: "error", message: messages.operationFailed });
     }
   };
 
@@ -219,9 +266,9 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     reader.onload = () => {
       try {
         const data = JSON.parse(String(reader.result));
-        applyLayout(data, data.name || "imported");
+        applyLayout(data, data.name || "imported", false, false);
       } catch {
-        window.alert(messages.invalidLayoutFile);
+        setStatus({ kind: "error", message: messages.invalidLayoutFile });
       }
     };
     reader.readAsText(file);
@@ -229,18 +276,21 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
   };
 
   return {
+    currentBuiltin,
     exportLayout,
     fileInputRef,
     importLayout,
     layoutName,
     layoutNames,
-    loadLayout,
+    openLayout,
     openImagePicker,
     saveLayout,
+    saveLayoutAs,
     selectedLayout,
     setDefaultLayout,
-    setLayoutName,
-    setSelectedLayout,
     uploadImage,
+    status,
+    isDirty:
+      cleanSignature !== layoutSignature(layout, buttonMappings, stickMappings),
   };
 }
