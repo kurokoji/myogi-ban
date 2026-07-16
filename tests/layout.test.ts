@@ -11,6 +11,7 @@ test("ensureLayoutDefaults fills missing nested values", () => {
 
   assert.equal(layout.name, "legacy");
   assert.equal(layout.background.w, "640");
+  assert.equal(layout.background.opacity, 1);
   assert.equal(layout.background.scale, "");
   assert.equal(layout.defaultbuttons.cssShape, "circle");
   assert.deepEqual(layout.guides.vertical, [10]);

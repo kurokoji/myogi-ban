@@ -49,7 +49,6 @@ function EditorApp(): React.ReactElement {
   const [stickMappings, setStickMappings] = useState<StickMapping[]>(() =>
     GamepadManager.createDefaultStickMappings(),
   );
-  const [backgroundOpacity, setBackgroundOpacity] = useState(1);
   const [selectedButtonIndex, setSelectedButtonIndex] = useState<number | null>(
     null,
   );
@@ -336,10 +335,8 @@ function EditorApp(): React.ReactElement {
 
         <BackgroundSettingsPanel
           layout={layout}
-          backgroundOpacity={backgroundOpacity}
           fileInputRef={fileInputRef}
           updateLayout={updateLayout}
-          onBackgroundOpacityChange={setBackgroundOpacity}
           uploadImage={uploadImage}
           openImagePicker={openImagePicker}
         />
@@ -505,7 +502,7 @@ function EditorApp(): React.ReactElement {
                 layout={layout}
                 stickClass={snapshot.stickClass}
                 pressedButtons={snapshot.pressedButtons}
-                backgroundOpacity={backgroundOpacity}
+                backgroundOpacity={layout.background.opacity}
                 editorMode
                 selectedButtonIndex={selectedButtonIndex}
                 selectedButtonIndexes={selectedButtonIndexes}

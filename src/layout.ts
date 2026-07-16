@@ -51,6 +51,7 @@ export function createDefaultBackgroundConfig(
 ): BackgroundConfig {
   return {
     show: true,
+    opacity: 1,
     image: "",
     scale: "1",
     w: "",

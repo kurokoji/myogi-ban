@@ -132,10 +132,8 @@ export function StickSettingsPanel({
 
 interface BackgroundSettingsPanelProps {
   layout: Layout;
-  backgroundOpacity: number;
   fileInputRef: RefObject<HTMLInputElement | null>;
   updateLayout: EditorLayoutUpdater;
-  onBackgroundOpacityChange: (opacity: number) => void;
   uploadImage: (event: ChangeEvent<HTMLInputElement>) => void;
   openImagePicker: (target: ImageUploadTarget) => void;
 }
@@ -152,16 +150,18 @@ export function BackgroundSettingsPanel(
         <Title order={2}>{t("background")}</Title>
         <label className="range-label">
           <span>
-            {t("bgOpacity")} <b>{props.backgroundOpacity.toFixed(1)}</b>
+            {t("bgOpacity")} <b>{layout.background.opacity.toFixed(1)}</b>
           </span>
           <input
             type="range"
             min="0"
             max="1"
             step="0.1"
-            value={props.backgroundOpacity}
+            value={layout.background.opacity}
             onChange={(event) =>
-              props.onBackgroundOpacityChange(parseFloat(event.target.value))
+              updateLayout((next) => {
+                next.background.opacity = parseFloat(event.target.value);
+              })
             }
           />
         </label>

@@ -34,6 +34,7 @@ export interface StickLayout {
 
 export interface BackgroundConfig {
   show: boolean;
+  opacity: number;
   image: string;
   scale: string;
   w: string;

@@ -88,6 +88,7 @@ function ViewerApp(): React.ReactElement {
         layout={layout}
         stickClass={snapshot.stickClass}
         pressedButtons={snapshot.pressedButtons}
+        backgroundOpacity={layout.background.opacity}
       />
     </div>
   );
