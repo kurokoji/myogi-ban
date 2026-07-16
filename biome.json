@@ -10,6 +10,7 @@
       "biome.json",
       "package.json",
       "scripts/**",
+      "tests/**",
       "tsconfig.json",
       "src/**",
       "public/*.html",

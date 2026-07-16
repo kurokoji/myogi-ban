@@ -11,6 +11,7 @@
     "build:editor": "node scripts/build-editor.mjs",
     "build:viewer": "esbuild src/viewer.tsx --bundle --minify --define:process.env.NODE_ENV=\\\"production\\\" --outfile=public/js/viewer.js",
     "typecheck": "tsc --noEmit",
+    "test": "node scripts/run-tests.mjs",
     "check": "biome check .",
     "check:write": "biome check --write .",
     "format": "biome format --write .",
