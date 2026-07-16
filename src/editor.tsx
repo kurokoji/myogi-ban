@@ -59,6 +59,7 @@ function EditorApp(): React.ReactElement {
   const [language, setLanguage] = useState(i18n.language);
   const [copiedObsUrl, setCopiedObsUrl] = useState(false);
   const layoutRef = useRef(layout);
+  const previewScrollRef = useRef<HTMLDivElement | null>(null);
   const {
     assigningTarget,
     assignmentName,
@@ -431,7 +432,11 @@ function EditorApp(): React.ReactElement {
             <span className="preview-reset-icon">1x</span>
           </ActionIcon>
         </div>
-        <div id="preview-scroll" onScroll={updateRulerOrigin}>
+        <div
+          id="preview-scroll"
+          onScroll={updateRulerOrigin}
+          ref={previewScrollRef}
+        >
           <div
             className="preview-ruler preview-ruler-horizontal"
             aria-hidden="true"
@@ -517,6 +522,7 @@ function EditorApp(): React.ReactElement {
                 selectedButtonIndex={selectedButtonIndex}
                 selectedButtonIndexes={selectedButtonIndexes}
                 selectedStick={selectedStick}
+                selectionSurfaceRef={previewScrollRef}
                 onBackgroundSizeChange={updateBackgroundSize}
                 onButtonClick={selectButtonAndStartAssignment}
                 onStickClick={selectStickAndStartAssignment}

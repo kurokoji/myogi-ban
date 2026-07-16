@@ -25,6 +25,7 @@ export interface GamepadViewProps {
   selectedButtonIndex?: number | null;
   selectedButtonIndexes?: number[];
   selectedStick?: boolean;
+  selectionSurfaceRef?: React.RefObject<HTMLElement | null>;
   onBackgroundSizeChange?: (width: number, height: number) => void;
   onButtonClick?: (index: number) => void;
   onStickClick?: (index: number) => void;
@@ -214,6 +215,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     selectedButtonIndex,
     selectedButtonIndexes = [],
     selectedStick = false,
+    selectionSurfaceRef,
     onBackgroundSizeChange,
     onButtonClick,
     onStickClick,
@@ -416,6 +418,47 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     },
     [editorMode, onSelectionChange],
   );
+
+  useEffect(() => {
+    const surface = selectionSurfaceRef?.current;
+    if (!editorMode || !surface) return;
+
+    const handleExternalMouseDown = (event: MouseEvent) => {
+      if (event.button !== 0) return;
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+      if (
+        target.closest(
+          "#gamepad-area, .preview-ruler, .preview-guide, .preview-toolbar, .preview-history-toolbar",
+        )
+      )
+        return;
+      const area = document.getElementById("gamepad-area");
+      if (!area) return;
+      const local = pointerToLocal(event, area, backgroundSize);
+      dragMovedRef.current = false;
+      setDragState({
+        type: "selection",
+        startX: local.x,
+        startY: local.y,
+        currentX: local.x,
+        currentY: local.y,
+      });
+    };
+
+    const handleExternalClick = (event: MouseEvent) => {
+      if (!dragMovedRef.current) return;
+      dragMovedRef.current = false;
+      event.stopPropagation();
+    };
+
+    surface.addEventListener("mousedown", handleExternalMouseDown);
+    surface.addEventListener("click", handleExternalClick);
+    return () => {
+      surface.removeEventListener("mousedown", handleExternalMouseDown);
+      surface.removeEventListener("click", handleExternalClick);
+    };
+  }, [backgroundSize, editorMode, selectionSurfaceRef]);
 
   useEffect(() => {
     if (!dragState) return;
