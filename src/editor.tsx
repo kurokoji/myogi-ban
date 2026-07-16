@@ -518,33 +518,26 @@ function EditorApp(): React.ReactElement {
     const dataUrl = await readFileAsDataUrl(file);
 
     try {
-      const response = await fetch(`${SERVER_URL}/api/upload-image`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          data: dataUrl,
-          layoutName: uploadLayoutName,
-          fileName: file.name,
-        }),
+      const result = await apiRef.current.uploadImage({
+        data: dataUrl,
+        layoutName: uploadLayoutName,
+        fileName: file.name,
       });
-      if (response.ok) {
-        const result = await response.json();
-        const fileName = result.fileName || file.name;
-        const target = imageUploadTargetRef.current;
-        updateLayout((next) => {
-          next.name = uploadLayoutName;
-          if (target.type === "background") {
-            next.background.image = fileName;
-          } else if (target.type === "defaultButton") {
-            next.defaultbuttons[target.state === "pressed" ? "imgp" : "img"] =
-              fileName;
-          } else {
-            next.buttons[target.index][
-              target.state === "pressed" ? "imgp" : "img"
-            ] = fileName;
-          }
-        });
-      }
+      const fileName = result.fileName || file.name;
+      const target = imageUploadTargetRef.current;
+      updateLayout((next) => {
+        next.name = uploadLayoutName;
+        if (target.type === "background") {
+          next.background.image = fileName;
+        } else if (target.type === "defaultButton") {
+          next.defaultbuttons[target.state === "pressed" ? "imgp" : "img"] =
+            fileName;
+        } else {
+          next.buttons[target.index][
+            target.state === "pressed" ? "imgp" : "img"
+          ] = fileName;
+        }
+      });
     } catch (error) {
       console.error("Failed to upload image:", error);
     }

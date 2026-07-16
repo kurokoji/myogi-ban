@@ -5,47 +5,72 @@ import {
   SERVER_URL,
 } from "./types";
 
+interface UploadImageOptions {
+  data: string;
+  layoutName: string;
+  fileName: string;
+}
+
+interface UploadImageResult {
+  fileName: string;
+}
+
+async function request(path: string, init?: RequestInit): Promise<Response> {
+  const response = await fetch(`${SERVER_URL}${path}`, init);
+  if (!response.ok) {
+    throw new Error(
+      `API request failed: ${init?.method ?? "GET"} ${path} (${response.status})`,
+    );
+  }
+  return response;
+}
+
+async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await request(path, init);
+  return response.json() as Promise<T>;
+}
+
+function jsonRequest(body: unknown): RequestInit {
+  return {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  };
+}
+
 export class ApiClient {
   async getLayouts(): Promise<LayoutEntry[]> {
-    const res = await fetch(`${SERVER_URL}/api/layouts`);
-    return res.json();
+    return requestJson<LayoutEntry[]>("/api/layouts");
   }
 
   async getLayout(name: string): Promise<Layout> {
-    const res = await fetch(`${SERVER_URL}/api/layout/${name}`);
-    return res.json();
+    return requestJson<Layout>(`/api/layout/${encodeURIComponent(name)}`);
   }
 
   async saveLayout(name: string, data: Layout): Promise<void> {
-    await fetch(`${SERVER_URL}/api/layout/save`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, data }),
-    });
+    await request("/api/layout/save", jsonRequest({ name, data }));
   }
 
   async sendState(state: GamepadState): Promise<void> {
     try {
-      await fetch(`${SERVER_URL}/api/state`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(state),
-      });
+      await request("/api/state", jsonRequest(state));
     } catch {
       // ignore errors
     }
   }
 
   async getDefaultLayout(): Promise<{ name: string }> {
-    const res = await fetch(`${SERVER_URL}/api/default-layout`);
-    return res.json();
+    return requestJson<{ name: string }>("/api/default-layout");
   }
 
   async setDefaultLayout(name: string): Promise<void> {
-    await fetch(`${SERVER_URL}/api/default-layout`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name }),
-    });
+    await request("/api/default-layout", jsonRequest({ name }));
+  }
+
+  async uploadImage(options: UploadImageOptions): Promise<UploadImageResult> {
+    return requestJson<UploadImageResult>(
+      "/api/upload-image",
+      jsonRequest(options),
+    );
   }
 }
