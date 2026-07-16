@@ -2,6 +2,35 @@ import { TOTAL_BUTTONS } from "./types";
 
 export type ButtonMapping = number; // 0-51: button index, 1000000+: axis code
 export type StickMapping = number;
+export const UNASSIGNED_MAPPING = -1;
+
+export function toggleMappingAssignment(
+  buttonMappings: ButtonMapping[],
+  stickMappings: StickMapping[],
+  target: { type: "button" | "stick"; index: number },
+  code: number,
+): { buttonMappings: ButtonMapping[]; stickMappings: StickMapping[] } {
+  const currentMapping =
+    target.type === "button"
+      ? buttonMappings[target.index]
+      : stickMappings[target.index];
+  if (currentMapping === code) {
+    const nextButtons = [...buttonMappings];
+    const nextStick = [...stickMappings];
+    if (target.type === "button") {
+      nextButtons[target.index] = UNASSIGNED_MAPPING;
+    } else {
+      nextStick[target.index] = UNASSIGNED_MAPPING;
+    }
+    return { buttonMappings: nextButtons, stickMappings: nextStick };
+  }
+
+  const nextButtons = [...buttonMappings];
+  const nextStick = [...stickMappings];
+  if (target.type === "button") nextButtons[target.index] = code;
+  else nextStick[target.index] = code;
+  return { buttonMappings: nextButtons, stickMappings: nextStick };
+}
 
 export class GamepadManager {
   private activeGamepadIndex: number = -1;
@@ -63,10 +92,15 @@ export class GamepadManager {
   }
 
   isButtonPressed(mapping: ButtonMapping, gamepad: Gamepad): boolean {
+    if (mapping === UNASSIGNED_MAPPING) return false;
     if (mapping >= 1000000) {
       return this.isAxisTriggered(mapping, gamepad);
     }
-    return mapping < gamepad.buttons.length && gamepad.buttons[mapping].pressed;
+    return (
+      mapping >= 0 &&
+      mapping < gamepad.buttons.length &&
+      gamepad.buttons[mapping].pressed
+    );
   }
 
   private isAxisTriggered(code: number, gamepad: Gamepad): boolean {

@@ -15,6 +15,7 @@ import {
   type ButtonMapping,
   GamepadManager,
   type StickMapping,
+  toggleMappingAssignment,
 } from "../gamepad";
 import { createEmptySnapshot, readGamepadSnapshot } from "../gamepad-state";
 import type { GamepadState, Layout } from "../types";
@@ -62,26 +63,22 @@ export function useEditorGamepad(options: UseEditorGamepadOptions) {
 
   const completeAssignment = useCallback(
     (target: number, code: number) => {
-      if (target < 1000) {
-        setButtonMappings((current) => {
-          const next = [...current];
-          next[target] = code;
-          return next;
-        });
-      } else {
-        const directionIndex = target - 1000;
-        setStickMappings((current) => {
-          const next = [...current];
-          next[directionIndex] = code;
-          return next;
-        });
-      }
+      const mappings = toggleMappingAssignment(
+        buttonMappingsRef.current,
+        stickMappingsRef.current,
+        target < 1000
+          ? { type: "button", index: target }
+          : { type: "stick", index: target - 1000 },
+        code,
+      );
+      setButtonMappings(mappings.buttonMappings);
+      setStickMappings(mappings.stickMappings);
 
       setAssigningTarget(null);
       axisHoldCounterRef.current = 0;
       axisHoldTargetRef.current = null;
     },
-    [setButtonMappings, setStickMappings],
+    [buttonMappingsRef, setButtonMappings, setStickMappings, stickMappingsRef],
   );
 
   useEffect(() => {
