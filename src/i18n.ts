@@ -108,6 +108,7 @@ export const resources = {
       pressedWidth: "押下時の幅(px)",
       pressedHeight: "押下時の高さ(px)",
       layoutNamePlaceholder: "レイアウト名",
+      layoutNameExists: "同じ名前のレイアウトがすでに存在します",
     },
   },
   en: {
@@ -215,6 +216,7 @@ export const resources = {
       pressedWidth: "Pressed width (px)",
       pressedHeight: "Pressed height (px)",
       layoutNamePlaceholder: "name",
+      layoutNameExists: "A layout with this name already exists",
     },
   },
 };

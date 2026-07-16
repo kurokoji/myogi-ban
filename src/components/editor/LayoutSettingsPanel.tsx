@@ -21,7 +21,7 @@ interface LayoutSettingsPanelProps {
   status: OperationStatus;
   openLayout: (value: string) => void;
   saveLayout: () => void;
-  saveLayoutAs: (name: string) => void;
+  saveLayoutAs: (name: string) => Promise<boolean>;
   deleteLayout: () => void;
   setDefaultLayout: () => void;
   exportLayout: () => void;
@@ -34,6 +34,10 @@ export function LayoutSettingsPanel(
   const { t } = useTranslation();
   const [showSaveAs, setShowSaveAs] = useState(false);
   const [saveAsName, setSaveAsName] = useState("");
+  const normalizedSaveAsName = saveAsName.trim().toLocaleLowerCase();
+  const saveAsNameExists = props.layoutNames.some(
+    (entry) => entry.name.trim().toLocaleLowerCase() === normalizedSaveAsName,
+  );
 
   const openSaveAs = () => {
     setSaveAsName(
@@ -42,10 +46,9 @@ export function LayoutSettingsPanel(
     setShowSaveAs(true);
   };
 
-  const confirmSaveAs = () => {
-    if (!saveAsName.trim()) return;
-    props.saveLayoutAs(saveAsName);
-    setShowSaveAs(false);
+  const confirmSaveAs = async () => {
+    if (!normalizedSaveAsName || saveAsNameExists) return;
+    if (await props.saveLayoutAs(saveAsName)) setShowSaveAs(false);
   };
 
   return (
@@ -110,6 +113,7 @@ export function LayoutSettingsPanel(
               value={saveAsName}
               onChange={(event) => setSaveAsName(event.target.value)}
               placeholder={t("layoutNamePlaceholder")}
+              error={saveAsNameExists ? t("layoutNameExists") : undefined}
               autoFocus
             />
             <Group gap="xs" grow>
@@ -123,7 +127,7 @@ export function LayoutSettingsPanel(
               <Button
                 size="xs"
                 onClick={confirmSaveAs}
-                disabled={!saveAsName.trim()}
+                disabled={!normalizedSaveAsName || saveAsNameExists}
               >
                 {t("save")}
               </Button>

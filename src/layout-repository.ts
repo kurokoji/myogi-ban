@@ -54,6 +54,14 @@ export class LayoutRepository {
     return fs.existsSync(builtinPath) ? builtinPath : null;
   }
 
+  has(name: string): boolean {
+    const normalizedName = name.trim().toLocaleLowerCase();
+    if (!normalizedName) return false;
+    return this.list().some(
+      (entry) => entry.name.trim().toLocaleLowerCase() === normalizedName,
+    );
+  }
+
   private copyAssets(
     layout: unknown,
     sourceLayoutName: string,

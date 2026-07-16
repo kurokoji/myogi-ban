@@ -50,8 +50,12 @@ export class ApiClient {
     );
   }
 
-  async saveLayout(name: string, data: Layout): Promise<void> {
-    await request("/api/layout/save", jsonRequest({ name, data }));
+  async saveLayout(
+    name: string,
+    data: Layout,
+    overwrite = true,
+  ): Promise<void> {
+    await request("/api/layout/save", jsonRequest({ name, data, overwrite }));
   }
 
   async deleteLayout(name: string): Promise<void> {

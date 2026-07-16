@@ -44,6 +44,7 @@ interface UseEditorLayoutsOptions {
     discardChanges: string;
     confirmDelete: string;
     deleted: string;
+    layoutNameExists: string;
   };
 }
 
@@ -174,13 +175,13 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     }
   };
 
-  const saveToName = async (name: string) => {
+  const saveToName = async (name: string, overwrite = true) => {
     const data = cloneLayout(layout);
     data.name = name;
     data.buttonMappings = buttonMappings;
     data.stickMappings = stickMappings;
     try {
-      await api.saveLayout(name, data);
+      await api.saveLayout(name, data, overwrite);
       await refreshLayouts();
       restoreLayout(data);
       clearLayoutHistory();
@@ -189,9 +190,17 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
       setSelectedLayout(layoutSelectionValue(name, false));
       setCleanSignature(layoutSignature(data, buttonMappings, stickMappings));
       setStatus({ kind: "success", message: messages.saved });
+      return true;
     } catch (error) {
       console.error("Failed to save layout:", error);
-      setStatus({ kind: "error", message: messages.operationFailed });
+      setStatus({
+        kind: "error",
+        message:
+          error instanceof Error && error.message.includes("(409)")
+            ? messages.layoutNameExists
+            : messages.operationFailed,
+      });
+      return false;
     }
   };
 
@@ -202,8 +211,17 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
 
   const saveLayoutAs = async (name: string) => {
     const trimmedName = name.trim();
-    if (!trimmedName) return;
-    await saveToName(trimmedName);
+    if (!trimmedName) return false;
+    const normalizedName = trimmedName.toLocaleLowerCase();
+    if (
+      layoutNames.some(
+        (entry) => entry.name.trim().toLocaleLowerCase() === normalizedName,
+      )
+    ) {
+      setStatus({ kind: "error", message: messages.layoutNameExists });
+      return false;
+    }
+    return saveToName(trimmedName, false);
   };
 
   const setDefaultLayout = async () => {

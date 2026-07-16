@@ -155,6 +155,7 @@ function EditorApp(): React.ReactElement {
       discardChanges: t("discardChanges"),
       confirmDelete: t("confirmDelete"),
       deleted: t("deleted"),
+      layoutNameExists: t("layoutNameExists"),
     },
   });
 

@@ -63,6 +63,10 @@ export function createLocalServer(options: LocalServerOptions): http.Server {
 
   expressApp.post("/api/layout/save", (req, res) => {
     const layoutName = req.body.name || "custom";
+    if (req.body.overwrite === false && layouts.has(layoutName)) {
+      res.status(409).json({ ok: false, error: "layout_name_exists" });
+      return;
+    }
     layouts.save(layoutName, req.body.data as Layout);
     res.json({ ok: true });
   });

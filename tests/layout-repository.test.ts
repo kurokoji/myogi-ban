@@ -48,3 +48,21 @@ test("LayoutRepository deletes user layouts only", (t) => {
   assert.equal(existsSync(join(builtinLayoutDir, "preset")), true);
   assert.equal(repository.delete("../builtin"), false);
 });
+
+test("LayoutRepository detects existing user and built-in names", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const builtinLayoutDir = join(root, "builtin");
+  const userLayoutDir = join(root, "user");
+  mkdirSync(join(builtinLayoutDir, "Preset"), { recursive: true });
+  mkdirSync(join(userLayoutDir, "Custom"), { recursive: true });
+  const repository = new LayoutRepository({
+    builtinLayoutDir,
+    userLayoutDir,
+    defaultLayoutFile: join(root, "default.json"),
+  });
+
+  assert.equal(repository.has("preset"), true);
+  assert.equal(repository.has(" CUSTOM "), true);
+  assert.equal(repository.has("new-layout"), false);
+});
