@@ -29,6 +29,7 @@ import {
   type ButtonMapping,
   GamepadManager,
   type StickMapping,
+  UNASSIGNED_MAPPING,
 } from "./gamepad";
 import { useEditorGamepad } from "./hooks/useEditorGamepad";
 import { useEditorGuides } from "./hooks/useEditorGuides";
@@ -267,6 +268,54 @@ function EditorApp(): React.ReactElement {
     [cancelAssignment, clearSelection],
   );
 
+  const addButton = useCallback(() => {
+    if (layout.totalbuttonshow >= 48) return;
+    const newIndex = layout.totalbuttonshow;
+    updateLayout((next) => {
+      next.buttons.splice(newIndex, 0, createEmptyButtonLayout());
+      if (next.buttons.length > 48) next.buttons.pop();
+      next.totalbuttonshow += 1;
+    });
+    setButtonMappings((current) => {
+      const next = [...current];
+      next.splice(newIndex, 0, UNASSIGNED_MAPPING);
+      if (next.length > 48) next.pop();
+      return next;
+    });
+    setSelectedButtonIndexes([newIndex]);
+    setSelectedButtonIndex(newIndex);
+    setSelectedStick(false);
+    cancelAssignment();
+  }, [cancelAssignment, layout.totalbuttonshow, updateLayout]);
+
+  const deleteSelectedButtons = useCallback(() => {
+    const indexes = [...selectedButtonIndexes]
+      .filter((index) => index < layout.totalbuttonshow)
+      .sort((a, b) => b - a);
+    if (indexes.length === 0) return;
+    updateLayout((next) => {
+      for (const index of indexes) {
+        next.buttons.splice(index, 1);
+        next.buttons.push(createEmptyButtonLayout());
+      }
+      next.totalbuttonshow = Math.max(0, next.totalbuttonshow - indexes.length);
+    });
+    setButtonMappings((current) => {
+      const next = [...current];
+      for (const index of indexes) {
+        next.splice(index, 1);
+        next.push(UNASSIGNED_MAPPING);
+      }
+      return next;
+    });
+    clearSelection();
+  }, [
+    clearSelection,
+    layout.totalbuttonshow,
+    selectedButtonIndexes,
+    updateLayout,
+  ]);
+
   const selectButtonAndStartAssignment = useCallback(
     (index: number, toggleSelection: boolean) => {
       if (toggleSelection) {
@@ -399,6 +448,8 @@ function EditorApp(): React.ReactElement {
           selectedButtonIndexes={selectedButtonIndexes}
           updateLayout={updateLayout}
           updateSelectedButtons={updateSelectedButtons}
+          onAddButton={addButton}
+          onDeleteSelectedButtons={deleteSelectedButtons}
           onSelectedButtonChange={selectButtonForSettings}
           openImagePicker={openImagePicker}
           cancelAssignment={cancelAssignment}

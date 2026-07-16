@@ -13,7 +13,6 @@ import {
 import { useTranslation } from "react-i18next";
 import {
   type AssigningTarget,
-  createEmptyButtonLayout,
   type EditorLayoutUpdater,
   type ImageUploadTarget,
   numericValue,
@@ -30,6 +29,8 @@ interface ButtonSettingsPanelProps {
   updateLayout: EditorLayoutUpdater;
   updateSelectedButtons: EditorLayoutUpdater;
   onSelectedButtonChange: (index: number | null) => void;
+  onAddButton: () => void;
+  onDeleteSelectedButtons: () => void;
   openImagePicker: (target: ImageUploadTarget) => void;
   cancelAssignment: () => void;
 }
@@ -44,23 +45,19 @@ export function ButtonSettingsPanel(
     <Paper className="panel" withBorder>
       <Stack gap="xs">
         <Title order={2}>{t("buttons")}</Title>
-        <NumberInput
-          size="xs"
-          label={t("count")}
-          min={0}
-          max={48}
-          value={layout.totalbuttonshow}
-          onChange={(value) =>
-            updateLayout((next) => {
-              next.totalbuttonshow = Math.max(
-                0,
-                Math.min(48, Number(value) || 0),
-              );
-              while (next.buttons.length < next.totalbuttonshow)
-                next.buttons.push(createEmptyButtonLayout());
-            })
-          }
-        />
+        <Group gap="xs" justify="space-between">
+          <Text size="xs" fw={600}>
+            {t("buttonCount", { count: layout.totalbuttonshow })}
+          </Text>
+          <Button
+            size="xs"
+            variant="light"
+            onClick={props.onAddButton}
+            disabled={layout.totalbuttonshow >= 48}
+          >
+            {t("addButton")}
+          </Button>
+        </Group>
         <Switch
           size="sm"
           label={t("useCssButton")}
@@ -291,15 +288,23 @@ export function ButtonSettingsPanel(
           }
           data={[
             { value: "", label: t("select") },
-            ...Array.from(
-              { length: Math.max(1, layout.totalbuttonshow) },
-              (_, index) => ({
-                value: String(index),
-                label: `${t("buttonLabel")} ${index + 1}`,
-              }),
-            ),
+            ...Array.from({ length: layout.totalbuttonshow }, (_, index) => ({
+              value: String(index),
+              label: `${t("buttonLabel")} ${index + 1}`,
+            })),
           ]}
         />
+        <Button
+          size="xs"
+          variant="light"
+          color="red"
+          onClick={props.onDeleteSelectedButtons}
+          disabled={props.selectedButtonIndexes.length === 0}
+        >
+          {t("deleteSelectedButtons", {
+            count: props.selectedButtonIndexes.length,
+          })}
+        </Button>
         {selectedButtonIndex !== null && (
           <Stack gap="xs">
             {props.selectedButtonIndexes.length > 1 && (
