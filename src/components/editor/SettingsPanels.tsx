@@ -17,6 +17,7 @@ import {
 } from "../../editor-helpers";
 import type { Layout } from "../../types";
 import { ColorInput } from "./EditorInputs";
+import { LinkedSizeInputs } from "./LinkedSizeInputs";
 
 export { DisplaySettingsPanel } from "./DisplaySettingsPanel";
 export { GamepadStatusPanel } from "./GamepadStatusPanel";
@@ -69,28 +70,20 @@ export function StickSettingsPanel({
             }
           />
         </div>
-        <div className="control row">
-          <NumberInput
-            size="xs"
-            label="W (%)"
-            value={numericValue(layout.stick.w)}
-            onChange={(value) =>
-              updateLayout((next) => {
-                next.stick.w = String(value ?? "");
-              })
-            }
-          />
-          <NumberInput
-            size="xs"
-            label="H (%)"
-            value={numericValue(layout.stick.h)}
-            onChange={(value) =>
-              updateLayout((next) => {
-                next.stick.h = String(value ?? "");
-              })
-            }
-          />
-        </div>
+        <LinkedSizeInputs
+          width={layout.stick.w}
+          height={layout.stick.h}
+          widthLabel="W (%)"
+          heightLabel="H (%)"
+          fallbackWidth="100"
+          fallbackHeight="100"
+          onChange={(width, height) =>
+            updateLayout((next) => {
+              next.stick.w = width;
+              next.stick.h = height;
+            })
+          }
+        />
         <div className="control row">
           <ColorInput
             id="stick-plate-color"
@@ -197,30 +190,21 @@ export function BackgroundSettingsPanel(
                 })
               }
             />
-            <div className="control row">
-              <NumberInput
-                size="xs"
-                label={t("obsWidth")}
-                min={1}
-                value={numericValue(layout.background.w)}
-                onChange={(value) =>
-                  updateLayout((next) => {
-                    next.background.w = String(value ?? "");
-                  })
-                }
-              />
-              <NumberInput
-                size="xs"
-                label={t("obsHeight")}
-                min={1}
-                value={numericValue(layout.background.h)}
-                onChange={(value) =>
-                  updateLayout((next) => {
-                    next.background.h = String(value ?? "");
-                  })
-                }
-              />
-            </div>
+            <LinkedSizeInputs
+              width={layout.background.w}
+              height={layout.background.h}
+              widthLabel={t("obsWidth")}
+              heightLabel={t("obsHeight")}
+              fallbackWidth="500"
+              fallbackHeight="250"
+              min={1}
+              onChange={(width, height) =>
+                updateLayout((next) => {
+                  next.background.w = width;
+                  next.background.h = height;
+                })
+              }
+            />
           </>
         ) : (
           <>

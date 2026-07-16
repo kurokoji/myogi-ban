@@ -19,6 +19,7 @@ import {
 } from "../../editor-helpers";
 import type { ButtonShape, Layout } from "../../types";
 import { ColorInput } from "./EditorInputs";
+import { LinkedSizeInputs } from "./LinkedSizeInputs";
 
 interface ButtonSettingsPanelProps {
   layout: Layout;
@@ -208,50 +209,34 @@ export function ButtonSettingsPanel(
         <Text size="xs" fw={600}>
           {t("defaultButtonSize")}
         </Text>
-        <div className="control row">
-          <NumberInput
-            size="xs"
-            label={t("width")}
-            value={numericValue(layout.defaultbuttons.w)}
-            onChange={(value) =>
-              updateLayout((next) => {
-                next.defaultbuttons.w = String(value ?? "");
-              })
-            }
-          />
-          <NumberInput
-            size="xs"
-            label={t("height")}
-            value={numericValue(layout.defaultbuttons.h)}
-            onChange={(value) =>
-              updateLayout((next) => {
-                next.defaultbuttons.h = String(value ?? "");
-              })
-            }
-          />
-        </div>
-        <div className="control row">
-          <NumberInput
-            size="xs"
-            label={t("pressedWidth")}
-            value={numericValue(layout.defaultbuttons.wp)}
-            onChange={(value) =>
-              updateLayout((next) => {
-                next.defaultbuttons.wp = String(value ?? "");
-              })
-            }
-          />
-          <NumberInput
-            size="xs"
-            label={t("pressedHeight")}
-            value={numericValue(layout.defaultbuttons.hp)}
-            onChange={(value) =>
-              updateLayout((next) => {
-                next.defaultbuttons.hp = String(value ?? "");
-              })
-            }
-          />
-        </div>
+        <LinkedSizeInputs
+          width={layout.defaultbuttons.w}
+          height={layout.defaultbuttons.h}
+          widthLabel={t("width")}
+          heightLabel={t("height")}
+          fallbackWidth="60"
+          fallbackHeight="60"
+          onChange={(width, height) =>
+            updateLayout((next) => {
+              next.defaultbuttons.w = width;
+              next.defaultbuttons.h = height;
+            })
+          }
+        />
+        <LinkedSizeInputs
+          width={layout.defaultbuttons.wp}
+          height={layout.defaultbuttons.hp}
+          widthLabel={t("pressedWidth")}
+          heightLabel={t("pressedHeight")}
+          fallbackWidth={layout.defaultbuttons.w || "60"}
+          fallbackHeight={layout.defaultbuttons.h || "60"}
+          onChange={(width, height) =>
+            updateLayout((next) => {
+              next.defaultbuttons.wp = width;
+              next.defaultbuttons.hp = height;
+            })
+          }
+        />
         <NumberInput
           size="xs"
           label={t("rotation")}
@@ -609,81 +594,65 @@ export function ButtonSettingsPanel(
             <Text size="xs" fw={600}>
               {t("releasedSize")}
             </Text>
-            <div className="control row">
-              <NumberInput
-                size="xs"
-                label={t("width")}
-                value={
-                  layout.buttons[selectedButtonIndex]?.w ===
-                  layout.defaultbuttons.w
-                    ? ""
-                    : numericValue(layout.buttons[selectedButtonIndex]?.w || "")
-                }
-                onChange={(value) =>
-                  props.updateSelectedButtons((next) => {
-                    next.buttons[selectedButtonIndex].w = String(value ?? "");
-                  })
-                }
-                placeholder={layout.defaultbuttons.w || "60"}
-              />
-              <NumberInput
-                size="xs"
-                label={t("height")}
-                value={
-                  layout.buttons[selectedButtonIndex]?.h ===
-                  layout.defaultbuttons.h
-                    ? ""
-                    : numericValue(layout.buttons[selectedButtonIndex]?.h || "")
-                }
-                onChange={(value) =>
-                  props.updateSelectedButtons((next) => {
-                    next.buttons[selectedButtonIndex].h = String(value ?? "");
-                  })
-                }
-                placeholder={layout.defaultbuttons.h || "60"}
-              />
-            </div>
+            <LinkedSizeInputs
+              width={
+                layout.buttons[selectedButtonIndex]?.w ===
+                layout.defaultbuttons.w
+                  ? ""
+                  : layout.buttons[selectedButtonIndex]?.w || ""
+              }
+              height={
+                layout.buttons[selectedButtonIndex]?.h ===
+                layout.defaultbuttons.h
+                  ? ""
+                  : layout.buttons[selectedButtonIndex]?.h || ""
+              }
+              widthLabel={t("width")}
+              heightLabel={t("height")}
+              widthPlaceholder={layout.defaultbuttons.w || "60"}
+              heightPlaceholder={layout.defaultbuttons.h || "60"}
+              fallbackWidth={layout.defaultbuttons.w || "60"}
+              fallbackHeight={layout.defaultbuttons.h || "60"}
+              onChange={(width, height) =>
+                props.updateSelectedButtons((next) => {
+                  next.buttons[selectedButtonIndex].w = width;
+                  next.buttons[selectedButtonIndex].h = height;
+                })
+              }
+            />
             <Text size="xs" fw={600}>
               {t("pressedSize")}
             </Text>
-            <div className="control row">
-              <NumberInput
-                size="xs"
-                label={t("pressedWidth")}
-                value={
-                  layout.buttons[selectedButtonIndex]?.wp ===
-                  layout.defaultbuttons.wp
-                    ? ""
-                    : numericValue(
-                        layout.buttons[selectedButtonIndex]?.wp || "",
-                      )
-                }
-                onChange={(value) =>
-                  props.updateSelectedButtons((next) => {
-                    next.buttons[selectedButtonIndex].wp = String(value ?? "");
-                  })
-                }
-                placeholder={layout.defaultbuttons.wp || "60"}
-              />
-              <NumberInput
-                size="xs"
-                label={t("pressedHeight")}
-                value={
-                  layout.buttons[selectedButtonIndex]?.hp ===
-                  layout.defaultbuttons.hp
-                    ? ""
-                    : numericValue(
-                        layout.buttons[selectedButtonIndex]?.hp || "",
-                      )
-                }
-                onChange={(value) =>
-                  props.updateSelectedButtons((next) => {
-                    next.buttons[selectedButtonIndex].hp = String(value ?? "");
-                  })
-                }
-                placeholder={layout.defaultbuttons.hp || "60"}
-              />
-            </div>
+            <LinkedSizeInputs
+              width={
+                layout.buttons[selectedButtonIndex]?.wp ===
+                layout.defaultbuttons.wp
+                  ? ""
+                  : layout.buttons[selectedButtonIndex]?.wp || ""
+              }
+              height={
+                layout.buttons[selectedButtonIndex]?.hp ===
+                layout.defaultbuttons.hp
+                  ? ""
+                  : layout.buttons[selectedButtonIndex]?.hp || ""
+              }
+              widthLabel={t("pressedWidth")}
+              heightLabel={t("pressedHeight")}
+              widthPlaceholder={layout.defaultbuttons.wp || "60"}
+              heightPlaceholder={layout.defaultbuttons.hp || "60"}
+              fallbackWidth={
+                layout.defaultbuttons.wp || layout.defaultbuttons.w || "60"
+              }
+              fallbackHeight={
+                layout.defaultbuttons.hp || layout.defaultbuttons.h || "60"
+              }
+              onChange={(width, height) =>
+                props.updateSelectedButtons((next) => {
+                  next.buttons[selectedButtonIndex].wp = width;
+                  next.buttons[selectedButtonIndex].hp = height;
+                })
+              }
+            />
             <NumberInput
               size="xs"
               label={t("rotation")}
