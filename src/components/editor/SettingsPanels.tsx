@@ -91,40 +91,28 @@ export function StickSettingsPanel({
             }
           />
         </div>
-        <Switch
-          size="sm"
-          label={t("useCssStick")}
-          checked={!(layout.stick.useCss ?? false)}
-          onChange={(event) =>
-            updateLayout((next) => {
-              next.stick.useCss = !event.target.checked;
-            })
-          }
-        />
-        {layout.stick.useCss && (
-          <div className="control row">
-            <ColorInput
-              id="stick-plate-color"
-              label={t("stickPlateColor")}
-              value={layout.stick.cssPlateColor || "#888888"}
-              onChange={(event) =>
-                updateLayout((next) => {
-                  next.stick.cssPlateColor = event.target.value;
-                })
-              }
-            />
-            <ColorInput
-              id="stick-knob-shaft-color"
-              label={t("stickKnobShaft")}
-              value={layout.stick.cssColor || "#cccccc"}
-              onChange={(event) =>
-                updateLayout((next) => {
-                  next.stick.cssColor = event.target.value;
-                })
-              }
-            />
-          </div>
-        )}
+        <div className="control row">
+          <ColorInput
+            id="stick-plate-color"
+            label={t("stickPlateColor")}
+            value={layout.stick.cssPlateColor || "#888888"}
+            onChange={(event) =>
+              updateLayout((next) => {
+                next.stick.cssPlateColor = event.target.value;
+              })
+            }
+          />
+          <ColorInput
+            id="stick-knob-shaft-color"
+            label={t("stickKnobShaft")}
+            value={layout.stick.cssColor || "#cccccc"}
+            onChange={(event) =>
+              updateLayout((next) => {
+                next.stick.cssColor = event.target.value;
+              })
+            }
+          />
+        </div>
       </Stack>
     </Paper>
   );
