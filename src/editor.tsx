@@ -41,6 +41,7 @@ import {
   type StickMapping,
 } from "./gamepad";
 import { useEditorGamepad } from "./hooks/useEditorGamepad";
+import { useLayoutHistory } from "./hooks/useLayoutHistory";
 import i18n from "./i18n";
 import { createDefaultLayout, ensureLayoutDefaults } from "./layout";
 import { type Layout, type LayoutEntry, SERVER_URL } from "./types";
@@ -48,7 +49,6 @@ import { type Layout, type LayoutEntry, SERVER_URL } from "./types";
 const MIN_PREVIEW_SCALE = 0.1;
 const MAX_PREVIEW_SCALE = 3;
 const PREVIEW_SCALE_STEP = 0.1;
-const MAX_LAYOUT_HISTORY = 100;
 const APP_VERSION = process.env.npm_package_version ?? "0.0.0";
 const RULER_MINOR_STEP = 10;
 const RULER_MAJOR_STEP = 50;
@@ -93,17 +93,6 @@ function createSignedRulerTicks(length: number): number[] {
   ];
 }
 
-function sameLayout(a: Layout, b: Layout): boolean {
-  return JSON.stringify(a) === JSON.stringify(b);
-}
-
-function isEditableTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false;
-  return Boolean(
-    target.closest("input, textarea, select, [contenteditable='true']"),
-  );
-}
-
 function EditorApp(): React.ReactElement {
   const { t } = useTranslation();
   const apiRef = useRef(new ApiClient());
@@ -131,15 +120,8 @@ function EditorApp(): React.ReactElement {
   );
   const [selectedStick, setSelectedStick] = useState(false);
   const [language, setLanguage] = useState(i18n.language);
-  const [historyAvailability, setHistoryAvailability] = useState({
-    canUndo: false,
-    canRedo: false,
-  });
   const [copiedObsUrl, setCopiedObsUrl] = useState(false);
   const layoutRef = useRef(layout);
-  const undoStackRef = useRef<Layout[]>([]);
-  const redoStackRef = useRef<Layout[]>([]);
-  const dragHistoryStartRef = useRef<Layout | null>(null);
   const previewRef = useRef<HTMLElement | null>(null);
   const previewScrollRef = useRef<HTMLDivElement | null>(null);
   const previewContainerRef = useRef<HTMLDivElement | null>(null);
@@ -163,6 +145,21 @@ function EditorApp(): React.ReactElement {
     setStickMappings,
     buttonLabel: t("buttonLabel"),
     stickLabel: t("stickLabel"),
+  });
+  const {
+    beginDrag: beginLayoutDrag,
+    clearHistory: clearLayoutHistory,
+    endDrag: endLayoutDrag,
+    historyAvailability,
+    redoLayout,
+    restoreLayout,
+    undoLayout,
+    updateLayout,
+  } = useLayoutHistory({
+    layout,
+    layoutRef,
+    setLayout,
+    onRestore: resetSnapshot,
   });
 
   const obsUrl = `${SERVER_URL}/view`;
@@ -282,65 +279,6 @@ function EditorApp(): React.ReactElement {
     setPreviewScale((current) => clampPreviewScale(current + delta));
   }, []);
 
-  useEffect(() => {
-    layoutRef.current = layout;
-  }, [layout]);
-
-  const syncLayoutHistoryAvailability = useCallback(() => {
-    setHistoryAvailability({
-      canUndo: undoStackRef.current.length > 0,
-      canRedo: redoStackRef.current.length > 0,
-    });
-  }, []);
-
-  const clearLayoutHistory = useCallback(() => {
-    undoStackRef.current = [];
-    redoStackRef.current = [];
-    dragHistoryStartRef.current = null;
-    syncLayoutHistoryAvailability();
-  }, [syncLayoutHistoryAvailability]);
-
-  const pushUndoSnapshot = useCallback(
-    (snapshot: Layout) => {
-      const nextStack = [...undoStackRef.current, cloneLayout(snapshot)];
-      if (nextStack.length > MAX_LAYOUT_HISTORY) {
-        nextStack.shift();
-      }
-      undoStackRef.current = nextStack;
-      syncLayoutHistoryAvailability();
-    },
-    [syncLayoutHistoryAvailability],
-  );
-
-  const restoreLayout = useCallback(
-    (nextLayout: Layout) => {
-      layoutRef.current = nextLayout;
-      setLayout(nextLayout);
-      resetSnapshot(nextLayout);
-    },
-    [resetSnapshot],
-  );
-
-  const undoLayout = useCallback(() => {
-    const previous = undoStackRef.current.pop();
-    if (!previous) return;
-
-    const current = cloneLayout(layoutRef.current);
-    redoStackRef.current = [...redoStackRef.current, current];
-    restoreLayout(previous);
-    syncLayoutHistoryAvailability();
-  }, [restoreLayout, syncLayoutHistoryAvailability]);
-
-  const redoLayout = useCallback(() => {
-    const next = redoStackRef.current.pop();
-    if (!next) return;
-
-    const current = cloneLayout(layoutRef.current);
-    pushUndoSnapshot(current);
-    restoreLayout(next);
-    syncLayoutHistoryAvailability();
-  }, [pushUndoSnapshot, restoreLayout, syncLayoutHistoryAvailability]);
-
   const refreshLayouts = useCallback(async () => {
     try {
       const layouts = await apiRef.current.getLayouts();
@@ -355,9 +293,7 @@ function EditorApp(): React.ReactElement {
   const applyLayout = useCallback(
     (data: Layout, name?: string) => {
       const nextLayout = ensureLayoutDefaults(data);
-      layoutRef.current = nextLayout;
-      setLayout(nextLayout);
-      resetSnapshot(nextLayout);
+      restoreLayout(nextLayout);
       clearLayoutHistory();
       setSelectedButtonIndexes([]);
       setSelectedStick(false);
@@ -369,26 +305,8 @@ function EditorApp(): React.ReactElement {
       );
       if (name) setLayoutName(name);
     },
-    [clearLayoutHistory, resetSnapshot],
+    [clearLayoutHistory, restoreLayout],
   );
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (isEditableTarget(event.target)) return;
-      if (!event.ctrlKey || event.altKey || event.metaKey) return;
-      if (event.key.toLowerCase() !== "z") return;
-
-      event.preventDefault();
-      if (event.shiftKey) {
-        redoLayout();
-      } else {
-        undoLayout();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [redoLayout, undoLayout]);
 
   useEffect(() => {
     let cancelled = false;
@@ -432,22 +350,6 @@ function EditorApp(): React.ReactElement {
       cancelAssignment();
     }
   }, [cancelAssignment, layout.totalbuttonshow, selectedButtonIndex]);
-
-  const updateLayout = useCallback(
-    (updater: (layout: Layout) => void) => {
-      setLayout((current) => {
-        const next = cloneLayout(current);
-        updater(next);
-        if (sameLayout(current, next)) return current;
-        pushUndoSnapshot(current);
-        redoStackRef.current = [];
-        syncLayoutHistoryAvailability();
-        layoutRef.current = next;
-        return next;
-      });
-    },
-    [pushUndoSnapshot, syncLayoutHistoryAvailability],
-  );
 
   const clearGuides = useCallback(() => {
     updateLayout((next) => {
@@ -495,19 +397,6 @@ function EditorApp(): React.ReactElement {
       return next;
     });
   }, []);
-
-  const beginLayoutDrag = useCallback(() => {
-    dragHistoryStartRef.current = cloneLayout(layoutRef.current);
-  }, []);
-
-  const endLayoutDrag = useCallback(() => {
-    const startLayout = dragHistoryStartRef.current;
-    dragHistoryStartRef.current = null;
-    if (!startLayout || sameLayout(startLayout, layoutRef.current)) return;
-    pushUndoSnapshot(startLayout);
-    redoStackRef.current = [];
-    syncLayoutHistoryAvailability();
-  }, [pushUndoSnapshot, syncLayoutHistoryAvailability]);
 
   const updateSelection = useCallback(
     (selection: { buttonIndexes: number[]; stick: boolean }) => {
