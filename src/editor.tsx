@@ -10,7 +10,6 @@ import {
   type ChangeEvent,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -41,57 +40,16 @@ import {
   type StickMapping,
 } from "./gamepad";
 import { useEditorGamepad } from "./hooks/useEditorGamepad";
+import { useEditorGuides } from "./hooks/useEditorGuides";
 import { useLayoutHistory } from "./hooks/useLayoutHistory";
+import { usePreviewViewport } from "./hooks/usePreviewViewport";
 import i18n from "./i18n";
 import { createDefaultLayout, ensureLayoutDefaults } from "./layout";
 import { type Layout, type LayoutEntry, SERVER_URL } from "./types";
 
-const MIN_PREVIEW_SCALE = 0.1;
-const MAX_PREVIEW_SCALE = 3;
 const PREVIEW_SCALE_STEP = 0.1;
 const APP_VERSION = process.env.npm_package_version ?? "0.0.0";
-const RULER_MINOR_STEP = 10;
 const RULER_MAJOR_STEP = 50;
-const RULER_EXTRA_LENGTH = 1000;
-
-type GuideDragState = { axis: "x" | "y"; index: number } | null;
-
-function clampPreviewScale(scale: number): number {
-  const nextScale = Math.min(
-    MAX_PREVIEW_SCALE,
-    Math.max(MIN_PREVIEW_SCALE, scale),
-  );
-  return Math.round(nextScale * 10) / 10;
-}
-
-function layoutSizeValue(value: string | undefined, fallback: number): number {
-  if (!value) return fallback;
-  const parsed = Number.parseFloat(value);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
-}
-
-function createRulerTicks(length: number): number[] {
-  const lastTick = Math.floor(length / RULER_MINOR_STEP) * RULER_MINOR_STEP;
-  return Array.from(
-    { length: lastTick / RULER_MINOR_STEP + 1 },
-    (_, index) => index * RULER_MINOR_STEP,
-  );
-}
-
-function createNegativeRulerTicks(length: number): number[] {
-  const lastTick = Math.floor(length / RULER_MINOR_STEP) * RULER_MINOR_STEP;
-  return Array.from(
-    { length: lastTick / RULER_MINOR_STEP },
-    (_, index) => -(index + 1) * RULER_MINOR_STEP,
-  );
-}
-
-function createSignedRulerTicks(length: number): number[] {
-  return [
-    ...createNegativeRulerTicks(length).reverse(),
-    ...createRulerTicks(length),
-  ];
-}
 
 function EditorApp(): React.ReactElement {
   const { t } = useTranslation();
@@ -110,7 +68,6 @@ function EditorApp(): React.ReactElement {
   const [stickMappings, setStickMappings] = useState<StickMapping[]>(() =>
     GamepadManager.createDefaultStickMappings(),
   );
-  const [previewScale, setPreviewScale] = useState(1);
   const [backgroundOpacity, setBackgroundOpacity] = useState(1);
   const [selectedButtonIndex, setSelectedButtonIndex] = useState<number | null>(
     null,
@@ -122,11 +79,6 @@ function EditorApp(): React.ReactElement {
   const [language, setLanguage] = useState(i18n.language);
   const [copiedObsUrl, setCopiedObsUrl] = useState(false);
   const layoutRef = useRef(layout);
-  const previewRef = useRef<HTMLElement | null>(null);
-  const previewScrollRef = useRef<HTMLDivElement | null>(null);
-  const previewContainerRef = useRef<HTMLDivElement | null>(null);
-  const [rulerOrigin, setRulerOrigin] = useState({ x: 0, y: 0 });
-  const [guideDrag, setGuideDrag] = useState<GuideDragState>(null);
   const {
     assigningTarget,
     assignmentName,
@@ -161,124 +113,27 @@ function EditorApp(): React.ReactElement {
     setLayout,
     onRestore: resetSnapshot,
   });
+  const {
+    canZoomIn,
+    canZoomOut,
+    changePreviewScale,
+    previewScale,
+    rulerTicks,
+    scaledPreviewHeight,
+    scaledPreviewWidth,
+    zoomPercent,
+    zoomPreview,
+  } = usePreviewViewport(layout.background);
+  const {
+    previewContainerRef,
+    previewRef,
+    rulerOrigin,
+    startExistingGuideDrag,
+    startGuideDrag,
+    updateRulerOrigin,
+  } = useEditorGuides({ layoutRef, previewScale, setLayout });
 
   const obsUrl = `${SERVER_URL}/view`;
-  const zoomPercent = Math.round(previewScale * 100);
-  const previewWidth = layoutSizeValue(layout.background.w, 500);
-  const previewHeight = layoutSizeValue(layout.background.h, 250);
-  const scaledPreviewWidth = Math.ceil(previewWidth * previewScale);
-  const scaledPreviewHeight = Math.ceil(previewHeight * previewScale);
-  const rulerTicks = useMemo(
-    () =>
-      createSignedRulerTicks(
-        Math.ceil(
-          (Math.max(previewWidth, previewHeight) + RULER_EXTRA_LENGTH) /
-            previewScale,
-        ),
-      ),
-    [previewHeight, previewScale, previewWidth],
-  );
-
-  const updateRulerOrigin = useCallback(() => {
-    const preview = previewRef.current;
-    const container = previewContainerRef.current;
-    if (!preview || !container) return;
-    const previewRect = preview.getBoundingClientRect();
-    const containerRect = container.getBoundingClientRect();
-    const x = containerRect.left - previewRect.left;
-    const y = containerRect.top - previewRect.top;
-    setRulerOrigin((current) => {
-      if (current.x === x && current.y === y) return current;
-      return { x, y };
-    });
-  }, []);
-
-  useEffect(() => {
-    updateRulerOrigin();
-  });
-
-  useEffect(() => {
-    window.addEventListener("resize", updateRulerOrigin);
-    return () => window.removeEventListener("resize", updateRulerOrigin);
-  }, [updateRulerOrigin]);
-
-  const guideCoordinateFromPointer = useCallback(
-    (event: { clientX: number; clientY: number }, axis: "x" | "y") => {
-      const preview = previewRef.current;
-      if (!preview) return 0;
-      const previewRect = preview.getBoundingClientRect();
-      const screenPosition =
-        axis === "x"
-          ? event.clientX - previewRect.left
-          : event.clientY - previewRect.top;
-      const origin = axis === "x" ? rulerOrigin.x : rulerOrigin.y;
-      return Math.round((screenPosition - origin) / previewScale);
-    },
-    [previewScale, rulerOrigin.x, rulerOrigin.y],
-  );
-
-  const moveGuide = useCallback(
-    (axis: "x" | "y", index: number, value: number) => {
-      setLayout((current) => {
-        const next = cloneLayout(current);
-        const guides =
-          axis === "x" ? next.guides.vertical : next.guides.horizontal;
-        guides[index] = value;
-        layoutRef.current = next;
-        return next;
-      });
-    },
-    [],
-  );
-
-  const startGuideDrag = useCallback(
-    (axis: "x" | "y", event: React.MouseEvent<HTMLElement>) => {
-      event.preventDefault();
-      event.stopPropagation();
-      const value = guideCoordinateFromPointer(event, axis);
-      setLayout((current) => {
-        const next = cloneLayout(current);
-        const guides =
-          axis === "x" ? next.guides.vertical : next.guides.horizontal;
-        setGuideDrag({ axis, index: guides.length });
-        guides.push(value);
-        layoutRef.current = next;
-        return next;
-      });
-    },
-    [guideCoordinateFromPointer],
-  );
-
-  useEffect(() => {
-    if (!guideDrag) return;
-
-    const handleMouseMove = (event: MouseEvent) => {
-      moveGuide(
-        guideDrag.axis,
-        guideDrag.index,
-        guideCoordinateFromPointer(event, guideDrag.axis),
-      );
-    };
-    const handleMouseUp = () => {
-      setGuideDrag(null);
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [guideCoordinateFromPointer, guideDrag, moveGuide]);
-
-  const changePreviewScale = useCallback((scale: number) => {
-    setPreviewScale(clampPreviewScale(scale));
-  }, []);
-
-  const zoomPreview = useCallback((delta: number) => {
-    setPreviewScale((current) => clampPreviewScale(current + delta));
-  }, []);
-
   const refreshLayouts = useCallback(async () => {
     try {
       const layouts = await apiRef.current.getLayouts();
@@ -695,7 +550,7 @@ function EditorApp(): React.ReactElement {
             variant="light"
             aria-label={t("zoomOut")}
             onClick={() => zoomPreview(-PREVIEW_SCALE_STEP)}
-            disabled={previewScale <= MIN_PREVIEW_SCALE}
+            disabled={!canZoomOut}
           >
             <span className="preview-zoom-icon preview-zoom-minus" />
           </ActionIcon>
@@ -707,7 +562,7 @@ function EditorApp(): React.ReactElement {
             variant="light"
             aria-label={t("zoomIn")}
             onClick={() => zoomPreview(PREVIEW_SCALE_STEP)}
-            disabled={previewScale >= MAX_PREVIEW_SCALE}
+            disabled={!canZoomIn}
           >
             <span className="preview-zoom-icon preview-zoom-plus" />
           </ActionIcon>
@@ -720,11 +575,7 @@ function EditorApp(): React.ReactElement {
             <span className="preview-reset-icon">1x</span>
           </ActionIcon>
         </div>
-        <div
-          id="preview-scroll"
-          onScroll={updateRulerOrigin}
-          ref={previewScrollRef}
-        >
+        <div id="preview-scroll" onScroll={updateRulerOrigin}>
           <div
             className="preview-ruler preview-ruler-horizontal"
             aria-hidden="true"
@@ -770,11 +621,9 @@ function EditorApp(): React.ReactElement {
               <span
                 className="preview-guide preview-guide-vertical"
                 key={`x-${index}`}
-                onMouseDown={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  setGuideDrag({ axis: "x", index });
-                }}
+                onMouseDown={(event) =>
+                  startExistingGuideDrag("x", index, event)
+                }
                 style={{ left: rulerOrigin.x + guide * previewScale }}
               />
             ))}
@@ -782,11 +631,9 @@ function EditorApp(): React.ReactElement {
               <span
                 className="preview-guide preview-guide-horizontal"
                 key={`y-${index}`}
-                onMouseDown={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  setGuideDrag({ axis: "y", index });
-                }}
+                onMouseDown={(event) =>
+                  startExistingGuideDrag("y", index, event)
+                }
                 style={{ top: rulerOrigin.y + guide * previewScale }}
               />
             ))}
