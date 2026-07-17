@@ -30,3 +30,7 @@ npm run build
 ```
 
 Separate behavior changes from structural refactoring when practical. Never commit a known Red state unless the user explicitly requests a work-in-progress commit.
+
+## Refactoring Backlog
+
+Use `docs/REFACTORING.md` as the refactoring backlog. Before starting a refactor, select an unchecked item and follow the TDD workflow above. After the implementation and full verification pass, change its checkbox to `[x]` and include that update in the same commit as the refactor.
