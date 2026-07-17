@@ -144,6 +144,7 @@ export function LayoutSettingsPanel(
         <Button
           size="xs"
           variant="light"
+          color="yellow"
           fullWidth
           leftSection={<IconStar size={16} />}
           onClick={props.setDefaultLayout}

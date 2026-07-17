@@ -74,7 +74,8 @@ test("layout panel keeps secondary actions in a more menu", async () => {
   const panel = within(view.container);
 
   assert.equal(panel.queryByRole("button", { name: "deleteLayout" }), null);
-  assert.ok(panel.getByRole("button", { name: "setDefault" }));
+  const setDefaultButton = panel.getByRole("button", { name: "setDefault" });
+  assert.match(setDefaultButton.getAttribute("style") ?? "", /yellow/);
   const moreButton = panel.getByRole("button", { name: "moreActions" });
   await user.click(moreButton);
   assert.equal(moreButton.getAttribute("aria-expanded"), "true");
