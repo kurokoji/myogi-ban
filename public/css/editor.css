@@ -69,6 +69,27 @@ body {
   text-transform: uppercase;
 }
 
+.sidebar-accordion .mantine-Accordion-control {
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.sidebar-accordion .mantine-Accordion-content {
+  padding: 0 10px 10px;
+}
+
+.sidebar-accordion .panel {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.sidebar-accordion .panel h2 {
+  display: none;
+}
+
 .control {
   margin-bottom: 0;
 }

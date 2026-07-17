@@ -8,6 +8,7 @@ import { useState } from "react";
 import { LayoutSettingsPanel } from "../src/components/editor/LayoutSettingsPanel";
 import { LinkedSizeInputs } from "../src/components/editor/LinkedSizeInputs";
 import { PreviewZoomControls } from "../src/components/editor/PreviewZoomControls";
+import { SidebarAccordion } from "../src/components/editor/SidebarAccordion";
 import { ButtonLayer } from "../src/components/gamepad/ButtonLayer";
 import { GamepadView } from "../src/components/GamepadView";
 import { createDefaultLayout } from "../src/layout";
@@ -169,5 +170,33 @@ test("zoom percentage resets zoom without a separate reset button", async () => 
   assert.equal(
     controls.getByRole("button", { name: "resetZoom" }).textContent,
     "140%",
+  );
+});
+
+test("sidebar accordion restores persisted open sections", () => {
+  const values = new Map<string, string>([
+    ["editor-sidebar-sections", '["layout"]'],
+  ]);
+  const storage = {
+    getItem: (key: string) => values.get(key) ?? null,
+    setItem: (key: string, value: string) => values.set(key, value),
+  };
+  const view = renderComponent(
+    <SidebarAccordion
+      storage={storage}
+      sections={[
+        { value: "display", label: "Display", content: <p>Display body</p> },
+        { value: "layout", label: "Layout", content: <p>Layout body</p> },
+      ]}
+    />,
+  );
+  const controls = view.container.querySelectorAll<HTMLButtonElement>(
+    ".sidebar-accordion button",
+  );
+  assert.equal(controls.length, 2);
+  assert.equal(
+    view.container.querySelectorAll(".mantine-Accordion-item[data-active]")
+      .length,
+    1,
   );
 });

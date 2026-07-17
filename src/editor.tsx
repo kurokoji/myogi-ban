@@ -25,6 +25,7 @@ import {
   LayoutSettingsPanel,
   StickSettingsPanel,
 } from "./components/editor/SettingsPanels";
+import { SidebarAccordion } from "./components/editor/SidebarAccordion";
 import { GamepadView } from "./components/GamepadView";
 import {
   addEditorButton,
@@ -387,60 +388,101 @@ function EditorApp(): React.ReactElement {
           </Text>
         </div>
 
-        <DisplaySettingsPanel
-          language={language}
-          previewScale={previewScale}
-          hasGuides={
-            layout.guides.vertical.length > 0 ||
-            layout.guides.horizontal.length > 0
-          }
-          onLanguageChange={changeLanguage}
-          onPreviewScaleChange={changePreviewScale}
-          onClearGuides={clearGuides}
+        <SidebarAccordion
+          sections={[
+            {
+              value: "display",
+              label: t("display"),
+              content: (
+                <DisplaySettingsPanel
+                  language={language}
+                  previewScale={previewScale}
+                  hasGuides={
+                    layout.guides.vertical.length > 0 ||
+                    layout.guides.horizontal.length > 0
+                  }
+                  onLanguageChange={changeLanguage}
+                  onPreviewScaleChange={changePreviewScale}
+                  onClearGuides={clearGuides}
+                />
+              ),
+            },
+            {
+              value: "layout",
+              label: t("layout"),
+              content: (
+                <LayoutSettingsPanel
+                  currentBuiltin={currentBuiltin}
+                  isDirty={isDirty}
+                  layoutNames={layoutNames}
+                  selectedLayout={selectedLayout}
+                  layoutName={layoutName}
+                  openLayout={openLayout}
+                  saveLayout={saveLayout}
+                  saveLayoutAs={saveLayoutAs}
+                  deleteLayout={deleteLayout}
+                  setDefaultLayout={setDefaultLayout}
+                  exportLayout={exportLayout}
+                  importLayout={importLayout}
+                  status={status}
+                />
+              ),
+            },
+            {
+              value: "background",
+              label: t("background"),
+              content: (
+                <BackgroundSettingsPanel
+                  layout={layout}
+                  fileInputRef={fileInputRef}
+                  updateLayout={updateLayout}
+                  uploadImage={uploadImage}
+                  openImagePicker={openImagePicker}
+                />
+              ),
+            },
+            {
+              value: "stick",
+              label: t("stick"),
+              content: (
+                <StickSettingsPanel
+                  layout={layout}
+                  updateLayout={updateLayout}
+                />
+              ),
+            },
+            {
+              value: "buttons",
+              label: t("buttons"),
+              content: (
+                <ButtonSettingsPanel
+                  layout={layout}
+                  assigningTarget={assigningTarget}
+                  assignmentName={assignmentName}
+                  selectedButtonIndex={selectedButtonIndex}
+                  selectedButtonIndexes={selectedButtonIndexes}
+                  updateLayout={updateLayout}
+                  updateSelectedButtons={updateSelectedButtons}
+                  onAddButton={addButton}
+                  onDeleteSelectedButtons={deleteSelectedButtons}
+                  onSelectedButtonChange={selectButtonForSettings}
+                  openImagePicker={openImagePicker}
+                  cancelAssignment={cancelAssignment}
+                />
+              ),
+            },
+            {
+              value: "gamepad",
+              label: t("gamepad"),
+              content: (
+                <GamepadStatusPanel
+                  connected={connected}
+                  gamepadName={gamepadName}
+                />
+              ),
+            },
+          ]}
         />
-
-        <LayoutSettingsPanel
-          currentBuiltin={currentBuiltin}
-          isDirty={isDirty}
-          layoutNames={layoutNames}
-          selectedLayout={selectedLayout}
-          layoutName={layoutName}
-          openLayout={openLayout}
-          saveLayout={saveLayout}
-          saveLayoutAs={saveLayoutAs}
-          deleteLayout={deleteLayout}
-          setDefaultLayout={setDefaultLayout}
-          exportLayout={exportLayout}
-          importLayout={importLayout}
-          status={status}
-        />
-
-        <BackgroundSettingsPanel
-          layout={layout}
-          fileInputRef={fileInputRef}
-          updateLayout={updateLayout}
-          uploadImage={uploadImage}
-          openImagePicker={openImagePicker}
-        />
-
-        <StickSettingsPanel layout={layout} updateLayout={updateLayout} />
-
-        <ButtonSettingsPanel
-          layout={layout}
-          assigningTarget={assigningTarget}
-          assignmentName={assignmentName}
-          selectedButtonIndex={selectedButtonIndex}
-          selectedButtonIndexes={selectedButtonIndexes}
-          updateLayout={updateLayout}
-          updateSelectedButtons={updateSelectedButtons}
-          onAddButton={addButton}
-          onDeleteSelectedButtons={deleteSelectedButtons}
-          onSelectedButtonChange={selectButtonForSettings}
-          openImagePicker={openImagePicker}
-          cancelAssignment={cancelAssignment}
-        />
-
-        <GamepadStatusPanel connected={connected} gamepadName={gamepadName} />
       </aside>
 
       <main
