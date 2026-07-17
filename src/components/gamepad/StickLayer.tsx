@@ -59,6 +59,7 @@ export function StickLayer({
               Number.parseFloat(stick.y) || 125,
             )
           }
+          onClick={(event) => onDirectionClick(0, event)}
         />
       )}
       <div

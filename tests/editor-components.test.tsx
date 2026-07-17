@@ -8,6 +8,7 @@ import { useState } from "react";
 import { LayoutSettingsPanel } from "../src/components/editor/LayoutSettingsPanel";
 import { LinkedSizeInputs } from "../src/components/editor/LinkedSizeInputs";
 import { ButtonLayer } from "../src/components/gamepad/ButtonLayer";
+import { GamepadView } from "../src/components/GamepadView";
 import { createDefaultLayout } from "../src/layout";
 
 test("duplicate layout names disable save-as before submitting", async () => {
@@ -91,4 +92,24 @@ test("button layer renders every member of a multiple selection", () => {
 
   assert.equal(view.container.querySelectorAll(".button-selected").length, 2);
   assert.equal(view.container.querySelector("#button1.button-selected"), null);
+});
+
+test("control-clicking the stick center requests selection toggle", () => {
+  const layout = createDefaultLayout();
+  const clicks: Array<{ index: number; toggle: boolean }> = [];
+  const view = renderComponent(
+    <GamepadView
+      layout={layout}
+      stickClass="stick"
+      pressedButtons={[]}
+      editorMode={true}
+      onStickClick={(index, toggle) => clicks.push({ index, toggle })}
+    />,
+  );
+
+  const handle = view.container.querySelector(".stick-drag-handle");
+  assert.ok(handle);
+  fireEvent.click(handle, { ctrlKey: true });
+
+  assert.deepEqual(clicks, [{ index: 0, toggle: true }]);
 });
