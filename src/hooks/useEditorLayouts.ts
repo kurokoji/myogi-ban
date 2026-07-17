@@ -29,6 +29,7 @@ import {
   createEditorSnapshotSignature,
 } from "../layout-save";
 import { selectLayoutAfterDelete } from "../layout-selection";
+import { parseImportedLayoutJson } from "../layout-validation";
 import type { Layout, LayoutEntry, OperationStatus } from "../types";
 
 interface UseEditorLayoutsOptions {
@@ -317,8 +318,8 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     const reader = new FileReader();
     reader.onload = () => {
       try {
-        const data = JSON.parse(String(reader.result));
-        applyLayout(data, data.name || "imported", false, false);
+        const data = parseImportedLayoutJson(String(reader.result));
+        applyLayout(data as Layout, data.name || "imported", false, false);
       } catch {
         setStatus({ kind: "error", message: messages.invalidLayoutFile });
       }
