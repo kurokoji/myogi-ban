@@ -3,9 +3,11 @@ import * as fs from "fs";
 import * as http from "http";
 import * as path from "path";
 import WebSocket from "ws";
-import { ImageUploadValidationError } from "./image-asset";
-import { CorruptLayoutError, LayoutRepository } from "./layout-repository";
-import type { GamepadState, Layout } from "./types";
+import { LayoutRepository } from "./layout-repository";
+import { registerImageRoutes } from "./server-routes/image-routes";
+import { registerLayoutRoutes } from "./server-routes/layout-routes";
+import { registerStateRoutes } from "./server-routes/state-routes";
+import type { GamepadState } from "./types";
 
 export interface LocalServerOptions {
   port: number;
@@ -33,7 +35,7 @@ export function createLocalServer(options: LocalServerOptions): http.Server {
   const server = http.createServer(expressApp);
   const wss = new WebSocket.Server({ server });
   const layouts = new LayoutRepository(options);
-  let latestState: GamepadState | null = null;
+  const stateStore: { latest: GamepadState | null } = { latest: null };
 
   const broadcastState = (state: GamepadState): void => {
     const message = JSON.stringify({ type: "state", data: state });
@@ -52,80 +54,13 @@ export function createLocalServer(options: LocalServerOptions): http.Server {
     res.sendFile(path.join(options.publicDir, "view.html"));
   });
 
-  expressApp.post("/api/state", (req, res) => {
-    latestState = req.body as GamepadState;
-    broadcastState(latestState);
-    res.json({ ok: true });
-  });
-
-  expressApp.get("/api/state", (_req, res) => {
-    res.json(latestState || {});
-  });
-
-  expressApp.post("/api/layout/save", (req, res) => {
-    const layoutName = req.body.name || "custom";
-    if (req.body.overwrite === false && layouts.has(layoutName)) {
-      res.status(409).json({ ok: false, error: "layout_name_exists" });
-      return;
-    }
-    layouts.save(layoutName, req.body.data as Layout);
-    res.json({ ok: true });
-  });
-
-  expressApp.get("/api/layouts", (_req, res) => {
-    res.json(layouts.list());
-  });
-
-  expressApp.get("/api/layout/:name", (req, res) => {
-    try {
-      res.json(layouts.read(req.params.name, req.query.builtin === "true"));
-    } catch (error) {
-      if (error instanceof CorruptLayoutError) {
-        res.status(422).json({ ok: false, error: "invalid_layout_json" });
-        return;
-      }
-      throw error;
-    }
-  });
-
-  expressApp.delete("/api/layout/:name", (req, res) => {
-    if (!layouts.delete(req.params.name)) {
-      res.status(404).json({ ok: false });
-      return;
-    }
-    res.json({ ok: true });
-  });
-
-  expressApp.post("/api/upload-image", (req, res) => {
-    const { data, layoutName, fileName } = req.body;
-    try {
-      const safeFileName = layouts.uploadImage(
-        data,
-        layoutName || "custom",
-        fileName,
-      );
-      res.json({ ok: true, fileName: safeFileName });
-    } catch (error) {
-      if (error instanceof ImageUploadValidationError) {
-        res.status(400).json({ ok: false, error: error.code });
-        return;
-      }
-      throw error;
-    }
-  });
-
-  expressApp.get("/api/default-layout", (_req, res) => {
-    res.json(layouts.getDefault());
-  });
-
-  expressApp.post("/api/default-layout", (req, res) => {
-    layouts.setDefault(req.body.name);
-    res.json({ ok: true });
-  });
+  registerStateRoutes(expressApp, stateStore, broadcastState);
+  registerLayoutRoutes(expressApp, layouts);
+  registerImageRoutes(expressApp, layouts);
 
   wss.on("connection", (ws) => {
-    if (latestState) {
-      ws.send(JSON.stringify({ type: "state", data: latestState }));
+    if (stateStore.latest) {
+      ws.send(JSON.stringify({ type: "state", data: stateStore.latest }));
     }
   });
 
