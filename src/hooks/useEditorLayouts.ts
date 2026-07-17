@@ -24,6 +24,7 @@ import {
 import { ensureLayoutDefaults } from "../layout";
 import { isLayoutNameTaken } from "../layout-name";
 import { buildLayoutForSave } from "../layout-save";
+import { selectLayoutAfterDelete } from "../layout-selection";
 import type { Layout, LayoutEntry, OperationStatus } from "../types";
 
 interface UseEditorLayoutsOptions {
@@ -242,9 +243,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
       const defaultLayout = await api.getDefaultLayout();
       await api.deleteLayout(layoutName);
       const entries = await refreshLayouts();
-      const fallback =
-        entries.find((entry) => entry.name === layoutName && entry.builtin) ??
-        entries[0];
+      const fallback = selectLayoutAfterDelete(entries, layoutName);
       if (fallback) {
         const selection = layoutSelectionValue(fallback.name, fallback.builtin);
         applyLayout(
