@@ -41,9 +41,15 @@ function ensureDir(dir: string): void {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 }
 
-function writeJson(filePath: string, data: unknown): void {
+export function writeJsonAtomically(filePath: string, data: unknown): void {
   ensureDir(path.dirname(filePath));
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+  const temporaryPath = `${filePath}.tmp-${process.pid}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  try {
+    fs.writeFileSync(temporaryPath, JSON.stringify(data, null, 2));
+    fs.renameSync(temporaryPath, filePath);
+  } finally {
+    if (fs.existsSync(temporaryPath)) fs.unlinkSync(temporaryPath);
+  }
 }
 
 export function collectLayoutAssets(layout: unknown): string[] {
@@ -140,7 +146,10 @@ export class LayoutRepository {
     const layoutDir = path.join(this.options.userLayoutDir, name);
     ensureDir(layoutDir);
     this.copyAssets(layout, layout.name || name, name);
-    writeJson(path.join(layoutDir, "layout.json"), { ...layout, name });
+    writeJsonAtomically(path.join(layoutDir, "layout.json"), {
+      ...layout,
+      name,
+    });
   }
 
   delete(name: string): boolean {
@@ -177,6 +186,6 @@ export class LayoutRepository {
 
   setDefault(name: string): void {
     assertValidLayoutName(name);
-    writeJson(this.options.defaultLayoutFile, { name });
+    writeJsonAtomically(this.options.defaultLayoutFile, { name });
   }
 }
