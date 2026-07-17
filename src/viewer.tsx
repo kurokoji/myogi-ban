@@ -13,7 +13,11 @@ import { startGamepadMonitor } from "./gamepad-monitor";
 import { createEmptySnapshot, readGamepadSnapshot } from "./gamepad-state";
 import { useLatestRef } from "./hooks/useLatestRef";
 import { createDefaultLayout, ensureLayoutDefaults } from "./layout";
-import type { Layout } from "./types";
+import type { GamepadState, Layout } from "./types";
+import {
+  nextViewerConnectionStatus,
+  type ViewerConnectionStatus,
+} from "./viewer-connection";
 
 function ViewerApp(): React.ReactElement {
   const apiRef = useRef(new ApiClient());
@@ -27,6 +31,8 @@ function ViewerApp(): React.ReactElement {
   const [snapshot, setSnapshot] = useState(() =>
     createEmptySnapshot(createDefaultLayout()),
   );
+  const [connectionStatus, setConnectionStatus] =
+    useState<ViewerConnectionStatus>("loading");
   const layoutRef = useLatestRef(layout);
   const buttonMappingsRef = useLatestRef(buttonMappings);
   const stickMappingsRef = useLatestRef(stickMappings);
@@ -58,7 +64,53 @@ function ViewerApp(): React.ReactElement {
           );
         }
       })
-      .catch(() => undefined);
+      .catch(() =>
+        setConnectionStatus((current) =>
+          nextViewerConnectionStatus(current, "api-error"),
+        ),
+      );
+  }, []);
+
+  useEffect(() => {
+    let disposed = false;
+    let socket: WebSocket | null = null;
+    let retryTimer = 0;
+    const connect = () => {
+      socket = new WebSocket(
+        `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}`,
+      );
+      socket.onopen = () =>
+        setConnectionStatus((current) =>
+          nextViewerConnectionStatus(current, "socket-open"),
+        );
+      socket.onmessage = (event) => {
+        const message = JSON.parse(String(event.data)) as {
+          type?: string;
+          data?: GamepadState;
+        };
+        if (message.type !== "state" || !message.data) return;
+        const state = message.data;
+        const nextLayout = ensureLayoutDefaults(state.layout);
+        setLayout(nextLayout);
+        setSnapshot({
+          ...createEmptySnapshot(nextLayout),
+          stickClass: state.stick,
+          pressedButtons: state.buttons,
+        });
+      };
+      socket.onclose = () => {
+        setConnectionStatus((current) =>
+          nextViewerConnectionStatus(current, "socket-close"),
+        );
+        if (!disposed) retryTimer = window.setTimeout(connect, 1000);
+      };
+    };
+    connect();
+    return () => {
+      disposed = true;
+      window.clearTimeout(retryTimer);
+      socket?.close();
+    };
   }, []);
 
   useEffect(() => {
@@ -92,7 +144,11 @@ function ViewerApp(): React.ReactElement {
   }, [buttonMappingsRef, layoutRef, stickMappingsRef]);
 
   return (
-    <div id="container" className="container">
+    <div
+      id="container"
+      className="container"
+      data-connection-status={connectionStatus}
+    >
       <GamepadView
         layout={layout}
         stickClass={snapshot.stickClass}
