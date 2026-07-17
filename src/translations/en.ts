@@ -1,3 +1,5 @@
+import type { TranslationKey } from "./keys";
+
 export const enTranslation = {
   appTitle: "Myogi Ban",
   obs: "Viewer",
@@ -103,4 +105,4 @@ export const enTranslation = {
   pressedHeight: "Pressed height (px)",
   layoutNamePlaceholder: "name",
   layoutNameExists: "A layout with this name already exists",
-} as const;
+} as const satisfies Record<TranslationKey, string>;
