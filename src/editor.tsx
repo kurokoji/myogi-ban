@@ -25,6 +25,7 @@ import {
   createEmptyButtonLayout,
   updateSelectedButtonSettings,
 } from "./editor-helpers";
+import { toggleSelectedIndex } from "./editor-selection";
 import {
   type ButtonMapping,
   GamepadManager,
@@ -321,9 +322,7 @@ function EditorApp(): React.ReactElement {
     (index: number, toggleSelection: boolean) => {
       if (toggleSelection) {
         setSelectedButtonIndexes((current) => {
-          const next = current.includes(index)
-            ? current.filter((selectedIndex) => selectedIndex !== index)
-            : [...current, index];
+          const next = toggleSelectedIndex(current, index);
           setSelectedButtonIndex(next[0] ?? null);
           return next;
         });
