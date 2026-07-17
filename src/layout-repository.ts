@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import { resolveAvailableAssetName } from "./image-asset";
 import { assertValidLayoutName, isLayoutNameTaken } from "./layout-name";
 import type { Layout, LayoutEntry } from "./types";
 
@@ -162,9 +163,12 @@ export class LayoutRepository {
 
   uploadImage(data: string, layoutName: string, fileName: string): string {
     assertValidLayoutName(layoutName);
-    const safeFileName = path.basename(fileName);
     const layoutDir = path.join(this.options.userLayoutDir, layoutName);
     ensureDir(layoutDir);
+    const safeFileName = resolveAvailableAssetName(
+      path.basename(fileName),
+      new Set(fs.readdirSync(layoutDir)),
+    );
     const base64Data = data.replace(/^data:image\/[^;]+;base64,/, "");
     fs.writeFileSync(
       path.join(layoutDir, safeFileName),
