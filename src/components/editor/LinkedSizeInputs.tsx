@@ -2,6 +2,7 @@ import { ActionIcon, Group, NumberInput } from "@mantine/core";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { numericValue } from "../../editor-helpers";
+import { resizeWithAspectRatio } from "../../linked-size";
 
 interface LinkedSizeInputsProps {
   width: string;
@@ -14,15 +15,6 @@ interface LinkedSizeInputsProps {
   fallbackHeight?: string;
   min?: number;
   onChange: (width: string, height: string) => void;
-}
-
-function effectiveNumber(value: string, fallback = ""): number | null {
-  const parsed = Number.parseFloat(value || fallback);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
-}
-
-function formatDimension(value: number): string {
-  return String(Math.round(value * 10000) / 10000);
 }
 
 export function LinkedSizeInputs({
@@ -41,30 +33,29 @@ export function LinkedSizeInputs({
   const [linked, setLinked] = useState(true);
 
   const changeWidth = (value: string | number) => {
-    const nextWidth = String(value ?? "");
-    const oldWidth = effectiveNumber(width, fallbackWidth);
-    const oldHeight = effectiveNumber(height, fallbackHeight);
-    const numericWidth = effectiveNumber(nextWidth);
-    const nextHeight =
-      linked && numericWidth !== null && oldWidth !== null && oldHeight !== null
-        ? formatDimension((numericWidth * oldHeight) / oldWidth)
-        : height;
-    onChange(nextWidth, nextHeight);
+    const next = resizeWithAspectRatio({
+      width,
+      height,
+      nextValue: value,
+      changed: "width",
+      linked,
+      fallbackWidth,
+      fallbackHeight,
+    });
+    onChange(next.width, next.height);
   };
 
   const changeHeight = (value: string | number) => {
-    const nextHeight = String(value ?? "");
-    const oldWidth = effectiveNumber(width, fallbackWidth);
-    const oldHeight = effectiveNumber(height, fallbackHeight);
-    const numericHeight = effectiveNumber(nextHeight);
-    const nextWidth =
-      linked &&
-      numericHeight !== null &&
-      oldWidth !== null &&
-      oldHeight !== null
-        ? formatDimension((numericHeight * oldWidth) / oldHeight)
-        : width;
-    onChange(nextWidth, nextHeight);
+    const next = resizeWithAspectRatio({
+      width,
+      height,
+      nextValue: value,
+      changed: "height",
+      linked,
+      fallbackWidth,
+      fallbackHeight,
+    });
+    onChange(next.width, next.height);
   };
 
   return (
