@@ -20,12 +20,13 @@ import {
   StickSettingsPanel,
 } from "./components/editor/SettingsPanels";
 import { GamepadView } from "./components/GamepadView";
-import { addEditorButton, deleteEditorButtons } from "./editor-buttons";
 import {
-  cloneLayout,
-  createEmptyButtonLayout,
-  updateSelectedButtonSettings,
-} from "./editor-helpers";
+  addEditorButton,
+  type ButtonPositionUpdate,
+  deleteEditorButtons,
+  withButtonPositions,
+} from "./editor-buttons";
+import { cloneLayout, updateSelectedButtonSettings } from "./editor-helpers";
 import {
   createButtonSelection,
   EMPTY_EDITOR_SELECTION,
@@ -226,30 +227,23 @@ function EditorApp(): React.ReactElement {
     });
   }, []);
 
-  const handleButtonPositionChange = useCallback(
-    (index: number, x: number, y: number) => {
+  const handlePositionsChange = useCallback(
+    (update: {
+      buttons: ButtonPositionUpdate[];
+      stick?: { x: number; y: number };
+    }) => {
       setLayout((current) => {
-        const next = cloneLayout(current);
-        if (!next.buttons[index])
-          next.buttons[index] = createEmptyButtonLayout();
-        next.buttons[index].x = String(x);
-        next.buttons[index].y = String(y);
+        const next = withButtonPositions(current, update.buttons);
+        if (update.stick) {
+          next.stick.x = String(update.stick.x);
+          next.stick.y = String(update.stick.y);
+        }
         layoutRef.current = next;
         return next;
       });
     },
     [],
   );
-
-  const handleStickPositionChange = useCallback((x: number, y: number) => {
-    setLayout((current) => {
-      const next = cloneLayout(current);
-      next.stick.x = String(x);
-      next.stick.y = String(y);
-      layoutRef.current = next;
-      return next;
-    });
-  }, []);
 
   const updateSelection = useCallback(
     (nextSelection: { buttonIndexes: number[]; stick: boolean }) => {
@@ -604,8 +598,7 @@ function EditorApp(): React.ReactElement {
                 onSelectionChange={updateSelection}
                 onLayoutDragStart={beginLayoutDrag}
                 onLayoutDragEnd={endLayoutDrag}
-                onButtonPositionChange={handleButtonPositionChange}
-                onStickPositionChange={handleStickPositionChange}
+                onPositionsChange={handlePositionsChange}
               />
             </div>
           </div>

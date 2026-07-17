@@ -3,6 +3,27 @@ import { cloneLayout, createEmptyButtonLayout } from "./editor-helpers";
 import { type ButtonMapping, UNASSIGNED_MAPPING } from "./gamepad";
 import type { Layout } from "./types";
 
+export interface ButtonPositionUpdate {
+  index: number;
+  x: number;
+  y: number;
+}
+
+export function withButtonPositions(
+  layout: Layout,
+  positions: ButtonPositionUpdate[],
+): Layout {
+  const next = cloneLayout(layout);
+  for (const { index, x, y } of positions) {
+    if (!next.buttons[index]) {
+      next.buttons[index] = createEmptyButtonLayout();
+    }
+    next.buttons[index].x = String(x);
+    next.buttons[index].y = String(y);
+  }
+  return next;
+}
+
 export function addEditorButton(
   layout: Layout,
   mapping: ButtonMapping[],
