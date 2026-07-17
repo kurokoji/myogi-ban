@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { cloneLayout } from "../editor-helpers";
+import { areLayoutSnapshotsEqual } from "../layout-history";
 import type { Layout } from "../types";
 
 const MAX_LAYOUT_HISTORY = 100;
@@ -17,10 +18,6 @@ interface UseLayoutHistoryOptions {
   layoutRef: MutableRefObject<Layout>;
   setLayout: Dispatch<SetStateAction<Layout>>;
   onRestore: (layout: Layout) => void;
-}
-
-function sameLayout(a: Layout, b: Layout): boolean {
-  return JSON.stringify(a) === JSON.stringify(b);
 }
 
 function isEditableTarget(target: EventTarget | null): boolean {
@@ -105,7 +102,7 @@ export function useLayoutHistory({
       setLayout((current) => {
         const next = cloneLayout(current);
         updater(next);
-        if (sameLayout(current, next)) return current;
+        if (areLayoutSnapshotsEqual(current, next)) return current;
         pushUndoSnapshot(current);
         redoStackRef.current = [];
         syncAvailability();
@@ -123,7 +120,8 @@ export function useLayoutHistory({
   const endDrag = useCallback(() => {
     const startLayout = dragHistoryStartRef.current;
     dragHistoryStartRef.current = null;
-    if (!startLayout || sameLayout(startLayout, layoutRef.current)) return;
+    if (!startLayout || areLayoutSnapshotsEqual(startLayout, layoutRef.current))
+      return;
     pushUndoSnapshot(startLayout);
     redoStackRef.current = [];
     syncAvailability();
