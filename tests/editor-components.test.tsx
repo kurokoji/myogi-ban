@@ -202,7 +202,7 @@ test("sidebar accordion restores persisted open sections", () => {
   );
 });
 
-test("advanced button settings stay collapsed until requested", () => {
+test("advanced button settings stay collapsed until requested", async () => {
   const view = renderComponent(
     <ButtonAdvancedSettings label="Advanced">
       <p>Advanced content</p>
@@ -212,7 +212,36 @@ test("advanced button settings stay collapsed until requested", () => {
   assert.ok(details);
   assert.equal(details.open, false);
 
-  fireEvent.click(within(view.container).getByText("Advanced"));
+  const user = userEvent.setup({ document: componentDocument });
+  await user.click(within(view.container).getByText("Advanced"));
 
   assert.equal(details.open, true);
+});
+
+test("advanced button settings restore their open state after remounting", async () => {
+  const values = new Map<string, string>();
+  const storage = {
+    getItem: (key: string) => values.get(key) ?? null,
+    setItem: (key: string, value: string) => values.set(key, value),
+  };
+  const first = renderComponent(
+    <ButtonAdvancedSettings label="Advanced" storage={storage}>
+      <p>Advanced content</p>
+    </ButtonAdvancedSettings>,
+  );
+  const firstDetails = first.container.querySelector("details");
+  assert.ok(firstDetails);
+  const user = userEvent.setup({ document: componentDocument });
+  await user.click(first.container.querySelector("summary") as HTMLElement);
+  assert.equal(firstDetails.open, true);
+  first.unmount();
+
+  const second = renderComponent(
+    <ButtonAdvancedSettings label="Advanced" storage={storage}>
+      <p>Advanced content</p>
+    </ButtonAdvancedSettings>,
+  );
+  const secondDetails = second.container.querySelector("details");
+  assert.ok(secondDetails);
+  assert.equal(secondDetails.open, true);
 });
