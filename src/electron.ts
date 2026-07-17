@@ -1,9 +1,9 @@
 import { app, BrowserWindow } from "electron";
-import * as fs from "fs";
 import type * as http from "http";
 import * as path from "path";
 import { resolveElectronDataDir } from "./data-paths";
 import { createLocalServer } from "./local-server";
+import { cleanupLocalServer } from "./server-cleanup";
 import { PORT } from "./types";
 
 let mainWindow: BrowserWindow | null = null;
@@ -54,10 +54,8 @@ app.whenReady().then(() => {
 });
 
 app.on("window-all-closed", () => {
-  if (server) server.close();
-
-  const pidFile = path.join(dataDir, "server.pid");
-  if (fs.existsSync(pidFile)) fs.unlinkSync(pidFile);
+  cleanupLocalServer(server, path.join(dataDir, "server.pid"));
+  server = null;
 
   if (process.platform !== "darwin") app.quit();
 });
