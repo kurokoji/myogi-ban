@@ -1,3 +1,4 @@
+import type { ApiSuccess } from "./api-response";
 import {
   type GamepadState,
   type Layout,
@@ -36,7 +37,8 @@ async function request(path: string, init?: RequestInit): Promise<Response> {
 
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await request(path, init);
-  return response.json() as Promise<T>;
+  const body = (await response.json()) as ApiSuccess<T>;
+  return body.data;
 }
 
 function jsonRequest(body: unknown): RequestInit {

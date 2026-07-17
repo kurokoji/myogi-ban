@@ -4,7 +4,7 @@ import { ApiClient, ApiError } from "../src/api";
 
 test("ApiClient returns parsed JSON for successful requests", async (t) => {
   t.mock.method(globalThis, "fetch", async () =>
-    Response.json([{ name: "default", builtin: true }]),
+    Response.json({ ok: true, data: [{ name: "default", builtin: true }] }),
   );
 
   assert.deepEqual(await new ApiClient().getLayouts(), [
@@ -33,7 +33,7 @@ test("ApiClient rejects unsuccessful HTTP responses", async (t) => {
 
 test("ApiClient URL-encodes layout names", async (t) => {
   const fetchMock = t.mock.method(globalThis, "fetch", async () =>
-    Response.json({ version: "test" }),
+    Response.json({ ok: true, data: { version: "test" } }),
   );
 
   await new ApiClient().getLayout("player one");
@@ -42,7 +42,7 @@ test("ApiClient URL-encodes layout names", async (t) => {
 
 test("ApiClient can explicitly request a built-in layout", async (t) => {
   const fetchMock = t.mock.method(globalThis, "fetch", async () =>
-    Response.json({ version: "test" }),
+    Response.json({ ok: true, data: { version: "test" } }),
   );
 
   await new ApiClient().getLayout("hit-box-ultra", true);

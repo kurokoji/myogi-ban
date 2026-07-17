@@ -1,4 +1,5 @@
 import type { Express } from "express";
+import { apiFailure, apiSuccess } from "../api-response";
 import {
   CorruptLayoutError,
   type LayoutRepository,
@@ -19,19 +20,21 @@ export function registerLayoutRoutes(
   app.post("/api/layout/save", (req, res) => {
     const name = req.body.name || "custom";
     if (req.body.overwrite === false && layouts.has(name)) {
-      res.status(409).json({ ok: false, error: "layout_name_exists" });
+      res.status(409).json(apiFailure("layout_name_exists"));
       return;
     }
     layouts.save(name, req.body.data as Layout);
-    res.json({ ok: true });
+    res.json(apiSuccess());
   });
-  app.get("/api/layouts", (_req, res) => res.json(layouts.list()));
+  app.get("/api/layouts", (_req, res) => res.json(apiSuccess(layouts.list())));
   app.get("/api/layout/:name", (req, res) => {
     try {
-      res.json(layouts.read(req.params.name, req.query.builtin === "true"));
+      res.json(
+        apiSuccess(layouts.read(req.params.name, req.query.builtin === "true")),
+      );
     } catch (error) {
       if (error instanceof CorruptLayoutError) {
-        res.status(422).json({ ok: false, error: "invalid_layout_json" });
+        res.status(422).json(apiFailure("invalid_layout_json"));
         return;
       }
       throw error;
@@ -39,14 +42,16 @@ export function registerLayoutRoutes(
   });
   app.delete("/api/layout/:name", (req, res) => {
     if (!layouts.delete(req.params.name)) {
-      res.status(404).json({ ok: false });
+      res.status(404).json(apiFailure("layout_not_found"));
       return;
     }
-    res.json({ ok: true });
+    res.json(apiSuccess());
   });
-  app.get("/api/default-layout", (_req, res) => res.json(layouts.getDefault()));
+  app.get("/api/default-layout", (_req, res) =>
+    res.json(apiSuccess(layouts.getDefault())),
+  );
   app.post("/api/default-layout", (req, res) => {
     layouts.setDefault(req.body.name);
-    res.json({ ok: true });
+    res.json(apiSuccess());
   });
 }
