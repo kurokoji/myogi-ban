@@ -43,6 +43,19 @@ test("updateSelectedButtonSettings preserves settings that were not changed", ()
   assert.equal(layout.buttons[1].w, "80");
 });
 
+test("updateSelectedButtonSettings removes an undefined setting from every selected button", () => {
+  const layout = createDefaultLayout();
+  layout.buttons[0].rotation = "10";
+  layout.buttons[1].rotation = "20";
+
+  updateSelectedButtonSettings(layout, [0, 1], (next) => {
+    delete next.buttons[0].rotation;
+  });
+
+  assert.equal(layout.buttons[0].rotation, undefined);
+  assert.equal(layout.buttons[1].rotation, undefined);
+});
+
 test("cloneLayout creates independent nested collections", () => {
   const original = createDefaultLayout();
   const cloned = cloneLayout(original);
