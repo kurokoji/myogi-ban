@@ -7,7 +7,10 @@ import {
   useRef,
   useState,
 } from "react";
-import { guideCoordinateFromPointer } from "../editor-guides";
+import {
+  guideCoordinateFromPointer,
+  updateGuidePosition,
+} from "../editor-guides";
 import { cloneLayout } from "../editor-helpers";
 import type { Layout } from "../types";
 
@@ -69,12 +72,14 @@ export function useEditorGuides({
   );
 
   const moveGuide = useCallback(
-    (axis: GuideAxis, index: number, value: number) => {
+    (axis: GuideAxis, index: number, value: number, limit?: number) => {
       setLayout((current) => {
         const next = cloneLayout(current);
         const guides =
           axis === "x" ? next.guides.vertical : next.guides.horizontal;
-        guides[index] = value;
+        const updated = updateGuidePosition(guides, index, value, limit);
+        if (axis === "x") next.guides.vertical = updated;
+        else next.guides.horizontal = updated;
         layoutRef.current = next;
         return next;
       });
@@ -118,14 +123,30 @@ export function useEditorGuides({
         coordinateFromPointer(event, guideDrag.axis),
       );
     };
-    const handleMouseUp = () => setGuideDrag(null);
+    const handleMouseUp = (event: MouseEvent) => {
+      const value = coordinateFromPointer(event, guideDrag.axis);
+      const currentLayout = layoutRef.current;
+      const rawLimit =
+        guideDrag.axis === "x"
+          ? currentLayout.background.w
+          : currentLayout.background.h;
+      const fallback = guideDrag.axis === "x" ? 500 : 250;
+      const parsed = Number.parseFloat(rawLimit || "");
+      moveGuide(
+        guideDrag.axis,
+        guideDrag.index,
+        value,
+        Number.isFinite(parsed) && parsed > 0 ? parsed : fallback,
+      );
+      setGuideDrag(null);
+    };
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [coordinateFromPointer, guideDrag, moveGuide]);
+  }, [coordinateFromPointer, guideDrag, moveGuide, layoutRef.current]);
 
   return {
     previewContainerRef,
