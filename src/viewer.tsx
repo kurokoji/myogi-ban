@@ -8,6 +8,7 @@ import {
   GamepadManager,
   type StickMapping,
 } from "./gamepad";
+import { startGamepadMonitor } from "./gamepad-monitor";
 import { createEmptySnapshot, readGamepadSnapshot } from "./gamepad-state";
 import { useLatestRef } from "./hooks/useLatestRef";
 import { createDefaultLayout, ensureLayoutDefaults } from "./layout";
@@ -58,8 +59,6 @@ function ViewerApp(): React.ReactElement {
       setSnapshot(createEmptySnapshot(layoutRef.current));
     });
 
-    const pollTimer = window.setInterval(() => manager.pollConnection(), 100);
-    let frame = 0;
     const updateLoop = () => {
       const gamepad = manager.getGamepad();
       if (gamepad) {
@@ -72,13 +71,14 @@ function ViewerApp(): React.ReactElement {
         );
         setSnapshot(nextSnapshot);
       }
-      frame = window.requestAnimationFrame(updateLoop);
     };
-    frame = window.requestAnimationFrame(updateLoop);
+    const stopMonitor = startGamepadMonitor({
+      poll: () => manager.pollConnection(),
+      update: updateLoop,
+    });
 
     return () => {
-      window.clearInterval(pollTimer);
-      window.cancelAnimationFrame(frame);
+      stopMonitor();
       manager.dispose();
     };
   }, [buttonMappingsRef, layoutRef, stickMappingsRef]);

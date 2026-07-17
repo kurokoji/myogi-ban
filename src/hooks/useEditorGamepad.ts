@@ -17,6 +17,7 @@ import {
   type StickMapping,
   toggleMappingAssignment,
 } from "../gamepad";
+import { startGamepadMonitor } from "../gamepad-monitor";
 import { createEmptySnapshot, readGamepadSnapshot } from "../gamepad-state";
 import type { GamepadState, Layout } from "../types";
 import { useLatestRef } from "./useLatestRef";
@@ -94,8 +95,6 @@ export function useEditorGamepad(options: UseEditorGamepadOptions) {
       setSnapshot(createEmptySnapshot(layoutRef.current));
     });
 
-    const pollTimer = window.setInterval(() => manager.pollConnection(), 100);
-    let frame = 0;
     const updateLoop = () => {
       const gamepad = manager.getGamepad();
       if (gamepad) {
@@ -146,13 +145,14 @@ export function useEditorGamepad(options: UseEditorGamepadOptions) {
           api.sendState(state);
         }
       }
-      frame = window.requestAnimationFrame(updateLoop);
     };
-    frame = window.requestAnimationFrame(updateLoop);
+    const stopMonitor = startGamepadMonitor({
+      poll: () => manager.pollConnection(),
+      update: updateLoop,
+    });
 
     return () => {
-      window.clearInterval(pollTimer);
-      window.cancelAnimationFrame(frame);
+      stopMonitor();
       manager.dispose();
     };
   }, [
