@@ -9,9 +9,6 @@ import {
   IconArrowBackUp,
   IconArrowForwardUp,
   IconCopy,
-  IconZoomIn,
-  IconZoomOut,
-  IconZoomReset,
 } from "@tabler/icons-react";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -19,6 +16,7 @@ import { createRoot } from "react-dom/client";
 import { useTranslation } from "react-i18next";
 import "./i18n";
 import { ApiClient } from "./api";
+import { PreviewZoomControls } from "./components/editor/PreviewZoomControls";
 import {
   BackgroundSettingsPanel,
   ButtonSettingsPanel,
@@ -474,41 +472,14 @@ function EditorApp(): React.ReactElement {
             </ActionIcon>
           </Tooltip>
         </div>
-        <div
-          className="preview-toolbar"
-          role="toolbar"
-          aria-label={t("previewZoom")}
-        >
-          <ActionIcon
-            size="sm"
-            variant="light"
-            aria-label={t("zoomOut")}
-            onClick={() => zoomPreview(-PREVIEW_SCALE_STEP)}
-            disabled={!canZoomOut}
-          >
-            <IconZoomOut size={16} />
-          </ActionIcon>
-          <Text className="preview-zoom-value" size="xs" fw={600}>
-            {zoomPercent}%
-          </Text>
-          <ActionIcon
-            size="sm"
-            variant="light"
-            aria-label={t("zoomIn")}
-            onClick={() => zoomPreview(PREVIEW_SCALE_STEP)}
-            disabled={!canZoomIn}
-          >
-            <IconZoomIn size={16} />
-          </ActionIcon>
-          <ActionIcon
-            size="sm"
-            variant="subtle"
-            aria-label={t("resetZoom")}
-            onClick={() => changePreviewScale(1)}
-          >
-            <IconZoomReset size={16} />
-          </ActionIcon>
-        </div>
+        <PreviewZoomControls
+          zoomPercent={zoomPercent}
+          canZoomIn={canZoomIn}
+          canZoomOut={canZoomOut}
+          onZoomOut={() => zoomPreview(-PREVIEW_SCALE_STEP)}
+          onZoomIn={() => zoomPreview(PREVIEW_SCALE_STEP)}
+          onReset={() => changePreviewScale(1)}
+        />
         <div
           id="preview-scroll"
           onScroll={updateRulerOrigin}

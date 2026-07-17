@@ -7,6 +7,7 @@ import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { LayoutSettingsPanel } from "../src/components/editor/LayoutSettingsPanel";
 import { LinkedSizeInputs } from "../src/components/editor/LinkedSizeInputs";
+import { PreviewZoomControls } from "../src/components/editor/PreviewZoomControls";
 import { ButtonLayer } from "../src/components/gamepad/ButtonLayer";
 import { GamepadView } from "../src/components/GamepadView";
 import { createDefaultLayout } from "../src/layout";
@@ -145,4 +146,28 @@ test("control-clicking the stick center requests selection toggle", () => {
   fireEvent.click(handle, { ctrlKey: true });
 
   assert.deepEqual(clicks, [{ index: 0, toggle: true }]);
+});
+
+test("zoom percentage resets zoom without a separate reset button", async () => {
+  const changes: number[] = [];
+  const view = renderComponent(
+    <PreviewZoomControls
+      zoomPercent={140}
+      canZoomIn={true}
+      canZoomOut={true}
+      onZoomIn={() => {}}
+      onZoomOut={() => {}}
+      onReset={() => changes.push(1)}
+    />,
+  );
+  const controls = within(view.container);
+  const user = userEvent.setup({ document: componentDocument });
+
+  assert.equal(controls.getAllByRole("button").length, 3);
+  await user.click(controls.getByRole("button", { name: "resetZoom" }));
+  assert.deepEqual(changes, [1]);
+  assert.equal(
+    controls.getByRole("button", { name: "resetZoom" }).textContent,
+    "140%",
+  );
 });
