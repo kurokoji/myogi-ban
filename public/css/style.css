@@ -35,59 +35,11 @@ body {
 }
 
 .stick-area {
-  background-image: url("../layout/preset/stick-back.png");
-  background-size: 150px 150px;
-  width: 250px;
-  height: 250px;
   position: absolute;
   transform: translate(-50%, -50%);
 }
 
-[class="stick"] {
-  background-image: url("../layout/preset/stick-center.png");
-  background-size: 100% 100%;
-  width: 150px;
-  height: 150px;
-  left: calc(50% - 75px);
-  top: calc(50% - 75px);
-}
-
-.stick:not([class="stick"]) {
-  background-image: url("../layout/preset/stick-up.png");
-  background-size: 100% 100%;
-  width: 150px;
-  height: 150px;
-  left: calc(50% - 75px);
-  top: calc(50% - 75px);
-}
-
-.stick.stick-up {
-  transform: rotate(0deg);
-}
-.stick.stick-down {
-  transform: rotate(180deg);
-}
-.stick.stick-left {
-  transform: rotate(270deg);
-}
-.stick.stick-right {
-  transform: rotate(90deg);
-}
-.stick.stick-up.stick-left {
-  transform: rotate(315deg);
-}
-.stick.stick-up.stick-right {
-  transform: rotate(45deg);
-}
-.stick.stick-down.stick-left {
-  transform: rotate(225deg);
-}
-.stick.stick-down.stick-right {
-  transform: rotate(135deg);
-}
-
 .stick {
-  background-size: 100% 100%;
   position: absolute;
 }
 
