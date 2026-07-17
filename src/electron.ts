@@ -2,11 +2,13 @@ import { app, BrowserWindow } from "electron";
 import * as fs from "fs";
 import type * as http from "http";
 import * as path from "path";
+import { resolveElectronDataDir } from "./data-paths";
 import { createLocalServer } from "./local-server";
 import { PORT } from "./types";
 
 let mainWindow: BrowserWindow | null = null;
 let server: http.Server | null = null;
+let dataDir = "";
 
 function createWindow(): void {
   mainWindow = new BrowserWindow({
@@ -26,17 +28,19 @@ function createWindow(): void {
 }
 
 function startServer(): void {
-  const userDataDir = process.argv.includes("--dev")
-    ? path.join(__dirname, "..", ".dev-data")
-    : app.getPath("userData");
+  dataDir = resolveElectronDataDir(
+    process.argv.includes("--dev"),
+    path.join(__dirname, ".."),
+    app.getPath("userData"),
+  );
 
   server = createLocalServer({
     port: PORT,
     publicDir: path.join(__dirname, "..", "public"),
     builtinLayoutDir: path.join(__dirname, "..", "public", "layout"),
-    userLayoutDir: path.join(userDataDir, "user-layouts"),
-    defaultLayoutFile: path.join(userDataDir, "default-layout.json"),
-    pidFile: path.join(userDataDir, "server.pid"),
+    userLayoutDir: path.join(dataDir, "user-layouts"),
+    defaultLayoutFile: path.join(dataDir, "default-layout.json"),
+    pidFile: path.join(dataDir, "server.pid"),
     onListening: createWindow,
   });
 }
@@ -52,10 +56,7 @@ app.whenReady().then(() => {
 app.on("window-all-closed", () => {
   if (server) server.close();
 
-  const userDataDir = process.argv.includes("--dev")
-    ? path.join(__dirname, "..", ".dev-data")
-    : app.getPath("userData");
-  const pidFile = path.join(userDataDir, "server.pid");
+  const pidFile = path.join(dataDir, "server.pid");
   if (fs.existsSync(pidFile)) fs.unlinkSync(pidFile);
 
   if (process.platform !== "darwin") app.quit();
