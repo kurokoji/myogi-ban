@@ -22,6 +22,7 @@ import {
   type StickMapping,
 } from "../gamepad";
 import { ensureLayoutDefaults } from "../layout";
+import { isLayoutNameTaken } from "../layout-name";
 import type { Layout, LayoutEntry, OperationStatus } from "../types";
 
 interface UseEditorLayoutsOptions {
@@ -212,12 +213,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
   const saveLayoutAs = async (name: string) => {
     const trimmedName = name.trim();
     if (!trimmedName) return false;
-    const normalizedName = trimmedName.toLocaleLowerCase();
-    if (
-      layoutNames.some(
-        (entry) => entry.name.trim().toLocaleLowerCase() === normalizedName,
-      )
-    ) {
+    if (isLayoutNameTaken(trimmedName, layoutNames)) {
       setStatus({ kind: "error", message: messages.layoutNameExists });
       return false;
     }

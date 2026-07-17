@@ -10,6 +10,7 @@ import {
 } from "@mantine/core";
 import { type ChangeEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { isLayoutNameTaken, normalizeLayoutName } from "../../layout-name";
 import type { LayoutEntry, OperationStatus } from "../../types";
 
 interface LayoutSettingsPanelProps {
@@ -34,10 +35,8 @@ export function LayoutSettingsPanel(
   const { t } = useTranslation();
   const [showSaveAs, setShowSaveAs] = useState(false);
   const [saveAsName, setSaveAsName] = useState("");
-  const normalizedSaveAsName = saveAsName.trim().toLocaleLowerCase();
-  const saveAsNameExists = props.layoutNames.some(
-    (entry) => entry.name.trim().toLocaleLowerCase() === normalizedSaveAsName,
-  );
+  const normalizedSaveAsName = normalizeLayoutName(saveAsName);
+  const saveAsNameExists = isLayoutNameTaken(saveAsName, props.layoutNames);
 
   const openSaveAs = () => {
     setSaveAsName(

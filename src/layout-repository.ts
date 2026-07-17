@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import { isLayoutNameTaken } from "./layout-name";
 import type { Layout, LayoutEntry } from "./types";
 
 export interface LayoutRepositoryOptions {
@@ -55,11 +56,7 @@ export class LayoutRepository {
   }
 
   has(name: string): boolean {
-    const normalizedName = name.trim().toLocaleLowerCase();
-    if (!normalizedName) return false;
-    return this.list().some(
-      (entry) => entry.name.trim().toLocaleLowerCase() === normalizedName,
-    );
+    return isLayoutNameTaken(name, this.list());
   }
 
   private copyAssets(
