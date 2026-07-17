@@ -69,6 +69,19 @@ test("updateSelectedButtonSettings creates missing selected button settings", ()
   assert.equal(layout.buttons[1].y, "");
 });
 
+test("updateSelectedButtonSettings does nothing when no buttons are selected", () => {
+  const layout = createDefaultLayout();
+  const before = JSON.stringify(layout);
+  let updaterCalled = false;
+
+  updateSelectedButtonSettings(layout, [], () => {
+    updaterCalled = true;
+  });
+
+  assert.equal(updaterCalled, false);
+  assert.equal(JSON.stringify(layout), before);
+});
+
 test("cloneLayout creates independent nested collections", () => {
   const original = createDefaultLayout();
   const cloned = cloneLayout(original);
