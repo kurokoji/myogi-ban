@@ -221,6 +221,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     [selectedButtonIndexes],
   );
   const dragMovedRef = useRef(false);
+  const areaRef = useRef<HTMLDivElement | null>(null);
   const [dragState, setDragState] = useState<DragState | null>(null);
 
   const buttonRects = useMemo(
@@ -320,7 +321,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     ) => {
       if (!editorMode) return;
       e.stopPropagation();
-      const area = document.getElementById("gamepad-area");
+      const area = areaRef.current;
       if (!area) return;
       const local = pointerToLocal(e, area, backgroundSize);
       dragMovedRef.current = false;
@@ -357,7 +358,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     (event: React.MouseEvent<HTMLDivElement>) => {
       if (!editorMode || event.button !== 0) return;
       event.stopPropagation();
-      const area = document.getElementById("gamepad-area");
+      const area = areaRef.current;
       if (!area) return;
       const local = pointerToLocal(event, area, backgroundSize);
       dragMovedRef.current = false;
@@ -375,7 +376,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
         dragMovedRef.current = false;
         return;
       }
-      const area = document.getElementById("gamepad-area");
+      const area = areaRef.current;
       if (!area) return;
       const local = pointerToLocal(event, area, backgroundSize);
       const button = [...buttonRects]
@@ -448,7 +449,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
         )
       )
         return;
-      const area = document.getElementById("gamepad-area");
+      const area = areaRef.current;
       if (!area) return;
       const local = pointerToLocal(event, area, backgroundSize);
       dragMovedRef.current = false;
@@ -480,7 +481,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
 
     const handleMouseMove = (e: MouseEvent) => {
       if (dragState.type === "selection") {
-        const area = document.getElementById("gamepad-area");
+        const area = areaRef.current;
         if (!area) return;
         const local = pointerToLocal(e, area, backgroundSize);
         if (
@@ -497,7 +498,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
         return;
       }
 
-      const area = document.getElementById("gamepad-area");
+      const area = areaRef.current;
       if (!area) return;
       const local = pointerToLocal(e, area, backgroundSize);
       const deltaX = local.x - dragState.startX;
@@ -610,6 +611,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
   return (
     <div id="gamepad0" className="gamepad-background">
       <div
+        ref={areaRef}
         id="gamepad-area"
         className="gamepad-area"
         style={{ width: backgroundSize.width, height: backgroundSize.height }}
