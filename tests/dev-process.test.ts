@@ -18,3 +18,25 @@ test("restartable process stops the old child before spawning a replacement", as
   await controller.restart();
   assert.equal(children.length, 2);
 });
+
+test("restartable process reports unexpected exits but not intentional stops", async () => {
+  const exits: Array<[number | null, string | null]> = [];
+  let child: EventEmitter & { kill: (signal?: string) => void };
+  const controller = createRestartableProcess(
+    () => {
+      child = Object.assign(new EventEmitter(), {
+        kill(signal = "SIGTERM") {
+          child.emit("exit", null, signal);
+        },
+      });
+      return child;
+    },
+    { onUnexpectedExit: (code, signal) => exits.push([code, signal]) },
+  );
+  const first = controller.start();
+  first.emit("exit", 2, null);
+  assert.deepEqual(exits, [[2, null]]);
+  controller.start();
+  await controller.stop();
+  assert.deepEqual(exits, [[2, null]]);
+});

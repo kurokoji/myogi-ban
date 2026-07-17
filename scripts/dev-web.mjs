@@ -50,15 +50,33 @@ const server = await context({
 await Promise.all([editor.rebuild(), viewer.rebuild(), server.rebuild()]);
 await Promise.all([editor.watch(), viewer.watch(), server.watch()]);
 
-serverProcess = createRestartableProcess(() =>
-  spawn(process.execPath, ["dist/server.js"], {
-    stdio: "inherit",
-    env: { ...process.env, MYOGI_BAN_DATA_DIR: ".dev-data" },
-  }),
+serverProcess = createRestartableProcess(
+  () =>
+    spawn(process.execPath, ["dist/server.js"], {
+      stdio: "inherit",
+      env: { ...process.env, MYOGI_BAN_DATA_DIR: ".dev-data" },
+    }),
+  {
+    onUnexpectedExit(code, signal) {
+      console.error(
+        `Development server exited unexpectedly (${code ?? signal})`,
+      );
+      void Promise.all([
+        editor.dispose(),
+        viewer.dispose(),
+        server.dispose(),
+      ]).then(() => {
+        process.exitCode = code ?? 1;
+      });
+    },
+  },
 );
 serverProcess.start();
 
+let shuttingDown = false;
 async function shutdown() {
+  if (shuttingDown) return;
+  shuttingDown = true;
   await serverProcess.stop();
   await Promise.all([editor.dispose(), viewer.dispose(), server.dispose()]);
 }

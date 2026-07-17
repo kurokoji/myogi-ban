@@ -57,7 +57,7 @@
 - [x] R040 Electronの開発・製品データ保存先決定を共通関数へ分離する
 - [x] R041 Electronのサーバー終了とPID削除を単一cleanupへ集約する
 - [x] R042 開発監視スクリプトでサーバー変更時の再起動を扱う
-- [ ] R043 開発監視スクリプトの子プロセス異常終了とシグナル処理をテストする
+- [x] R043 開発監視スクリプトの子プロセス異常終了とシグナル処理をテストする
 - [ ] R044 ViewerのAPI取得失敗・WebSocket切断・再接続状態を整理する
 - [ ] R045 `document.getElementById` によるプレビュー参照をReact refへ統一する
 - [ ] R046 `selectedButtonIndex` と `selectedButtonIndexes` を単一の選択モデルへ統合する
