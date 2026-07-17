@@ -1,11 +1,11 @@
 import { useCallback, useMemo, useState } from "react";
-import { createSignedRulerTicks } from "../editor-helpers";
 import {
   clampPreviewScale,
   MAX_PREVIEW_SCALE,
   MIN_PREVIEW_SCALE,
   zoomPreviewScale,
 } from "../preview-viewport";
+import { createSignedRulerTicks } from "../ruler-ticks";
 import type { BackgroundConfig } from "../types";
 
 const RULER_EXTRA_LENGTH = 1000;

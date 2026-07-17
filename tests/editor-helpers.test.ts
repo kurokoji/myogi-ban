@@ -2,10 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   cloneLayout,
-  createSignedRulerTicks,
   updateSelectedButtonSettings,
 } from "../src/editor-helpers";
 import { createDefaultLayout } from "../src/layout";
+import { createSignedRulerTicks } from "../src/ruler-ticks";
 
 test("createSignedRulerTicks creates symmetric ticks including zero", () => {
   assert.deepEqual(createSignedRulerTicks(25, 10), [-20, -10, 0, 10, 20]);
