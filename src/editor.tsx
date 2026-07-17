@@ -20,6 +20,7 @@ import {
   StickSettingsPanel,
 } from "./components/editor/SettingsPanels";
 import { GamepadView } from "./components/GamepadView";
+import { addEditorButton, deleteEditorButtons } from "./editor-buttons";
 import {
   cloneLayout,
   createEmptyButtonLayout,
@@ -30,7 +31,6 @@ import {
   type ButtonMapping,
   GamepadManager,
   type StickMapping,
-  UNASSIGNED_MAPPING,
 } from "./gamepad";
 import { useEditorGamepad } from "./hooks/useEditorGamepad";
 import { useEditorGuides } from "./hooks/useEditorGuides";
@@ -271,49 +271,31 @@ function EditorApp(): React.ReactElement {
   );
 
   const addButton = useCallback(() => {
-    if (layout.totalbuttonshow >= 48) return;
-    const newIndex = layout.totalbuttonshow;
-    updateLayout((next) => {
-      next.buttons.splice(newIndex, 0, createEmptyButtonLayout());
-      if (next.buttons.length > 48) next.buttons.pop();
-      next.totalbuttonshow += 1;
-    });
-    setButtonMappings((current) => {
-      const next = [...current];
-      next.splice(newIndex, 0, UNASSIGNED_MAPPING);
-      if (next.length > 48) next.pop();
-      return next;
-    });
+    const result = addEditorButton(layout, buttonMappings);
+    if (!result) return;
+    updateLayout((next) => Object.assign(next, result.layout));
+    setButtonMappings(result.mapping);
+    const newIndex = result.index;
     setSelectedButtonIndexes([newIndex]);
     setSelectedButtonIndex(newIndex);
     setSelectedStick(false);
     cancelAssignment();
-  }, [cancelAssignment, layout.totalbuttonshow, updateLayout]);
+  }, [buttonMappings, cancelAssignment, layout, updateLayout]);
 
   const deleteSelectedButtons = useCallback(() => {
-    const indexes = [...selectedButtonIndexes]
-      .filter((index) => index < layout.totalbuttonshow)
-      .sort((a, b) => b - a);
-    if (indexes.length === 0) return;
-    updateLayout((next) => {
-      for (const index of indexes) {
-        next.buttons.splice(index, 1);
-        next.buttons.push(createEmptyButtonLayout());
-      }
-      next.totalbuttonshow = Math.max(0, next.totalbuttonshow - indexes.length);
-    });
-    setButtonMappings((current) => {
-      const next = [...current];
-      for (const index of indexes) {
-        next.splice(index, 1);
-        next.push(UNASSIGNED_MAPPING);
-      }
-      return next;
-    });
+    const result = deleteEditorButtons(
+      layout,
+      buttonMappings,
+      selectedButtonIndexes,
+    );
+    if (result.layout.totalbuttonshow === layout.totalbuttonshow) return;
+    updateLayout((next) => Object.assign(next, result.layout));
+    setButtonMappings(result.mapping);
     clearSelection();
   }, [
     clearSelection,
-    layout.totalbuttonshow,
+    buttonMappings,
+    layout,
     selectedButtonIndexes,
     updateLayout,
   ]);
