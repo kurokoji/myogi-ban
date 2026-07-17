@@ -30,6 +30,19 @@ test("updateSelectedButtonSettings applies changed settings to every selected bu
   assert.equal(layout.buttons[1].cssShape, "rounded");
 });
 
+test("updateSelectedButtonSettings preserves settings that were not changed", () => {
+  const layout = createDefaultLayout();
+  layout.buttons[0].w = "40";
+  layout.buttons[1].w = "80";
+
+  updateSelectedButtonSettings(layout, [0, 1], (next) => {
+    next.buttons[0].cssColor = "#abcdef";
+  });
+
+  assert.equal(layout.buttons[0].w, "40");
+  assert.equal(layout.buttons[1].w, "80");
+});
+
 test("cloneLayout creates independent nested collections", () => {
   const original = createDefaultLayout();
   const cloned = cloneLayout(original);
