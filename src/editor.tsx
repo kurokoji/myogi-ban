@@ -38,6 +38,7 @@ import {
   createButtonSelection,
   EMPTY_EDITOR_SELECTION,
   normalizeEditorSelection,
+  resolveInspectorTarget,
   toggleButtonInSelection,
 } from "./editor-selection";
 import {
@@ -72,6 +73,7 @@ function EditorApp(): React.ReactElement {
   const selectedButtonIndex = selection.primaryButtonIndex;
   const selectedButtonIndexes = selection.buttonIndexes;
   const selectedStick = selection.stick;
+  const inspectorTarget = resolveInspectorTarget(selection);
   const [language, setLanguage] = useState(i18n.language);
   const [copiedObsUrl, setCopiedObsUrl] = useState(false);
   const layoutRef = useRef(layout);
@@ -429,47 +431,38 @@ function EditorApp(): React.ReactElement {
               ),
             },
             {
-              value: "background",
-              label: t("background"),
-              content: (
-                <BackgroundSettingsPanel
-                  layout={layout}
-                  fileInputRef={fileInputRef}
-                  updateLayout={updateLayout}
-                  uploadImage={uploadImage}
-                  openImagePicker={openImagePicker}
-                />
-              ),
-            },
-            {
-              value: "stick",
-              label: t("stick"),
-              content: (
-                <StickSettingsPanel
-                  layout={layout}
-                  updateLayout={updateLayout}
-                />
-              ),
-            },
-            {
-              value: "buttons",
-              label: t("buttons"),
-              content: (
-                <ButtonSettingsPanel
-                  layout={layout}
-                  assigningTarget={assigningTarget}
-                  assignmentName={assignmentName}
-                  selectedButtonIndex={selectedButtonIndex}
-                  selectedButtonIndexes={selectedButtonIndexes}
-                  updateLayout={updateLayout}
-                  updateSelectedButtons={updateSelectedButtons}
-                  onAddButton={addButton}
-                  onDeleteSelectedButtons={deleteSelectedButtons}
-                  onSelectedButtonChange={selectButtonForSettings}
-                  openImagePicker={openImagePicker}
-                  cancelAssignment={cancelAssignment}
-                />
-              ),
+              value: "properties",
+              label: t(inspectorTarget),
+              content:
+                inspectorTarget === "background" ? (
+                  <BackgroundSettingsPanel
+                    layout={layout}
+                    fileInputRef={fileInputRef}
+                    updateLayout={updateLayout}
+                    uploadImage={uploadImage}
+                    openImagePicker={openImagePicker}
+                  />
+                ) : inspectorTarget === "stick" ? (
+                  <StickSettingsPanel
+                    layout={layout}
+                    updateLayout={updateLayout}
+                  />
+                ) : (
+                  <ButtonSettingsPanel
+                    layout={layout}
+                    assigningTarget={assigningTarget}
+                    assignmentName={assignmentName}
+                    selectedButtonIndex={selectedButtonIndex}
+                    selectedButtonIndexes={selectedButtonIndexes}
+                    updateLayout={updateLayout}
+                    updateSelectedButtons={updateSelectedButtons}
+                    onAddButton={addButton}
+                    onDeleteSelectedButtons={deleteSelectedButtons}
+                    onSelectedButtonChange={selectButtonForSettings}
+                    openImagePicker={openImagePicker}
+                    cancelAssignment={cancelAssignment}
+                  />
+                ),
             },
             {
               value: "gamepad",

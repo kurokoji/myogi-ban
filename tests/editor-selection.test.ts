@@ -4,6 +4,7 @@ import {
   createButtonSelection,
   EMPTY_EDITOR_SELECTION,
   normalizeEditorSelection,
+  resolveInspectorTarget,
   toggleButtonInSelection,
   toggleSelectedIndex,
 } from "../src/editor-selection";
@@ -34,4 +35,29 @@ test("normalizeEditorSelection removes indexes outside the visible buttons", () 
     primaryIndex: null,
     cancelAssignment: true,
   });
+});
+
+test("inspector shows background settings when nothing is selected", () => {
+  assert.equal(resolveInspectorTarget(EMPTY_EDITOR_SELECTION), "background");
+});
+
+test("inspector shows stick settings when the stick is selected", () => {
+  assert.equal(
+    resolveInspectorTarget({
+      ...EMPTY_EDITOR_SELECTION,
+      stick: true,
+    }),
+    "stick",
+  );
+});
+
+test("inspector gives button settings priority when buttons are selected", () => {
+  assert.equal(
+    resolveInspectorTarget({
+      buttonIndexes: [2, 3],
+      primaryButtonIndex: 2,
+      stick: true,
+    }),
+    "buttons",
+  );
 });

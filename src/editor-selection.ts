@@ -13,6 +13,15 @@ export interface EditorSelection {
   stick: boolean;
 }
 
+export type InspectorTarget = "background" | "stick" | "buttons";
+
+export function resolveInspectorTarget(
+  selection: EditorSelection,
+): InspectorTarget {
+  if (selection.buttonIndexes.length > 0) return "buttons";
+  return selection.stick ? "stick" : "background";
+}
+
 export const EMPTY_EDITOR_SELECTION: EditorSelection = {
   buttonIndexes: [],
   primaryButtonIndex: null,
