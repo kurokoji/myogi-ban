@@ -79,6 +79,7 @@ function ViewerApp(): React.ReactElement {
     return () => {
       window.clearInterval(pollTimer);
       window.cancelAnimationFrame(frame);
+      manager.dispose();
     };
   }, [buttonMappingsRef, layoutRef, stickMappingsRef]);
 

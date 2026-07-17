@@ -153,6 +153,7 @@ export function useEditorGamepad(options: UseEditorGamepadOptions) {
     return () => {
       window.clearInterval(pollTimer);
       window.cancelAnimationFrame(frame);
+      manager.dispose();
     };
   }, [
     api,

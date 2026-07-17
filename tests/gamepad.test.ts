@@ -1,6 +1,30 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { toggleMappingAssignment, UNASSIGNED_MAPPING } from "../src/gamepad";
+import {
+  GamepadManager,
+  toggleMappingAssignment,
+  UNASSIGNED_MAPPING,
+} from "../src/gamepad";
+
+test("GamepadManager dispose removes its gamepad event listeners", () => {
+  const listeners = new Map<string, Set<EventListener>>();
+  const fakeWindow = {
+    addEventListener(type: string, listener: EventListener) {
+      const entries = listeners.get(type) ?? new Set<EventListener>();
+      entries.add(listener);
+      listeners.set(type, entries);
+    },
+    removeEventListener(type: string, listener: EventListener) {
+      listeners.get(type)?.delete(listener);
+    },
+  };
+  Object.assign(globalThis, { window: fakeWindow });
+  const manager = new GamepadManager();
+  assert.equal(listeners.get("gamepadconnected")?.size, 1);
+  manager.dispose();
+  assert.equal(listeners.get("gamepadconnected")?.size, 0);
+  assert.equal(listeners.get("gamepaddisconnected")?.size, 0);
+});
 
 test("toggleMappingAssignment removes an input assigned to the same target", () => {
   const result = toggleMappingAssignment(

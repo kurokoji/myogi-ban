@@ -37,27 +37,35 @@ export class GamepadManager {
   private axesCenter: number[] = [];
   private onConnectCallback: ((gamepad: Gamepad) => void) | null = null;
   private onDisconnectCallback: (() => void) | null = null;
+  private readonly handleConnected = (event: GamepadEvent): void => {
+    if (this.activeGamepadIndex === -1) {
+      this.activeGamepadIndex = event.gamepad.index;
+      this.axesCenter = [...event.gamepad.axes];
+      this.onConnectCallback?.(event.gamepad);
+    }
+  };
+  private readonly handleDisconnected = (event: GamepadEvent): void => {
+    if (event.gamepad.index === this.activeGamepadIndex) {
+      this.activeGamepadIndex = -1;
+      this.axesCenter = [];
+      this.onDisconnectCallback?.();
+    }
+  };
 
   constructor() {
     this.setupEventListeners();
   }
 
   private setupEventListeners(): void {
-    window.addEventListener("gamepadconnected", (e) => {
-      if (this.activeGamepadIndex === -1) {
-        this.activeGamepadIndex = e.gamepad.index;
-        this.axesCenter = [...e.gamepad.axes];
-        this.onConnectCallback?.(e.gamepad);
-      }
-    });
+    window.addEventListener("gamepadconnected", this.handleConnected);
+    window.addEventListener("gamepaddisconnected", this.handleDisconnected);
+  }
 
-    window.addEventListener("gamepaddisconnected", (e) => {
-      if (e.gamepad.index === this.activeGamepadIndex) {
-        this.activeGamepadIndex = -1;
-        this.axesCenter = [];
-        this.onDisconnectCallback?.();
-      }
-    });
+  dispose(): void {
+    window.removeEventListener("gamepadconnected", this.handleConnected);
+    window.removeEventListener("gamepaddisconnected", this.handleDisconnected);
+    this.onConnectCallback = null;
+    this.onDisconnectCallback = null;
   }
 
   onConnect(callback: (gamepad: Gamepad) => void): void {
