@@ -1,6 +1,6 @@
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { type Rect, rectsIntersect } from "../geometry";
+import { dragPosition, type Rect, rectsIntersect } from "../geometry";
 import { type ButtonShape, type Layout, STICK_NAMES } from "../types";
 
 const STICK_SELECTION_SIZE = 96;
@@ -531,13 +531,16 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
         return;
       }
 
-      const newX = Math.round(dragState.initialX + deltaX);
-      const newY = Math.round(dragState.initialY + deltaY);
+      const position = dragPosition(
+        { x: dragState.initialX, y: dragState.initialY },
+        { x: dragState.startX, y: dragState.startY },
+        local,
+      );
 
       if (dragState.type === "button") {
-        onButtonPositionChange?.(dragState.index, newX, newY);
+        onButtonPositionChange?.(dragState.index, position.x, position.y);
       } else if (dragState.type === "stick") {
-        onStickPositionChange?.(newX, newY);
+        onStickPositionChange?.(position.x, position.y);
       }
     };
 

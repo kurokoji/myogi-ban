@@ -5,6 +5,22 @@ export interface Rect {
   bottom: number;
 }
 
+export interface Point {
+  x: number;
+  y: number;
+}
+
+export function dragPosition(
+  initial: Point,
+  start: Point,
+  current: Point,
+): Point {
+  return {
+    x: Math.round(initial.x + current.x - start.x),
+    y: Math.round(initial.y + current.y - start.y),
+  };
+}
+
 export function rectsIntersect(a: Rect, b: Rect): boolean {
   return (
     a.left <= b.right &&

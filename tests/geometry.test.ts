@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { rectsIntersect } from "../src/geometry";
+import { dragPosition, rectsIntersect } from "../src/geometry";
 
 test("rectsIntersect detects overlap and touching edges", () => {
   const rect = { left: 0, top: 0, right: 10, bottom: 10 };
@@ -19,5 +19,12 @@ test("rectsIntersect rejects separated rectangles", () => {
   assert.equal(
     rectsIntersect(rect, { left: 11, top: 0, right: 20, bottom: 10 }),
     false,
+  );
+});
+
+test("dragPosition applies pointer delta and rounds coordinates", () => {
+  assert.deepEqual(
+    dragPosition({ x: 100, y: 50 }, { x: 10, y: 20 }, { x: 15.4, y: 17.6 }),
+    { x: 105, y: 48 },
   );
 });
