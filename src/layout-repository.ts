@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { resolveAvailableAssetName } from "./image-asset";
+import { resolveAvailableAssetName, validateImageUpload } from "./image-asset";
 import { assertValidLayoutName, isLayoutNameTaken } from "./layout-name";
 import type { Layout, LayoutEntry } from "./types";
 
@@ -163,6 +163,7 @@ export class LayoutRepository {
 
   uploadImage(data: string, layoutName: string, fileName: string): string {
     assertValidLayoutName(layoutName);
+    validateImageUpload({ data, fileName });
     const layoutDir = path.join(this.options.userLayoutDir, layoutName);
     ensureDir(layoutDir);
     const safeFileName = resolveAvailableAssetName(

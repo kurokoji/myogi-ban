@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { resolveAvailableAssetName } from "../src/image-asset";
+import {
+  resolveAvailableAssetName,
+  validateImageUpload,
+} from "../src/image-asset";
 
 test("resolveAvailableAssetName preserves unused names and suffixes collisions", () => {
   assert.equal(
@@ -17,5 +20,30 @@ test("resolveAvailableAssetName preserves unused names and suffixes collisions",
       new Set(["button.png", "button-2.png"]),
     ),
     "button-3.png",
+  );
+});
+
+test("validateImageUpload accepts supported images and rejects unsafe input", () => {
+  assert.doesNotThrow(() =>
+    validateImageUpload({
+      data: "data:image/png;base64,AA==",
+      fileName: "button.png",
+    }),
+  );
+  assert.throws(
+    () =>
+      validateImageUpload({
+        data: "data:text/html;base64,AA==",
+        fileName: "button.png",
+      }),
+    /Invalid image upload/,
+  );
+  assert.throws(
+    () =>
+      validateImageUpload({
+        data: "data:image/png;base64,AA==",
+        fileName: "../button.png",
+      }),
+    /Invalid image upload/,
   );
 });

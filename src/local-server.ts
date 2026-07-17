@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as http from "http";
 import * as path from "path";
 import WebSocket from "ws";
+import { ImageUploadValidationError } from "./image-asset";
 import { CorruptLayoutError, LayoutRepository } from "./layout-repository";
 import type { GamepadState, Layout } from "./types";
 
@@ -97,12 +98,20 @@ export function createLocalServer(options: LocalServerOptions): http.Server {
 
   expressApp.post("/api/upload-image", (req, res) => {
     const { data, layoutName, fileName } = req.body;
-    const safeFileName = layouts.uploadImage(
-      data,
-      layoutName || "custom",
-      fileName,
-    );
-    res.json({ ok: true, fileName: safeFileName });
+    try {
+      const safeFileName = layouts.uploadImage(
+        data,
+        layoutName || "custom",
+        fileName,
+      );
+      res.json({ ok: true, fileName: safeFileName });
+    } catch (error) {
+      if (error instanceof ImageUploadValidationError) {
+        res.status(400).json({ ok: false, error: error.code });
+        return;
+      }
+      throw error;
+    }
   });
 
   expressApp.get("/api/default-layout", (_req, res) => {
