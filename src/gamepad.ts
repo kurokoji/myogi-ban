@@ -1,3 +1,4 @@
+import { decodeAxisMapping, encodeAxisMapping } from "./axis-mapping";
 import { TOTAL_BUTTONS } from "./types";
 
 export type ButtonMapping = number; // 0-51: button index, 1000000+: axis code
@@ -112,18 +113,10 @@ export class GamepadManager {
   }
 
   private isAxisTriggered(code: number, gamepad: Gamepad): boolean {
-    let sign: number;
-
-    if (code >= 2000000) {
-      sign = -1;
-      code -= 2000000;
-    } else {
-      sign = 1;
-      code -= 1000000;
-    }
-
-    const axis = Math.floor(code / 10000);
-    const val = ((code - axis * 10000) * sign) / 100;
+    const mapping = decodeAxisMapping(code);
+    if (!mapping) return false;
+    const { axis, value: val } = mapping;
+    const sign = val < 0 ? -1 : 1;
 
     if (axis >= gamepad.axes.length) return false;
 
@@ -160,9 +153,7 @@ export class GamepadManager {
   }
 
   static axisToCode(axis: number, value: number): number {
-    const sign = value < 0 ? 2000000 : 1000000;
-    const absValue = Math.abs(Math.floor(value * 100));
-    return sign + axis * 10000 + absValue;
+    return encodeAxisMapping({ axis, value });
   }
 
   static createDefaultButtonMappings(): ButtonMapping[] {
