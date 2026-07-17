@@ -1,6 +1,7 @@
 import {
   Button,
   Group,
+  Menu,
   NativeSelect,
   Paper,
   Stack,
@@ -8,6 +9,13 @@ import {
   TextInput,
   Title,
 } from "@mantine/core";
+import {
+  IconChevronDown,
+  IconDownload,
+  IconStar,
+  IconTrash,
+  IconUpload,
+} from "@tabler/icons-react";
 import { type ChangeEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isLayoutNameTaken, normalizeLayoutName } from "../../layout-name";
@@ -133,39 +141,54 @@ export function LayoutSettingsPanel(
             </Group>
           </Stack>
         )}
-        <Button size="xs" fullWidth onClick={props.setDefaultLayout}>
-          {t("setDefault")}
-        </Button>
-        <Button
-          size="xs"
-          variant="light"
-          color="red"
-          fullWidth
-          onClick={props.deleteLayout}
-          disabled={props.currentBuiltin}
+        <Menu
+          keepMounted
+          position="bottom-end"
+          transitionProps={{ duration: 0 }}
+          withinPortal={false}
         >
-          {t("deleteLayout")}
-        </Button>
-        <Group gap="xs" align="end" wrap="nowrap">
-          <Button
-            size="xs"
-            variant="light"
-            fullWidth
-            onClick={props.exportLayout}
-          >
-            {t("export")}
-          </Button>
-          <Button
-            size="xs"
-            variant="light"
-            fullWidth
-            onClick={() =>
-              document.getElementById("import-layout-input")?.click()
-            }
-          >
-            {t("import")}
-          </Button>
-        </Group>
+          <Menu.Target>
+            <Button
+              size="xs"
+              variant="default"
+              fullWidth
+              rightSection={<IconChevronDown size={14} />}
+            >
+              {t("moreActions")}
+            </Button>
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Item
+              leftSection={<IconStar size={16} />}
+              onClick={props.setDefaultLayout}
+            >
+              {t("setDefault")}
+            </Menu.Item>
+            <Menu.Item
+              leftSection={<IconDownload size={16} />}
+              onClick={props.exportLayout}
+            >
+              {t("export")}
+            </Menu.Item>
+            <Menu.Item
+              leftSection={<IconUpload size={16} />}
+              onClick={() =>
+                document.getElementById("import-layout-input")?.click()
+              }
+            >
+              {t("import")}
+            </Menu.Item>
+            <Menu.Divider />
+            <Menu.Item
+              color="red"
+              leftSection={<IconTrash size={16} />}
+              onClick={props.deleteLayout}
+              disabled={props.currentBuiltin}
+            >
+              {t("deleteLayout")}
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
         <input
           id="import-layout-input"
           type="file"

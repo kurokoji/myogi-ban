@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { componentDocument, renderComponent } from "./component-render";
-import { fireEvent } from "@testing-library/react";
+import { fireEvent, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { LayoutSettingsPanel } from "../src/components/editor/LayoutSettingsPanel";
@@ -47,6 +47,39 @@ test("duplicate layout names disable save-as before submitting", async () => {
     true,
   );
   assert.equal(saveCalls, 0);
+});
+
+test("layout panel keeps secondary actions in a more menu", async () => {
+  const view = renderComponent(
+    <LayoutSettingsPanel
+      layoutNames={[{ name: "custom", builtin: false }]}
+      selectedLayout="custom:user"
+      layoutName="custom"
+      currentBuiltin={false}
+      isDirty={false}
+      status={null}
+      openLayout={() => {}}
+      saveLayout={() => {}}
+      saveLayoutAs={async () => true}
+      deleteLayout={() => {}}
+      setDefaultLayout={() => {}}
+      exportLayout={() => {}}
+      importLayout={() => {}}
+    />,
+  );
+  const user = userEvent.setup({ document: componentDocument });
+  const panel = within(view.container);
+
+  assert.equal(panel.queryByRole("button", { name: "deleteLayout" }), null);
+  const moreButton = panel.getByRole("button", { name: "moreActions" });
+  await user.click(moreButton);
+  assert.equal(moreButton.getAttribute("aria-expanded"), "true");
+  assert.ok(panel.getByRole("menuitem", { name: "setDefault", hidden: true }));
+  assert.ok(panel.getByRole("menuitem", { name: "export", hidden: true }));
+  assert.ok(panel.getByRole("menuitem", { name: "import", hidden: true }));
+  assert.ok(
+    panel.getByRole("menuitem", { name: "deleteLayout", hidden: true }),
+  );
 });
 
 test("linked size inputs update height and can unlink the ratio", async () => {
