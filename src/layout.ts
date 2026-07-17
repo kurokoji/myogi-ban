@@ -1,3 +1,4 @@
+import { CURRENT_LAYOUT_VERSION, migrateLayout } from "./layout-migration";
 import {
   type BackgroundConfig,
   type ButtonLayout,
@@ -79,7 +80,7 @@ export function createDefaultLayout(): Layout {
   }
 
   return {
-    version: "v1.0.6",
+    version: CURRENT_LAYOUT_VERSION,
     name: "default",
     totalbuttonshow: 8,
     showstick: true,
@@ -118,18 +119,12 @@ export function createDefaultLayout(): Layout {
 
 export function ensureLayoutDefaults(layout: Partial<Layout>): Layout {
   const defaults = createDefaultLayout();
-  const incomingBackground = layout.background as
+  const migrated = migrateLayout(layout);
+  const incomingBackground = migrated.background as
     | Partial<BackgroundConfig>
     | undefined;
   const background = { ...defaults.background, ...(incomingBackground || {}) };
-  if (
-    incomingBackground &&
-    !("scale" in incomingBackground) &&
-    (incomingBackground.w || incomingBackground.h)
-  ) {
-    background.scale = "";
-  }
-  const incomingDefaultButtons = layout.defaultbuttons as
+  const incomingDefaultButtons = migrated.defaultbuttons as
     | Partial<ButtonLayout>
     | undefined;
   const defaultbuttons = {
@@ -137,7 +132,7 @@ export function ensureLayoutDefaults(layout: Partial<Layout>): Layout {
     ...(incomingDefaultButtons || {}),
   };
 
-  const buttons = (layout.buttons || defaults.buttons).map((button) => {
+  const buttons = (migrated.buttons || defaults.buttons).map((button) => {
     const b = { ...button };
     if (b.w === defaultbuttons.w) b.w = "";
     if (b.h === defaultbuttons.h) b.h = "";
@@ -150,16 +145,15 @@ export function ensureLayoutDefaults(layout: Partial<Layout>): Layout {
 
   return {
     ...defaults,
-    ...layout,
-    version: defaults.version,
-    stick: { ...defaults.stick, ...(layout.stick || {}) },
+    ...migrated,
+    stick: { ...defaults.stick, ...(migrated.stick || {}) },
     defaultbuttons,
     background,
     buttons,
     guides: {
-      vertical: [...(layout.guides?.vertical || defaults.guides.vertical)],
+      vertical: [...(migrated.guides?.vertical || defaults.guides.vertical)],
       horizontal: [
-        ...(layout.guides?.horizontal || defaults.guides.horizontal),
+        ...(migrated.guides?.horizontal || defaults.guides.horizontal),
       ],
     },
   };
