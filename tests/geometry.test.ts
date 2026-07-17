@@ -4,6 +4,7 @@ import {
   dragGroupPositions,
   dragPosition,
   rectsIntersect,
+  unionRectsAtIndexes,
 } from "../src/geometry";
 
 test("rectsIntersect detects overlap and touching edges", () => {
@@ -48,4 +49,20 @@ test("dragGroupPositions applies one pointer delta to every item", () => {
       { index: 3, x: 33, y: 38 },
     ],
   );
+});
+
+test("unionRectsAtIndexes visits selected rectangles by index", () => {
+  const rects = [
+    { left: 0, top: 0, right: 10, bottom: 10 },
+    { left: 20, top: 20, right: 30, bottom: 30 },
+    { left: -5, top: 5, right: 5, bottom: 15 },
+  ];
+
+  assert.deepEqual(unionRectsAtIndexes(rects, [0, 2, 99]), {
+    left: -5,
+    top: 0,
+    right: 10,
+    bottom: 15,
+  });
+  assert.equal(unionRectsAtIndexes(rects, []), null);
 });

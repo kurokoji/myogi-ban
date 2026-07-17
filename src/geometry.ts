@@ -40,3 +40,23 @@ export function rectsIntersect(a: Rect, b: Rect): boolean {
     a.bottom >= b.top
   );
 }
+
+export function unionRectsAtIndexes(
+  rects: Rect[],
+  indexes: number[],
+): Rect | null {
+  let result: Rect | null = null;
+  for (const index of indexes) {
+    const rect = rects[index];
+    if (!rect) continue;
+    result = result
+      ? {
+          left: Math.min(result.left, rect.left),
+          top: Math.min(result.top, rect.top),
+          right: Math.max(result.right, rect.right),
+          bottom: Math.max(result.bottom, rect.bottom),
+        }
+      : { ...rect };
+  }
+  return result;
+}

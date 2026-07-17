@@ -6,6 +6,7 @@ import {
   dragPosition,
   type Rect,
   rectsIntersect,
+  unionRectsAtIndexes,
 } from "../geometry";
 import type { Layout } from "../types";
 import { ButtonLayer } from "./gamepad/ButtonLayer";
@@ -269,12 +270,14 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
           dragState.currentY,
         )
       : null;
+  const selectedButtonsRect = unionRectsAtIndexes(
+    buttonRects,
+    selectedButtonIndexes,
+  );
   const selectedGroupRect =
     editorMode && !selectionRect
       ? unionRects([
-          ...buttonRects.filter((button) =>
-            selectedButtonSet.has(button.index),
-          ),
+          ...(selectedButtonsRect ? [selectedButtonsRect] : []),
           ...(selectedStick && layout.showstick ? [stickRect] : []),
         ])
       : null;
