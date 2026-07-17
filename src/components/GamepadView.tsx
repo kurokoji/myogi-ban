@@ -1,5 +1,6 @@
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type Rect, rectsIntersect } from "../geometry";
 import { type ButtonShape, type Layout, STICK_NAMES } from "../types";
 
 const STICK_SELECTION_SIZE = 96;
@@ -39,13 +40,6 @@ export interface GamepadViewProps {
   onStickPositionChange?: (x: number, y: number) => void;
 }
 
-interface Rect {
-  left: number;
-  top: number;
-  right: number;
-  bottom: number;
-}
-
 type DragState =
   | {
       type: "button" | "stick";
@@ -78,15 +72,6 @@ function getImageStyle(layout: Layout, fileName: string): React.CSSProperties {
   return fileName
     ? { backgroundImage: `url("${assetUrl(layout, fileName)}")` }
     : {};
-}
-
-function rectsIntersect(a: Rect, b: Rect): boolean {
-  return (
-    a.left <= b.right &&
-    a.right >= b.left &&
-    a.top <= b.bottom &&
-    a.bottom >= b.top
-  );
 }
 
 function rectContainsPoint(rect: Rect, point: { x: number; y: number }) {
