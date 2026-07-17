@@ -13,6 +13,7 @@ import { createDefaultLayout } from "../src/layout";
 import {
   CorruptLayoutError,
   collectLayoutAssets,
+  findAssetSources,
   LayoutRepository,
 } from "../src/layout-repository";
 
@@ -35,6 +36,29 @@ test("collectLayoutAssets returns safe unique image names", () => {
     "pressed.png",
     "button-pressed.png",
   ]);
+});
+
+test("findAssetSources scans directories once and preserves precedence", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "myogi-ban-assets-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const preferred = join(root, "preferred");
+  const fallback = join(root, "fallback");
+  mkdirSync(preferred);
+  mkdirSync(fallback);
+  writeFileSync(join(preferred, "shared.png"), "preferred");
+  writeFileSync(join(fallback, "shared.png"), "fallback");
+  writeFileSync(join(fallback, "fallback.png"), "fallback");
+
+  assert.deepEqual(
+    findAssetSources(
+      [preferred, fallback],
+      new Set(["shared.png", "fallback.png", "missing.png"]),
+    ),
+    new Map([
+      ["shared.png", join(preferred, "shared.png")],
+      ["fallback.png", join(fallback, "fallback.png")],
+    ]),
+  );
 });
 
 test("LayoutRepository deletes user layouts only", (t) => {

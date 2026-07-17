@@ -72,6 +72,23 @@ export function collectLayoutAssets(layout: unknown): string[] {
   return [...assets];
 }
 
+export function findAssetSources(
+  sourceDirs: string[],
+  assetNames: Set<string>,
+): Map<string, string> {
+  const remaining = new Set(assetNames);
+  const sources = new Map<string, string>();
+  for (const sourceDir of sourceDirs) {
+    if (remaining.size === 0) break;
+    for (const entry of fs.readdirSync(sourceDir, { withFileTypes: true })) {
+      if (!entry.isFile() || !remaining.has(entry.name)) continue;
+      sources.set(entry.name, path.join(sourceDir, entry.name));
+      remaining.delete(entry.name);
+    }
+  }
+  return sources;
+}
+
 export class LayoutRepository {
   constructor(private readonly options: LayoutRepositoryOptions) {}
 
@@ -106,16 +123,18 @@ export class LayoutRepository {
       ),
     );
 
-    for (const asset of collectLayoutAssets(layout)) {
+    const missingAssets = new Set(
+      collectLayoutAssets(layout).filter(
+        (asset) => !fs.existsSync(path.join(targetDir, asset)),
+      ),
+    );
+    const assetSources = findAssetSources(
+      [...new Set(sourceDirs)],
+      missingAssets,
+    );
+    for (const [asset, sourcePath] of assetSources) {
       const targetPath = path.join(targetDir, asset);
-      if (fs.existsSync(targetPath)) continue;
-      for (const sourceDir of sourceDirs) {
-        const sourcePath = path.join(sourceDir, asset);
-        if (fs.existsSync(sourcePath)) {
-          fs.copyFileSync(sourcePath, targetPath);
-          break;
-        }
-      }
+      fs.copyFileSync(sourcePath, targetPath);
     }
   }
 
