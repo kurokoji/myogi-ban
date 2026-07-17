@@ -1,15 +1,14 @@
 import { useCallback, useMemo, useState } from "react";
 import { createSignedRulerTicks } from "../editor-helpers";
+import {
+  clampPreviewScale,
+  MAX_PREVIEW_SCALE,
+  MIN_PREVIEW_SCALE,
+  zoomPreviewScale,
+} from "../preview-viewport";
 import type { BackgroundConfig } from "../types";
 
-const MIN_SCALE = 0.1;
-const MAX_SCALE = 3;
 const RULER_EXTRA_LENGTH = 1000;
-
-function clampScale(scale: number): number {
-  const nextScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, scale));
-  return Math.round(nextScale * 10) / 10;
-}
 
 function layoutSize(value: string | undefined, fallback: number): number {
   if (!value) return fallback;
@@ -33,16 +32,16 @@ export function usePreviewViewport(background: BackgroundConfig) {
   );
 
   const changePreviewScale = useCallback((scale: number) => {
-    setPreviewScale(clampScale(scale));
+    setPreviewScale(clampPreviewScale(scale));
   }, []);
 
   const zoomPreview = useCallback((delta: number) => {
-    setPreviewScale((current) => clampScale(current + delta));
+    setPreviewScale((current) => zoomPreviewScale(current, delta));
   }, []);
 
   return {
-    canZoomIn: previewScale < MAX_SCALE,
-    canZoomOut: previewScale > MIN_SCALE,
+    canZoomIn: previewScale < MAX_PREVIEW_SCALE,
+    canZoomOut: previewScale > MIN_PREVIEW_SCALE,
     changePreviewScale,
     previewScale,
     rulerTicks,
