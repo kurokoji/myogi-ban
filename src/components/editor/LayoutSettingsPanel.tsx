@@ -141,6 +141,15 @@ export function LayoutSettingsPanel(
             </Group>
           </Stack>
         )}
+        <Button
+          size="xs"
+          variant="light"
+          fullWidth
+          leftSection={<IconStar size={16} />}
+          onClick={props.setDefaultLayout}
+        >
+          {t("setDefault")}
+        </Button>
         <Menu
           keepMounted
           position="bottom-end"
@@ -158,12 +167,6 @@ export function LayoutSettingsPanel(
             </Button>
           </Menu.Target>
           <Menu.Dropdown>
-            <Menu.Item
-              leftSection={<IconStar size={16} />}
-              onClick={props.setDefaultLayout}
-            >
-              {t("setDefault")}
-            </Menu.Item>
             <Menu.Item
               leftSection={<IconDownload size={16} />}
               onClick={props.exportLayout}
