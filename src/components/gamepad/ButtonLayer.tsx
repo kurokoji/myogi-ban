@@ -1,4 +1,5 @@
 import type React from "react";
+import { type CSSVariableStyle, cssVariables } from "../../style-types";
 import type { ButtonLayout, ButtonShape, Layout } from "../../types";
 
 function buttonRadiusForShape(shape: ButtonShape): string {
@@ -44,7 +45,7 @@ function buttonStyle(
   const cssEasing = button.cssEasing ?? defaultButton.cssEasing ?? "ease";
   const cssShape = button.cssShape ?? defaultButton.cssShape ?? "circle";
   const rotation = button.rotation ?? defaultButton.rotation ?? "0";
-  const style = {
+  const style: CSSVariableStyle = cssVariables({
     left: `${button.x || defaultButton.x || 0}px`,
     top: `${button.y || defaultButton.y || 0}px`,
     width: `${pressed ? pressedWidth || defaultButton.wp || defaultButton.w || "60" : releasedWidth || defaultButton.w || "60"}px`,
@@ -57,7 +58,7 @@ function buttonStyle(
     "--button-radius": buttonRadiusForShape(cssShape),
     "--button-transition": `${cssTransition}s`,
     "--button-easing": cssEasing,
-  } as React.CSSProperties;
+  });
   if (!useCss && useImage) {
     style.backgroundImage = `url("layout/${layout.name}/${useImage}")`;
   }

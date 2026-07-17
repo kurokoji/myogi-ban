@@ -1,4 +1,5 @@
 import type React from "react";
+import { cssVariables } from "../../style-types";
 import type { StickLayout } from "../../types";
 import { STICK_NAMES } from "../../types";
 
@@ -40,12 +41,12 @@ export function StickLayer({
         transform: `translate(-50%,-50%) scale(${scaleX},${scaleY})`,
         display: show ? undefined : "none",
         cursor: editorMode ? "move" : undefined,
-        ...({
+        ...cssVariables({
           "--stick-color": stick.cssColor ?? "#cccccc",
           "--stick-plate-color": stick.cssPlateColor ?? "#888888",
           "--stick-transition": `${stick.cssTransition ?? "0.02"}s`,
           "--stick-easing": stick.cssEasing ?? "ease",
-        } as React.CSSProperties),
+        }),
       }}
     >
       {editorMode && (

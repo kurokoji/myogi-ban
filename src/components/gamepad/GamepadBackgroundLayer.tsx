@@ -1,4 +1,5 @@
 import type React from "react";
+import { cssVariables } from "../../style-types";
 import type { BackgroundConfig } from "../../types";
 
 interface GamepadBackgroundLayerProps {
@@ -25,10 +26,10 @@ export function GamepadBackgroundLayer({
       className={`gamepad-area-background${background.useCss ? " background-css" : ""}`}
       style={{
         ...(background.useCss
-          ? ({
+          ? cssVariables({
               "--bg-color": background.cssColor ?? "#0b0f14",
               "--bg-radius": `${background.cssBorderRadius ?? 0}px`,
-            } as React.CSSProperties)
+            })
           : imageStyle),
         width,
         height,
