@@ -1,10 +1,17 @@
 import assert from "node:assert/strict";
-import { existsSync, mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { createDefaultLayout } from "../src/layout";
 import {
+  CorruptLayoutError,
   collectLayoutAssets,
   LayoutRepository,
 } from "../src/layout-repository";
@@ -95,4 +102,18 @@ test("LayoutRepository rejects invalid layout names at every entry point", (t) =
     /Invalid layout name/,
   );
   assert.equal(existsSync(join(root, "escape")), false);
+});
+
+test("LayoutRepository reports corrupted JSON without replacing it", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const user = join(root, "user");
+  mkdirSync(join(user, "broken"), { recursive: true });
+  writeFileSync(join(user, "broken", "layout.json"), "{");
+  const repository = new LayoutRepository({
+    builtinLayoutDir: join(root, "builtin"),
+    userLayoutDir: user,
+    defaultLayoutFile: join(root, "default.json"),
+  });
+  assert.throws(() => repository.read("broken"), CorruptLayoutError);
 });

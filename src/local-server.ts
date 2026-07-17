@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as http from "http";
 import * as path from "path";
 import WebSocket from "ws";
-import { LayoutRepository } from "./layout-repository";
+import { CorruptLayoutError, LayoutRepository } from "./layout-repository";
 import type { GamepadState, Layout } from "./types";
 
 export interface LocalServerOptions {
@@ -76,7 +76,15 @@ export function createLocalServer(options: LocalServerOptions): http.Server {
   });
 
   expressApp.get("/api/layout/:name", (req, res) => {
-    res.json(layouts.read(req.params.name, req.query.builtin === "true"));
+    try {
+      res.json(layouts.read(req.params.name, req.query.builtin === "true"));
+    } catch (error) {
+      if (error instanceof CorruptLayoutError) {
+        res.status(422).json({ ok: false, error: "invalid_layout_json" });
+        return;
+      }
+      throw error;
+    }
   });
 
   expressApp.delete("/api/layout/:name", (req, res) => {

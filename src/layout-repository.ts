@@ -9,6 +9,26 @@ export interface LayoutRepositoryOptions {
   defaultLayoutFile: string;
 }
 
+export class CorruptLayoutError extends Error {
+  readonly cause: unknown;
+  constructor(
+    readonly filePath: string,
+    cause?: unknown,
+  ) {
+    super(`Corrupted layout JSON: ${filePath}`);
+    this.name = "CorruptLayoutError";
+    this.cause = cause;
+  }
+}
+
+function readJson(filePath: string): unknown {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, "utf8"));
+  } catch (error) {
+    throw new CorruptLayoutError(filePath, error);
+  }
+}
+
 function getLayoutDirs(baseDir: string): string[] {
   if (!fs.existsSync(baseDir)) return [];
   return fs
@@ -112,9 +132,7 @@ export class LayoutRepository {
       : this.findLayoutPath(name);
     if (!layoutPath) return {};
     const jsonPath = path.join(layoutPath, "layout.json");
-    return fs.existsSync(jsonPath)
-      ? JSON.parse(fs.readFileSync(jsonPath, "utf8"))
-      : {};
+    return fs.existsSync(jsonPath) ? readJson(jsonPath) : {};
   }
 
   save(name: string, layout: Layout): void {
@@ -147,9 +165,14 @@ export class LayoutRepository {
   }
 
   getDefault(): { name: string } {
-    return fs.existsSync(this.options.defaultLayoutFile)
-      ? JSON.parse(fs.readFileSync(this.options.defaultLayoutFile, "utf8"))
-      : { name: "default" };
+    if (!fs.existsSync(this.options.defaultLayoutFile))
+      return { name: "default" };
+    try {
+      return readJson(this.options.defaultLayoutFile) as { name: string };
+    } catch (error) {
+      if (error instanceof CorruptLayoutError) return { name: "default" };
+      throw error;
+    }
   }
 
   setDefault(name: string): void {
