@@ -2,6 +2,16 @@ import { decodeAxisMapping, encodeAxisMapping } from "./axis-mapping";
 import { TOTAL_BUTTONS } from "./types";
 
 export type ButtonMapping = number; // 0-51: button index, 1000000+: axis code
+
+export function assignmentCodeFromInput(
+  buttonPress: number | null,
+  axisInput: { axis: number; value: number } | null,
+): number | null {
+  if (buttonPress !== null) return buttonPress;
+  return axisInput
+    ? encodeAxisMapping({ axis: axisInput.axis, value: axisInput.value })
+    : null;
+}
 export type StickMapping = number;
 export const UNASSIGNED_MAPPING = -1;
 

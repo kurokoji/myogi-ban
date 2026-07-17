@@ -1,10 +1,22 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  assignmentCodeFromInput,
   GamepadManager,
   toggleMappingAssignment,
   UNASSIGNED_MAPPING,
 } from "../src/gamepad";
+
+test("axis assignment completes from a single detected input", () => {
+  assert.equal(
+    assignmentCodeFromInput(null, { axis: 1, value: -0.8 }),
+    GamepadManager.axisToCode(1, -0.8),
+  );
+});
+
+test("button assignment takes priority over an axis input", () => {
+  assert.equal(assignmentCodeFromInput(4, { axis: 1, value: -0.8 }), 4);
+});
 
 test("GamepadManager dispose removes its gamepad event listeners", () => {
   const listeners = new Map<string, Set<EventListener>>();

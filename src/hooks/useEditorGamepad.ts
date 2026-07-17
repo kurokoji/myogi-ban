@@ -7,12 +7,12 @@ import {
   useState,
 } from "react";
 import type { ApiClient } from "../api";
-import { AXIS_ASSIGN_HOLD_FRAMES } from "../app-constants";
 import {
   type AssigningTarget,
   assignmentNameForTarget,
 } from "../editor-helpers";
 import {
+  assignmentCodeFromInput,
   type ButtonMapping,
   GamepadManager,
   type StickMapping,
@@ -46,10 +46,6 @@ export function useEditorGamepad(options: UseEditorGamepadOptions) {
     stickLabel,
   } = options;
   const gamepadRef = useRef<GamepadManager | null>(null);
-  const axisHoldCounterRef = useRef(0);
-  const axisHoldTargetRef = useRef<{ axis: number; value: number } | null>(
-    null,
-  );
   const [connected, setConnected] = useState(false);
   const [gamepadName, setGamepadName] = useState("");
   const [snapshot, setSnapshot] = useState(() => createEmptySnapshot(layout));
@@ -77,8 +73,6 @@ export function useEditorGamepad(options: UseEditorGamepadOptions) {
       setStickMappings(mappings.stickMappings);
 
       setAssigningTarget(null);
-      axisHoldCounterRef.current = 0;
-      axisHoldTargetRef.current = null;
     },
     [buttonMappingsRef, setButtonMappings, setStickMappings, stickMappingsRef],
   );
@@ -101,32 +95,11 @@ export function useEditorGamepad(options: UseEditorGamepadOptions) {
       if (gamepad) {
         const target = assigningTargetRef.current;
         if (target !== null) {
-          const buttonPress = manager.detectButtonPress();
-          if (buttonPress !== null) {
-            completeAssignment(target, buttonPress);
-          } else {
-            const axisHold = manager.detectAxisHold();
-            if (
-              axisHold &&
-              axisHoldTargetRef.current &&
-              axisHoldTargetRef.current.axis === axisHold.axis &&
-              Math.abs(axisHoldTargetRef.current.value - axisHold.value) < 0.1
-            ) {
-              axisHoldCounterRef.current += 1;
-              if (axisHoldCounterRef.current >= AXIS_ASSIGN_HOLD_FRAMES) {
-                completeAssignment(
-                  target,
-                  GamepadManager.axisToCode(axisHold.axis, axisHold.value),
-                );
-              }
-            } else if (axisHold) {
-              axisHoldTargetRef.current = axisHold;
-              axisHoldCounterRef.current = 1;
-            } else {
-              axisHoldTargetRef.current = null;
-              axisHoldCounterRef.current = 0;
-            }
-          }
+          const code = assignmentCodeFromInput(
+            manager.detectButtonPress(),
+            manager.detectAxisHold(),
+          );
+          if (code !== null) completeAssignment(target, code);
         } else {
           const nextSnapshot = readGamepadSnapshot(
             manager,
@@ -167,14 +140,10 @@ export function useEditorGamepad(options: UseEditorGamepadOptions) {
 
   const startAssignment = useCallback((target: number) => {
     setAssigningTarget(target);
-    axisHoldCounterRef.current = 0;
-    axisHoldTargetRef.current = null;
   }, []);
 
   const cancelAssignment = useCallback(() => {
     setAssigningTarget(null);
-    axisHoldCounterRef.current = 0;
-    axisHoldTargetRef.current = null;
   }, []);
 
   return {

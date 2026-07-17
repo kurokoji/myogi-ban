@@ -717,7 +717,7 @@ export function ButtonSettingsPanel(
                 {t("assigning")}: <span>{props.assignmentName}</span>
               </p>
               <Text size="xs" c="dimmed">
-                {t("pressButtonOrHoldAxis")}
+                {t("pressButtonOrMoveAxis")}
               </Text>
               <Button
                 size="xs"

@@ -76,7 +76,7 @@ export const jaTranslation = {
   buttonMapping: "ボタン割り当て",
   clickPreviewToAssign: "プレビューのボタンをクリックして割り当て",
   assigning: "割り当て中",
-  pressButtonOrHoldAxis: "ボタンを押すか軸を1秒ホールド",
+  pressButtonOrMoveAxis: "ボタンを押すか軸を入力",
   cancel: "キャンセル",
   saved: "保存しました",
   defaultSaved: "デフォルトに設定しました",

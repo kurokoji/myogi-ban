@@ -78,7 +78,7 @@ export const enTranslation = {
   buttonMapping: "Button Mapping",
   clickPreviewToAssign: "Click a button on the preview to assign",
   assigning: "Assigning",
-  pressButtonOrHoldAxis: "Press a button or hold an axis for 1 second",
+  pressButtonOrMoveAxis: "Press a button or move an axis",
   cancel: "Cancel",
   saved: "Saved!",
   defaultSaved: "Set as default layout!",
