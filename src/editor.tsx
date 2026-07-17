@@ -5,6 +5,14 @@ import {
   Title,
   Tooltip,
 } from "@mantine/core";
+import {
+  IconArrowBackUp,
+  IconArrowForwardUp,
+  IconCopy,
+  IconZoomIn,
+  IconZoomOut,
+  IconZoomReset,
+} from "@tabler/icons-react";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
@@ -370,7 +378,7 @@ function EditorApp(): React.ReactElement {
               aria-label={t("copy")}
               onClick={copyObsUrl}
             >
-              ⧉
+              <IconCopy size={16} />
             </ActionIcon>
             {copiedObsUrl && (
               <span className="copy-feedback">{t("copied")}</span>
@@ -451,7 +459,7 @@ function EditorApp(): React.ReactElement {
               onClick={undoLayout}
               disabled={!historyAvailability.canUndo}
             >
-              <span className="preview-history-icon">↶</span>
+              <IconArrowBackUp size={16} />
             </ActionIcon>
           </Tooltip>
           <Tooltip label={t("redo")} openDelay={300}>
@@ -462,7 +470,7 @@ function EditorApp(): React.ReactElement {
               onClick={redoLayout}
               disabled={!historyAvailability.canRedo}
             >
-              <span className="preview-history-icon">↷</span>
+              <IconArrowForwardUp size={16} />
             </ActionIcon>
           </Tooltip>
         </div>
@@ -478,7 +486,7 @@ function EditorApp(): React.ReactElement {
             onClick={() => zoomPreview(-PREVIEW_SCALE_STEP)}
             disabled={!canZoomOut}
           >
-            <span className="preview-zoom-icon preview-zoom-minus" />
+            <IconZoomOut size={16} />
           </ActionIcon>
           <Text className="preview-zoom-value" size="xs" fw={600}>
             {zoomPercent}%
@@ -490,7 +498,7 @@ function EditorApp(): React.ReactElement {
             onClick={() => zoomPreview(PREVIEW_SCALE_STEP)}
             disabled={!canZoomIn}
           >
-            <span className="preview-zoom-icon preview-zoom-plus" />
+            <IconZoomIn size={16} />
           </ActionIcon>
           <ActionIcon
             size="sm"
@@ -498,7 +506,7 @@ function EditorApp(): React.ReactElement {
             aria-label={t("resetZoom")}
             onClick={() => changePreviewScale(1)}
           >
-            <span className="preview-reset-icon">1x</span>
+            <IconZoomReset size={16} />
           </ActionIcon>
         </div>
         <div

@@ -1,4 +1,5 @@
 import { ActionIcon, Group, NumberInput } from "@mantine/core";
+import { IconLink, IconUnlink } from "@tabler/icons-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { numericValue } from "../../editor-helpers";
@@ -77,7 +78,7 @@ export function LinkedSizeInputs({
         aria-pressed={linked}
         onClick={() => setLinked((current) => !current)}
       >
-        🔗
+        {linked ? <IconLink size={16} /> : <IconUnlink size={16} />}
       </ActionIcon>
       <NumberInput
         size="xs"

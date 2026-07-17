@@ -188,50 +188,6 @@ body {
   right: 12px;
 }
 
-.preview-zoom-icon,
-.preview-reset-icon,
-.preview-history-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.preview-zoom-icon {
-  position: relative;
-  width: 14px;
-  height: 14px;
-}
-
-.preview-zoom-icon::before,
-.preview-zoom-icon::after {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 12px;
-  height: 2px;
-  border-radius: 999px;
-  background: currentColor;
-  content: "";
-  transform: translate(-50%, -50%);
-}
-
-.preview-zoom-plus::after {
-  transform: translate(-50%, -50%) rotate(90deg);
-}
-
-.preview-reset-icon {
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.preview-history-icon {
-  width: 1em;
-  height: 1em;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1;
-}
-
 .preview-zoom-value {
   min-width: 42px;
   color: #ffffff;
