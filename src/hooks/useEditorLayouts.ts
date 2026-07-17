@@ -23,6 +23,7 @@ import {
 } from "../gamepad";
 import { ensureLayoutDefaults } from "../layout";
 import { isLayoutNameTaken } from "../layout-name";
+import { buildLayoutForSave } from "../layout-save";
 import type { Layout, LayoutEntry, OperationStatus } from "../types";
 
 interface UseEditorLayoutsOptions {
@@ -177,10 +178,12 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
   };
 
   const saveToName = async (name: string, overwrite = true) => {
-    const data = cloneLayout(layout);
-    data.name = name;
-    data.buttonMappings = buttonMappings;
-    data.stickMappings = stickMappings;
+    const data = buildLayoutForSave(
+      layout,
+      name,
+      buttonMappings,
+      stickMappings,
+    );
     try {
       await api.saveLayout(name, data, overwrite);
       await refreshLayouts();
