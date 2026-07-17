@@ -22,6 +22,7 @@ import {
   type StickMapping,
 } from "../gamepad";
 import { ensureLayoutDefaults } from "../layout";
+import { withUploadedImage } from "../layout-image";
 import { isLayoutNameTaken } from "../layout-name";
 import {
   buildLayoutForSave,
@@ -288,18 +289,10 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
       const fileName = result.fileName || file.name;
       const target = imageUploadTargetRef.current;
       updateLayout((next) => {
-        next.name = uploadLayoutName;
-        if (target.type === "background") {
-          next.background.image = fileName;
-        } else if (target.type === "defaultButton") {
-          next.defaultbuttons[target.state === "pressed" ? "imgp" : "img"] =
-            fileName;
-        } else {
-          for (const index of target.indexes) {
-            next.buttons[index][target.state === "pressed" ? "imgp" : "img"] =
-              fileName;
-          }
-        }
+        Object.assign(
+          next,
+          withUploadedImage(next, target, uploadLayoutName, fileName),
+        );
       });
     } catch (error) {
       console.error("Failed to upload image:", error);
