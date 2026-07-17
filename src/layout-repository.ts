@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { isLayoutNameTaken } from "./layout-name";
+import { assertValidLayoutName, isLayoutNameTaken } from "./layout-name";
 import type { Layout, LayoutEntry } from "./types";
 
 export interface LayoutRepositoryOptions {
@@ -49,6 +49,7 @@ export class LayoutRepository {
   constructor(private readonly options: LayoutRepositoryOptions) {}
 
   private findLayoutPath(name: string): string | null {
+    assertValidLayoutName(name);
     const userPath = path.join(this.options.userLayoutDir, name);
     if (fs.existsSync(userPath)) return userPath;
     const builtinPath = path.join(this.options.builtinLayoutDir, name);
@@ -56,6 +57,7 @@ export class LayoutRepository {
   }
 
   has(name: string): boolean {
+    assertValidLayoutName(name);
     return isLayoutNameTaken(name, this.list());
   }
 
@@ -104,6 +106,7 @@ export class LayoutRepository {
   }
 
   read(name: string, builtin = false): unknown {
+    assertValidLayoutName(name);
     const layoutPath = builtin
       ? path.join(this.options.builtinLayoutDir, name)
       : this.findLayoutPath(name);
@@ -115,6 +118,7 @@ export class LayoutRepository {
   }
 
   save(name: string, layout: Layout): void {
+    assertValidLayoutName(name);
     const layoutDir = path.join(this.options.userLayoutDir, name);
     ensureDir(layoutDir);
     this.copyAssets(layout, layout.name || name, name);
@@ -122,7 +126,7 @@ export class LayoutRepository {
   }
 
   delete(name: string): boolean {
-    if (!name || path.basename(name) !== name) return false;
+    assertValidLayoutName(name);
     const layoutDir = path.join(this.options.userLayoutDir, name);
     if (!fs.existsSync(layoutDir)) return false;
     fs.rmSync(layoutDir, { recursive: true });
@@ -130,6 +134,7 @@ export class LayoutRepository {
   }
 
   uploadImage(data: string, layoutName: string, fileName: string): string {
+    assertValidLayoutName(layoutName);
     const safeFileName = path.basename(fileName);
     const layoutDir = path.join(this.options.userLayoutDir, layoutName);
     ensureDir(layoutDir);
@@ -148,6 +153,7 @@ export class LayoutRepository {
   }
 
   setDefault(name: string): void {
+    assertValidLayoutName(name);
     writeJson(this.options.defaultLayoutFile, { name });
   }
 }
