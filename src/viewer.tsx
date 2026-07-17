@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./i18n";
 import { ApiClient } from "./api";
 import { GamepadView } from "./components/GamepadView";
+import { selectDefaultLayoutEntry } from "./default-layout";
 import {
   type ButtonMapping,
   GamepadManager,
@@ -31,11 +32,18 @@ function ViewerApp(): React.ReactElement {
   const stickMappingsRef = useLatestRef(stickMappings);
 
   useEffect(() => {
-    apiRef.current
-      .getDefaultLayout()
-      .then((defaultLayout) => {
-        const layoutName = defaultLayout.name || "preset";
-        return apiRef.current.getLayout(layoutName);
+    Promise.all([
+      apiRef.current.getDefaultLayout(),
+      apiRef.current.getLayouts(),
+    ])
+      .then(([defaultLayout, entries]) => {
+        const entry = selectDefaultLayoutEntry(
+          entries,
+          defaultLayout.name || "default",
+        );
+        return entry
+          ? apiRef.current.getLayout(entry.name, entry.builtin)
+          : null;
       })
       .then((data) => {
         if (data?.version) {

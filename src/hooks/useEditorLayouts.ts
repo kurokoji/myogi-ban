@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { type ApiClient, ApiError } from "../api";
+import { selectDefaultLayoutEntry } from "../default-layout";
 import {
   cloneLayout,
   type EditorLayoutUpdater,
@@ -137,14 +138,11 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
         const name = defaultLayout.name || "preset";
         const entries = await refreshLayouts();
         if (!cancelled) {
-          const entry =
-            entries.find((item) => item.name === name && !item.builtin) ??
-            entries.find((item) => item.name === name);
-          const data = await api.getLayout(name, entry?.builtin ?? false);
-          if (data) applyLayout(data, name, entry?.builtin ?? false);
-          setSelectedLayout(
-            entry ? layoutSelectionValue(entry.name, entry.builtin) : name,
-          );
+          const entry = selectDefaultLayoutEntry(entries, name);
+          if (!entry) return;
+          const data = await api.getLayout(entry.name, entry.builtin);
+          if (data) applyLayout(data, entry.name, entry.builtin);
+          setSelectedLayout(layoutSelectionValue(entry.name, entry.builtin));
         }
       } catch {
         console.log("No default layout found, using built-in default");
