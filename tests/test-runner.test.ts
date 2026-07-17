@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { createTestRunnerArguments } from "../scripts/test-runner-options.mjs";
+import {
+  createTestRunnerArguments,
+  isTestFile,
+} from "../scripts/test-runner-options.mjs";
 
 test("test runner uses the spec reporter and forwards CLI filters", () => {
   assert.deepEqual(
@@ -16,4 +19,10 @@ test("test runner uses the spec reporter and forwards CLI filters", () => {
       "second.test.js",
     ],
   );
+});
+
+test("test runner discovers TypeScript component tests", () => {
+  assert.equal(isTestFile("panel.test.tsx"), true);
+  assert.equal(isTestFile("helper.test.ts"), true);
+  assert.equal(isTestFile("panel.tsx"), false);
 });
