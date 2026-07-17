@@ -21,6 +21,17 @@ export function dragPosition(
   };
 }
 
+export function dragGroupPositions(
+  items: Array<{ index: number; initialX: number; initialY: number }>,
+  start: Point,
+  current: Point,
+): Array<{ index: number; x: number; y: number }> {
+  return items.map((item) => ({
+    index: item.index,
+    ...dragPosition({ x: item.initialX, y: item.initialY }, start, current),
+  }));
+}
+
 export function rectsIntersect(a: Rect, b: Rect): boolean {
   return (
     a.left <= b.right &&

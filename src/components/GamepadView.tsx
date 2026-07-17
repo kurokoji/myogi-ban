@@ -1,6 +1,11 @@
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { dragPosition, type Rect, rectsIntersect } from "../geometry";
+import {
+  dragGroupPositions,
+  dragPosition,
+  type Rect,
+  rectsIntersect,
+} from "../geometry";
 import { type ButtonShape, type Layout, STICK_NAMES } from "../types";
 
 const STICK_SELECTION_SIZE = 96;
@@ -515,12 +520,12 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
       }
 
       if (dragState.type === "group") {
-        for (const button of dragState.buttons) {
-          onButtonPositionChange?.(
-            button.index,
-            Math.round(button.initialX + deltaX),
-            Math.round(button.initialY + deltaY),
-          );
+        for (const button of dragGroupPositions(
+          dragState.buttons,
+          { x: dragState.startX, y: dragState.startY },
+          local,
+        )) {
+          onButtonPositionChange?.(button.index, button.x, button.y);
         }
         if (dragState.stick) {
           onStickPositionChange?.(
