@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
 import { context } from "esbuild";
+import { createRestartableProcess } from "./dev-process.mjs";
 
 const require = createRequire(import.meta.url);
 const pkg = require("../package.json");
@@ -26,34 +27,41 @@ const viewer = await context({
   outfile: "public/js/viewer.js",
 });
 
+let serverProcess;
 const server = await context({
   entryPoints: ["src/server.ts"],
   bundle: true,
   platform: "node",
   external: ["ws", "express"],
   outfile: "dist/server.js",
+  plugins: [
+    {
+      name: "restart-server",
+      setup(build) {
+        build.onEnd((result) => {
+          if (result.errors.length === 0 && serverProcess)
+            void serverProcess.restart();
+        });
+      },
+    },
+  ],
 });
 
 await Promise.all([editor.rebuild(), viewer.rebuild(), server.rebuild()]);
-await Promise.all([editor.watch(), viewer.watch()]);
+await Promise.all([editor.watch(), viewer.watch(), server.watch()]);
 
-const serverProcess = spawn(process.execPath, ["dist/server.js"], {
-  stdio: "inherit",
-  env: {
-    ...process.env,
-    MYOGI_BAN_DATA_DIR: ".dev-data",
-  },
-});
+serverProcess = createRestartableProcess(() =>
+  spawn(process.execPath, ["dist/server.js"], {
+    stdio: "inherit",
+    env: { ...process.env, MYOGI_BAN_DATA_DIR: ".dev-data" },
+  }),
+);
+serverProcess.start();
 
 async function shutdown() {
-  serverProcess.kill("SIGTERM");
+  await serverProcess.stop();
   await Promise.all([editor.dispose(), viewer.dispose(), server.dispose()]);
 }
 
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
-
-serverProcess.on("exit", async (code) => {
-  await Promise.all([editor.dispose(), viewer.dispose(), server.dispose()]);
-  process.exitCode = code ?? 0;
-});
