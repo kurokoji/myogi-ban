@@ -18,6 +18,10 @@ import {
   readFileAsDataUrl,
 } from "../editor-helpers";
 import {
+  type EditorSelection,
+  EMPTY_EDITOR_SELECTION,
+} from "../editor-selection";
+import {
   type ButtonMapping,
   GamepadManager,
   type StickMapping,
@@ -40,8 +44,7 @@ interface UseEditorLayoutsOptions {
   stickMappings: StickMapping[];
   setButtonMappings: Dispatch<SetStateAction<ButtonMapping[]>>;
   setStickMappings: Dispatch<SetStateAction<StickMapping[]>>;
-  setSelectedButtonIndexes: Dispatch<SetStateAction<number[]>>;
-  setSelectedStick: Dispatch<SetStateAction<boolean>>;
+  setSelection: Dispatch<SetStateAction<EditorSelection>>;
   restoreLayout: (layout: Layout) => void;
   clearLayoutHistory: () => void;
   updateLayout: EditorLayoutUpdater;
@@ -65,8 +68,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     stickMappings,
     setButtonMappings,
     setStickMappings,
-    setSelectedButtonIndexes,
-    setSelectedStick,
+    setSelection,
     restoreLayout,
     clearLayoutHistory,
     updateLayout,
@@ -103,8 +105,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
         data.stickMappings || GamepadManager.createDefaultStickMappings();
       restoreLayout(nextLayout);
       clearLayoutHistory();
-      setSelectedButtonIndexes([]);
-      setSelectedStick(false);
+      setSelection(EMPTY_EDITOR_SELECTION);
       setButtonMappings(nextButtonMappings);
       setStickMappings(nextStickMappings);
       if (name) setLayoutName(name);
@@ -124,8 +125,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
       clearLayoutHistory,
       restoreLayout,
       setButtonMappings,
-      setSelectedButtonIndexes,
-      setSelectedStick,
+      setSelection,
       setStickMappings,
     ],
   );

@@ -60,7 +60,7 @@
 - [x] R043 開発監視スクリプトの子プロセス異常終了とシグナル処理をテストする
 - [x] R044 ViewerのAPI取得失敗・WebSocket切断・再接続状態を整理する
 - [x] R045 `document.getElementById` によるプレビュー参照をReact refへ統一する
-- [ ] R046 `selectedButtonIndex` と `selectedButtonIndexes` を単一の選択モデルへ統合する
+- [x] R046 `selectedButtonIndex` と `selectedButtonIndexes` を単一の選択モデルへ統合する
 - [ ] R047 最大ボタン数・既定寸法・ポーリング間隔などのマジックナンバーを定数化する
 
 ## Lower Priority

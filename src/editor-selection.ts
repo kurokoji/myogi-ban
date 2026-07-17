@@ -7,6 +7,34 @@ export function toggleSelectedIndex(
     : [...selectedIndexes, index];
 }
 
+export interface EditorSelection {
+  buttonIndexes: number[];
+  primaryButtonIndex: number | null;
+  stick: boolean;
+}
+
+export const EMPTY_EDITOR_SELECTION: EditorSelection = {
+  buttonIndexes: [],
+  primaryButtonIndex: null,
+  stick: false,
+};
+
+export function createButtonSelection(index: number): EditorSelection {
+  return { buttonIndexes: [index], primaryButtonIndex: index, stick: false };
+}
+
+export function toggleButtonInSelection(
+  selection: EditorSelection,
+  index: number,
+): EditorSelection {
+  const buttonIndexes = toggleSelectedIndex(selection.buttonIndexes, index);
+  return {
+    ...selection,
+    buttonIndexes,
+    primaryButtonIndex: buttonIndexes[0] ?? null,
+  };
+}
+
 export function normalizeEditorSelection(
   buttonIndexes: number[],
   primaryIndex: number | null,

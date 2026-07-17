@@ -27,8 +27,10 @@ import {
   updateSelectedButtonSettings,
 } from "./editor-helpers";
 import {
+  createButtonSelection,
+  EMPTY_EDITOR_SELECTION,
   normalizeEditorSelection,
-  toggleSelectedIndex,
+  toggleButtonInSelection,
 } from "./editor-selection";
 import {
   type ButtonMapping,
@@ -58,13 +60,10 @@ function EditorApp(): React.ReactElement {
   const [stickMappings, setStickMappings] = useState<StickMapping[]>(() =>
     GamepadManager.createDefaultStickMappings(),
   );
-  const [selectedButtonIndex, setSelectedButtonIndex] = useState<number | null>(
-    null,
-  );
-  const [selectedButtonIndexes, setSelectedButtonIndexes] = useState<number[]>(
-    [],
-  );
-  const [selectedStick, setSelectedStick] = useState(false);
+  const [selection, setSelection] = useState(EMPTY_EDITOR_SELECTION);
+  const selectedButtonIndex = selection.primaryButtonIndex;
+  const selectedButtonIndexes = selection.buttonIndexes;
+  const selectedStick = selection.stick;
   const [language, setLanguage] = useState(i18n.language);
   const [copiedObsUrl, setCopiedObsUrl] = useState(false);
   const layoutRef = useRef(layout);
@@ -146,8 +145,7 @@ function EditorApp(): React.ReactElement {
     stickMappings,
     setButtonMappings,
     setStickMappings,
-    setSelectedButtonIndexes,
-    setSelectedStick,
+    setSelection,
     restoreLayout,
     clearLayoutHistory,
     updateLayout,
@@ -171,8 +169,16 @@ function EditorApp(): React.ReactElement {
       selectedButtonIndex,
       layout.totalbuttonshow,
     );
-    setSelectedButtonIndexes(normalized.buttonIndexes);
-    setSelectedButtonIndex(normalized.primaryIndex);
+    if (
+      normalized.buttonIndexes !== selectedButtonIndexes ||
+      normalized.primaryIndex !== selectedButtonIndex
+    ) {
+      setSelection((current) => ({
+        ...current,
+        buttonIndexes: normalized.buttonIndexes,
+        primaryButtonIndex: normalized.primaryIndex,
+      }));
+    }
     if (normalized.cancelAssignment) cancelAssignment();
   }, [
     cancelAssignment,
@@ -246,19 +252,18 @@ function EditorApp(): React.ReactElement {
   }, []);
 
   const updateSelection = useCallback(
-    (selection: { buttonIndexes: number[]; stick: boolean }) => {
-      setSelectedButtonIndexes(selection.buttonIndexes);
-      setSelectedStick(selection.stick);
-      setSelectedButtonIndex(selection.buttonIndexes[0] ?? null);
+    (nextSelection: { buttonIndexes: number[]; stick: boolean }) => {
+      setSelection({
+        ...nextSelection,
+        primaryButtonIndex: nextSelection.buttonIndexes[0] ?? null,
+      });
       cancelAssignment();
     },
     [cancelAssignment],
   );
 
   const clearSelection = useCallback(() => {
-    setSelectedButtonIndexes([]);
-    setSelectedStick(false);
-    setSelectedButtonIndex(null);
+    setSelection(EMPTY_EDITOR_SELECTION);
     cancelAssignment();
   }, [cancelAssignment]);
 
@@ -268,9 +273,7 @@ function EditorApp(): React.ReactElement {
         clearSelection();
         return;
       }
-      setSelectedButtonIndexes([index]);
-      setSelectedStick(false);
-      setSelectedButtonIndex(index);
+      setSelection(createButtonSelection(index));
       cancelAssignment();
     },
     [cancelAssignment, clearSelection],
@@ -282,9 +285,7 @@ function EditorApp(): React.ReactElement {
     updateLayout((next) => Object.assign(next, result.layout));
     setButtonMappings(result.mapping);
     const newIndex = result.index;
-    setSelectedButtonIndexes([newIndex]);
-    setSelectedButtonIndex(newIndex);
-    setSelectedStick(false);
+    setSelection(createButtonSelection(newIndex));
     cancelAssignment();
   }, [buttonMappings, cancelAssignment, layout, updateLayout]);
 
@@ -309,17 +310,11 @@ function EditorApp(): React.ReactElement {
   const selectButtonAndStartAssignment = useCallback(
     (index: number, toggleSelection: boolean) => {
       if (toggleSelection) {
-        setSelectedButtonIndexes((current) => {
-          const next = toggleSelectedIndex(current, index);
-          setSelectedButtonIndex(next[0] ?? null);
-          return next;
-        });
+        setSelection((current) => toggleButtonInSelection(current, index));
         cancelAssignment();
         return;
       }
-      setSelectedButtonIndexes([index]);
-      setSelectedStick(false);
-      setSelectedButtonIndex(index);
+      setSelection(createButtonSelection(index));
       startAssignment(index);
     },
     [cancelAssignment, startAssignment],
@@ -328,13 +323,15 @@ function EditorApp(): React.ReactElement {
   const selectStickAndStartAssignment = useCallback(
     (index: number, toggleSelection: boolean) => {
       if (toggleSelection) {
-        setSelectedStick((current) => !current);
+        setSelection((current) => ({ ...current, stick: !current.stick }));
         cancelAssignment();
         return;
       }
-      setSelectedButtonIndexes([]);
-      setSelectedStick(true);
-      setSelectedButtonIndex(null);
+      setSelection({
+        buttonIndexes: [],
+        primaryButtonIndex: null,
+        stick: true,
+      });
       startAssignment(1000 + index);
     },
     [cancelAssignment, startAssignment],
