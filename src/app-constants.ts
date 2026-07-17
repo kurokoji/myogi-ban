@@ -1,0 +1,7 @@
+export const MAX_VISIBLE_BUTTONS = 48;
+export const DEFAULT_BACKGROUND_SIZE = { width: 500, height: 250 } as const;
+export const DEFAULT_BUTTON_SIZE = 48;
+export const DEFAULT_STICK_SIZE = 100;
+export const GAMEPAD_POLL_INTERVAL_MS = 100;
+export const AXIS_ASSIGN_HOLD_FRAMES = 60;
+export const VIEWER_RECONNECT_DELAY_MS = 1000;

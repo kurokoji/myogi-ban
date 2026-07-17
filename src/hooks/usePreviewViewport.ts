@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import { DEFAULT_BACKGROUND_SIZE } from "../app-constants";
 import {
   clampPreviewScale,
   MAX_PREVIEW_SCALE,
@@ -18,8 +19,11 @@ function layoutSize(value: string | undefined, fallback: number): number {
 
 export function usePreviewViewport(background: BackgroundConfig) {
   const [previewScale, setPreviewScale] = useState(1);
-  const previewWidth = layoutSize(background.w, 500);
-  const previewHeight = layoutSize(background.h, 250);
+  const previewWidth = layoutSize(background.w, DEFAULT_BACKGROUND_SIZE.width);
+  const previewHeight = layoutSize(
+    background.h,
+    DEFAULT_BACKGROUND_SIZE.height,
+  );
   const rulerTicks = useMemo(
     () =>
       createSignedRulerTicks(

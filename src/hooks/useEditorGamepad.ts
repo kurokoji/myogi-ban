@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import type { ApiClient } from "../api";
+import { AXIS_ASSIGN_HOLD_FRAMES } from "../app-constants";
 import {
   type AssigningTarget,
   assignmentNameForTarget,
@@ -112,7 +113,7 @@ export function useEditorGamepad(options: UseEditorGamepadOptions) {
               Math.abs(axisHoldTargetRef.current.value - axisHold.value) < 0.1
             ) {
               axisHoldCounterRef.current += 1;
-              if (axisHoldCounterRef.current >= 60) {
+              if (axisHoldCounterRef.current >= AXIS_ASSIGN_HOLD_FRAMES) {
                 completeAssignment(
                   target,
                   GamepadManager.axisToCode(axisHold.axis, axisHold.value),

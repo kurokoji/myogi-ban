@@ -1,3 +1,4 @@
+import { MAX_VISIBLE_BUTTONS } from "./app-constants";
 import type { Layout } from "./types";
 
 export class InvalidLayoutError extends Error {
@@ -53,7 +54,7 @@ export function validateImportedLayout(
     "totalbuttonshow" in value &&
     (!Number.isInteger(value.totalbuttonshow) ||
       Number(value.totalbuttonshow) < 0 ||
-      Number(value.totalbuttonshow) > 48)
+      Number(value.totalbuttonshow) > MAX_VISIBLE_BUTTONS)
   )
     throw new InvalidLayoutError();
   if ("showstick" in value && typeof value.showstick !== "boolean")

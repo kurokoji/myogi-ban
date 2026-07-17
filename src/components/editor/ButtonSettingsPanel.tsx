@@ -11,6 +11,7 @@ import {
   Title,
 } from "@mantine/core";
 import { useTranslation } from "react-i18next";
+import { MAX_VISIBLE_BUTTONS } from "../../app-constants";
 import { resetButtonToDefaults } from "../../button-settings";
 import {
   type AssigningTarget,
@@ -60,7 +61,7 @@ export function ButtonSettingsPanel(
               size="xs"
               variant="light"
               onClick={props.onAddButton}
-              disabled={layout.totalbuttonshow >= 48}
+              disabled={layout.totalbuttonshow >= MAX_VISIBLE_BUTTONS}
             >
               {t("addButton")}
             </Button>

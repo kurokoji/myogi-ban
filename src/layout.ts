@@ -1,3 +1,8 @@
+import {
+  DEFAULT_BACKGROUND_SIZE,
+  DEFAULT_BUTTON_SIZE,
+  DEFAULT_STICK_SIZE,
+} from "./app-constants";
 import { CURRENT_LAYOUT_VERSION, migrateLayout } from "./layout-migration";
 import {
   type BackgroundConfig,
@@ -87,14 +92,14 @@ export function createDefaultLayout(): Layout {
     stick: createDefaultStickLayout({
       x: "130",
       y: "105",
-      w: "100",
-      h: "100",
+      w: String(DEFAULT_STICK_SIZE),
+      h: String(DEFAULT_STICK_SIZE),
       cssColor: "#e03131",
       cssPlateColor: "#868e96",
     }),
     defaultbuttons: createDefaultButtonLayout({
-      w: "48",
-      h: "48",
+      w: String(DEFAULT_BUTTON_SIZE),
+      h: String(DEFAULT_BUTTON_SIZE),
       useCss: true,
       cssColor: "#e03131",
       cssPressedColor: "#c2251c",
@@ -105,8 +110,8 @@ export function createDefaultLayout(): Layout {
     }),
     buttons,
     background: createDefaultBackgroundConfig({
-      w: "500",
-      h: "250",
+      w: String(DEFAULT_BACKGROUND_SIZE.width),
+      h: String(DEFAULT_BACKGROUND_SIZE.height),
       cssColor: "#ffffff",
       cssBorderRadius: 20,
     }),

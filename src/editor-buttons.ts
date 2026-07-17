@@ -1,3 +1,4 @@
+import { MAX_VISIBLE_BUTTONS } from "./app-constants";
 import { cloneLayout, createEmptyButtonLayout } from "./editor-helpers";
 import { type ButtonMapping, UNASSIGNED_MAPPING } from "./gamepad";
 import type { Layout } from "./types";
@@ -5,7 +6,7 @@ import type { Layout } from "./types";
 export function addEditorButton(
   layout: Layout,
   mapping: ButtonMapping[],
-  limit = 48,
+  limit = MAX_VISIBLE_BUTTONS,
 ) {
   if (layout.totalbuttonshow >= limit) return null;
   const next = cloneLayout(layout);

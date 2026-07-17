@@ -17,7 +17,10 @@ export function startGamepadMonitor(
     options.requestFrame ?? window.requestAnimationFrame.bind(window);
   const cancelFrame =
     options.cancelFrame ?? window.cancelAnimationFrame.bind(window);
-  const timer = setTimer(options.poll, options.pollInterval ?? 100);
+  const timer = setTimer(
+    options.poll,
+    options.pollInterval ?? GAMEPAD_POLL_INTERVAL_MS,
+  );
   let frame = 0;
   const update = () => {
     options.update();
@@ -29,3 +32,5 @@ export function startGamepadMonitor(
     cancelFrame(frame);
   };
 }
+
+import { GAMEPAD_POLL_INTERVAL_MS } from "./app-constants";

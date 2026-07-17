@@ -61,7 +61,7 @@
 - [x] R044 ViewerのAPI取得失敗・WebSocket切断・再接続状態を整理する
 - [x] R045 `document.getElementById` によるプレビュー参照をReact refへ統一する
 - [x] R046 `selectedButtonIndex` と `selectedButtonIndexes` を単一の選択モデルへ統合する
-- [ ] R047 最大ボタン数・既定寸法・ポーリング間隔などのマジックナンバーを定数化する
+- [x] R047 最大ボタン数・既定寸法・ポーリング間隔などのマジックナンバーを定数化する
 
 ## Lower Priority
 

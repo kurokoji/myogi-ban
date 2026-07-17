@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./i18n";
 import { ApiClient } from "./api";
+import { VIEWER_RECONNECT_DELAY_MS } from "./app-constants";
 import { GamepadView } from "./components/GamepadView";
 import { selectDefaultLayoutEntry } from "./default-layout";
 import {
@@ -102,7 +103,8 @@ function ViewerApp(): React.ReactElement {
         setConnectionStatus((current) =>
           nextViewerConnectionStatus(current, "socket-close"),
         );
-        if (!disposed) retryTimer = window.setTimeout(connect, 1000);
+        if (!disposed)
+          retryTimer = window.setTimeout(connect, VIEWER_RECONNECT_DELAY_MS);
       };
     };
     connect();

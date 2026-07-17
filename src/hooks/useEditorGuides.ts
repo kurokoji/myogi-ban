@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { DEFAULT_BACKGROUND_SIZE } from "../app-constants";
 import {
   guideCoordinateFromPointer,
   updateGuidePosition,
@@ -130,7 +131,10 @@ export function useEditorGuides({
         guideDrag.axis === "x"
           ? currentLayout.background.w
           : currentLayout.background.h;
-      const fallback = guideDrag.axis === "x" ? 500 : 250;
+      const fallback =
+        guideDrag.axis === "x"
+          ? DEFAULT_BACKGROUND_SIZE.width
+          : DEFAULT_BACKGROUND_SIZE.height;
       const parsed = Number.parseFloat(rawLimit || "");
       moveGuide(
         guideDrag.axis,
