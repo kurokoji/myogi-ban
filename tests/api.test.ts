@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { ApiClient } from "../src/api";
+import { ApiClient, ApiError } from "../src/api";
 
 test("ApiClient returns parsed JSON for successful requests", async (t) => {
   t.mock.method(globalThis, "fetch", async () =>
@@ -21,7 +21,13 @@ test("ApiClient rejects unsuccessful HTTP responses", async (t) => {
 
   await assert.rejects(
     () => new ApiClient().getLayouts(),
-    /API request failed: GET \/api\/layouts \(500\)/,
+    (error) => {
+      assert.equal(error instanceof ApiError, true);
+      assert.equal((error as ApiError).status, 500);
+      assert.equal((error as ApiError).method, "GET");
+      assert.equal((error as ApiError).path, "/api/layouts");
+      return true;
+    },
   );
 });
 

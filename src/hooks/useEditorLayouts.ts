@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
-import type { ApiClient } from "../api";
+import { type ApiClient, ApiError } from "../api";
 import {
   cloneLayout,
   type EditorLayoutUpdater,
@@ -201,7 +201,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
       setStatus({
         kind: "error",
         message:
-          error instanceof Error && error.message.includes("(409)")
+          error instanceof ApiError && error.status === 409
             ? messages.layoutNameExists
             : messages.operationFailed,
       });

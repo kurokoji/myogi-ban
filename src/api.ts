@@ -15,12 +15,21 @@ interface UploadImageResult {
   fileName: string;
 }
 
+export class ApiError extends Error {
+  constructor(
+    readonly status: number,
+    readonly method: string,
+    readonly path: string,
+  ) {
+    super(`API request failed: ${method} ${path} (${status})`);
+    this.name = "ApiError";
+  }
+}
+
 async function request(path: string, init?: RequestInit): Promise<Response> {
   const response = await fetch(`${SERVER_URL}${path}`, init);
   if (!response.ok) {
-    throw new Error(
-      `API request failed: ${init?.method ?? "GET"} ${path} (${response.status})`,
-    );
+    throw new ApiError(response.status, init?.method ?? "GET", path);
   }
   return response;
 }
