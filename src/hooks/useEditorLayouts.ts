@@ -23,7 +23,10 @@ import {
 } from "../gamepad";
 import { ensureLayoutDefaults } from "../layout";
 import { isLayoutNameTaken } from "../layout-name";
-import { buildLayoutForSave } from "../layout-save";
+import {
+  buildLayoutForSave,
+  createEditorSnapshotSignature,
+} from "../layout-save";
 import { selectLayoutAfterDelete } from "../layout-selection";
 import type { Layout, LayoutEntry, OperationStatus } from "../types";
 
@@ -49,14 +52,6 @@ interface UseEditorLayoutsOptions {
     deleted: string;
     layoutNameExists: string;
   };
-}
-
-function layoutSignature(
-  layout: Layout,
-  buttonMappings: ButtonMapping[],
-  stickMappings: StickMapping[],
-): string {
-  return JSON.stringify({ layout, buttonMappings, stickMappings });
 }
 
 export function useEditorLayouts(options: UseEditorLayoutsOptions) {
@@ -114,7 +109,11 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
       setStatus(null);
       setCleanSignature(
         markClean
-          ? layoutSignature(nextLayout, nextButtonMappings, nextStickMappings)
+          ? createEditorSnapshotSignature(
+              nextLayout,
+              nextButtonMappings,
+              nextStickMappings,
+            )
           : "",
       );
     },
@@ -159,7 +158,8 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
   const openLayout = async (selection: string) => {
     if (!selection || selection === selectedLayout) return;
     const dirty =
-      cleanSignature !== layoutSignature(layout, buttonMappings, stickMappings);
+      cleanSignature !==
+      createEditorSnapshotSignature(layout, buttonMappings, stickMappings);
     if (dirty && !window.confirm(messages.discardChanges)) return;
     const name = layoutNameFromSelection(selection);
     try {
@@ -193,7 +193,9 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
       setLayoutName(name);
       setCurrentBuiltin(false);
       setSelectedLayout(layoutSelectionValue(name, false));
-      setCleanSignature(layoutSignature(data, buttonMappings, stickMappings));
+      setCleanSignature(
+        createEditorSnapshotSignature(data, buttonMappings, stickMappings),
+      );
       setStatus({ kind: "success", message: messages.saved });
       return true;
     } catch (error) {
@@ -349,6 +351,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     uploadImage,
     status,
     isDirty:
-      cleanSignature !== layoutSignature(layout, buttonMappings, stickMappings),
+      cleanSignature !==
+      createEditorSnapshotSignature(layout, buttonMappings, stickMappings),
   };
 }

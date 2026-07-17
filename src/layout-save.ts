@@ -3,6 +3,14 @@ import type { ButtonMapping, StickMapping } from "./gamepad";
 import { CURRENT_LAYOUT_VERSION } from "./layout-migration";
 import type { Layout } from "./types";
 
+export function createEditorSnapshotSignature(
+  layout: Layout,
+  buttonMappings: ButtonMapping[],
+  stickMappings: StickMapping[],
+): string {
+  return JSON.stringify({ layout, buttonMappings, stickMappings });
+}
+
 export function buildLayoutForSave(
   layout: Layout,
   name: string,

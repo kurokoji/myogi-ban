@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createDefaultLayout } from "../src/layout";
 import { CURRENT_LAYOUT_VERSION } from "../src/layout-migration";
-import { buildLayoutForSave } from "../src/layout-save";
+import {
+  buildLayoutForSave,
+  createEditorSnapshotSignature,
+} from "../src/layout-save";
 
 test("buildLayoutForSave applies the save name and current mappings", () => {
   const saved = buildLayoutForSave(
@@ -52,4 +55,16 @@ test("buildLayoutForSave uses the current layout format version", () => {
 
   assert.equal(saved.version, CURRENT_LAYOUT_VERSION);
   assert.equal(layout.version, "v1.0.5");
+});
+
+test("createEditorSnapshotSignature detects layout and mapping changes", () => {
+  const layout = createDefaultLayout();
+  const original = createEditorSnapshotSignature(layout, [1], [2]);
+
+  assert.equal(createEditorSnapshotSignature(layout, [1], [2]), original);
+  assert.notEqual(createEditorSnapshotSignature(layout, [3], [2]), original);
+  assert.notEqual(
+    createEditorSnapshotSignature({ ...layout, name: "changed" }, [1], [2]),
+    original,
+  );
 });
