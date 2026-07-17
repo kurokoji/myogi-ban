@@ -64,6 +64,7 @@ export const enTranslation = {
   overwriteSave: "Save",
   saveAs: "Save as…",
   moreActions: "More actions",
+  advancedSettings: "Advanced settings",
   currentLayout: "Current layout",
   unsavedChanges: "Unsaved changes",
   builtInSaveHint:

@@ -10,6 +10,7 @@ import { LinkedSizeInputs } from "../src/components/editor/LinkedSizeInputs";
 import { PreviewZoomControls } from "../src/components/editor/PreviewZoomControls";
 import { SidebarAccordion } from "../src/components/editor/SidebarAccordion";
 import { ButtonLayer } from "../src/components/gamepad/ButtonLayer";
+import { ButtonAdvancedSettings } from "../src/components/editor/ButtonSettingsSections";
 import { GamepadView } from "../src/components/GamepadView";
 import { createDefaultLayout } from "../src/layout";
 
@@ -199,4 +200,19 @@ test("sidebar accordion restores persisted open sections", () => {
       .length,
     1,
   );
+});
+
+test("advanced button settings stay collapsed until requested", () => {
+  const view = renderComponent(
+    <ButtonAdvancedSettings label="Advanced">
+      <p>Advanced content</p>
+    </ButtonAdvancedSettings>,
+  );
+  const details = view.container.querySelector("details");
+  assert.ok(details);
+  assert.equal(details.open, false);
+
+  fireEvent.click(within(view.container).getByText("Advanced"));
+
+  assert.equal(details.open, true);
 });

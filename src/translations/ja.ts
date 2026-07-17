@@ -62,6 +62,7 @@ export const jaTranslation = {
   overwriteSave: "上書き保存",
   saveAs: "名前を付けて保存…",
   moreActions: "その他の操作",
+  advancedSettings: "詳細設定",
   currentLayout: "現在のレイアウト",
   unsavedChanges: "変更あり",
   builtInSaveHint:
