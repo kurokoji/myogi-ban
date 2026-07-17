@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { guideCoordinateFromPointer } from "../editor-guides";
 import { cloneLayout } from "../editor-helpers";
 import type { Layout } from "../types";
 
@@ -56,12 +57,13 @@ export function useEditorGuides({
       const preview = previewRef.current;
       if (!preview) return 0;
       const previewRect = preview.getBoundingClientRect();
-      const screenPosition =
-        axis === "x"
-          ? event.clientX - previewRect.left
-          : event.clientY - previewRect.top;
       const origin = axis === "x" ? rulerOrigin.x : rulerOrigin.y;
-      return Math.round((screenPosition - origin) / previewScale);
+      return guideCoordinateFromPointer(
+        axis === "x" ? event.clientX : event.clientY,
+        axis === "x" ? previewRect.left : previewRect.top,
+        origin,
+        previewScale,
+      );
     },
     [previewScale, rulerOrigin.x, rulerOrigin.y],
   );
