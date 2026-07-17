@@ -6,21 +6,14 @@ import {
   type Rect,
   rectsIntersect,
 } from "../geometry";
-import { type ButtonShape, type Layout, STICK_NAMES } from "../types";
+import type { Layout } from "../types";
+import { ButtonLayer } from "./gamepad/ButtonLayer";
+import { GamepadBackgroundLayer } from "./gamepad/GamepadBackgroundLayer";
+import { SelectionOverlays } from "./gamepad/SelectionOverlays";
+import { StickLayer } from "./gamepad/StickLayer";
 
 const STICK_SELECTION_SIZE = 96;
 const SELECTION_BOUNDS_PADDING = 12;
-
-function buttonRadiusForShape(shape: ButtonShape): string {
-  switch (shape) {
-    case "square":
-      return "0";
-    case "rounded":
-      return "8px";
-    case "circle":
-      return "50%";
-  }
-}
 
 export interface GamepadViewProps {
   layout: Layout;
@@ -71,12 +64,6 @@ type DragState =
 
 function assetUrl(layout: Layout, fileName: string): string {
   return `layout/${layout.name}/${fileName}`;
-}
-
-function getImageStyle(layout: Layout, fileName: string): React.CSSProperties {
-  return fileName
-    ? { backgroundImage: `url("${assetUrl(layout, fileName)}")` }
-    : {};
 }
 
 function rectContainsPoint(rect: Rect, point: { x: number; y: number }) {
@@ -629,194 +616,44 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
         onMouseDown={handleSelectionMouseDown}
         onClick={handleSelectionClick}
       >
-        <div
-          id="gamepad-area-background"
-          className={`gamepad-area-background${layout.background.useCss ? " background-css" : ""}`}
-          style={{
-            ...(layout.background.useCss
-              ? ({
-                  "--bg-color": layout.background.cssColor ?? "#0b0f14",
-                  "--bg-radius": `${layout.background.cssBorderRadius ?? 0}px`,
-                } as React.CSSProperties)
-              : getImageStyle(layout, layout.background.image)),
-            width: backgroundSize.width,
-            height: backgroundSize.height,
-            opacity: backgroundOpacity,
-            visibility: layout.background.show === false ? "hidden" : "visible",
-          }}
+        <GamepadBackgroundLayer
+          background={layout.background}
+          layoutName={layout.name}
+          width={backgroundSize.width}
+          height={backgroundSize.height}
+          opacity={backgroundOpacity}
         />
-        <div
-          id="stick-area"
-          className={`stick-area stick-css ${editorMode && selectedStick ? "stick-selected" : ""}`}
-          style={{
-            left: layout.stick.x ? `${layout.stick.x}px` : undefined,
-            top: layout.stick.y ? `${layout.stick.y}px` : undefined,
-            transform: `translate(-50%,-50%) scale(${stickScaleX},${stickScaleY})`,
-            display: layout.showstick ? undefined : "none",
-            cursor: editorMode ? "move" : undefined,
-            ...({
-              "--stick-color": layout.stick.cssColor ?? "#cccccc",
-              "--stick-plate-color": layout.stick.cssPlateColor ?? "#888888",
-              "--stick-transition": `${layout.stick.cssTransition ?? "0.02"}s`,
-              "--stick-easing": layout.stick.cssEasing ?? "ease",
-            } as React.CSSProperties),
-          }}
-        >
-          {editorMode && (
-            <div
-              className="stick-drag-handle"
-              onMouseDown={(e) =>
-                handleMouseDown(
-                  e,
-                  "stick",
-                  0,
-                  parseFloat(layout.stick.x) || 110,
-                  parseFloat(layout.stick.y) || 125,
-                )
-              }
-            />
-          )}
-          {(() => {
-            const dir = stickClass.startsWith("stick ")
-              ? stickClass.slice(6)
-              : "";
-            return (
-              <div
-                id="stick-shaft"
-                className={`stick-shaft${dir ? ` ${dir}` : ""}`}
-              />
-            );
-          })()}
-          <div id="stick" className={`${stickClass} stick-css`} />
-          {STICK_NAMES.map((name, index) => (
-            <div
-              id={name}
-              className={`stick-block ${name}`}
-              key={name}
-              onClick={
-                editorMode
-                  ? (event) => handleStickClick(index, event)
-                  : undefined
-              }
-            />
-          ))}
-        </div>
-        <div id="button-area" className="button-area">
-          {Array.from({ length: layout.totalbuttonshow }, (_, index) => {
-            const button = layout.buttons[index] || defaultButton;
-            const pressed = pressedButtons[index] || false;
-            const releasedImage =
-              button.img === defaultButton.img ? "" : button.img;
-            const pressedImage =
-              button.imgp === defaultButton.imgp ? "" : button.imgp;
-            const releasedWidth = button.w === defaultButton.w ? "" : button.w;
-            const releasedHeight = button.h === defaultButton.h ? "" : button.h;
-            const pressedWidth =
-              button.wp === defaultButton.wp ? "" : button.wp;
-            const pressedHeight =
-              button.hp === defaultButton.hp ? "" : button.hp;
-
-            const useCss = button.useCss ?? defaultButton.useCss ?? false;
-            const useImage = pressed ? pressedImage : releasedImage;
-            const cssColor =
-              button.cssColor ?? defaultButton.cssColor ?? "#cccccc";
-            const cssPressedColor =
-              button.cssPressedColor ??
-              defaultButton.cssPressedColor ??
-              "#999999";
-            const cssTransition =
-              button.cssTransition ?? defaultButton.cssTransition ?? "0.02";
-            const cssEasing =
-              button.cssEasing ?? defaultButton.cssEasing ?? "ease";
-            const cssShape =
-              button.cssShape ?? defaultButton.cssShape ?? "circle";
-            const rotation = button.rotation ?? defaultButton.rotation ?? "0";
-            const style: React.CSSProperties = {
-              left: `${button.x || defaultButton.x || 0}px`,
-              top: `${button.y || defaultButton.y || 0}px`,
-              width: `${pressed ? pressedWidth || defaultButton.wp || defaultButton.w || "60" : releasedWidth || defaultButton.w || "60"}px`,
-              height: `${pressed ? pressedHeight || defaultButton.hp || defaultButton.h || "60" : releasedHeight || defaultButton.h || "60"}px`,
-              cursor: editorMode ? "move" : undefined,
-              "--button-color": pressed ? cssPressedColor : cssColor,
-              "--button-shadow-color": pressed
-                ? "rgba(0, 0, 0, 0.4)"
-                : "rgba(0, 0, 0, 0.2)",
-              "--button-rotation": `${rotation}deg`,
-              "--button-radius": buttonRadiusForShape(cssShape),
-              "--button-transition": `${cssTransition}s`,
-              "--button-easing": cssEasing,
-            } as React.CSSProperties;
-
-            if (!useCss && useImage) {
-              style.backgroundImage = `url("${assetUrl(layout, useImage)}")`;
-            }
-
-            if (pressed) {
-              if (button.xp || defaultButton.xp)
-                style.left = `${button.xp || defaultButton.xp}px`;
-              if (button.yp || defaultButton.yp)
-                style.top = `${button.yp || defaultButton.yp}px`;
-            }
-
-            const className = `gamepad-button button${index} ${pressed ? "button-pressed" : "button-released"} ${useCss ? "button-css" : ""} ${editorMode && ((selectedButtonIndex !== null && selectedButtonIndex !== undefined && selectedButtonIndex === index) || selectedButtonSet.has(index)) ? "button-selected" : ""}`;
-
-            return (
-              <div
-                id={`button${index}`}
-                className={className}
-                key={index}
-                onClick={
-                  editorMode
-                    ? (event) => handleButtonClick(index, event)
-                    : undefined
-                }
-                onMouseDown={
-                  editorMode
-                    ? (e) =>
-                        handleMouseDown(
-                          e,
-                          "button",
-                          index,
-                          parseFloat(button.x || defaultButton.x || "0"),
-                          parseFloat(button.y || defaultButton.y || "0"),
-                        )
-                    : undefined
-                }
-                style={style}
-              />
-            );
-          })}
-        </div>
-        {selectionRect && (
-          <div
-            className="selection-box"
-            style={{
-              left: selectionRect.left,
-              top: selectionRect.top,
-              width: selectionRect.right - selectionRect.left,
-              height: selectionRect.bottom - selectionRect.top,
-            }}
-          />
-        )}
-        {selectedGroupRect && (
-          <div
-            className="selection-bounds"
-            onMouseDown={handleGroupBoundsMouseDown}
-            onClick={handleGroupBoundsClick}
-            style={{
-              left: selectedGroupRect.left - SELECTION_BOUNDS_PADDING,
-              top: selectedGroupRect.top - SELECTION_BOUNDS_PADDING,
-              width:
-                selectedGroupRect.right -
-                selectedGroupRect.left +
-                SELECTION_BOUNDS_PADDING * 2,
-              height:
-                selectedGroupRect.bottom -
-                selectedGroupRect.top +
-                SELECTION_BOUNDS_PADDING * 2,
-            }}
-          />
-        )}
+        <StickLayer
+          stick={layout.stick}
+          show={layout.showstick}
+          stickClass={stickClass}
+          scaleX={stickScaleX}
+          scaleY={stickScaleY}
+          editorMode={editorMode}
+          selected={selectedStick}
+          onDragMouseDown={(event, initialX, initialY) =>
+            handleMouseDown(event, "stick", 0, initialX, initialY)
+          }
+          onDirectionClick={handleStickClick}
+        />
+        <ButtonLayer
+          layout={layout}
+          pressedButtons={pressedButtons}
+          editorMode={editorMode}
+          selectedButtonIndex={selectedButtonIndex}
+          selectedButtonIndexes={selectedButtonIndexes}
+          onButtonClick={handleButtonClick}
+          onButtonMouseDown={(event, index, initialX, initialY) =>
+            handleMouseDown(event, "button", index, initialX, initialY)
+          }
+        />
+        <SelectionOverlays
+          selectionRect={selectionRect}
+          selectedGroupRect={selectedGroupRect}
+          boundsPadding={SELECTION_BOUNDS_PADDING}
+          onBoundsMouseDown={handleGroupBoundsMouseDown}
+          onBoundsClick={handleGroupBoundsClick}
+        />
       </div>
     </div>
   );
