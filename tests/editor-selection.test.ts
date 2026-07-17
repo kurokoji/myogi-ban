@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { toggleSelectedIndex } from "../src/editor-selection";
+import {
+  normalizeEditorSelection,
+  toggleSelectedIndex,
+} from "../src/editor-selection";
 
 test("toggleSelectedIndex adds an unselected index", () => {
   assert.deepEqual(toggleSelectedIndex([1, 3], 2), [1, 3, 2]);
@@ -8,4 +11,12 @@ test("toggleSelectedIndex adds an unselected index", () => {
 
 test("toggleSelectedIndex removes a selected index", () => {
   assert.deepEqual(toggleSelectedIndex([1, 3, 2], 3), [1, 2]);
+});
+
+test("normalizeEditorSelection removes indexes outside the visible buttons", () => {
+  assert.deepEqual(normalizeEditorSelection([1, 8], 8, 8), {
+    buttonIndexes: [1],
+    primaryIndex: null,
+    cancelAssignment: true,
+  });
 });

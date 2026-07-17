@@ -26,7 +26,10 @@ import {
   createEmptyButtonLayout,
   updateSelectedButtonSettings,
 } from "./editor-helpers";
-import { toggleSelectedIndex } from "./editor-selection";
+import {
+  normalizeEditorSelection,
+  toggleSelectedIndex,
+} from "./editor-selection";
 import {
   type ButtonMapping,
   GamepadManager,
@@ -163,17 +166,20 @@ function EditorApp(): React.ReactElement {
   const obsUrl = `${SERVER_URL}/view`;
 
   useEffect(() => {
-    setSelectedButtonIndexes((current) =>
-      current.filter((index) => index < layout.totalbuttonshow),
+    const normalized = normalizeEditorSelection(
+      selectedButtonIndexes,
+      selectedButtonIndex,
+      layout.totalbuttonshow,
     );
-    if (
-      selectedButtonIndex !== null &&
-      selectedButtonIndex >= layout.totalbuttonshow
-    ) {
-      setSelectedButtonIndex(null);
-      cancelAssignment();
-    }
-  }, [cancelAssignment, layout.totalbuttonshow, selectedButtonIndex]);
+    setSelectedButtonIndexes(normalized.buttonIndexes);
+    setSelectedButtonIndex(normalized.primaryIndex);
+    if (normalized.cancelAssignment) cancelAssignment();
+  }, [
+    cancelAssignment,
+    layout.totalbuttonshow,
+    selectedButtonIndex,
+    selectedButtonIndexes,
+  ]);
 
   const clearGuides = useCallback(() => {
     updateLayout((next) => {
