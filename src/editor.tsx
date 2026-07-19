@@ -154,6 +154,7 @@ function EditorApp(): React.ReactElement {
     status,
     uploadImage,
     isDirty,
+    isDefaultLayout,
   } = useEditorLayouts({
     api: apiRef.current,
     layout,
@@ -442,6 +443,7 @@ function EditorApp(): React.ReactElement {
               content: (
                 <LayoutSettingsPanel
                   currentBuiltin={currentBuiltin}
+                  isDefaultLayout={isDefaultLayout}
                   isDirty={isDirty}
                   layoutNames={layoutNames}
                   selectedLayout={selectedLayout}

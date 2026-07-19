@@ -82,6 +82,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
   const [selectedLayout, setSelectedLayout] = useState("");
   const [layoutName, setLayoutName] = useState("mypreset");
   const [currentBuiltin, setCurrentBuiltin] = useState(false);
+  const [defaultLayoutName, setDefaultLayoutName] = useState("");
   const [cleanSignature, setCleanSignature] = useState("");
   const [status, setStatus] = useState<OperationStatus>(null);
 
@@ -138,6 +139,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
         const name = defaultLayout.name || "preset";
         const entries = await refreshLayouts();
         if (!cancelled) {
+          setDefaultLayoutName(name);
           const entry = selectDefaultLayoutEntry(entries, name);
           if (!entry) return;
           const data = await api.getLayout(entry.name, entry.builtin);
@@ -230,6 +232,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     const name = layoutName || layout.name || "custom";
     try {
       await api.setDefaultLayout(name);
+      setDefaultLayoutName(name);
       setStatus({ kind: "success", message: messages.defaultSaved });
     } catch (error) {
       console.error("Failed to set default layout:", error);
@@ -256,9 +259,11 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
         setSelectedLayout(selection);
         if (defaultLayout.name === layoutName) {
           await api.setDefaultLayout(fallback.name);
+          setDefaultLayoutName(fallback.name);
         }
       } else {
         setSelectedLayout("");
+        if (defaultLayout.name === layoutName) setDefaultLayoutName("");
       }
       setStatus({ kind: "success", message: messages.deleted });
     } catch (error) {
@@ -345,5 +350,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     isDirty:
       cleanSignature !==
       createEditorSnapshotSignature(layout, buttonMappings, stickMappings),
+    isDefaultLayout:
+      defaultLayoutName !== "" && defaultLayoutName === layoutName,
   };
 }

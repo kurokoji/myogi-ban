@@ -73,6 +73,7 @@ export const enTranslation = {
     "Built-in layouts cannot be overwritten. Save with a new name.",
   layoutName: "Layout name",
   setDefault: "Set as Default",
+  defaultLayout: "Default layout",
   deleteLayout: "Delete this layout",
   gamepad: "Gamepad",
   notConnected: "Not connected",

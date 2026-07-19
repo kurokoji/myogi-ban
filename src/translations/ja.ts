@@ -71,6 +71,7 @@ export const jaTranslation = {
     "組み込みレイアウトは上書きできません。名前を付けて保存してください。",
   layoutName: "レイアウト名",
   setDefault: "デフォルトに設定",
+  defaultLayout: "デフォルト設定済み",
   deleteLayout: "このレイアウトを削除",
   gamepad: "ゲームパッド",
   notConnected: "未接続",

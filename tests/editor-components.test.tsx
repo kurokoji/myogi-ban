@@ -23,6 +23,7 @@ test("duplicate layout names disable save-as before submitting", async () => {
       selectedLayout="existing:builtin"
       layoutName="existing"
       currentBuiltin={true}
+      isDefaultLayout={false}
       isDirty={false}
       status={null}
       openLayout={() => {}}
@@ -60,6 +61,7 @@ test("layout panel keeps secondary actions in a more menu", async () => {
       selectedLayout="custom:user"
       layoutName="custom"
       currentBuiltin={false}
+      isDefaultLayout={true}
       isDirty={false}
       status={null}
       openLayout={() => {}}
@@ -75,8 +77,10 @@ test("layout panel keeps secondary actions in a more menu", async () => {
   const panel = within(view.container);
 
   assert.equal(panel.queryByRole("button", { name: "deleteLayout" }), null);
-  const setDefaultButton = panel.getByRole("button", { name: "setDefault" });
-  assert.match(setDefaultButton.getAttribute("style") ?? "", /yellow/);
+  const setDefaultButton = panel.getByRole("button", {
+    name: "defaultLayout",
+  });
+  assert.equal(setDefaultButton.hasAttribute("disabled"), true);
   const moreButton = panel.getByRole("button", { name: "moreActions" });
   await user.click(moreButton);
   assert.equal(moreButton.getAttribute("aria-expanded"), "true");

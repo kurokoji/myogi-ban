@@ -26,6 +26,7 @@ interface LayoutSettingsPanelProps {
   selectedLayout: string;
   layoutName: string;
   currentBuiltin: boolean;
+  isDefaultLayout: boolean;
   isDirty: boolean;
   status: OperationStatus;
   openLayout: (value: string) => void;
@@ -143,13 +144,14 @@ export function LayoutSettingsPanel(
         )}
         <Button
           size="xs"
-          variant="light"
+          variant={props.isDefaultLayout ? "filled" : "light"}
           color="yellow"
           fullWidth
           leftSection={<IconStar size={16} />}
           onClick={props.setDefaultLayout}
+          disabled={props.isDefaultLayout}
         >
-          {t("setDefault")}
+          {t(props.isDefaultLayout ? "defaultLayout" : "setDefault")}
         </Button>
         <Menu
           keepMounted
