@@ -25,7 +25,7 @@ Myogi BanはローカルHTTPサーバー、編集画面、OBSビューアで構�
 
 ## エントリポイント
 
-- `src/electron.ts`: Electronアプリ起動用。Express/WebSocketサーバーを起動し、編集画面をBrowserWindowで開く
+- `src/electron.ts`: Electronアプリ起動用。Express/WebSocketサーバーを起動し、本番はExpress、開発時はVite Rendererの編集画面をBrowserWindowで開く
 - `src/server.ts`: Webサーバー単体起動用。Express/WebSocketサーバーだけを起動する
 - `src/local-server.ts`: Electron/Webサーバーで共有するExpress API、静的配信、WebSocket、レイアウト保存処理
 - `src/editor.tsx`: 編集画面のReactエントリ

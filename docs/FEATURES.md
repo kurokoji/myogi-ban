@@ -60,7 +60,8 @@
 
 ## 起動形態
 
-- `npm start`: Electronアプリとして起動
+- `npm start`: ビルド済みのElectronアプリとして起動
+- `npm run dev`: Vite Renderer、Electron mainの監視ビルド、Electronアプリをまとめて起動
 - `npm run start:web`: ローカルWebサーバーとして起動
 - `npm run dev:web`: ViteのFast Refreshと、開発用保存先 `.dev-data` を使うExpressサーバーを起動
 - `npm stop`: Webサーバー単体起動時のPIDファイルを使って停止

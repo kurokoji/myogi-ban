@@ -30,6 +30,15 @@ npm start
 
 編集画面をElectronウィンドウで開き、同時にローカルサーバーを起動します。
 
+開発時はVite RendererとElectronを一緒に起動します。
+
+```bash
+npm run dev
+```
+
+Reactコンポーネントの変更は、ElectronウィンドウへFast Refreshで反映されます。
+Electron mainの変更時はElectronプロセスが再起動します。
+
 ### Webサーバー単体
 
 ```bash

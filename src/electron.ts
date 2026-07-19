@@ -2,6 +2,7 @@ import { app, BrowserWindow } from "electron";
 import type * as http from "http";
 import * as path from "path";
 import { resolveElectronDataDir } from "./data-paths";
+import { resolveElectronRendererUrl } from "./electron-renderer";
 import { createLocalServer } from "./local-server";
 import { cleanupLocalServer } from "./server-cleanup";
 import { PORT } from "./types";
@@ -9,6 +10,7 @@ import { PORT } from "./types";
 let mainWindow: BrowserWindow | null = null;
 let server: http.Server | null = null;
 let dataDir = "";
+const development = process.argv.includes("--dev");
 
 function createWindow(): void {
   mainWindow = new BrowserWindow({
@@ -21,7 +23,9 @@ function createWindow(): void {
     autoHideMenuBar: true,
   });
 
-  mainWindow.loadURL(`http://localhost:${PORT}`);
+  mainWindow.loadURL(
+    resolveElectronRendererUrl({ development, serverPort: PORT }),
+  );
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
@@ -29,7 +33,7 @@ function createWindow(): void {
 
 function startServer(): void {
   dataDir = resolveElectronDataDir(
-    process.argv.includes("--dev"),
+    development,
     path.join(__dirname, ".."),
     app.getPath("userData"),
   );

@@ -19,7 +19,7 @@
     "start:web": "npm run build && node dist/server.js",
     "dev:web": "node scripts/dev-web.mjs",
     "stop": "node -e \"const fs = require('fs'); const path = require('path'); const pidFile = path.join(__dirname, 'server.pid'); if (fs.existsSync(pidFile)) { const pid = fs.readFileSync(pidFile, 'utf8'); try { process.kill(parseInt(pid), 'SIGTERM'); console.log('Server stopped (PID: ' + pid + ')'); } catch (e) { console.log('Server not running'); } if (fs.existsSync(pidFile)) { fs.unlinkSync(pidFile); } } else { console.log('Server not running (no PID file)'); }\"",
-    "dev": "npm run build && node -e \"const p = require('os').platform(); const e = p === 'linux' ? 'LD_LIBRARY_PATH=$PWD/.libs/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH ' : ''; require('child_process').execSync(e + 'electron . --dev', { stdio: 'inherit', shell: true })\"",
+    "dev": "node scripts/dev-electron.mjs",
     "build:dist": "npm run build && npx electron-builder"
   },
   "build": {
