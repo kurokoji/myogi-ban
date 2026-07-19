@@ -40,6 +40,7 @@ export const enTranslation = {
   showBackground: "Show Background",
   bgScale: "Scale",
   bgImage: "BG Image",
+  noFileSelected: "No file selected",
   selectFile: "Select File",
   useCssBg: "Use images",
   bgColor: "Color",

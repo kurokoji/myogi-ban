@@ -5,7 +5,7 @@ import {
   Paper,
   Stack,
   Switch,
-  TextInput,
+  Text,
   Title,
 } from "@mantine/core";
 import type { ChangeEvent, RefObject } from "react";
@@ -209,18 +209,14 @@ export function BackgroundSettingsPanel(
         ) : (
           <>
             <Group gap="xs" align="end" wrap="nowrap">
-              <TextInput
-                size="xs"
-                label={t("bgImage")}
-                value={layout.background.image}
-                onChange={(event) =>
-                  updateLayout((next) => {
-                    next.background.image = event.target.value;
-                  })
-                }
-                placeholder="background.png"
-                className="grow"
-              />
+              <Stack gap={2} className="grow">
+                <Text size="xs" fw={500}>
+                  {t("bgImage")}
+                </Text>
+                <Text size="xs" truncate title={layout.background.image}>
+                  {layout.background.image || t("noFileSelected")}
+                </Text>
+              </Stack>
               <Button
                 size="xs"
                 variant="light"

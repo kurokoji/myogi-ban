@@ -4,7 +4,7 @@ import test from "node:test";
 import { componentDocument, renderComponent } from "./component-render";
 import { fireEvent, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useState } from "react";
+import { createRef, useState } from "react";
 import { LayoutSettingsPanel } from "../src/components/editor/LayoutSettingsPanel";
 import { LinkedSizeInputs } from "../src/components/editor/LinkedSizeInputs";
 import { PreviewZoomControls } from "../src/components/editor/PreviewZoomControls";
@@ -14,6 +14,7 @@ import { ButtonAdvancedSettings } from "../src/components/editor/ButtonSettingsS
 import { GamepadView } from "../src/components/GamepadView";
 import { SelectionOverlays } from "../src/components/gamepad/SelectionOverlays";
 import { createDefaultLayout } from "../src/layout";
+import { BackgroundSettingsPanel } from "../src/components/editor/SettingsPanels";
 
 test("duplicate layout names disable save-as before submitting", async () => {
   let saveCalls = 0;
@@ -115,6 +116,24 @@ test("linked size inputs update height and can unlink the ratio", async () => {
   await user.click(view.getByRole("button", { name: "unlinkAspectRatio" }));
   fireEvent.change(width, { target: { value: "300" } });
   assert.equal((height as HTMLInputElement).value, "100");
+});
+
+test("background image name is text because file selection owns it", () => {
+  const layout = createDefaultLayout();
+  layout.background.useCss = false;
+  layout.background.image = "background.png";
+  const view = renderComponent(
+    <BackgroundSettingsPanel
+      layout={layout}
+      fileInputRef={createRef<HTMLInputElement>()}
+      updateLayout={() => {}}
+      uploadImage={() => {}}
+      openImagePicker={() => {}}
+    />,
+  );
+
+  assert.equal(view.queryByRole("textbox", { name: "bgImage" }), null);
+  assert.ok(view.getByText("background.png"));
 });
 
 test("button layer renders every member of a multiple selection", () => {

@@ -38,6 +38,7 @@ export const jaTranslation = {
   showBackground: "背景を表示",
   bgScale: "倍率",
   bgImage: "背景画像",
+  noFileSelected: "ファイル未選択",
   selectFile: "ファイル選択",
   useCssBg: "画像を使う",
   bgColor: "色",
