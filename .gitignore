@@ -145,6 +145,7 @@ vite.config.ts.timestamp-*
 
 # Project-specific generated files and local data
 public/js/
+public/assets/
 .libs/
 *.afphoto
 *.psd

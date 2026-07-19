@@ -1,6 +1,7 @@
 export function createRestartableProcess(spawnChild, options = {}) {
   let child = null;
   let stopping = false;
+  let restartQueue = Promise.resolve();
   const start = () => {
     const started = spawnChild();
     child = started;
@@ -22,9 +23,12 @@ export function createRestartableProcess(spawnChild, options = {}) {
   };
   return {
     start,
-    async restart() {
-      await stop();
-      return start();
+    restart() {
+      restartQueue = restartQueue.then(async () => {
+        await stop();
+        return start();
+      });
+      return restartQueue;
     },
     stop,
     current: () => child,

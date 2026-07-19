@@ -40,3 +40,26 @@ test("restartable process reports unexpected exits but not intentional stops", a
   await controller.stop();
   assert.deepEqual(exits, [[2, null]]);
 });
+
+test("restartable process serializes concurrent restart requests", async () => {
+  let activeChildren = 0;
+  let maximumActiveChildren = 0;
+  const controller = createRestartableProcess(() => {
+    activeChildren += 1;
+    maximumActiveChildren = Math.max(maximumActiveChildren, activeChildren);
+    const child = Object.assign(new EventEmitter(), {
+      kill() {
+        setTimeout(() => {
+          activeChildren -= 1;
+          child.emit("exit", 0);
+        }, 0);
+      },
+    });
+    return child;
+  });
+
+  controller.start();
+  await Promise.all([controller.restart(), controller.restart()]);
+  assert.equal(maximumActiveChildren, 1);
+  await controller.stop();
+});

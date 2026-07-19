@@ -36,19 +36,21 @@ npm start
 npm run start:web
 ```
 
-開発中は、ソース変更を自動ビルドする監視サーバーを利用できます。
+開発中は、React Fast Refreshに対応したVite開発サーバーを利用できます。
 
 ```bash
 npm run dev:web
 ```
 
-`http://localhost:33770` を開いてください。開発時のレイアウトはプロジェクト内の
-`.dev-data` に保存されます。変更後はブラウザを更新するだけで反映され、サーバーの
-再起動は不要です。
+編集画面は `http://localhost:5173` を開いてください。
+開発時のレイアウトはプロジェクト内の `.dev-data` に保存されます。
+Reactコンポーネントの変更はブラウザへ即時反映されます。
+サーバー側の変更時はExpressプロセスだけが再起動します。
 
 ブラウザで以下にアクセスします。
 
-- 編集画面: http://localhost:33770
+- 開発用編集画面: http://localhost:5173
+- 開発用ビューア: http://localhost:5173/view.html
 - OBS用ビューア: http://localhost:33770/view
 
 ### 停止
@@ -83,8 +85,7 @@ npm run build
 # 個別ビルド
 npm run build:server
 npm run build:electron
-npm run build:editor
-npm run build:viewer
+npm run build:web
 
 # 型チェック
 npm run typecheck

@@ -62,13 +62,13 @@
 
 - `npm start`: Electronアプリとして起動
 - `npm run start:web`: ローカルWebサーバーとして起動
-- `npm run dev:web`: フロントエンドを自動ビルドしながら、開発用保存先 `.dev-data` を使用してWebサーバーを起動
+- `npm run dev:web`: ViteのFast Refreshと、開発用保存先 `.dev-data` を使うExpressサーバーを起動
 - `npm stop`: Webサーバー単体起動時のPIDファイルを使って停止
 - `npm run build:dist`: electron-builderで配布用パッケージを作成
 
 ## 制限事項
 
-- サーバーのポートは `33770` 固定
+- Expressサーバーのポートは `33770`、Vite開発サーバーのポートは `5173` 固定
 - ボタン表示数のUI上限は48
 - Gamepad APIの認識には、ブラウザ上でゲームパッドのボタン入力が必要な場合があります
 - 画像アップロードAPIのJSON上限は100MB

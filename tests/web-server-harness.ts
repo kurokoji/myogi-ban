@@ -59,7 +59,7 @@ export async function startTestWebServer(
   };
 
   return {
-    webSocketUrl: `ws://127.0.0.1:${port}`,
+    webSocketUrl: `ws://127.0.0.1:${port}/ws`,
     async getJson<T>(path) {
       const response = await successfulResponse(path);
       return ((await response.json()) as ApiSuccess<T>).data;

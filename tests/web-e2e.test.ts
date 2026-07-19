@@ -55,3 +55,22 @@ test("web layout flow reaches the viewer websocket", async () => {
     await app.close();
   }
 });
+
+test("websocket rejects paths reserved for Vite HMR", async () => {
+  const app = await startTestWebServer({ default: createDefaultLayout() });
+  const rootUrl = app.webSocketUrl.replace(/\/ws$/, "/");
+
+  try {
+    const result = await new Promise<"open" | "rejected">((resolve) => {
+      const socket = new WebSocket(rootUrl);
+      socket.once("open", () => {
+        socket.close();
+        resolve("open");
+      });
+      socket.once("unexpected-response", () => resolve("rejected"));
+    });
+    assert.equal(result, "rejected");
+  } finally {
+    await app.close();
+  }
+});

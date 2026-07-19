@@ -8,6 +8,16 @@ export type ViewerConnectionEvent =
   | "socket-close"
   | "api-error";
 
+interface ViewerLocation {
+  protocol: string;
+  host: string;
+}
+
+export function createViewerWebSocketUrl(location: ViewerLocation): string {
+  const protocol = location.protocol === "https:" ? "wss" : "ws";
+  return `${protocol}://${location.host}/ws`;
+}
+
 export function nextViewerConnectionStatus(
   current: ViewerConnectionStatus,
   event: ViewerConnectionEvent,

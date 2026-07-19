@@ -33,7 +33,7 @@ function writeText(filePath: string, data: string): void {
 export function createLocalServer(options: LocalServerOptions): http.Server {
   const expressApp = express();
   const server = http.createServer(expressApp);
-  const wss = new WebSocket.Server({ server });
+  const wss = new WebSocket.Server({ server, path: "/ws" });
   const layouts = new LayoutRepository(options);
   const stateStore: { latest: GamepadState | null } = { latest: null };
 

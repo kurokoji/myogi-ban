@@ -1,10 +1,5 @@
 import type { ApiSuccess } from "./api-response";
-import {
-  type GamepadState,
-  type Layout,
-  type LayoutEntry,
-  SERVER_URL,
-} from "./types";
+import type { GamepadState, Layout, LayoutEntry } from "./types";
 
 interface UploadImageOptions {
   data: string;
@@ -28,7 +23,7 @@ export class ApiError extends Error {
 }
 
 async function request(path: string, init?: RequestInit): Promise<Response> {
-  const response = await fetch(`${SERVER_URL}${path}`, init);
+  const response = await fetch(path, init);
   if (!response.ok) {
     throw new ApiError(response.status, init?.method ?? "GET", path);
   }

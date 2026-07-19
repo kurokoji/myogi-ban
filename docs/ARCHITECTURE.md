@@ -128,13 +128,12 @@ CSS描画ボタンは `cssShape` で `"circle"`、`"rounded"`、`"square"` を�
 
 ## ビルド
 
-esbuildで各エントリをバンドルします。
+サーバーとElectron mainはesbuild、ブラウザ向けのeditorとviewerはViteでバンドルします。
 
 ```bash
 npm run build:server   # dist/server.js
 npm run build:electron # dist/electron.js
-npm run build:editor   # public/js/editor.js
-npm run build:viewer   # public/js/viewer.js
+npm run build:web      # public/index.html、public/view.html、public/assets/*
 ```
 
 `npm run build` は上記をまとめて実行します。`npm run typecheck` は `tsc --noEmit` を実行します。

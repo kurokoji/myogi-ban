@@ -1,34 +1,10 @@
 import { spawn } from "node:child_process";
-import { createRequire } from "node:module";
 import { context } from "esbuild";
+import { createServer } from "vite";
 import { createRestartableProcess } from "./dev-process.mjs";
 
-const require = createRequire(import.meta.url);
-const pkg = require("../package.json");
-
-const editor = await context({
-  entryPoints: ["src/editor.tsx"],
-  bundle: true,
-  sourcemap: true,
-  define: {
-    "process.env.NODE_ENV": JSON.stringify("development"),
-    "process.env.npm_package_version": JSON.stringify(pkg.version),
-  },
-  outfile: "public/js/editor.js",
-});
-
-const viewer = await context({
-  entryPoints: ["src/viewer.tsx"],
-  bundle: true,
-  sourcemap: true,
-  define: {
-    "process.env.NODE_ENV": JSON.stringify("development"),
-  },
-  outfile: "public/js/viewer.js",
-});
-
 let serverProcess;
-const server = await context({
+const serverBuild = await context({
   entryPoints: ["src/server.ts"],
   bundle: true,
   platform: "node",
@@ -39,16 +15,17 @@ const server = await context({
       name: "restart-server",
       setup(build) {
         build.onEnd((result) => {
-          if (result.errors.length === 0 && serverProcess)
+          if (result.errors.length === 0 && serverProcess) {
             void serverProcess.restart();
+          }
         });
       },
     },
   ],
 });
 
-await Promise.all([editor.rebuild(), viewer.rebuild(), server.rebuild()]);
-await Promise.all([editor.watch(), viewer.watch(), server.watch()]);
+await serverBuild.rebuild();
+await serverBuild.watch();
 
 serverProcess = createRestartableProcess(
   () =>
@@ -61,11 +38,7 @@ serverProcess = createRestartableProcess(
       console.error(
         `Development server exited unexpectedly (${code ?? signal})`,
       );
-      void Promise.all([
-        editor.dispose(),
-        viewer.dispose(),
-        server.dispose(),
-      ]).then(() => {
+      void serverBuild.dispose().then(() => {
         process.exitCode = code ?? 1;
       });
     },
@@ -73,12 +46,17 @@ serverProcess = createRestartableProcess(
 );
 serverProcess.start();
 
+const vite = await createServer();
+await vite.listen();
+vite.printUrls();
+
 let shuttingDown = false;
 async function shutdown() {
   if (shuttingDown) return;
   shuttingDown = true;
   await serverProcess.stop();
-  await Promise.all([editor.dispose(), viewer.dispose(), server.dispose()]);
+  await vite.close();
+  await serverBuild.dispose();
 }
 
 process.on("SIGINT", shutdown);

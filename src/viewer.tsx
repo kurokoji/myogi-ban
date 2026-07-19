@@ -16,6 +16,7 @@ import { useLatestRef } from "./hooks/useLatestRef";
 import { createDefaultLayout, ensureLayoutDefaults } from "./layout";
 import type { GamepadState, Layout } from "./types";
 import {
+  createViewerWebSocketUrl,
   nextViewerConnectionStatus,
   type ViewerConnectionStatus,
 } from "./viewer-connection";
@@ -77,9 +78,7 @@ function ViewerApp(): React.ReactElement {
     let socket: WebSocket | null = null;
     let retryTimer = 0;
     const connect = () => {
-      socket = new WebSocket(
-        `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}`,
-      );
+      socket = new WebSocket(createViewerWebSocketUrl(location));
       socket.onopen = () =>
         setConnectionStatus((current) =>
           nextViewerConnectionStatus(current, "socket-open"),

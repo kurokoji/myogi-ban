@@ -3,13 +3,14 @@ import test from "node:test";
 import { ApiClient, ApiError } from "../src/api";
 
 test("ApiClient returns parsed JSON for successful requests", async (t) => {
-  t.mock.method(globalThis, "fetch", async () =>
+  const fetchMock = t.mock.method(globalThis, "fetch", async () =>
     Response.json({ ok: true, data: [{ name: "default", builtin: true }] }),
   );
 
   assert.deepEqual(await new ApiClient().getLayouts(), [
     { name: "default", builtin: true },
   ]);
+  assert.equal(fetchMock.mock.calls[0].arguments[0], "/api/layouts");
 });
 
 test("ApiClient rejects unsuccessful HTTP responses", async (t) => {
