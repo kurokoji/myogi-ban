@@ -81,6 +81,7 @@ function EditorApp(): React.ReactElement {
   const inspectorTarget = resolveInspectorTarget(selection);
   const [language, setLanguage] = useState(i18n.language);
   const [copiedObsUrl, setCopiedObsUrl] = useState(false);
+  const [snappingEnabled, setSnappingEnabled] = useState(true);
   const layoutRef = useRef(layout);
   const previewScrollRef = useRef<HTMLDivElement | null>(null);
   const {
@@ -537,9 +538,11 @@ function EditorApp(): React.ReactElement {
           zoomPercent={zoomPercent}
           canZoomIn={canZoomIn}
           canZoomOut={canZoomOut}
+          snappingEnabled={snappingEnabled}
           onZoomOut={() => zoomPreview(-PREVIEW_SCALE_STEP)}
           onZoomIn={() => zoomPreview(PREVIEW_SCALE_STEP)}
           onReset={() => changePreviewScale(1)}
+          onSnappingChange={setSnappingEnabled}
         />
         <div
           id="preview-scroll"
@@ -631,6 +634,7 @@ function EditorApp(): React.ReactElement {
                 selectedButtonIndex={selectedButtonIndex}
                 selectedButtonIndexes={selectedButtonIndexes}
                 selectedStick={selectedStick}
+                snappingEnabled={snappingEnabled}
                 selectionSurfaceRef={previewScrollRef}
                 onBackgroundSizeChange={updateBackgroundSize}
                 onButtonClick={selectButtonAndStartAssignment}

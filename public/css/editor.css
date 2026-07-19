@@ -448,6 +448,38 @@ body {
   pointer-events: none;
 }
 
+#preview .snap-guide {
+  position: absolute;
+  z-index: 80;
+  background: rgba(34, 211, 238, 0.95);
+  box-shadow: 0 0 6px rgba(34, 211, 238, 0.75);
+  pointer-events: none;
+}
+
+#preview .snap-guide-vertical {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+
+#preview .snap-guide-horizontal {
+  right: 0;
+  left: 0;
+  height: 1px;
+}
+
+#preview .snap-target {
+  position: absolute;
+  z-index: 79;
+  border: 2px solid rgba(34, 211, 238, 0.95);
+  border-radius: 6px;
+  background: rgba(34, 211, 238, 0.12);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.5),
+    0 0 12px rgba(34, 211, 238, 0.7);
+  pointer-events: none;
+}
+
 #preview .selection-bounds {
   position: absolute;
   z-index: 59;

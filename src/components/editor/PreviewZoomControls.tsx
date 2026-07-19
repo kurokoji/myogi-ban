@@ -1,14 +1,16 @@
 import { ActionIcon, UnstyledButton } from "@mantine/core";
-import { IconZoomIn, IconZoomOut } from "@tabler/icons-react";
+import { IconMagnet, IconZoomIn, IconZoomOut } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 
 interface PreviewZoomControlsProps {
   zoomPercent: number;
   canZoomIn: boolean;
   canZoomOut: boolean;
+  snappingEnabled: boolean;
   onZoomIn: () => void;
   onZoomOut: () => void;
   onReset: () => void;
+  onSnappingChange: (enabled: boolean) => void;
 }
 
 export function PreviewZoomControls(
@@ -19,8 +21,18 @@ export function PreviewZoomControls(
     <div
       className="preview-toolbar"
       role="toolbar"
-      aria-label={t("previewZoom")}
+      aria-label={t("previewControls")}
     >
+      <ActionIcon
+        size="sm"
+        variant={props.snappingEnabled ? "filled" : "light"}
+        aria-label={t("snapping")}
+        aria-pressed={props.snappingEnabled}
+        title={t("snapping")}
+        onClick={() => props.onSnappingChange(!props.snappingEnabled)}
+      >
+        <IconMagnet size={16} />
+      </ActionIcon>
       <ActionIcon
         size="sm"
         variant="light"

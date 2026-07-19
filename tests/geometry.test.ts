@@ -4,6 +4,10 @@ import {
   dragGroupPositions,
   dragPosition,
   rectsIntersect,
+  rectsOnSnapGuides,
+  resolveRectSnap,
+  snapRect,
+  snapRectDelta,
   unionRectsAtIndexes,
 } from "../src/geometry";
 
@@ -65,4 +69,52 @@ test("unionRectsAtIndexes visits selected rectangles by index", () => {
     bottom: 15,
   });
   assert.equal(unionRectsAtIndexes(rects, []), null);
+});
+
+test("snapRectDelta aligns nearby moving edges with target edges", () => {
+  const result = snapRectDelta(
+    { left: 10, top: 10, right: 50, bottom: 50 },
+    { x: 47, y: 18 },
+    [{ left: 100, top: 30, right: 140, bottom: 70 }],
+    6,
+  );
+
+  assert.deepEqual(result, { x: 50, y: 20 });
+});
+
+test("snapRect reports the coordinates used for alignment guides", () => {
+  const result = snapRect(
+    { left: 10, top: 10, right: 50, bottom: 50 },
+    { x: 47, y: 18 },
+    [{ left: 100, top: 30, right: 140, bottom: 70 }],
+    6,
+  );
+
+  assert.deepEqual(result, {
+    delta: { x: 50, y: 20 },
+    guideX: 100,
+    guideY: 30,
+  });
+});
+
+test("rectsOnSnapGuides identifies the buttons aligned to active guides", () => {
+  const targets = [
+    { left: 80, top: 30, right: 120, bottom: 70 },
+    { left: 180, top: 130, right: 220, bottom: 170 },
+  ];
+
+  assert.deepEqual(rectsOnSnapGuides(targets, 100, 150), targets);
+  assert.deepEqual(rectsOnSnapGuides(targets, 80, undefined), [targets[0]]);
+});
+
+test("resolveRectSnap preserves raw movement when snapping is disabled", () => {
+  const result = resolveRectSnap(
+    false,
+    { left: 10, top: 10, right: 50, bottom: 50 },
+    { x: 47, y: 18 },
+    [{ left: 100, top: 30, right: 140, bottom: 70 }],
+    6,
+  );
+
+  assert.deepEqual(result, { delta: { x: 47, y: 18 } });
 });

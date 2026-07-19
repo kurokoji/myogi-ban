@@ -6,6 +6,8 @@ import {
   dragPosition,
   type Rect,
   rectsIntersect,
+  rectsOnSnapGuides,
+  resolveRectSnap,
   unionRectsAtIndexes,
 } from "../geometry";
 import type { Layout } from "../types";
@@ -16,6 +18,7 @@ import { StickLayer } from "./gamepad/StickLayer";
 
 const STICK_SELECTION_SIZE = 96;
 const SELECTION_BOUNDS_PADDING = 12;
+const SNAP_THRESHOLD = 6;
 
 export interface GamepadViewProps {
   layout: Layout;
@@ -26,6 +29,7 @@ export interface GamepadViewProps {
   selectedButtonIndex?: number | null;
   selectedButtonIndexes?: number[];
   selectedStick?: boolean;
+  snappingEnabled?: boolean;
   selectionSurfaceRef?: React.RefObject<HTMLElement | null>;
   onBackgroundSizeChange?: (width: number, height: number) => void;
   onButtonClick?: (index: number, toggleSelection: boolean) => void;
@@ -50,6 +54,8 @@ type DragState =
       startY: number;
       initialX: number;
       initialY: number;
+      snapRect: Rect;
+      snapTargets: Rect[];
     }
   | {
       type: "group";
@@ -57,6 +63,8 @@ type DragState =
       startY: number;
       buttons: Array<{ index: number; initialX: number; initialY: number }>;
       stick: { initialX: number; initialY: number } | null;
+      snapRect: Rect;
+      snapTargets: Rect[];
     }
   | {
       type: "selection";
@@ -205,6 +213,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     selectedButtonIndex,
     selectedButtonIndexes = [],
     selectedStick = false,
+    snappingEnabled = true,
     selectionSurfaceRef,
     onBackgroundSizeChange,
     onButtonClick,
@@ -226,6 +235,11 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
   const dragMovedRef = useRef(false);
   const areaRef = useRef<HTMLDivElement | null>(null);
   const [dragState, setDragState] = useState<DragState | null>(null);
+  const [snapGuides, setSnapGuides] = useState<{
+    x?: number;
+    y?: number;
+    targets: Rect[];
+  } | null>(null);
 
   const buttonRects = useMemo(
     () =>
@@ -304,6 +318,10 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
         startY: local.y,
         buttons,
         stick,
+        snapRect: selectedGroupRect ?? stickRect,
+        snapTargets: buttonRects.filter(
+          (button) => !selectedButtonSet.has(button.index),
+        ),
       };
     },
     [
@@ -311,8 +329,11 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
       layout.buttons,
       layout.stick.x,
       layout.stick.y,
+      buttonRects,
       selectedButtonSet,
+      selectedGroupRect,
       selectedStick,
+      stickRect,
     ],
   );
 
@@ -330,6 +351,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
       if (!area) return;
       const local = pointerToLocal(e, area, backgroundSize);
       dragMovedRef.current = false;
+      setSnapGuides(null);
       onLayoutDragStart?.();
 
       if (
@@ -347,15 +369,22 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
         startY: local.y,
         initialX,
         initialY,
+        snapRect: type === "button" ? buttonRects[index] : stickRect,
+        snapTargets:
+          type === "button"
+            ? buttonRects.filter((button) => button.index !== index)
+            : buttonRects,
       });
     },
     [
       backgroundSize,
+      buttonRects,
       createGroupDragState,
       editorMode,
       onLayoutDragStart,
       selectedButtonSet,
       selectedStick,
+      stickRect,
     ],
   );
 
@@ -367,6 +396,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
       if (!area) return;
       const local = pointerToLocal(event, area, backgroundSize);
       dragMovedRef.current = false;
+      setSnapGuides(null);
       onLayoutDragStart?.();
       setDragState(createGroupDragState(local));
     },
@@ -486,6 +516,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
 
     const handleMouseMove = (e: MouseEvent) => {
       if (dragState.type === "selection") {
+        setSnapGuides(null);
         const area = areaRef.current;
         if (!area) return;
         const local = pointerToLocal(e, area, backgroundSize);
@@ -511,18 +542,42 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
       if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {
         dragMovedRef.current = true;
       }
+      const snap = resolveRectSnap(
+        snappingEnabled,
+        dragState.snapRect,
+        { x: deltaX, y: deltaY },
+        dragState.snapTargets,
+        SNAP_THRESHOLD,
+      );
+      const snappedDelta = snap.delta;
+      setSnapGuides(
+        snap.guideX === undefined && snap.guideY === undefined
+          ? null
+          : {
+              x: snap.guideX,
+              y: snap.guideY,
+              targets: rectsOnSnapGuides(
+                dragState.snapTargets,
+                snap.guideX,
+                snap.guideY,
+              ),
+            },
+      );
 
       if (dragState.type === "group") {
         onPositionsChange?.({
           buttons: dragGroupPositions(
             dragState.buttons,
             { x: dragState.startX, y: dragState.startY },
-            local,
+            {
+              x: dragState.startX + snappedDelta.x,
+              y: dragState.startY + snappedDelta.y,
+            },
           ),
           stick: dragState.stick
             ? {
-                x: Math.round(dragState.stick.initialX + deltaX),
-                y: Math.round(dragState.stick.initialY + deltaY),
+                x: Math.round(dragState.stick.initialX + snappedDelta.x),
+                y: Math.round(dragState.stick.initialY + snappedDelta.y),
               }
             : undefined,
         });
@@ -531,8 +586,8 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
 
       const position = dragPosition(
         { x: dragState.initialX, y: dragState.initialY },
-        { x: dragState.startX, y: dragState.startY },
-        local,
+        { x: 0, y: 0 },
+        snappedDelta,
       );
 
       if (dragState.type === "button") {
@@ -545,6 +600,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     };
 
     const handleMouseUp = () => {
+      setSnapGuides(null);
       if (dragState.type === "selection") {
         const selectedRect = normalizedRect(
           dragState.startX,
@@ -589,6 +645,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     onPositionsChange,
     onLayoutDragEnd,
     onSelectionChange,
+    snappingEnabled,
     stickRect,
   ]);
 
@@ -658,6 +715,8 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
         <SelectionOverlays
           selectionRect={selectionRect}
           selectedGroupRect={selectedGroupRect}
+          snapGuides={snapGuides}
+          snapTargets={snapGuides?.targets}
           boundsPadding={SELECTION_BOUNDS_PADDING}
           onBoundsMouseDown={handleGroupBoundsMouseDown}
           onBoundsClick={handleGroupBoundsClick}

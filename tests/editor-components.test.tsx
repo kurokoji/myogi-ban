@@ -12,6 +12,7 @@ import { SidebarAccordion } from "../src/components/editor/SidebarAccordion";
 import { ButtonLayer } from "../src/components/gamepad/ButtonLayer";
 import { ButtonAdvancedSettings } from "../src/components/editor/ButtonSettingsSections";
 import { GamepadView } from "../src/components/GamepadView";
+import { SelectionOverlays } from "../src/components/gamepad/SelectionOverlays";
 import { createDefaultLayout } from "../src/layout";
 
 test("duplicate layout names disable save-as before submitting", async () => {
@@ -151,22 +152,57 @@ test("control-clicking the stick center requests selection toggle", () => {
   assert.deepEqual(clicks, [{ index: 0, toggle: true }]);
 });
 
+test("selection overlays show active snap alignment guides", () => {
+  const view = renderComponent(
+    <SelectionOverlays
+      selectionRect={null}
+      selectedGroupRect={null}
+      snapGuides={{ x: 120, y: 80 }}
+      snapTargets={[{ left: 100, top: 60, right: 140, bottom: 100 }]}
+      boundsPadding={0}
+      onBoundsMouseDown={() => {}}
+      onBoundsClick={() => {}}
+    />,
+  );
+
+  const vertical = view.container.querySelector<HTMLElement>(
+    ".snap-guide-vertical",
+  );
+  const horizontal = view.container.querySelector<HTMLElement>(
+    ".snap-guide-horizontal",
+  );
+  assert.equal(vertical?.style.left, "120px");
+  assert.equal(horizontal?.style.top, "80px");
+  const target = view.container.querySelector<HTMLElement>(".snap-target");
+  assert.equal(target?.style.left, "100px");
+  assert.equal(target?.style.top, "60px");
+  assert.equal(target?.style.width, "40px");
+  assert.equal(target?.style.height, "40px");
+});
+
 test("zoom percentage resets zoom without a separate reset button", async () => {
   const changes: number[] = [];
+  const snappingChanges: boolean[] = [];
   const view = renderComponent(
     <PreviewZoomControls
       zoomPercent={140}
       canZoomIn={true}
       canZoomOut={true}
+      snappingEnabled={true}
       onZoomIn={() => {}}
       onZoomOut={() => {}}
       onReset={() => changes.push(1)}
+      onSnappingChange={(enabled) => snappingChanges.push(enabled)}
     />,
   );
   const controls = within(view.container);
   const user = userEvent.setup({ document: componentDocument });
 
-  assert.equal(controls.getAllByRole("button").length, 3);
+  assert.equal(controls.getAllByRole("button").length, 4);
+  const snapping = controls.getByRole("button", { name: "snapping" });
+  assert.equal(snapping.getAttribute("aria-pressed"), "true");
+  await user.click(snapping);
+  assert.deepEqual(snappingChanges, [false]);
   await user.click(controls.getByRole("button", { name: "resetZoom" }));
   assert.deepEqual(changes, [1]);
   assert.equal(

@@ -4,6 +4,8 @@ import type { Rect } from "../../geometry";
 interface SelectionOverlaysProps {
   selectionRect: Rect | null;
   selectedGroupRect: Rect | null;
+  snapGuides?: { x?: number; y?: number } | null;
+  snapTargets?: Rect[];
   boundsPadding: number;
   onBoundsMouseDown: (event: React.MouseEvent<HTMLDivElement>) => void;
   onBoundsClick: (event: React.MouseEvent<HTMLDivElement>) => void;
@@ -12,12 +14,38 @@ interface SelectionOverlaysProps {
 export function SelectionOverlays({
   selectionRect,
   selectedGroupRect,
+  snapGuides,
+  snapTargets = [],
   boundsPadding,
   onBoundsMouseDown,
   onBoundsClick,
 }: SelectionOverlaysProps): React.ReactElement {
   return (
     <>
+      {snapGuides?.x !== undefined && (
+        <div
+          className="snap-guide snap-guide-vertical"
+          style={{ left: snapGuides.x }}
+        />
+      )}
+      {snapGuides?.y !== undefined && (
+        <div
+          className="snap-guide snap-guide-horizontal"
+          style={{ top: snapGuides.y }}
+        />
+      )}
+      {snapTargets.map((target, index) => (
+        <div
+          className="snap-target"
+          key={`${target.left}:${target.top}:${index}`}
+          style={{
+            left: target.left,
+            top: target.top,
+            width: target.right - target.left,
+            height: target.bottom - target.top,
+          }}
+        />
+      ))}
       {selectionRect && (
         <div
           className="selection-box"
