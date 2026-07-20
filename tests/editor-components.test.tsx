@@ -3,7 +3,6 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { componentDocument, renderComponent } from "./component-render";
 import { fireEvent, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { createRef, useState } from "react";
 import { LayoutSettingsPanel } from "../src/components/editor/LayoutSettingsPanel";
 import { DisplaySettingsPanel } from "../src/components/editor/DisplaySettingsPanel";
@@ -41,7 +40,7 @@ test("theme control selects automatic, light, and dark schemes with icons", () =
   );
 });
 
-test("duplicate layout names disable save-as before submitting", async () => {
+test("duplicate layout names disable save-as before submitting", () => {
   let saveCalls = 0;
   const view = renderComponent(
     <LayoutSettingsPanel
@@ -64,12 +63,9 @@ test("duplicate layout names disable save-as before submitting", async () => {
       importLayout={() => {}}
     />,
   );
-  const user = userEvent.setup({ document: componentDocument });
-
-  await user.click(view.getByRole("button", { name: "saveAs" }));
+  fireEvent.click(view.getByRole("button", { name: "saveAs" }));
   const input = view.getByRole("textbox", { name: "layoutName" });
-  await user.clear(input);
-  await user.type(input, "existing");
+  fireEvent.change(input, { target: { value: "existing" } });
 
   assert.equal(
     view
