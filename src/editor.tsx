@@ -26,6 +26,7 @@ import {
   StickSettingsPanel,
 } from "./components/editor/SettingsPanels";
 import { SidebarAccordion } from "./components/editor/SidebarAccordion";
+import { ThemeControl } from "./components/editor/ThemeControl";
 import { GamepadView } from "./components/GamepadView";
 import {
   addEditorButton,
@@ -396,9 +397,13 @@ function EditorApp(): React.ReactElement {
     <MantineProvider defaultColorScheme="auto">
       <aside id="sidebar">
         <div className="sidebar-header">
-          <Title order={1}>
-            {t("appTitle")} <span className="app-version">v{APP_VERSION}</span>
-          </Title>
+          <div className="sidebar-title-row">
+            <Title order={1}>
+              {t("appTitle")}{" "}
+              <span className="app-version">v{APP_VERSION}</span>
+            </Title>
+            <ThemeControl />
+          </div>
           <p className="server-url">
             {t("obs")}: <span>{obsUrl}</span>
             <ActionIcon

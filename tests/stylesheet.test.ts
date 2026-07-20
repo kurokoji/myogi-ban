@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const stylesheet = readFileSync("public/css/style.css", "utf8");
+const editorStylesheet = readFileSync("public/css/editor.css", "utf8");
 
 test("viewer stylesheet does not contain legacy image stick rules", () => {
   assert.doesNotMatch(
@@ -11,4 +12,9 @@ test("viewer stylesheet does not contain legacy image stick rules", () => {
   );
   assert.doesNotMatch(stylesheet, /\.stick:not\(\[class="stick"\]\)/);
   assert.doesNotMatch(stylesheet, /\[class="stick"\]/);
+});
+
+test("editor borders follow the active color scheme", () => {
+  assert.doesNotMatch(editorStylesheet, /var\(--mantine-color-gray-3\)/);
+  assert.match(editorStylesheet, /var\(--mantine-color-default-border\)/);
 });

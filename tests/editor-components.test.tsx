@@ -15,6 +15,31 @@ import { GamepadView } from "../src/components/GamepadView";
 import { SelectionOverlays } from "../src/components/gamepad/SelectionOverlays";
 import { createDefaultLayout } from "../src/layout";
 import { BackgroundSettingsPanel } from "../src/components/editor/SettingsPanels";
+import { ThemeControl } from "../src/components/editor/ThemeControl";
+
+test("theme control selects automatic, light, and dark schemes with icons", async () => {
+  const view = renderComponent(<ThemeControl />);
+  const user = userEvent.setup({ document: componentDocument });
+
+  const autoTheme = view.getByRole("radio", { name: "themeAuto" });
+  assert.ok(view.getByRole("radio", { name: "themeLight" }));
+  const darkTheme = view.getByRole("radio", { name: "themeDark" });
+  assert.ok(view.container.querySelector(".tabler-icon-sun"));
+  assert.ok(view.container.querySelector(".tabler-icon-device-desktop"));
+  assert.ok(view.container.querySelector(".tabler-icon-moon"));
+  await user.click(darkTheme);
+  assert.equal(
+    componentDocument.documentElement.dataset.mantineColorScheme,
+    "dark",
+  );
+  await user.click(autoTheme);
+  assert.equal(
+    componentDocument.defaultView?.localStorage.getItem(
+      "mantine-color-scheme-value",
+    ),
+    "auto",
+  );
+});
 
 test("duplicate layout names disable save-as before submitting", async () => {
   let saveCalls = 0;

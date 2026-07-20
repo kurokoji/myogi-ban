@@ -11,6 +11,12 @@ Object.assign(globalThis, {
   HTMLElement: componentDom.window.HTMLElement,
   Element: componentDom.window.Element,
   Node: componentDom.window.Node,
+  MutationObserver: componentDom.window.MutationObserver,
+  ResizeObserver: class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  },
   getComputedStyle: componentDom.window.getComputedStyle,
   requestAnimationFrame: (callback: FrameRequestCallback) =>
     setTimeout(callback, 0),

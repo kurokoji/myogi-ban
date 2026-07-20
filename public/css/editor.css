@@ -19,12 +19,25 @@ body {
   width: 320px;
   padding: 10px;
   overflow-y: auto;
-  border-right: 1px solid var(--mantine-color-gray-3);
+  border-right: 1px solid var(--mantine-color-default-border);
   background: var(--mantine-color-body);
 }
 
 .sidebar-header {
   margin-bottom: 10px;
+}
+
+.sidebar-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.theme-option-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sidebar-header h1 {
@@ -154,7 +167,7 @@ body {
   gap: 6px;
   margin-top: 8px;
   padding: 8px;
-  border: 1px solid var(--mantine-color-gray-3);
+  border: 1px solid var(--mantine-color-default-border);
   border-radius: 6px;
 }
 
