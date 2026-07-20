@@ -3,10 +3,8 @@ import { useTranslation } from "react-i18next";
 
 interface DisplaySettingsPanelProps {
   language: string;
-  previewScale: number;
   hasGuides: boolean;
   onLanguageChange: (language: string) => void;
-  onPreviewScaleChange: (scale: number) => void;
   onClearGuides: () => void;
 }
 
@@ -29,21 +27,6 @@ export function DisplaySettingsPanel(
             { value: "en", label: "English" },
           ]}
         />
-        <label className="range-label">
-          <span>
-            {t("scale")} <b>{props.previewScale.toFixed(1)}</b>
-          </span>
-          <input
-            type="range"
-            min="0.1"
-            max="3"
-            step="0.1"
-            value={props.previewScale}
-            onChange={(event) =>
-              props.onPreviewScaleChange(parseFloat(event.target.value))
-            }
-          />
-        </label>
         <Button
           size="xs"
           variant="light"

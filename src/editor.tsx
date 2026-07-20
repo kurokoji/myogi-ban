@@ -424,24 +424,18 @@ function EditorApp(): React.ReactElement {
         </div>
 
         <SidebarAccordion
+          fixedContent={
+            <DisplaySettingsPanel
+              language={language}
+              hasGuides={
+                layout.guides.vertical.length > 0 ||
+                layout.guides.horizontal.length > 0
+              }
+              onLanguageChange={changeLanguage}
+              onClearGuides={clearGuides}
+            />
+          }
           sections={[
-            {
-              value: "display",
-              label: t("display"),
-              content: (
-                <DisplaySettingsPanel
-                  language={language}
-                  previewScale={previewScale}
-                  hasGuides={
-                    layout.guides.vertical.length > 0 ||
-                    layout.guides.horizontal.length > 0
-                  }
-                  onLanguageChange={changeLanguage}
-                  onPreviewScaleChange={changePreviewScale}
-                  onClearGuides={clearGuides}
-                />
-              ),
-            },
             {
               value: "layout",
               label: t("layout"),

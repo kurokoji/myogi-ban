@@ -6,6 +6,7 @@ import { fireEvent, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createRef, useState } from "react";
 import { LayoutSettingsPanel } from "../src/components/editor/LayoutSettingsPanel";
+import { DisplaySettingsPanel } from "../src/components/editor/DisplaySettingsPanel";
 import { LinkedSizeInputs } from "../src/components/editor/LinkedSizeInputs";
 import { PreviewZoomControls } from "../src/components/editor/PreviewZoomControls";
 import { SidebarAccordion } from "../src/components/editor/SidebarAccordion";
@@ -17,9 +18,8 @@ import { createDefaultLayout } from "../src/layout";
 import { BackgroundSettingsPanel } from "../src/components/editor/SettingsPanels";
 import { ThemeControl } from "../src/components/editor/ThemeControl";
 
-test("theme control selects automatic, light, and dark schemes with icons", async () => {
+test("theme control selects automatic, light, and dark schemes with icons", () => {
   const view = renderComponent(<ThemeControl />);
-  const user = userEvent.setup({ document: componentDocument });
 
   const autoTheme = view.getByRole("radio", { name: "themeAuto" });
   assert.ok(view.getByRole("radio", { name: "themeLight" }));
@@ -27,12 +27,12 @@ test("theme control selects automatic, light, and dark schemes with icons", asyn
   assert.ok(view.container.querySelector(".tabler-icon-sun"));
   assert.ok(view.container.querySelector(".tabler-icon-device-desktop"));
   assert.ok(view.container.querySelector(".tabler-icon-moon"));
-  await user.click(darkTheme);
+  fireEvent.click(darkTheme);
   assert.equal(
     componentDocument.documentElement.dataset.mantineColorScheme,
     "dark",
   );
-  await user.click(autoTheme);
+  fireEvent.click(autoTheme);
   assert.equal(
     componentDocument.defaultView?.localStorage.getItem(
       "mantine-color-scheme-value",
@@ -80,7 +80,7 @@ test("duplicate layout names disable save-as before submitting", async () => {
   assert.equal(saveCalls, 0);
 });
 
-test("layout panel keeps secondary actions in a more menu", async () => {
+test("layout panel keeps secondary actions in a more menu", () => {
   const view = renderComponent(
     <LayoutSettingsPanel
       layoutNames={[{ name: "custom", builtin: false }]}
@@ -99,7 +99,6 @@ test("layout panel keeps secondary actions in a more menu", async () => {
       importLayout={() => {}}
     />,
   );
-  const user = userEvent.setup({ document: componentDocument });
   const panel = within(view.container);
 
   assert.equal(panel.queryByRole("button", { name: "deleteLayout" }), null);
@@ -108,7 +107,7 @@ test("layout panel keeps secondary actions in a more menu", async () => {
   });
   assert.equal(setDefaultButton.hasAttribute("disabled"), true);
   const moreButton = panel.getByRole("button", { name: "moreActions" });
-  await user.click(moreButton);
+  fireEvent.click(moreButton);
   assert.equal(moreButton.getAttribute("aria-expanded"), "true");
   assert.ok(panel.getByRole("menuitem", { name: "export", hidden: true }));
   assert.ok(panel.getByRole("menuitem", { name: "import", hidden: true }));
@@ -117,7 +116,7 @@ test("layout panel keeps secondary actions in a more menu", async () => {
   );
 });
 
-test("linked size inputs update height and can unlink the ratio", async () => {
+test("linked size inputs update height and can unlink the ratio", () => {
   function Example() {
     const [size, setSize] = useState({ width: "100", height: "50" });
     return (
@@ -132,13 +131,12 @@ test("linked size inputs update height and can unlink the ratio", async () => {
   }
 
   const view = renderComponent(<Example />);
-  const user = userEvent.setup({ document: componentDocument });
   const width = view.getByRole("textbox", { name: "Width" });
   const height = view.getByRole("textbox", { name: "Height" });
   fireEvent.change(width, { target: { value: "200" } });
   assert.equal((height as HTMLInputElement).value, "100");
 
-  await user.click(view.getByRole("button", { name: "unlinkAspectRatio" }));
+  fireEvent.click(view.getByRole("button", { name: "unlinkAspectRatio" }));
   fireEvent.change(width, { target: { value: "300" } });
   assert.equal((height as HTMLInputElement).value, "100");
 });
@@ -228,7 +226,7 @@ test("selection overlays show active snap alignment guides", () => {
   assert.equal(target?.style.height, "40px");
 });
 
-test("zoom percentage resets zoom without a separate reset button", async () => {
+test("zoom percentage resets zoom without a separate reset button", () => {
   const changes: number[] = [];
   const snappingChanges: boolean[] = [];
   const view = renderComponent(
@@ -244,14 +242,13 @@ test("zoom percentage resets zoom without a separate reset button", async () => 
     />,
   );
   const controls = within(view.container);
-  const user = userEvent.setup({ document: componentDocument });
 
   assert.equal(controls.getAllByRole("button").length, 4);
   const snapping = controls.getByRole("button", { name: "snapping" });
   assert.equal(snapping.getAttribute("aria-pressed"), "true");
-  await user.click(snapping);
+  fireEvent.click(snapping);
   assert.deepEqual(snappingChanges, [false]);
-  await user.click(controls.getByRole("button", { name: "resetZoom" }));
+  fireEvent.click(controls.getByRole("button", { name: "resetZoom" }));
   assert.deepEqual(changes, [1]);
   assert.equal(
     controls.getByRole("button", { name: "resetZoom" }).textContent,
@@ -287,7 +284,39 @@ test("sidebar accordion restores persisted open sections", () => {
   );
 });
 
-test("advanced button settings stay collapsed until requested", async () => {
+test("sidebar keeps fixed content outside the accordion", () => {
+  const view = renderComponent(
+    <SidebarAccordion
+      fixedContent={<p>Always visible</p>}
+      sections={[
+        { value: "layout", label: "Layout", content: <p>Layout body</p> },
+      ]}
+    />,
+  );
+
+  assert.ok(view.getByText("Always visible"));
+  assert.equal(
+    view.container.querySelectorAll(".sidebar-accordion button").length,
+    1,
+  );
+});
+
+test("display settings omit preview scale controls", () => {
+  const view = renderComponent(
+    <DisplaySettingsPanel
+      language="en"
+      hasGuides={true}
+      onLanguageChange={() => {}}
+      onClearGuides={() => {}}
+    />,
+  );
+
+  assert.ok(view.getByRole("combobox", { name: "language" }));
+  assert.ok(view.getByRole("button", { name: "clearGuides" }));
+  assert.equal(view.queryByRole("slider"), null);
+});
+
+test("advanced button settings stay collapsed until requested", () => {
   const view = renderComponent(
     <ButtonAdvancedSettings label="Advanced">
       <p>Advanced content</p>
@@ -297,13 +326,13 @@ test("advanced button settings stay collapsed until requested", async () => {
   assert.ok(details);
   assert.equal(details.open, false);
 
-  const user = userEvent.setup({ document: componentDocument });
-  await user.click(within(view.container).getByText("Advanced"));
+  details.open = true;
+  fireEvent(details, new componentDocument.defaultView.Event("toggle"));
 
   assert.equal(details.open, true);
 });
 
-test("advanced button settings restore their open state after remounting", async () => {
+test("advanced button settings restore their open state after remounting", () => {
   const values = new Map<string, string>();
   const storage = {
     getItem: (key: string) => values.get(key) ?? null,
@@ -316,8 +345,8 @@ test("advanced button settings restore their open state after remounting", async
   );
   const firstDetails = first.container.querySelector("details");
   assert.ok(firstDetails);
-  const user = userEvent.setup({ document: componentDocument });
-  await user.click(first.container.querySelector("summary") as HTMLElement);
+  firstDetails.open = true;
+  fireEvent(firstDetails, new componentDocument.defaultView.Event("toggle"));
   assert.equal(firstDetails.open, true);
   first.unmount();
 

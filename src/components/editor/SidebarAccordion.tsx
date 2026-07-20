@@ -17,11 +17,13 @@ export interface SidebarSection {
 }
 
 interface SidebarAccordionProps {
+  fixedContent?: ReactNode;
   sections: SidebarSection[];
   storage?: SidebarStorage;
 }
 
 export function SidebarAccordion({
+  fixedContent,
   sections,
   storage = window.localStorage,
 }: SidebarAccordionProps): React.ReactElement {
@@ -35,19 +37,22 @@ export function SidebarAccordion({
   };
 
   return (
-    <Accordion
-      className="sidebar-accordion"
-      multiple
-      transitionDuration={0}
-      value={openSections}
-      onChange={changeOpenSections}
-    >
-      {sections.map((section) => (
-        <Accordion.Item key={section.value} value={section.value}>
-          <Accordion.Control>{section.label}</Accordion.Control>
-          <Accordion.Panel>{section.content}</Accordion.Panel>
-        </Accordion.Item>
-      ))}
-    </Accordion>
+    <>
+      {fixedContent}
+      <Accordion
+        className="sidebar-accordion"
+        multiple
+        transitionDuration={0}
+        value={openSections}
+        onChange={changeOpenSections}
+      >
+        {sections.map((section) => (
+          <Accordion.Item key={section.value} value={section.value}>
+            <Accordion.Control>{section.label}</Accordion.Control>
+            <Accordion.Panel>{section.content}</Accordion.Panel>
+          </Accordion.Item>
+        ))}
+      </Accordion>
+    </>
   );
 }
