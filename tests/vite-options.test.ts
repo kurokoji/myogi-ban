@@ -12,5 +12,9 @@ test("Vite builds both browser entry points and proxies backend traffic", () => 
   assert.equal(options.build.outDir, "public");
   assert.equal(options.build.emptyOutDir, false);
   assert.equal(options.server.proxy["/api"].target, "http://localhost:33770");
+  assert.equal(
+    options.server.proxy["/favicon.png"].target,
+    "http://localhost:33770",
+  );
   assert.equal(options.server.proxy["/ws"].ws, true);
 });

@@ -22,6 +22,7 @@ export function createViteOptions({ backendPort }) {
     server: {
       proxy: {
         "/api": proxy(),
+        "/favicon.png": proxy(),
         "/layout": proxy(),
         "/css": proxy(),
         "/ws": proxy(true),
