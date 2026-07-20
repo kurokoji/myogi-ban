@@ -17,6 +17,18 @@ import { createDefaultLayout } from "../src/layout";
 import { BackgroundSettingsPanel } from "../src/components/editor/SettingsPanels";
 import { ThemeControl } from "../src/components/editor/ThemeControl";
 
+test("component tests clean up rendered DOM after each test", () => {
+  renderComponent(<p data-testid="cleanup-marker">Rendered</p>);
+  assert.ok(componentDocument.querySelector('[data-testid="cleanup-marker"]'));
+});
+
+test("component tests start with an empty rendered DOM", () => {
+  assert.equal(
+    componentDocument.querySelector('[data-testid="cleanup-marker"]'),
+    null,
+  );
+});
+
 test("theme control selects automatic, light, and dark schemes with icons", () => {
   const view = renderComponent(<ThemeControl />);
 

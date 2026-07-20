@@ -14,6 +14,7 @@ test("test runner uses the spec reporter and forwards CLI filters", () => {
     [
       "--test",
       "--test-reporter=spec",
+      "--test-concurrency=4",
       "--test-name-pattern=layout",
       "first.test.js",
       "second.test.js",
