@@ -1,9 +1,9 @@
-import { join } from "node:path";
+import { posix } from "node:path";
 
 export function createElectronDevSpawnOptions(options) {
   const env = { ...options.env };
   if (options.platform === "linux") {
-    const bundledLibraries = join(
+    const bundledLibraries = posix.join(
       options.cwd,
       ".libs/usr/lib/x86_64-linux-gnu",
     );
