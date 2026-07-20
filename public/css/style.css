@@ -116,14 +116,6 @@ body {
   height: 40px;
 }
 
-.button-released {
-  background-image: url("../layout/preset/button-released.png");
-}
-
-.button-pressed {
-  background-image: url("../layout/preset/button-pressed.png");
-}
-
 /* CSS描画ボタン（画像なしの場合） */
 .button-css {
   border-radius: var(--button-radius, 50%);
