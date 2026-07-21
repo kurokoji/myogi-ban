@@ -7,6 +7,7 @@ import {
   resolveInspectorTarget,
   toggleButtonInSelection,
   toggleSelectedIndex,
+  visibleInspectorTargets,
 } from "../src/editor-selection";
 
 test("toggleSelectedIndex adds an unselected index", () => {
@@ -60,4 +61,12 @@ test("inspector gives button settings priority when buttons are selected", () =>
     }),
     "buttons",
   );
+});
+
+test("all property sections stay available without a selection", () => {
+  assert.deepEqual(visibleInspectorTargets(), [
+    "background",
+    "stick",
+    "buttons",
+  ]);
 });

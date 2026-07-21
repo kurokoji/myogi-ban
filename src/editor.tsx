@@ -44,8 +44,8 @@ import {
   createButtonSelection,
   EMPTY_EDITOR_SELECTION,
   normalizeEditorSelection,
-  resolveInspectorTarget,
   toggleButtonInSelection,
+  visibleInspectorTargets,
 } from "./editor-selection";
 import {
   type ButtonMapping,
@@ -79,7 +79,6 @@ function EditorApp(): React.ReactElement {
   const selectedButtonIndex = selection.primaryButtonIndex;
   const selectedButtonIndexes = selection.buttonIndexes;
   const selectedStick = selection.stick;
-  const inspectorTarget = resolveInspectorTarget(selection);
   const [language, setLanguage] = useState(i18n.language);
   const [copiedObsUrl, setCopiedObsUrl] = useState(false);
   const [snappingEnabled, setSnappingEnabled] = useState(true);
@@ -470,11 +469,11 @@ function EditorApp(): React.ReactElement {
                 />
               ),
             },
-            {
-              value: "properties",
-              label: t(inspectorTarget),
+            ...visibleInspectorTargets().map((target) => ({
+              value: target,
+              label: t(target),
               content:
-                inspectorTarget === "background" ? (
+                target === "background" ? (
                   <BackgroundSettingsPanel
                     layout={layout}
                     fileInputRef={fileInputRef}
@@ -482,7 +481,7 @@ function EditorApp(): React.ReactElement {
                     uploadImage={uploadImage}
                     openImagePicker={openImagePicker}
                   />
-                ) : inspectorTarget === "stick" ? (
+                ) : target === "stick" ? (
                   <StickSettingsPanel
                     layout={layout}
                     updateLayout={updateLayout}
@@ -503,7 +502,7 @@ function EditorApp(): React.ReactElement {
                     cancelAssignment={cancelAssignment}
                   />
                 ),
-            },
+            })),
             {
               value: "gamepad",
               label: t("gamepad"),

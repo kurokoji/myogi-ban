@@ -22,6 +22,10 @@ export function resolveInspectorTarget(
   return selection.stick ? "stick" : "background";
 }
 
+export function visibleInspectorTargets(): InspectorTarget[] {
+  return ["background", "stick", "buttons"];
+}
+
 export const EMPTY_EDITOR_SELECTION: EditorSelection = {
   buttonIndexes: [],
   primaryButtonIndex: null,
