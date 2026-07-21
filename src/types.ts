@@ -49,6 +49,7 @@ export interface LayoutGuides {
 }
 
 export interface Layout {
+  sourceFormatVersion: 1 | 2;
   version: string;
   name: string;
   totalbuttonshow: number;

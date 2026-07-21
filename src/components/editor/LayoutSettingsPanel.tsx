@@ -1,4 +1,5 @@
 import {
+  Badge,
   Button,
   Group,
   Menu,
@@ -29,6 +30,7 @@ interface LayoutSettingsPanelProps {
   layoutNames: LayoutEntry[];
   selectedLayout: string;
   layoutName: string;
+  layoutFormatVersion?: 1 | 2;
   currentBuiltin: boolean;
   isDefaultLayout: boolean;
   isDirty: boolean;
@@ -69,6 +71,15 @@ export function LayoutSettingsPanel(
             </Text>
             <Group gap="xs">
               <LayoutNameText name={props.layoutName} />
+              {props.layoutFormatVersion && (
+                <Badge
+                  size="xs"
+                  variant="light"
+                  title={t("layoutFormatVersion")}
+                >
+                  v{props.layoutFormatVersion}
+                </Badge>
+              )}
               {props.currentBuiltin && (
                 <Text size="xs" c="dimmed">
                   ({t("builtIn")})

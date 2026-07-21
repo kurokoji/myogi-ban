@@ -292,6 +292,7 @@ export function deserializeLayoutDocumentV2(
   while (buttons.length < TOTAL_BUTTONS)
     buttons.push(createDefaultButtonLayout());
   return ensureLayoutDefaults({
+    sourceFormatVersion: 2,
     name: document.name,
     totalbuttonshow: document.buttons.length,
     showstick: document.stick.visible,

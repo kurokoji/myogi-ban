@@ -49,11 +49,14 @@ test("buildLayoutForSave does not share mutable data with its inputs", () => {
 
 test("buildLayoutForSave uses the current layout format version", () => {
   const layout = createDefaultLayout();
+  layout.sourceFormatVersion = 1;
   layout.version = "v1.0.5";
 
   const saved = buildLayoutForSave(layout, "custom", [], []);
 
   assert.equal(saved.version, CURRENT_LAYOUT_VERSION);
+  assert.equal(saved.sourceFormatVersion, 2);
+  assert.equal(layout.sourceFormatVersion, 1);
   assert.equal(layout.version, "v1.0.5");
 });
 

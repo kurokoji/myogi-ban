@@ -85,6 +85,7 @@ export const enTranslation = {
   moreActions: "More actions",
   advancedSettings: "Advanced settings",
   currentLayout: "Current layout",
+  layoutFormatVersion: "Layout format",
   unsavedChanges: "Unsaved changes",
   builtInSaveHint:
     "Built-in layouts cannot be overwritten. Save with a new name.",

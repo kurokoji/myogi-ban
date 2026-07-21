@@ -51,6 +51,7 @@ export function deserializeLayoutDocumentV1(
 
   return ensureLayoutDefaults({
     ...document,
+    sourceFormatVersion: 1,
     stick: normalizeNumericTextFields(legacy.stick, STICK_NUMERIC_TEXT_FIELDS),
     defaultbuttons: normalizeNumericTextFields(
       legacy.defaultbuttons,

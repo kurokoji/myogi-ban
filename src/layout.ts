@@ -85,6 +85,7 @@ export function createDefaultLayout(): Layout {
   }
 
   return {
+    sourceFormatVersion: 2,
     version: CURRENT_LAYOUT_VERSION,
     name: "default",
     totalbuttonshow: 8,

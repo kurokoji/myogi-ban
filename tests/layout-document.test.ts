@@ -44,6 +44,7 @@ test("deserializeLayoutDocument restores v2 data to the runtime layout", () => {
   assert.equal(restored.buttons[1].rotation, "15");
   assert.equal(restored.buttons[2].w, "");
   assert.deepEqual(restored.buttonMappings, [3, 4]);
+  assert.equal(restored.sourceFormatVersion, 2);
 });
 
 test("deserializeLayoutDocument keeps v1 documents readable", () => {
@@ -58,6 +59,7 @@ test("deserializeLayoutDocument keeps v1 documents readable", () => {
   assert.equal(restored.totalbuttonshow, 1);
   assert.equal(restored.buttons[0].x, "42");
   assert.equal(restored.buttons[0].y, "24");
+  assert.equal(restored.sourceFormatVersion, 1);
 });
 
 test("legacy numeric fields can be saved as a v2 document", () => {

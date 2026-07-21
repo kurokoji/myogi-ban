@@ -21,6 +21,7 @@ export function buildLayoutForSave(
   const saved = cloneLayout(layout);
   return {
     ...saved,
+    sourceFormatVersion: 2,
     version: CURRENT_LAYOUT_VERSION,
     name,
     buttonMappings: [...buttonMappings],

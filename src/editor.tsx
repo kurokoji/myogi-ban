@@ -454,6 +454,7 @@ function EditorApp(): React.ReactElement {
                   layoutNames={layoutNames}
                   selectedLayout={selectedLayout}
                   layoutName={layoutName}
+                  layoutFormatVersion={layout.sourceFormatVersion}
                   openLayout={openLayout}
                   saveLayout={saveLayout}
                   saveLayoutAs={saveLayoutAs}

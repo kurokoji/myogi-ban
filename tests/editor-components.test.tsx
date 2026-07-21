@@ -125,6 +125,30 @@ test("layout panel keeps secondary actions in a more menu", () => {
   );
 });
 
+test("layout panel shows the current file format version", () => {
+  const view = renderComponent(
+    <LayoutSettingsPanel
+      layoutNames={[]}
+      selectedLayout="legacy:user"
+      layoutName="legacy"
+      layoutFormatVersion={1}
+      currentBuiltin={false}
+      isDefaultLayout={false}
+      isDirty={false}
+      status={null}
+      openLayout={() => {}}
+      saveLayout={() => {}}
+      saveLayoutAs={async () => true}
+      deleteLayout={() => {}}
+      setDefaultLayout={() => {}}
+      exportLayout={() => {}}
+      importLayout={() => {}}
+    />,
+  );
+
+  assert.ok(view.getByText("v1"));
+});
+
 test("layout panel wraps a long layout name within the panel", () => {
   const longName = "very-long-layout-name-without-a-safe-break-point";
   const view = renderComponent(

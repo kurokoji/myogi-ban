@@ -83,6 +83,7 @@ export const jaTranslation = {
   moreActions: "その他の操作",
   advancedSettings: "詳細設定",
   currentLayout: "現在のレイアウト",
+  layoutFormatVersion: "レイアウト形式",
   unsavedChanges: "変更あり",
   builtInSaveHint:
     "組み込みレイアウトは上書きできません。名前を付けて保存してください。",
