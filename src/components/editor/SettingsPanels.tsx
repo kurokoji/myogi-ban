@@ -209,7 +209,7 @@ export function BackgroundSettingsPanel(
         ) : (
           <>
             <Group gap="xs" align="end" wrap="nowrap">
-              <Stack gap={2} className="grow">
+              <Stack gap={2} className="grow background-image-name">
                 <Text size="xs" fw={500}>
                   {t("bgImage")}
                 </Text>

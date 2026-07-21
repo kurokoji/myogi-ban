@@ -48,3 +48,10 @@ test("preview rulers reserve a separate top-left corner", () => {
   );
   assert.match(editorStylesheet, /\.preview-ruler-corner\s*\{/);
 });
+
+test("long background image names shrink before the file button", () => {
+  assert.match(
+    editorStylesheet,
+    /\.background-image-name\s*\{[^}]*min-width:\s*0;[^}]*overflow:\s*hidden;/s,
+  );
+});

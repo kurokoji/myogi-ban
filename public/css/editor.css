@@ -163,6 +163,11 @@ body {
   flex: 1;
 }
 
+.background-image-name {
+  min-width: 0;
+  overflow: hidden;
+}
+
 .mapping-status {
   display: grid;
   gap: 6px;
