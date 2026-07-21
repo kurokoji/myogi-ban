@@ -6,6 +6,11 @@ import { STATE_ROUTE_PATHS } from "../src/server-routes/state-routes";
 
 test("server route modules own their public paths", () => {
   assert.deepEqual(STATE_ROUTE_PATHS, ["/api/state"]);
-  assert.ok(LAYOUT_ROUTE_PATHS.includes("/api/layout/:name"));
-  assert.deepEqual(IMAGE_ROUTE_PATHS, ["/api/upload-image"]);
+  assert.deepEqual(LAYOUT_ROUTE_PATHS, [
+    "/api/layouts",
+    "/api/layouts/:name",
+    "/api/layout-imports",
+    "/api/default-layout",
+  ]);
+  assert.deepEqual(IMAGE_ROUTE_PATHS, ["/api/layouts/:name/assets"]);
 });

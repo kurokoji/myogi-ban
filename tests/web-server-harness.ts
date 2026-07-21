@@ -15,6 +15,7 @@ export interface TestWebServer {
   getJson<T>(path: string): Promise<T>;
   getText(path: string): Promise<string>;
   postJson(path: string, body: unknown): Promise<void>;
+  putJson(path: string, body: unknown): Promise<void>;
   postBinary<T>(path: string, body: Uint8Array): Promise<T>;
   close(): Promise<void>;
 }
@@ -71,6 +72,13 @@ export async function startTestWebServer(
     async postJson(path, body) {
       await successfulResponse(path, {
         method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      });
+    },
+    async putJson(path, body) {
+      await successfulResponse(path, {
+        method: "PUT",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(body),
       });

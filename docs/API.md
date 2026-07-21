@@ -27,7 +27,7 @@ Myogi Banはローカルサーバー上でREST APIとWebSocketを提供します
 
 指定したレイアウトを取得します。ユーザーレイアウトが同名で存在する場合はユーザーレイアウトが優先されます。
 
-**エンドポイント**: `GET /api/layout/:name`
+**エンドポイント**: `GET /api/layouts/:name`
 
 **レスポンス例**:
 
@@ -93,13 +93,12 @@ Myogi Banはローカルサーバー上でREST APIとWebSocketを提供します
 
 ユーザーレイアウトとして保存します。保存時に `data.name` はリクエストの `name` で上書きされます。
 
-**エンドポイント**: `POST /api/layout/save`
+**エンドポイント**: `PUT /api/layouts/:name`
 
 **リクエストボディ**:
 
 ```json
 {
-  "name": "mypreset",
   "data": {
     "version": "v1.0.10",
     "name": "mypreset",
@@ -118,7 +117,7 @@ Myogi Banはローカルサーバー上でREST APIとWebSocketを提供します
 
 `.myogi` のZIPバイナリを検証し、画像とレイアウトを原子的に保存します。同名レイアウトが存在する場合は連番名になります。
 
-**エンドポイント**: `POST /api/layout/import-package`
+**エンドポイント**: `POST /api/layout-imports`
 
 **Content-Type**: `application/octet-stream`
 
@@ -142,14 +141,13 @@ Myogi Banはローカルサーバー上でREST APIとWebSocketを提供します
 
 背景画像またはボタン画像をユーザーレイアウト配下へ保存します。`fileName` はサーバー側でbasename化されます。
 
-**エンドポイント**: `POST /api/upload-image`
+**エンドポイント**: `POST /api/layouts/:name/assets`
 
 **リクエストボディ**:
 
 ```json
 {
   "data": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg...",
-  "layoutName": "mypreset",
   "fileName": "background.png"
 }
 ```
@@ -167,7 +165,7 @@ Myogi Banはローカルサーバー上でREST APIとWebSocketを提供します
 
 編集画面から現在の入力状態を送信します。サーバーは状態を保持し、WebSocket接続中のクライアントへ配信します。
 
-**エンドポイント**: `POST /api/state`
+**エンドポイント**: `PUT /api/state`
 
 **リクエストボディ**:
 
@@ -208,7 +206,7 @@ OBSビューアと編集画面の初期読み込みに使うデフォルトレ�
 
 デフォルトレイアウト名を保存します。
 
-**エンドポイント**: `POST /api/default-layout`
+**エンドポイント**: `PUT /api/default-layout`
 
 **リクエストボディ**:
 
@@ -226,7 +224,7 @@ OBSビューアと編集画面の初期読み込みに使うデフォルトレ�
 
 **エンドポイント**: `ws://localhost:33770/ws`
 
-接続時に直近の状態があれば以下の形式で送信されます。以降、`POST /api/state` のたびに同じ形式で配信されます。
+接続時に直近の状態があれば以下の形式で送信されます。以降、`PUT /api/state` のたびに同じ形式で配信されます。
 
 ```json
 {

@@ -16,19 +16,18 @@ test("web layout flow reaches the viewer websocket", async () => {
     assert.deepEqual(list, [{ name: "default", builtin: true }]);
 
     const loaded = await app.getJson<typeof source>(
-      "/api/layout/default?builtin=true",
+      "/api/layouts/default?builtin=true",
     );
     const edited = {
       ...loaded,
       name: "e2e-edited",
       background: { ...loaded.background, cssColor: "#123456" },
     };
-    await app.postJson("/api/layout/save", {
-      name: edited.name,
+    await app.putJson("/api/layouts/e2e-edited", {
       data: edited,
       overwrite: false,
     });
-    const saved = await app.getJson<typeof source>("/api/layout/e2e-edited");
+    const saved = await app.getJson<typeof source>("/api/layouts/e2e-edited");
     assert.equal(saved.background.cssColor, "#123456");
 
     const viewerState = new Promise<{ layout: typeof source }>(
@@ -36,7 +35,7 @@ test("web layout flow reaches the viewer websocket", async () => {
         const viewer = new WebSocket(app.webSocketUrl);
         viewer.once("error", reject);
         viewer.once("open", () => {
-          void app.postJson("/api/state", {
+          void app.putJson("/api/state", {
             connected: true,
             stick: "",
             buttons: [],
@@ -89,12 +88,12 @@ test("web server atomically imports a binary layout package", async () => {
     const imported = await app.postBinary<{
       name: string;
       layout: typeof layout;
-    }>("/api/layout/import-package", archive);
+    }>("/api/layout-imports", archive);
 
     assert.equal(imported.name, "package-import");
     assert.equal(imported.layout.background.image, "background.png");
     assert.equal(
-      (await app.getJson<typeof layout>("/api/layout/package-import")).name,
+      (await app.getJson<typeof layout>("/api/layouts/package-import")).name,
       "package-import",
     );
   } finally {

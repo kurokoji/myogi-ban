@@ -48,9 +48,9 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   return body.data;
 }
 
-function jsonRequest(body: unknown): RequestInit {
+function jsonRequest(body: unknown, method = "POST"): RequestInit {
   return {
-    method: "POST",
+    method,
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   };
@@ -64,7 +64,7 @@ export class ApiClient {
   async getLayout(name: string, builtin = false): Promise<Layout> {
     const query = builtin ? "?builtin=true" : "";
     return requestJson<Layout>(
-      `/api/layout/${encodeURIComponent(name)}${query}`,
+      `/api/layouts/${encodeURIComponent(name)}${query}`,
     );
   }
 
@@ -73,18 +73,21 @@ export class ApiClient {
     data: Layout,
     overwrite = true,
   ): Promise<void> {
-    await request("/api/layout/save", jsonRequest({ name, data, overwrite }));
+    await request(
+      `/api/layouts/${encodeURIComponent(name)}`,
+      jsonRequest({ data, overwrite }, "PUT"),
+    );
   }
 
   async deleteLayout(name: string): Promise<void> {
-    await request(`/api/layout/${encodeURIComponent(name)}`, {
+    await request(`/api/layouts/${encodeURIComponent(name)}`, {
       method: "DELETE",
     });
   }
 
   async sendState(state: GamepadState): Promise<void> {
     try {
-      await request("/api/state", jsonRequest(state));
+      await request("/api/state", jsonRequest(state, "PUT"));
     } catch {
       // ignore errors
     }
@@ -95,26 +98,24 @@ export class ApiClient {
   }
 
   async setDefaultLayout(name: string): Promise<void> {
-    await request("/api/default-layout", jsonRequest({ name }));
+    await request("/api/default-layout", jsonRequest({ name }, "PUT"));
   }
 
   async uploadImage(options: UploadImageOptions): Promise<UploadImageResult> {
+    const { layoutName, ...body } = options;
     return requestJson<UploadImageResult>(
-      "/api/upload-image",
-      jsonRequest(options),
+      `/api/layouts/${encodeURIComponent(layoutName)}/assets`,
+      jsonRequest(body),
     );
   }
 
   async importLayoutPackage(
     data: Uint8Array,
   ): Promise<ImportLayoutPackageResult> {
-    return requestJson<ImportLayoutPackageResult>(
-      "/api/layout/import-package",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/octet-stream" },
-        body: new Uint8Array(data).buffer,
-      },
-    );
+    return requestJson<ImportLayoutPackageResult>("/api/layout-imports", {
+      method: "POST",
+      headers: { "Content-Type": "application/octet-stream" },
+      body: new Uint8Array(data).buffer,
+    });
   }
 }

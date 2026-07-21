@@ -8,10 +8,9 @@ import {
 import type { Layout } from "../types";
 
 export const LAYOUT_ROUTE_PATHS = [
-  "/api/layout/save",
-  "/api/layout/import-package",
   "/api/layouts",
-  "/api/layout/:name",
+  "/api/layouts/:name",
+  "/api/layout-imports",
   "/api/default-layout",
 ] as const;
 
@@ -19,8 +18,8 @@ export function registerLayoutRoutes(
   app: Express,
   layouts: LayoutRepository,
 ): void {
-  app.post("/api/layout/save", (req, res) => {
-    const name = req.body.name || "custom";
+  app.put("/api/layouts/:name", (req, res) => {
+    const name = req.params.name;
     if (req.body.overwrite === false && layouts.has(name)) {
       res.status(409).json(apiFailure("layout_name_exists"));
       return;
@@ -29,7 +28,7 @@ export function registerLayoutRoutes(
     res.json(apiSuccess());
   });
   app.post(
-    "/api/layout/import-package",
+    "/api/layout-imports",
     express.raw({ type: "application/octet-stream", limit: "100mb" }),
     async (req, res) => {
       try {
@@ -52,7 +51,7 @@ export function registerLayoutRoutes(
     },
   );
   app.get("/api/layouts", (_req, res) => res.json(apiSuccess(layouts.list())));
-  app.get("/api/layout/:name", (req, res) => {
+  app.get("/api/layouts/:name", (req, res) => {
     try {
       res.json(
         apiSuccess(layouts.read(req.params.name, req.query.builtin === "true")),
@@ -65,7 +64,7 @@ export function registerLayoutRoutes(
       throw error;
     }
   });
-  app.delete("/api/layout/:name", (req, res) => {
+  app.delete("/api/layouts/:name", (req, res) => {
     if (!layouts.delete(req.params.name)) {
       res.status(404).json(apiFailure("layout_not_found"));
       return;
@@ -75,7 +74,7 @@ export function registerLayoutRoutes(
   app.get("/api/default-layout", (_req, res) =>
     res.json(apiSuccess(layouts.getDefault())),
   );
-  app.post("/api/default-layout", (req, res) => {
+  app.put("/api/default-layout", (req, res) => {
     layouts.setDefault(req.body.name);
     res.json(apiSuccess());
   });

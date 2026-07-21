@@ -40,16 +40,17 @@ Expressサーバーは以下を提供します。
 | GET | `/` | 編集画面 |
 | GET | `/view` | OBSビューア |
 | GET | `/api/layouts` | レイアウト一覧 |
-| GET | `/api/layout/:name` | レイアウト取得 |
-| POST | `/api/layout/save` | レイアウト保存 |
-| POST | `/api/layout/import-package` | `.myogi` の原子的インポート |
-| POST | `/api/upload-image` | 画像アップロード |
-| POST | `/api/state` | 入力状態送信 |
+| GET | `/api/layouts/:name` | レイアウト取得 |
+| PUT | `/api/layouts/:name` | レイアウト保存 |
+| DELETE | `/api/layouts/:name` | レイアウト削除 |
+| POST | `/api/layout-imports` | `.myogi` の原子的インポート |
+| POST | `/api/layouts/:name/assets` | 画像アップロード |
+| PUT | `/api/state` | 入力状態送信 |
 | GET | `/api/state` | 直近の入力状態取得 |
 | GET | `/api/default-layout` | デフォルトレイアウト取得 |
-| POST | `/api/default-layout` | デフォルトレイアウト保存 |
+| PUT | `/api/default-layout` | デフォルトレイアウト保存 |
 
-WebSocketは同じポートで待ち受け、`POST /api/state` された状態を `{ type: "state", data }` として配信します。
+WebSocketは同じポートで待ち受け、`PUT /api/state` された状態を `{ type: "state", data }` として配信します。
 
 ## クライアント
 

@@ -12,7 +12,7 @@ export function registerStateRoutes(
   store: StateStore,
   broadcast: (state: GamepadState) => void,
 ): void {
-  app.post("/api/state", (req, res) => {
+  app.put("/api/state", (req, res) => {
     store.latest = req.body as GamepadState;
     broadcast(store.latest);
     res.json(apiSuccess());

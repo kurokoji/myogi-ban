@@ -38,7 +38,10 @@ test("ApiClient URL-encodes layout names", async (t) => {
   );
 
   await new ApiClient().getLayout("player one");
-  assert.match(String(fetchMock.mock.calls[0].arguments[0]), /player%20one$/);
+  assert.equal(
+    fetchMock.mock.calls[0].arguments[0],
+    "/api/layouts/player%20one",
+  );
 });
 
 test("ApiClient can explicitly request a built-in layout", async (t) => {
@@ -50,6 +53,46 @@ test("ApiClient can explicitly request a built-in layout", async (t) => {
   assert.match(
     String(fetchMock.mock.calls[0].arguments[0]),
     /hit-box-ultra\?builtin=true$/,
+  );
+});
+
+test("ApiClient saves a layout by replacing its named resource", async (t) => {
+  const fetchMock = t.mock.method(globalThis, "fetch", async () =>
+    Response.json({ ok: true }),
+  );
+  const layout = { name: "player one" } as never;
+
+  await new ApiClient().saveLayout("player one", layout, false);
+
+  assert.equal(
+    fetchMock.mock.calls[0].arguments[0],
+    "/api/layouts/player%20one",
+  );
+  const init = fetchMock.mock.calls[0].arguments[1] as RequestInit;
+  assert.equal(init.method, "PUT");
+  assert.deepEqual(JSON.parse(String(init.body)), {
+    data: layout,
+    overwrite: false,
+  });
+});
+
+test("ApiClient replaces state and the default layout with PUT", async (t) => {
+  const fetchMock = t.mock.method(globalThis, "fetch", async () =>
+    Response.json({ ok: true }),
+  );
+
+  await new ApiClient().sendState({ connected: true } as never);
+  await new ApiClient().setDefaultLayout("player one");
+
+  assert.equal(fetchMock.mock.calls[0].arguments[0], "/api/state");
+  assert.equal(
+    (fetchMock.mock.calls[0].arguments[1] as RequestInit).method,
+    "PUT",
+  );
+  assert.equal(fetchMock.mock.calls[1].arguments[0], "/api/default-layout");
+  assert.equal(
+    (fetchMock.mock.calls[1].arguments[1] as RequestInit).method,
+    "PUT",
   );
 });
 
@@ -65,10 +108,7 @@ test("ApiClient uploads a binary layout package", async (t) => {
     Uint8Array.from([1, 2, 3]),
   );
 
-  assert.equal(
-    fetchMock.mock.calls[0].arguments[0],
-    "/api/layout/import-package",
-  );
+  assert.equal(fetchMock.mock.calls[0].arguments[0], "/api/layout-imports");
   const init = fetchMock.mock.calls[0].arguments[1] as RequestInit;
   assert.equal(init.method, "POST");
   assert.equal(
@@ -76,6 +116,29 @@ test("ApiClient uploads a binary layout package", async (t) => {
     "application/octet-stream",
   );
   assert.equal(result.name, "imported");
+});
+
+test("ApiClient creates assets under their layout resource", async (t) => {
+  const fetchMock = t.mock.method(globalThis, "fetch", async () =>
+    Response.json({ ok: true, data: { fileName: "button.png" } }),
+  );
+
+  await new ApiClient().uploadImage({
+    data: "data:image/png;base64,test",
+    layoutName: "player one",
+    fileName: "button.png",
+  });
+
+  assert.equal(
+    fetchMock.mock.calls[0].arguments[0],
+    "/api/layouts/player%20one/assets",
+  );
+  assert.deepEqual(
+    JSON.parse(
+      String((fetchMock.mock.calls[0].arguments[1] as RequestInit).body),
+    ),
+    { data: "data:image/png;base64,test", fileName: "button.png" },
+  );
 });
 
 test("ApiClient exposes layout package validation codes", async (t) => {
