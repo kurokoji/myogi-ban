@@ -55,3 +55,14 @@ test("long background image names shrink before the file button", () => {
     /\.background-image-name\s*\{[^}]*min-width:\s*0;[^}]*overflow:\s*hidden;/s,
   );
 });
+
+test("preview snapping icon is explicitly centered across platforms", () => {
+  assert.match(
+    editorStylesheet,
+    /\.preview-snapping-button\s*\{[^}]*display:\s*inline-grid;[^}]*place-items:\s*center;/s,
+  );
+  assert.match(
+    editorStylesheet,
+    /\.preview-snapping-button svg\s*\{[^}]*display:\s*block;[^}]*margin:\s*auto;/s,
+  );
+});

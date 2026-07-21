@@ -24,6 +24,7 @@ export function PreviewZoomControls(
       aria-label={t("previewControls")}
     >
       <ActionIcon
+        className="preview-snapping-button"
         size="sm"
         variant={props.snappingEnabled ? "filled" : "light"}
         aria-label={t("snapping")}

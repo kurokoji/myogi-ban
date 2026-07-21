@@ -395,6 +395,7 @@ test("zoom percentage resets zoom without a separate reset button", () => {
 
   assert.equal(controls.getAllByRole("button").length, 4);
   const snapping = controls.getByRole("button", { name: "snapping" });
+  assert.ok(snapping.classList.contains("preview-snapping-button"));
   assert.equal(snapping.getAttribute("aria-pressed"), "true");
   fireEvent.click(snapping);
   assert.deepEqual(snappingChanges, [false]);

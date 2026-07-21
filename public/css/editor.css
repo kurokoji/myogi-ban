@@ -246,6 +246,16 @@ body {
   text-align: center;
 }
 
+.preview-snapping-button {
+  display: inline-grid;
+  place-items: center;
+}
+
+.preview-snapping-button svg {
+  display: block;
+  margin: auto;
+}
+
 #preview-scroll {
   --preview-ruler-size: 34px;
 
