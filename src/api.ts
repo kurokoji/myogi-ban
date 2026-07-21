@@ -11,6 +11,11 @@ interface UploadImageResult {
   fileName: string;
 }
 
+export interface ImportLayoutPackageResult {
+  name: string;
+  layout: Layout;
+}
+
 export class ApiError extends Error {
   constructor(
     readonly status: number,
@@ -90,6 +95,19 @@ export class ApiClient {
     return requestJson<UploadImageResult>(
       "/api/upload-image",
       jsonRequest(options),
+    );
+  }
+
+  async importLayoutPackage(
+    data: Uint8Array,
+  ): Promise<ImportLayoutPackageResult> {
+    return requestJson<ImportLayoutPackageResult>(
+      "/api/layout/import-package",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/octet-stream" },
+        body: new Uint8Array(data).buffer,
+      },
     );
   }
 }

@@ -42,6 +42,7 @@ Expressサーバーは以下を提供します。
 | GET | `/api/layouts` | レイアウト一覧 |
 | GET | `/api/layout/:name` | レイアウト取得 |
 | POST | `/api/layout/save` | レイアウト保存 |
+| POST | `/api/layout/import-package` | `.myogi` の原子的インポート |
 | POST | `/api/upload-image` | 画像アップロード |
 | POST | `/api/state` | 入力状態送信 |
 | GET | `/api/state` | 直近の入力状態取得 |
@@ -75,6 +76,7 @@ WebSocketは同じポートで待ち受け、`POST /api/state` された状態�
 `src/layout-document/v1.ts` は旧JSONの互換読込、`v2.ts` は現行JSONの検証・変換、`index.ts` は形式判定を担当します。
 旧形式は読み込めますが、新規保存は常に `formatVersion: 2` です。
 共有用の `.myogi` はZIP形式で、ルートの `layout.json` と `assets/` 配下の参照画像だけを格納します。
+インポートAPIはパッケージ全体を検証して同一ファイルシステム上の一時ディレクトリへ展開し、成功時だけユーザーレイアウトへrenameします。同名レイアウトは上書きせず連番名で保存します。
 
 ```typescript
 interface Layout {

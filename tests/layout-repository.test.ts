@@ -11,6 +11,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { createDefaultLayout } from "../src/layout";
+import { createLayoutPackage } from "../src/layout-package";
 import {
   CorruptLayoutError,
   collectLayoutAssets,
@@ -168,4 +169,98 @@ test("LayoutRepository stores v2 documents and returns runtime layouts", (t) => 
   >;
   assert.equal(restored.totalbuttonshow, 1);
   assert.equal(restored.buttons[0].x, "225");
+});
+
+test("LayoutRepository atomically imports a layout package with its assets", async (t) => {
+  const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const user = join(root, "user");
+  const repository = new LayoutRepository({
+    builtinLayoutDir: join(root, "builtin"),
+    userLayoutDir: user,
+    defaultLayoutFile: join(root, "default.json"),
+  });
+  const layout = createDefaultLayout();
+  layout.name = "imported";
+  layout.background.image = "background.png";
+  const archive = await createLayoutPackage(layout, async () =>
+    Uint8Array.from([1, 2, 3]),
+  );
+
+  const result = await repository.importPackage(archive);
+
+  assert.equal(result.name, "imported");
+  assert.equal(result.layout.background.image, "background.png");
+  assert.deepEqual(
+    readFileSync(join(user, "imported", "background.png")),
+    Buffer.from([1, 2, 3]),
+  );
+  assert.equal(
+    JSON.parse(readFileSync(join(user, "imported", "layout.json"), "utf8"))
+      .formatVersion,
+    2,
+  );
+});
+
+test("LayoutRepository imports packages under a new name without overwriting", async (t) => {
+  const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const user = join(root, "user");
+  mkdirSync(join(user, "imported"), { recursive: true });
+  writeFileSync(join(user, "imported", "keep.txt"), "keep");
+  const repository = new LayoutRepository({
+    builtinLayoutDir: join(root, "builtin"),
+    userLayoutDir: user,
+    defaultLayoutFile: join(root, "default.json"),
+  });
+  const layout = createDefaultLayout();
+  layout.name = "imported";
+  const archive = await createLayoutPackage(layout, async () => undefined);
+
+  const result = await repository.importPackage(archive);
+
+  assert.equal(result.name, "imported-2");
+  assert.equal(
+    readFileSync(join(user, "imported", "keep.txt"), "utf8"),
+    "keep",
+  );
+  assert.equal(existsSync(join(user, "imported-2", "layout.json")), true);
+});
+
+test("LayoutRepository leaves no staging data for an invalid package", async (t) => {
+  const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const user = join(root, "user");
+  const repository = new LayoutRepository({
+    builtinLayoutDir: join(root, "builtin"),
+    userLayoutDir: user,
+    defaultLayoutFile: join(root, "default.json"),
+  });
+
+  await assert.rejects(repository.importPackage(Uint8Array.from([1, 2, 3])));
+
+  assert.equal(existsSync(user), false);
+});
+
+test("LayoutRepository save removes unreferenced assets", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const user = join(root, "user");
+  const custom = join(user, "custom");
+  mkdirSync(custom, { recursive: true });
+  writeFileSync(join(custom, "keep.png"), "keep");
+  writeFileSync(join(custom, "stale.png"), "stale");
+  const repository = new LayoutRepository({
+    builtinLayoutDir: join(root, "builtin"),
+    userLayoutDir: user,
+    defaultLayoutFile: join(root, "default.json"),
+  });
+  const layout = createDefaultLayout();
+  layout.background.image = "keep.png";
+
+  repository.save("custom", layout);
+
+  assert.equal(existsSync(join(custom, "keep.png")), true);
+  assert.equal(existsSync(join(custom, "stale.png")), false);
+  assert.equal(existsSync(join(custom, "layout.json")), true);
 });

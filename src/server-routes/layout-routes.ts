@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import express, { type Express } from "express";
 import { apiFailure, apiSuccess } from "../api-response";
 import {
   CorruptLayoutError,
@@ -8,6 +8,7 @@ import type { Layout } from "../types";
 
 export const LAYOUT_ROUTE_PATHS = [
   "/api/layout/save",
+  "/api/layout/import-package",
   "/api/layouts",
   "/api/layout/:name",
   "/api/default-layout",
@@ -26,6 +27,21 @@ export function registerLayoutRoutes(
     layouts.save(name, req.body.data as Layout);
     res.json(apiSuccess());
   });
+  app.post(
+    "/api/layout/import-package",
+    express.raw({ type: "application/octet-stream", limit: "100mb" }),
+    async (req, res) => {
+      try {
+        const result = await layouts.importPackage(
+          new Uint8Array(req.body as Buffer),
+        );
+        res.json(apiSuccess(result));
+      } catch (error) {
+        console.error("Failed to import layout package:", error);
+        res.status(400).json(apiFailure("invalid_layout_package"));
+      }
+    },
+  );
   app.get("/api/layouts", (_req, res) => res.json(apiSuccess(layouts.list())));
   app.get("/api/layout/:name", (req, res) => {
     try {

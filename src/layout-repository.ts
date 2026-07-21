@@ -7,6 +7,7 @@ import {
   serializeLayoutDocument,
 } from "./layout-document";
 import { assertValidLayoutName, isLayoutNameTaken } from "./layout-name";
+import { imageMimeType, readLayoutPackage } from "./layout-package";
 import type { Layout, LayoutEntry } from "./types";
 
 export interface LayoutRepositoryOptions {
@@ -45,6 +46,19 @@ function getLayoutDirs(baseDir: string): string[] {
 
 function ensureDir(dir: string): void {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+}
+
+function removeUnreferencedAssets(layoutDir: string, layout: Layout): void {
+  const referenced = new Set(collectLayoutAssets(layout));
+  for (const entry of fs.readdirSync(layoutDir, { withFileTypes: true })) {
+    if (
+      entry.isFile() &&
+      /\.(?:png|jpe?g|webp|gif)$/i.test(entry.name) &&
+      !referenced.has(entry.name)
+    ) {
+      fs.unlinkSync(path.join(layoutDir, entry.name));
+    }
+  }
 }
 
 export function writeJsonAtomically(filePath: string, data: unknown): void {
@@ -165,6 +179,51 @@ export class LayoutRepository {
       path.join(layoutDir, "layout.json"),
       serializeLayoutDocument({ ...layout, name }),
     );
+    removeUnreferencedAssets(layoutDir, layout);
+  }
+
+  async importPackage(
+    data: Uint8Array | ArrayBuffer,
+  ): Promise<{ name: string; layout: Layout }> {
+    const contents = await readLayoutPackage(data);
+    const requestedName = contents.layout.name || "imported";
+    assertValidLayoutName(requestedName);
+    let name = requestedName;
+    let suffix = 2;
+    while (this.has(name)) {
+      name = `${requestedName}-${suffix}`;
+      suffix += 1;
+    }
+
+    for (const [fileName, bytes] of contents.assets) {
+      validateImageUpload({
+        data: `data:${imageMimeType(fileName)};base64,${Buffer.from(bytes).toString("base64")}`,
+        fileName,
+      });
+    }
+
+    ensureDir(this.options.userLayoutDir);
+    const targetDir = path.join(this.options.userLayoutDir, name);
+    const stagingDir = path.join(
+      this.options.userLayoutDir,
+      `.${name}.import-${process.pid}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    );
+    const layout = { ...contents.layout, name };
+    try {
+      ensureDir(stagingDir);
+      for (const [fileName, bytes] of contents.assets) {
+        fs.writeFileSync(path.join(stagingDir, fileName), bytes);
+      }
+      writeJsonAtomically(
+        path.join(stagingDir, "layout.json"),
+        serializeLayoutDocument(layout),
+      );
+      fs.renameSync(stagingDir, targetDir);
+      return { name, layout };
+    } finally {
+      if (fs.existsSync(stagingDir))
+        fs.rmSync(stagingDir, { recursive: true, force: true });
+    }
   }
 
   delete(name: string): boolean {

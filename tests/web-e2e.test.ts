@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import WebSocket from "ws";
 import { createDefaultLayout } from "../src/layout";
+import { createLayoutPackage } from "../src/layout-package";
 import { startTestWebServer } from "./web-server-harness";
 
 test("web layout flow reaches the viewer websocket", async () => {
@@ -70,6 +71,32 @@ test("websocket rejects paths reserved for Vite HMR", async () => {
       socket.once("unexpected-response", () => resolve("rejected"));
     });
     assert.equal(result, "rejected");
+  } finally {
+    await app.close();
+  }
+});
+
+test("web server atomically imports a binary layout package", async () => {
+  const app = await startTestWebServer({ default: createDefaultLayout() });
+  const layout = createDefaultLayout();
+  layout.name = "package-import";
+  layout.background.image = "background.png";
+
+  try {
+    const archive = await createLayoutPackage(layout, async () =>
+      Uint8Array.from([1, 2, 3]),
+    );
+    const imported = await app.postBinary<{
+      name: string;
+      layout: typeof layout;
+    }>("/api/layout/import-package", archive);
+
+    assert.equal(imported.name, "package-import");
+    assert.equal(imported.layout.background.image, "background.png");
+    assert.equal(
+      (await app.getJson<typeof layout>("/api/layout/package-import")).name,
+      "package-import",
+    );
   } finally {
     await app.close();
   }

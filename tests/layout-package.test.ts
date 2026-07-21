@@ -7,7 +7,6 @@ import {
   createLayoutPackage,
   InvalidLayoutPackageError,
   readLayoutPackage,
-  replaceLayoutAssetName,
 } from "../src/layout-package";
 
 test("layout package round trips v2 layout data and referenced images", async () => {
@@ -28,20 +27,6 @@ test("layout package round trips v2 layout data and referenced images", async ()
   assert.equal(restored.layout.totalbuttonshow, 1);
   assert.equal(restored.layout.background.image, "background.png");
   assert.deepEqual(restored.assets, images);
-});
-
-test("replaceLayoutAssetName updates every reference without mutating input", () => {
-  const layout = createDefaultLayout();
-  layout.background.image = "shared.png";
-  layout.defaultbuttons.img = "shared.png";
-  layout.buttons[0].imgp = "shared.png";
-
-  const updated = replaceLayoutAssetName(layout, "shared.png", "shared-2.png");
-
-  assert.equal(updated.background.image, "shared-2.png");
-  assert.equal(updated.defaultbuttons.img, "shared-2.png");
-  assert.equal(updated.buttons[0].imgp, "shared-2.png");
-  assert.equal(layout.background.image, "shared.png");
 });
 
 test("createLayoutPackage rejects a missing referenced image", async () => {

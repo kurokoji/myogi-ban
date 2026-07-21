@@ -1,5 +1,4 @@
 import type JSZipType from "jszip";
-import { cloneLayout } from "./editor-helpers";
 import { ensureLayoutDefaults } from "./layout";
 import { collectLayoutAssets } from "./layout-assets";
 import { serializeLayoutDocument } from "./layout-document";
@@ -31,21 +30,6 @@ function packageAssetNames(layout: Layout): string[] {
     ...layout,
     buttons: layout.buttons.slice(0, layout.totalbuttonshow),
   });
-}
-
-export function replaceLayoutAssetName(
-  layout: Layout,
-  currentName: string,
-  nextName: string,
-): Layout {
-  const updated = cloneLayout(layout);
-  if (updated.background.image === currentName)
-    updated.background.image = nextName;
-  for (const button of [updated.defaultbuttons, ...updated.buttons]) {
-    if (button.img === currentName) button.img = nextName;
-    if (button.imgp === currentName) button.imgp = nextName;
-  }
-  return updated;
 }
 
 export async function createLayoutPackage(

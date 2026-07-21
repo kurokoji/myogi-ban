@@ -114,6 +114,28 @@ Myogi Banはローカルサーバー上でREST APIとWebSocketを提供します
 { "ok": true }
 ```
 
+### レイアウトパッケージのインポート
+
+`.myogi` のZIPバイナリを検証し、画像とレイアウトを原子的に保存します。同名レイアウトが存在する場合は連番名になります。
+
+**エンドポイント**: `POST /api/layout/import-package`
+
+**Content-Type**: `application/octet-stream`
+
+**レスポンス例**:
+
+```json
+{
+  "ok": true,
+  "data": {
+    "name": "mypreset-2",
+    "layout": {
+      "name": "mypreset-2"
+    }
+  }
+}
+```
+
 ### 画像アップロード
 
 背景画像またはボタン画像をユーザーレイアウト配下へ保存します。`fileName` はサーバー側でbasename化されます。

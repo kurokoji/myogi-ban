@@ -108,7 +108,7 @@ npm run build:dist
 
 ## データ保存場所
 
-レイアウトJSONの現行形式は `formatVersion: 2` です。旧v1形式も読み込めます。共有時はv2の `layout.json` と参照画像をZIPへ格納した `.myogi` ファイルとしてエクスポートします。従来の `.json` ファイルも引き続きインポートできます。
+レイアウトJSONの現行形式は `formatVersion: 2` です。旧v1形式も読み込めます。共有時はv2の `layout.json` と参照画像をZIPへ格納した `.myogi` ファイルとしてエクスポートします。インポートは全内容の検証後に一括反映され、同名レイアウトは連番名で保存されます。従来の `.json` ファイルも引き続きインポートできます。
 
 - 組み込みレイアウト: `public/layout/{name}/layout.json`
 - Webサーバー単体のユーザーレイアウト: `public/user-layouts/{name}/layout.json`

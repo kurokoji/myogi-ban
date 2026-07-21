@@ -15,6 +15,7 @@ export interface TestWebServer {
   getJson<T>(path: string): Promise<T>;
   getText(path: string): Promise<string>;
   postJson(path: string, body: unknown): Promise<void>;
+  postBinary<T>(path: string, body: Uint8Array): Promise<T>;
   close(): Promise<void>;
 }
 
@@ -73,6 +74,14 @@ export async function startTestWebServer(
         headers: { "content-type": "application/json" },
         body: JSON.stringify(body),
       });
+    },
+    async postBinary<T>(path: string, body: Uint8Array): Promise<T> {
+      const response = await successfulResponse(path, {
+        method: "POST",
+        headers: { "content-type": "application/octet-stream" },
+        body: new Uint8Array(body).buffer,
+      });
+      return ((await response.json()) as ApiSuccess<T>).data;
     },
     async close() {
       await new Promise<void>((resolve, reject) => {

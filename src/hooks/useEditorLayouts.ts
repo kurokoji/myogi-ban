@@ -28,12 +28,7 @@ import {
 import { ensureLayoutDefaults } from "../layout";
 import { withUploadedImage } from "../layout-image";
 import { isLayoutNameTaken } from "../layout-name";
-import {
-  createLayoutPackage,
-  imageMimeType,
-  readLayoutPackage,
-  replaceLayoutAssetName,
-} from "../layout-package";
+import { createLayoutPackage } from "../layout-package";
 import {
   buildLayoutForSave,
   createEditorSnapshotSignature,
@@ -339,23 +334,13 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     event.target.value = "";
     if (file.name.toLowerCase().endsWith(".myogi")) {
       try {
-        const contents = await readLayoutPackage(await file.arrayBuffer());
-        let imported = contents.layout;
-        const importedName = imported.name || "imported";
-        for (const [name, data] of contents.assets) {
-          const imageFile = new File([new Uint8Array(data).buffer], name, {
-            type: imageMimeType(name),
-          });
-          const result = await api.uploadImage({
-            data: await readFileAsDataUrl(imageFile),
-            layoutName: importedName,
-            fileName: name,
-          });
-          if (result.fileName && result.fileName !== name) {
-            imported = replaceLayoutAssetName(imported, name, result.fileName);
-          }
-        }
-        applyLayout(imported, importedName, false, false);
+        const result = await api.importLayoutPackage(
+          new Uint8Array(await file.arrayBuffer()),
+        );
+        await refreshLayouts();
+        applyLayout(result.layout, result.name, false);
+        setSelectedLayout(layoutSelectionValue(result.name, false));
+        setStatus({ kind: "success", message: messages.saved });
       } catch (error) {
         console.error("Failed to import layout package:", error);
         setStatus({ kind: "error", message: messages.invalidLayoutFile });

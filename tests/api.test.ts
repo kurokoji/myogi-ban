@@ -52,3 +52,28 @@ test("ApiClient can explicitly request a built-in layout", async (t) => {
     /hit-box-ultra\?builtin=true$/,
   );
 });
+
+test("ApiClient uploads a binary layout package", async (t) => {
+  const fetchMock = t.mock.method(globalThis, "fetch", async () =>
+    Response.json({
+      ok: true,
+      data: { name: "imported", layout: { name: "imported" } },
+    }),
+  );
+
+  const result = await new ApiClient().importLayoutPackage(
+    Uint8Array.from([1, 2, 3]),
+  );
+
+  assert.equal(
+    fetchMock.mock.calls[0].arguments[0],
+    "/api/layout/import-package",
+  );
+  const init = fetchMock.mock.calls[0].arguments[1] as RequestInit;
+  assert.equal(init.method, "POST");
+  assert.equal(
+    (init.headers as Record<string, string>)["Content-Type"],
+    "application/octet-stream",
+  );
+  assert.equal(result.name, "imported");
+});
