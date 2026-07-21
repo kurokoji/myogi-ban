@@ -6,7 +6,11 @@ import {
   deserializeLayoutDocument,
   serializeLayoutDocument,
 } from "./layout-document";
-import { assertValidLayoutName, isLayoutNameTaken } from "./layout-name";
+import {
+  assertValidLayoutName,
+  isLayoutNameTaken,
+  resolveAvailableLayoutName,
+} from "./layout-name";
 import { imageMimeType, readLayoutPackage } from "./layout-package";
 import type { Layout, LayoutEntry } from "./types";
 
@@ -188,12 +192,7 @@ export class LayoutRepository {
     const contents = await readLayoutPackage(data);
     const requestedName = contents.layout.name || "imported";
     assertValidLayoutName(requestedName);
-    let name = requestedName;
-    let suffix = 2;
-    while (this.has(name)) {
-      name = `${requestedName}-${suffix}`;
-      suffix += 1;
-    }
+    const name = resolveAvailableLayoutName(requestedName, this.list());
 
     for (const [fileName, bytes] of contents.assets) {
       validateImageUpload({

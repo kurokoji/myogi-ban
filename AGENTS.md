@@ -18,6 +18,14 @@ For existing behavior that lacks coverage, add characterization tests before ref
 
 Prefer extracting domain logic into small pure functions. Test repository and API boundaries with real temporary files or lightweight fakes where practical; use mocks only at genuine external boundaries.
 
+## Component Design
+
+Keep UI components focused on one cohesive responsibility. Before adding UI to an existing component, review its current responsibilities and extract a child component when the change introduces a separate workflow, independent state, reusable formatting, or a distinct dialog/panel.
+
+Treat roughly 200 lines or several unrelated interaction groups as a review signal, not a target. Do not wait for a component to become difficult to navigate before splitting it. Container components should coordinate data and callbacks; focused child components should own the markup and local state for a single interaction.
+
+When feature work makes a touched component materially larger, include the responsibility split in the same change while tests are green. Avoid line-count-only extraction: each new component must have a clear name, narrow props, and a coherent reason to change.
+
 ## Verification
 
 Keep every commit green. Before committing completed work, run:

@@ -8,6 +8,7 @@ import {
   InvalidLayoutPackageError,
   MAX_LAYOUT_PACKAGE_BYTES,
   readLayoutPackage,
+  summarizeLayoutPackage,
 } from "../src/layout-package";
 
 const PNG_BYTES = Uint8Array.from([
@@ -45,6 +46,24 @@ test("layout package round trips v2 layout data and referenced images", async ()
   assert.equal(restored.layout.totalbuttonshow, 1);
   assert.equal(restored.layout.background.image, "background.png");
   assert.deepEqual(restored.assets, images);
+});
+
+test("summarizeLayoutPackage reports the layout and referenced image metadata", async () => {
+  const layout = createDefaultLayout();
+  layout.name = "previewed";
+  layout.background.image = "background.png";
+  const image = new Uint8Array([
+    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+  ]);
+  const archive = await createLayoutPackage(layout, async () => image);
+  const contents = await readLayoutPackage(archive);
+
+  assert.deepEqual(summarizeLayoutPackage(contents), {
+    name: "previewed",
+    formatVersion: 2,
+    imageCount: 1,
+    imageBytes: image.byteLength,
+  });
 });
 
 test("readLayoutPackage rejects unsafe and unexpected archive paths", async () => {

@@ -41,3 +41,13 @@ export function isLayoutNameTaken(
     (entry) => normalizeLayoutName(entry.name) === normalizedName,
   );
 }
+
+export function resolveAvailableLayoutName(
+  requestedName: string,
+  layouts: LayoutEntry[],
+): string {
+  if (!isLayoutNameTaken(requestedName, layouts)) return requestedName;
+  let suffix = 2;
+  while (isLayoutNameTaken(`${requestedName}-${suffix}`, layouts)) suffix += 1;
+  return `${requestedName}-${suffix}`;
+}

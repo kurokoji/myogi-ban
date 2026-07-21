@@ -4,6 +4,7 @@ import {
   isLayoutNameTaken,
   isValidLayoutName,
   normalizeLayoutName,
+  resolveAvailableLayoutName,
 } from "../src/layout-name";
 
 test("normalizeLayoutName trims whitespace and ignores letter case", () => {
@@ -47,4 +48,14 @@ test("isValidLayoutName rejects path-like and control-character names", () => {
   }
   assert.equal(isValidLayoutName("PWS FS-24"), true);
   assert.equal(isValidLayoutName("hit-box-ultra-copy"), true);
+});
+
+test("resolveAvailableLayoutName previews the suffix used for duplicate names", () => {
+  const layouts = [
+    { name: "sample", builtin: true },
+    { name: "sample-2", builtin: false },
+  ];
+
+  assert.equal(resolveAvailableLayoutName("new-layout", layouts), "new-layout");
+  assert.equal(resolveAvailableLayoutName("sample", layouts), "sample-3");
 });

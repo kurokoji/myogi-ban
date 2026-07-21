@@ -139,6 +139,8 @@ function EditorApp(): React.ReactElement {
     updateRulerOrigin,
   } = useEditorGuides({ layoutRef, previewScale, setLayout });
   const {
+    cancelImport,
+    confirmImport,
     currentBuiltin,
     deleteLayout,
     exportLayout,
@@ -148,6 +150,7 @@ function EditorApp(): React.ReactElement {
     layoutNames,
     openLayout,
     openImagePicker,
+    pendingImport,
     saveLayout,
     saveLayoutAs,
     selectedLayout,
@@ -457,6 +460,9 @@ function EditorApp(): React.ReactElement {
                   setDefaultLayout={setDefaultLayout}
                   exportLayout={exportLayout}
                   importLayout={importLayout}
+                  pendingImport={pendingImport}
+                  confirmImport={confirmImport}
+                  cancelImport={cancelImport}
                   status={status}
                 />
               ),

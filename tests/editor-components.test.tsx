@@ -124,6 +124,50 @@ test("layout panel keeps secondary actions in a more menu", () => {
   );
 });
 
+test("layout panel confirms a package preview before importing", () => {
+  let confirmCalls = 0;
+  let cancelCalls = 0;
+  const view = renderComponent(
+    <LayoutSettingsPanel
+      layoutNames={[]}
+      selectedLayout=""
+      layoutName="current"
+      currentBuiltin={false}
+      isDefaultLayout={false}
+      isDirty={false}
+      status={null}
+      openLayout={() => {}}
+      saveLayout={() => {}}
+      saveLayoutAs={async () => true}
+      deleteLayout={() => {}}
+      setDefaultLayout={() => {}}
+      exportLayout={() => {}}
+      importLayout={() => {}}
+      pendingImport={{
+        name: "sample",
+        savedName: "sample-2",
+        formatVersion: 2,
+        imageCount: 3,
+        imageBytes: 2048,
+      }}
+      confirmImport={() => {
+        confirmCalls += 1;
+      }}
+      cancelImport={() => {
+        cancelCalls += 1;
+      }}
+    />,
+  );
+
+  assert.ok(view.getByText("sample"));
+  assert.ok(view.getByText("sample-2"));
+  assert.ok(view.getByText("2.0 KB"));
+  fireEvent.click(view.getByRole("button", { name: "confirmImport" }));
+  fireEvent.click(view.getByRole("button", { name: "cancel" }));
+  assert.equal(confirmCalls, 1);
+  assert.equal(cancelCalls, 1);
+});
+
 test("linked size inputs update height and can unlink the ratio", () => {
   function Example() {
     const [size, setSize] = useState({ width: "100", height: "50" });

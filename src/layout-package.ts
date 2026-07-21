@@ -33,6 +33,28 @@ export const MAX_LAYOUT_DOCUMENT_BYTES = 1024 * 1024;
 export interface LayoutPackageContents {
   layout: Layout;
   assets: Map<string, Uint8Array>;
+  formatVersion: number;
+}
+
+export interface LayoutPackageSummary {
+  name: string;
+  formatVersion: number;
+  imageCount: number;
+  imageBytes: number;
+}
+
+export function summarizeLayoutPackage(
+  contents: LayoutPackageContents,
+): LayoutPackageSummary {
+  return {
+    name: contents.layout.name || "imported",
+    formatVersion: contents.formatVersion,
+    imageCount: contents.assets.size,
+    imageBytes: [...contents.assets.values()].reduce(
+      (total, bytes) => total + bytes.byteLength,
+      0,
+    ),
+  };
 }
 
 export function imageMimeType(fileName: string): string {
@@ -89,6 +111,7 @@ export async function readLayoutPackage(
   if (!layoutEntry) throw new InvalidLayoutPackageError("missing_layout");
 
   let layout: Layout;
+  let formatVersion: number;
   try {
     const layoutText = await layoutEntry.async("string");
     if (
@@ -96,6 +119,9 @@ export async function readLayoutPackage(
       MAX_LAYOUT_DOCUMENT_BYTES
     )
       throw new InvalidLayoutPackageError("layout_too_large");
+    const document = JSON.parse(layoutText) as { formatVersion?: unknown };
+    formatVersion =
+      typeof document?.formatVersion === "number" ? document.formatVersion : 1;
     layout = ensureLayoutDefaults(parseImportedLayoutJson(layoutText));
   } catch (error) {
     if (error instanceof InvalidLayoutPackageError) throw error;
@@ -130,5 +156,5 @@ export async function readLayoutPackage(
     }
     assets.set(name, bytes);
   }
-  return { layout, assets };
+  return { layout, assets, formatVersion };
 }
