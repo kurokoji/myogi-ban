@@ -52,6 +52,9 @@ interface UseEditorLayoutsOptions {
     saved: string;
     defaultSaved: string;
     invalidLayoutFile: string;
+    layoutPackageImageInvalid: string;
+    layoutPackageTooLarge: string;
+    layoutPackageUnsafe: string;
     operationFailed: string;
     discardChanges: string;
     confirmDelete: string;
@@ -343,7 +346,24 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
         setStatus({ kind: "success", message: messages.saved });
       } catch (error) {
         console.error("Failed to import layout package:", error);
-        setStatus({ kind: "error", message: messages.invalidLayoutFile });
+        let message = messages.invalidLayoutFile;
+        if (error instanceof ApiError) {
+          if (
+            error.code === "package_too_large" ||
+            error.code === "layout_too_large" ||
+            error.code === "image_too_large"
+          )
+            message = messages.layoutPackageTooLarge;
+          else if (error.code === "invalid_image_content")
+            message = messages.layoutPackageImageInvalid;
+          else if (
+            error.code === "unsafe_path" ||
+            error.code === "unexpected_file" ||
+            error.code === "too_many_files"
+          )
+            message = messages.layoutPackageUnsafe;
+        }
+        setStatus({ kind: "error", message });
       }
       return;
     }

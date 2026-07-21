@@ -122,6 +122,8 @@ Myogi Banはローカルサーバー上でREST APIとWebSocketを提供します
 
 **Content-Type**: `application/octet-stream`
 
+不正なパッケージはHTTP 400となり、`package_too_large`、`too_many_files`、`unsafe_path`、`unexpected_file`、`layout_too_large`、`invalid_layout`、`missing_asset`、`image_too_large`、`invalid_image_content` などのエラーコードを返します。
+
 **レスポンス例**:
 
 ```json

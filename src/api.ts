@@ -1,4 +1,4 @@
-import type { ApiSuccess } from "./api-response";
+import type { ApiFailure, ApiSuccess } from "./api-response";
 import type { GamepadState, Layout, LayoutEntry } from "./types";
 
 interface UploadImageOptions {
@@ -21,6 +21,7 @@ export class ApiError extends Error {
     readonly status: number,
     readonly method: string,
     readonly path: string,
+    readonly code?: string,
   ) {
     super(`API request failed: ${method} ${path} (${status})`);
     this.name = "ApiError";
@@ -30,7 +31,13 @@ export class ApiError extends Error {
 async function request(path: string, init?: RequestInit): Promise<Response> {
   const response = await fetch(path, init);
   if (!response.ok) {
-    throw new ApiError(response.status, init?.method ?? "GET", path);
+    let code: string | undefined;
+    try {
+      code = ((await response.json()) as ApiFailure).error;
+    } catch {
+      // A non-JSON failure has no application error code.
+    }
+    throw new ApiError(response.status, init?.method ?? "GET", path, code);
   }
   return response;
 }

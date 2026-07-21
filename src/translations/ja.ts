@@ -101,6 +101,9 @@ export const jaTranslation = {
   buttonsSelected: "{{count}}個のボタンを一括編集中",
   stickLabel: "スティック",
   invalidLayoutFile: "レイアウトファイルが不正です",
+  layoutPackageImageInvalid: "パッケージ内の画像形式が不正です",
+  layoutPackageTooLarge: "レイアウトパッケージの容量が上限を超えています",
+  layoutPackageUnsafe: "レイアウトパッケージに許可されていない内容があります",
   operationFailed: "操作に失敗しました",
   discardChanges:
     "未保存の変更があります。破棄して別のレイアウトを開きますか？",

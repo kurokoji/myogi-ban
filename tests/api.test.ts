@@ -77,3 +77,14 @@ test("ApiClient uploads a binary layout package", async (t) => {
   );
   assert.equal(result.name, "imported");
 });
+
+test("ApiClient exposes layout package validation codes", async (t) => {
+  t.mock.method(globalThis, "fetch", async () =>
+    Response.json({ ok: false, error: "unsafe_path" }, { status: 400 }),
+  );
+
+  await assert.rejects(
+    () => new ApiClient().importLayoutPackage(new Uint8Array()),
+    (error) => error instanceof ApiError && error.code === "unsafe_path",
+  );
+});

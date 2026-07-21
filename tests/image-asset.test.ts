@@ -26,7 +26,7 @@ test("resolveAvailableAssetName preserves unused names and suffixes collisions",
 test("validateImageUpload accepts supported images and rejects unsafe input", () => {
   assert.doesNotThrow(() =>
     validateImageUpload({
-      data: "data:image/png;base64,AA==",
+      data: "data:image/png;base64,iVBORw0KGgo=",
       fileName: "button.png",
     }),
   );
@@ -45,5 +45,16 @@ test("validateImageUpload accepts supported images and rejects unsafe input", ()
         fileName: "../button.png",
       }),
     /Invalid image upload/,
+  );
+});
+
+test("validateImageUpload rejects content that does not match its image type", () => {
+  assert.throws(
+    () =>
+      validateImageUpload({
+        data: "data:image/png;base64,R0lGODlh",
+        fileName: "button.png",
+      }),
+    /invalid_image_content/,
   );
 });

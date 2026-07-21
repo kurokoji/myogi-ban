@@ -19,6 +19,10 @@ import {
   LayoutRepository,
 } from "../src/layout-repository";
 
+const PNG_BYTES = Uint8Array.from([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+]);
+
 test("collectLayoutAssets returns safe unique image names", () => {
   const assets = collectLayoutAssets({
     background: { image: "images/background.png" },
@@ -183,9 +187,7 @@ test("LayoutRepository atomically imports a layout package with its assets", asy
   const layout = createDefaultLayout();
   layout.name = "imported";
   layout.background.image = "background.png";
-  const archive = await createLayoutPackage(layout, async () =>
-    Uint8Array.from([1, 2, 3]),
-  );
+  const archive = await createLayoutPackage(layout, async () => PNG_BYTES);
 
   const result = await repository.importPackage(archive);
 
@@ -193,7 +195,7 @@ test("LayoutRepository atomically imports a layout package with its assets", asy
   assert.equal(result.layout.background.image, "background.png");
   assert.deepEqual(
     readFileSync(join(user, "imported", "background.png")),
-    Buffer.from([1, 2, 3]),
+    Buffer.from(PNG_BYTES),
   );
   assert.equal(
     JSON.parse(readFileSync(join(user, "imported", "layout.json"), "utf8"))

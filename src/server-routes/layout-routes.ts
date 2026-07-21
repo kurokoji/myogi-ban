@@ -1,5 +1,6 @@
 import express, { type Express } from "express";
 import { apiFailure, apiSuccess } from "../api-response";
+import { InvalidLayoutPackageError } from "../layout-package";
 import {
   CorruptLayoutError,
   type LayoutRepository,
@@ -38,7 +39,15 @@ export function registerLayoutRoutes(
         res.json(apiSuccess(result));
       } catch (error) {
         console.error("Failed to import layout package:", error);
-        res.status(400).json(apiFailure("invalid_layout_package"));
+        res
+          .status(400)
+          .json(
+            apiFailure(
+              error instanceof InvalidLayoutPackageError
+                ? error.code
+                : "invalid_layout_package",
+            ),
+          );
       }
     },
   );

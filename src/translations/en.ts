@@ -103,6 +103,9 @@ export const enTranslation = {
   buttonsSelected: "Editing {{count}} buttons",
   stickLabel: "Stick",
   invalidLayoutFile: "Invalid layout file",
+  layoutPackageImageInvalid: "The package contains an invalid image",
+  layoutPackageTooLarge: "The layout package exceeds the size limit",
+  layoutPackageUnsafe: "The layout package contains disallowed content",
   operationFailed: "Operation failed",
   discardChanges:
     "You have unsaved changes. Discard them and open another layout?",
