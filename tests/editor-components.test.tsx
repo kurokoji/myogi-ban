@@ -11,6 +11,7 @@ import { PreviewZoomControls } from "../src/components/editor/PreviewZoomControl
 import { SidebarAccordion } from "../src/components/editor/SidebarAccordion";
 import { ButtonLayer } from "../src/components/gamepad/ButtonLayer";
 import { ButtonAdvancedSettings } from "../src/components/editor/ButtonSettingsSections";
+import { ButtonSettingsPanel } from "../src/components/editor/ButtonSettingsPanel";
 import { GamepadView } from "../src/components/GamepadView";
 import { SelectionOverlays } from "../src/components/gamepad/SelectionOverlays";
 import { createDefaultLayout } from "../src/layout";
@@ -479,6 +480,62 @@ test("advanced button settings stay collapsed until requested", () => {
   fireEvent(details, new componentDocument.defaultView.Event("toggle"));
 
   assert.equal(details.open, true);
+});
+
+test("button settings distinguish default and selected scopes", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 2;
+  const view = renderComponent(
+    <ButtonSettingsPanel
+      layout={layout}
+      assigningTarget={null}
+      assignmentName=""
+      selectedButtonIndex={1}
+      selectedButtonIndexes={[1]}
+      updateLayout={() => {}}
+      updateSelectedButtons={() => {}}
+      onSelectedButtonChange={() => {}}
+      onAddButton={() => {}}
+      onDeleteSelectedButtons={() => {}}
+      openImagePicker={() => {}}
+      cancelAssignment={() => {}}
+    />,
+  );
+  const details = view.container.querySelector("details");
+  assert.ok(details);
+  details.open = true;
+  fireEvent(details, new componentDocument.defaultView.Event("toggle"));
+
+  assert.ok(view.getByRole("heading", { name: "defaultButtonSettings" }));
+  assert.ok(view.getByText("defaultButtonSettingsHint"));
+  assert.ok(view.getByRole("heading", { name: "selectedButtonSettings" }));
+  assert.ok(view.container.querySelector(".button-settings-card-default"));
+  assert.ok(view.container.querySelector(".button-settings-card-selected"));
+});
+
+test("button settings explain how to open per-button settings when unselected", () => {
+  const view = renderComponent(
+    <ButtonSettingsPanel
+      layout={createDefaultLayout()}
+      assigningTarget={null}
+      assignmentName=""
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      updateLayout={() => {}}
+      updateSelectedButtons={() => {}}
+      onSelectedButtonChange={() => {}}
+      onAddButton={() => {}}
+      onDeleteSelectedButtons={() => {}}
+      openImagePicker={() => {}}
+      cancelAssignment={() => {}}
+    />,
+  );
+  const details = view.container.querySelector("details");
+  assert.ok(details);
+  details.open = true;
+  fireEvent(details, new componentDocument.defaultView.Event("toggle"));
+
+  assert.ok(view.getByText("selectButtonForSettings"));
 });
 
 test("advanced button settings restore their open state after remounting", () => {

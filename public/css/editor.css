@@ -112,6 +112,10 @@ body {
   cursor: pointer;
 }
 
+.button-settings-card-selected {
+  border-color: var(--mantine-primary-color-filled);
+}
+
 .control {
   margin-bottom: 0;
 }

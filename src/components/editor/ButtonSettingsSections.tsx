@@ -1,4 +1,4 @@
-import { Stack } from "@mantine/core";
+import { Paper, Stack, Text, Title } from "@mantine/core";
 import { type ReactNode, useState } from "react";
 
 const BUTTON_ADVANCED_SETTINGS_STORAGE_KEY = "button-advanced-settings-open";
@@ -8,25 +8,57 @@ interface ButtonSettingsStorage {
   setItem(key: string, value: string): void;
 }
 
-interface SectionProps {
+interface ChildrenProps {
   children: ReactNode;
 }
 
-interface AdvancedSectionProps extends SectionProps {
+interface SectionProps extends ChildrenProps {
+  title: ReactNode;
+  hint: ReactNode;
+}
+
+interface AdvancedSectionProps extends ChildrenProps {
   label: ReactNode;
   storage?: ButtonSettingsStorage;
 }
 
-export function DefaultButtonSettings({ children }: SectionProps) {
-  return <Stack gap="xs">{children}</Stack>;
+function ButtonSettingsScope({
+  children,
+  title,
+  hint,
+  className,
+}: SectionProps & { className: string }) {
+  return (
+    <Paper withBorder p="xs" className={`button-settings-card ${className}`}>
+      <Stack gap="xs">
+        <div>
+          <Title order={4} size="sm">
+            {title}
+          </Title>
+          <Text size="xs" c="dimmed">
+            {hint}
+          </Text>
+        </div>
+        {children}
+      </Stack>
+    </Paper>
+  );
 }
-export function SelectedButtonSettings({ children }: SectionProps) {
-  return <Stack gap="xs">{children}</Stack>;
+
+export function DefaultButtonSettings(props: SectionProps) {
+  return (
+    <ButtonSettingsScope {...props} className="button-settings-card-default" />
+  );
 }
-export function ButtonImageSettings({ children }: SectionProps) {
+export function SelectedButtonSettings(props: SectionProps) {
+  return (
+    <ButtonSettingsScope {...props} className="button-settings-card-selected" />
+  );
+}
+export function ButtonImageSettings({ children }: ChildrenProps) {
   return <>{children}</>;
 }
-export function ButtonAppearanceSettings({ children }: SectionProps) {
+export function ButtonAppearanceSettings({ children }: ChildrenProps) {
   return <>{children}</>;
 }
 

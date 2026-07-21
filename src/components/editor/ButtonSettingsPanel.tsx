@@ -100,7 +100,10 @@ export function ButtonSettingsPanel(
           })}
         </Button>
         <ButtonAdvancedSettings label={t("advancedSettings")}>
-          <DefaultButtonSettings>
+          <DefaultButtonSettings
+            title={t("defaultButtonSettings")}
+            hint={t("defaultButtonSettingsHint")}
+          >
             <Switch
               size="sm"
               label={t("useCssButton")}
@@ -297,16 +300,26 @@ export function ButtonSettingsPanel(
               }
             />
           </DefaultButtonSettings>
-          <SelectedButtonSettings>
+          <SelectedButtonSettings
+            title={
+              props.selectedButtonIndexes.length > 1
+                ? t("selectedButtonsSettings", {
+                    count: props.selectedButtonIndexes.length,
+                  })
+                : selectedButtonIndex !== null
+                  ? t("selectedButtonSettings", {
+                      number: selectedButtonIndex + 1,
+                    })
+                  : t("selectedButtonSettingsEmpty")
+            }
+            hint={t(
+              selectedButtonIndex === null
+                ? "selectButtonForSettings"
+                : "useDefaultWhenBlank",
+            )}
+          >
             {selectedButtonIndex !== null && (
               <Stack gap="xs">
-                {props.selectedButtonIndexes.length > 1 && (
-                  <Text size="xs" c="blue" fw={600}>
-                    {t("buttonsSelected", {
-                      count: props.selectedButtonIndexes.length,
-                    })}
-                  </Text>
-                )}
                 <Group gap="xs">
                   <Switch
                     size="sm"
@@ -688,9 +701,6 @@ export function ButtonSettingsPanel(
                 />
               </>
             )}
-            <Text size="xs" c="dimmed">
-              {t("useDefaultWhenBlank")}
-            </Text>
           </SelectedButtonSettings>
           <Title order={2}>{t("buttonMapping")}</Title>
           <Text size="xs" c="dimmed">
