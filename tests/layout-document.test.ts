@@ -60,6 +60,39 @@ test("deserializeLayoutDocument keeps v1 documents readable", () => {
   assert.equal(restored.buttons[0].y, "24");
 });
 
+test("legacy numeric fields can be saved as a v2 document", () => {
+  const restored = deserializeLayoutDocument({
+    version: "210124",
+    name: "legacy-numeric",
+    totalbuttonshow: 1,
+    stick: { x: 89, y: 116, w: 70, h: 70, cssTransition: 0.1 },
+    defaultbuttons: {
+      x: 0,
+      y: 0,
+      w: 40,
+      h: 40,
+      xp: 0,
+      yp: 0,
+      wp: 40,
+      hp: 40,
+    },
+    buttons: [{ x: 250, y: 90, w: 40, h: 40, xp: 0, yp: 0, wp: 40, hp: 40 }],
+    background: {
+      show: true,
+      image: "background.png",
+      scale: 0.1,
+      w: 375,
+      h: 234,
+    },
+  });
+
+  const document = serializeLayoutDocument(restored);
+
+  assert.deepEqual(document.stick.position, { x: 89, y: 116 });
+  assert.deepEqual(document.buttons[0]?.position, { x: 250, y: 90 });
+  assert.deepEqual(document.background.size, { width: 375, height: 234 });
+});
+
 test("deserializeLayoutDocument rejects unknown format versions", () => {
   assert.throws(
     () => deserializeLayoutDocument({ formatVersion: 3 }),
