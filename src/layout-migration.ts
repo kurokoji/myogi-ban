@@ -1,6 +1,6 @@
 import type { BackgroundConfig, Layout } from "./types";
 
-export const CURRENT_LAYOUT_VERSION = "v1.0.11";
+export const CURRENT_LAYOUT_VERSION = "v1.0.12";
 
 export function migrateLayout(layout: Partial<Layout>): Partial<Layout> {
   const background = layout.background

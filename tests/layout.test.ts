@@ -11,7 +11,7 @@ test("ensureLayoutDefaults fills missing nested values", () => {
   });
 
   assert.equal(layout.name, "legacy");
-  assert.equal(layout.version, "v1.0.11");
+  assert.equal(layout.version, "v1.0.12");
   assert.equal(layout.background.w, "640");
   assert.equal(layout.background.opacity, 1);
   assert.equal(layout.background.scale, "");
