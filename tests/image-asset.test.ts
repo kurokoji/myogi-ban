@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  MAX_IMAGE_BYTES,
   resolveAvailableAssetName,
+  validateImageBytes,
   validateImageUpload,
 } from "../src/image-asset";
 
@@ -56,5 +58,24 @@ test("validateImageUpload rejects content that does not match its image type", (
         fileName: "button.png",
       }),
     /invalid_image_content/,
+  );
+});
+
+test("validateImageBytes accepts an image slightly larger than 10 MB", () => {
+  const bytes = new Uint8Array(11 * 1024 * 1024);
+  bytes.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
+  assert.doesNotThrow(() =>
+    validateImageBytes({ bytes, fileName: "background.png" }),
+  );
+});
+
+test("validateImageBytes rejects an image larger than 15 MB", () => {
+  const bytes = new Uint8Array(MAX_IMAGE_BYTES + 1);
+  bytes.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
+  assert.throws(
+    () => validateImageBytes({ bytes, fileName: "background.png" }),
+    /image_too_large/,
   );
 });

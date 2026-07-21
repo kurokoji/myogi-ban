@@ -30,7 +30,7 @@ const EXTENSIONS: Record<string, string[]> = {
   "image/webp": ["webp"],
   "image/gif": ["gif"],
 };
-export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+export const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
 
 function startsWith(bytes: Uint8Array, signature: number[]): boolean {
   return signature.every((value, index) => bytes[index] === value);
