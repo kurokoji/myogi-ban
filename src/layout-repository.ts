@@ -1,6 +1,10 @@
 import * as fs from "fs";
 import * as path from "path";
 import { resolveAvailableAssetName, validateImageUpload } from "./image-asset";
+import {
+  deserializeLayoutDocument,
+  serializeLayoutDocument,
+} from "./layout-document";
 import { assertValidLayoutName, isLayoutNameTaken } from "./layout-name";
 import type { Layout, LayoutEntry } from "./types";
 
@@ -151,14 +155,21 @@ export class LayoutRepository {
     ];
   }
 
-  read(name: string, builtin = false): unknown {
+  read(name: string, builtin = false): Layout {
     assertValidLayoutName(name);
     const layoutPath = builtin
       ? path.join(this.options.builtinLayoutDir, name)
       : this.findLayoutPath(name);
-    if (!layoutPath) return {};
+    if (!layoutPath) return deserializeLayoutDocument({});
     const jsonPath = path.join(layoutPath, "layout.json");
-    return fs.existsSync(jsonPath) ? readJson(jsonPath) : {};
+    try {
+      return deserializeLayoutDocument(
+        fs.existsSync(jsonPath) ? readJson(jsonPath) : {},
+      );
+    } catch (error) {
+      if (error instanceof CorruptLayoutError) throw error;
+      throw new CorruptLayoutError(jsonPath, error);
+    }
   }
 
   save(name: string, layout: Layout): void {
@@ -166,10 +177,10 @@ export class LayoutRepository {
     const layoutDir = path.join(this.options.userLayoutDir, name);
     ensureDir(layoutDir);
     this.copyAssets(layout, layout.name || name, name);
-    writeJsonAtomically(path.join(layoutDir, "layout.json"), {
-      ...layout,
-      name,
-    });
+    writeJsonAtomically(
+      path.join(layoutDir, "layout.json"),
+      serializeLayoutDocument({ ...layout, name }),
+    );
   }
 
   delete(name: string): boolean {

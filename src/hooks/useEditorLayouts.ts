@@ -27,6 +27,7 @@ import {
   type StickMapping,
 } from "../gamepad";
 import { ensureLayoutDefaults } from "../layout";
+import { serializeLayoutDocument } from "../layout-document";
 import { withUploadedImage } from "../layout-image";
 import { isLayoutNameTaken } from "../layout-name";
 import {
@@ -304,9 +305,10 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
   };
 
   const exportLayout = () => {
-    const blob = new Blob([JSON.stringify(cloneLayout(layout), null, 2)], {
-      type: "application/json",
-    });
+    const blob = new Blob(
+      [JSON.stringify(serializeLayoutDocument(cloneLayout(layout)), null, 2)],
+      { type: "application/json" },
+    );
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;

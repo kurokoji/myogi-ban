@@ -1,4 +1,5 @@
 import { MAX_VISIBLE_BUTTONS } from "./app-constants";
+import { deserializeLayoutDocument } from "./layout-document";
 import type { Layout } from "./types";
 
 export class InvalidLayoutError extends Error {
@@ -84,6 +85,14 @@ export function parseImportedLayoutJson(text: string): Partial<Layout> {
     value = JSON.parse(text);
   } catch {
     throw new InvalidLayoutError();
+  }
+  if (object(value) && "formatVersion" in value) {
+    if (value.formatVersion !== 2) throw new InvalidLayoutError();
+    try {
+      return deserializeLayoutDocument(value);
+    } catch {
+      throw new InvalidLayoutError();
+    }
   }
   validateImportedLayout(value);
   return value;

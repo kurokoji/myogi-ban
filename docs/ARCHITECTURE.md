@@ -71,6 +71,10 @@ WebSocketは同じポートで待ち受け、`POST /api/state` された状態�
 
 ## レイアウトデータ
 
+レイアウトは、UIとViewerが扱う実行時モデルと、ディスク上のJSON形式を分離しています。
+`src/layout-document/v1.ts` は旧JSONの互換読込、`v2.ts` は現行JSONの検証・変換、`index.ts` は形式判定を担当します。
+旧形式は読み込めますが、新規保存とJSONエクスポートは常に `formatVersion: 2` です。
+
 ```typescript
 interface Layout {
   version: string;
@@ -87,7 +91,10 @@ interface Layout {
 }
 ```
 
-`ensureLayoutDefaults()` が古い/不足したレイアウトJSONに対して現在のデフォルト値を補完します。
+実行時モデルは既存の編集・描画処理との境界として上記の形を維持します。
+保存時のv2 JSONでは座標と寸法を数値で記録し、ボタンは表示中の要素だけを保存します。
+`formatVersion` はアプリのバージョンから独立しているため、保存形式が変わらないアプリアップデートでは更新しません。
+`ensureLayoutDefaults()` が旧JSONや省略値に対して現在のデフォルト値を補完します。
 CSS描画ボタンは `cssShape` で `"circle"`、`"rounded"`、`"square"` を指定できます。
 ボタンの `rotation` は度数文字列で、画像ボタンとCSS描画ボタンの両方に適用されます。
 エディタのガイド線は `guides.vertical` と `guides.horizontal` に背景左上基準の座標として保存されます。

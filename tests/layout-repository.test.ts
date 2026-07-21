@@ -3,6 +3,7 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readFileSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -140,4 +141,31 @@ test("LayoutRepository reports corrupted JSON without replacing it", (t) => {
     defaultLayoutFile: join(root, "default.json"),
   });
   assert.throws(() => repository.read("broken"), CorruptLayoutError);
+});
+
+test("LayoutRepository stores v2 documents and returns runtime layouts", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const user = join(root, "user");
+  const repository = new LayoutRepository({
+    builtinLayoutDir: join(root, "builtin"),
+    userLayoutDir: user,
+    defaultLayoutFile: join(root, "default.json"),
+  });
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 1;
+
+  repository.save("custom", layout);
+
+  const stored = JSON.parse(
+    readFileSync(join(user, "custom", "layout.json"), "utf8"),
+  );
+  assert.equal(stored.formatVersion, 2);
+  assert.equal(stored.buttons.length, 1);
+  assert.equal(stored.buttons[0].position.x, 225);
+  const restored = repository.read("custom") as ReturnType<
+    typeof createDefaultLayout
+  >;
+  assert.equal(restored.totalbuttonshow, 1);
+  assert.equal(restored.buttons[0].x, "225");
 });

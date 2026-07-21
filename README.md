@@ -108,6 +108,8 @@ npm run build:dist
 
 ## データ保存場所
 
+レイアウトJSONの現行形式は `formatVersion: 2` です。旧v1形式も読み込めますが、新規保存とエクスポートはv2形式になります。v2では座標・寸法を数値で持ち、未使用のボタン枠は保存しません。
+
 - 組み込みレイアウト: `public/layout/{name}/layout.json`
 - Webサーバー単体のユーザーレイアウト: `public/user-layouts/{name}/layout.json`
 - Electronのユーザーレイアウト: Electronの `userData` 配下 `user-layouts/{name}/layout.json`
