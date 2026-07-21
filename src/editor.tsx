@@ -430,6 +430,13 @@ function EditorApp(): React.ReactElement {
         </div>
 
         <SidebarAccordion
+          revealSection={
+            selectedButtonIndexes.length > 0
+              ? "buttons"
+              : selectedStick
+                ? "stick"
+                : undefined
+          }
           fixedContent={
             <DisplaySettingsPanel
               language={language}

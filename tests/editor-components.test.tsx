@@ -459,6 +459,46 @@ test("sidebar accordion restores persisted open sections", () => {
   );
 });
 
+test("sidebar accordion opens a section requested by preview selection", (t) => {
+  const testWindow = componentDocument.defaultView;
+  assert.ok(testWindow);
+  const originalRequestAnimationFrame = testWindow.requestAnimationFrame;
+  testWindow.requestAnimationFrame = () => 1;
+  t.after(() => {
+    testWindow.requestAnimationFrame = originalRequestAnimationFrame;
+  });
+
+  function Example() {
+    const [revealSection, setRevealSection] = useState<string>();
+    return (
+      <>
+        <button type="button" onClick={() => setRevealSection("buttons")}>
+          Select button
+        </button>
+        <SidebarAccordion
+          revealSection={revealSection}
+          storage={{ getItem: () => null, setItem: () => {} }}
+          sections={[
+            {
+              value: "buttons",
+              label: "Buttons",
+              content: <p>Button settings</p>,
+            },
+          ]}
+        />
+      </>
+    );
+  }
+
+  const view = renderComponent(<Example />);
+  const buttonSection = view.getByRole("button", { name: "Buttons" });
+  assert.equal(buttonSection.getAttribute("aria-expanded"), "false");
+
+  fireEvent.click(view.getByRole("button", { name: "Select button" }));
+
+  assert.equal(buttonSection.getAttribute("aria-expanded"), "true");
+});
+
 test("sidebar keeps fixed content outside the accordion", () => {
   const view = renderComponent(
     <SidebarAccordion

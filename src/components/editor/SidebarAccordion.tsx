@@ -1,5 +1,5 @@
 import { Accordion } from "@mantine/core";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import {
   readOpenSidebarSections,
   writeOpenSidebarSections,
@@ -18,18 +18,30 @@ export interface SidebarSection {
 
 interface SidebarAccordionProps {
   fixedContent?: ReactNode;
+  revealSection?: string;
   sections: SidebarSection[];
   storage?: SidebarStorage;
 }
 
 export function SidebarAccordion({
   fixedContent,
+  revealSection,
   sections,
   storage = window.localStorage,
 }: SidebarAccordionProps): React.ReactElement {
   const [openSections, setOpenSections] = useState<string[]>(() =>
     readOpenSidebarSections(storage, ["layout"]),
   );
+
+  useEffect(() => {
+    if (!revealSection) return;
+    setOpenSections((current) => {
+      if (current.includes(revealSection)) return current;
+      const next = [...current, revealSection];
+      writeOpenSidebarSections(storage, next);
+      return next;
+    });
+  }, [revealSection, storage]);
 
   const changeOpenSections = (values: string[]) => {
     setOpenSections(values);
