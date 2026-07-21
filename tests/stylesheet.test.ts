@@ -25,3 +25,10 @@ test("editor borders follow the active color scheme", () => {
   assert.doesNotMatch(editorStylesheet, /var\(--mantine-color-gray-3\)/);
   assert.match(editorStylesheet, /var\(--mantine-color-default-border\)/);
 });
+
+test("editor title row leaves a small gap below the title", () => {
+  assert.match(
+    editorStylesheet,
+    /\.sidebar-title-row\s*\{[^}]*margin-bottom:\s*10px;/s,
+  );
+});
