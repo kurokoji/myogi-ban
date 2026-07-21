@@ -73,7 +73,8 @@ WebSocketは同じポートで待ち受け、`POST /api/state` された状態�
 
 レイアウトは、UIとViewerが扱う実行時モデルと、ディスク上のJSON形式を分離しています。
 `src/layout-document/v1.ts` は旧JSONの互換読込、`v2.ts` は現行JSONの検証・変換、`index.ts` は形式判定を担当します。
-旧形式は読み込めますが、新規保存とJSONエクスポートは常に `formatVersion: 2` です。
+旧形式は読み込めますが、新規保存は常に `formatVersion: 2` です。
+共有用の `.myogi` はZIP形式で、ルートの `layout.json` と `assets/` 配下の参照画像だけを格納します。
 
 ```typescript
 interface Layout {

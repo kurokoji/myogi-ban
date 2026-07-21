@@ -198,7 +198,7 @@ export function LayoutSettingsPanel(
         <input
           id="import-layout-input"
           type="file"
-          accept=".json"
+          accept=".myogi,.json"
           hidden
           onChange={props.importLayout}
         />

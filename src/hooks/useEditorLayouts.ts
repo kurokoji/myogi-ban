@@ -10,7 +10,6 @@ import {
 import { type ApiClient, ApiError } from "../api";
 import { selectDefaultLayoutEntry } from "../default-layout";
 import {
-  cloneLayout,
   type EditorLayoutUpdater,
   type ImageUploadTarget,
   layoutNameFromSelection,
@@ -27,9 +26,14 @@ import {
   type StickMapping,
 } from "../gamepad";
 import { ensureLayoutDefaults } from "../layout";
-import { serializeLayoutDocument } from "../layout-document";
 import { withUploadedImage } from "../layout-image";
 import { isLayoutNameTaken } from "../layout-name";
+import {
+  createLayoutPackage,
+  imageMimeType,
+  readLayoutPackage,
+  replaceLayoutAssetName,
+} from "../layout-package";
 import {
   buildLayoutForSave,
   createEditorSnapshotSignature,
@@ -304,22 +308,60 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     }
   };
 
-  const exportLayout = () => {
-    const blob = new Blob(
-      [JSON.stringify(serializeLayoutDocument(cloneLayout(layout)), null, 2)],
-      { type: "application/json" },
-    );
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `${layoutName || "layout"}.json`;
-    anchor.click();
-    URL.revokeObjectURL(url);
+  const exportLayout = async () => {
+    try {
+      const archive = await createLayoutPackage(layout, async (name) => {
+        const response = await fetch(
+          `/layout/${encodeURIComponent(layout.name)}/${encodeURIComponent(name)}`,
+        );
+        return response.ok
+          ? new Uint8Array(await response.arrayBuffer())
+          : undefined;
+      });
+      const blob = new Blob([new Uint8Array(archive).buffer], {
+        type: "application/zip",
+      });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `${layoutName || "layout"}.myogi`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Failed to export layout:", error);
+      setStatus({ kind: "error", message: messages.operationFailed });
+    }
   };
 
-  const importLayout = (event: ChangeEvent<HTMLInputElement>) => {
+  const importLayout = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+    event.target.value = "";
+    if (file.name.toLowerCase().endsWith(".myogi")) {
+      try {
+        const contents = await readLayoutPackage(await file.arrayBuffer());
+        let imported = contents.layout;
+        const importedName = imported.name || "imported";
+        for (const [name, data] of contents.assets) {
+          const imageFile = new File([new Uint8Array(data).buffer], name, {
+            type: imageMimeType(name),
+          });
+          const result = await api.uploadImage({
+            data: await readFileAsDataUrl(imageFile),
+            layoutName: importedName,
+            fileName: name,
+          });
+          if (result.fileName && result.fileName !== name) {
+            imported = replaceLayoutAssetName(imported, name, result.fileName);
+          }
+        }
+        applyLayout(imported, importedName, false, false);
+      } catch (error) {
+        console.error("Failed to import layout package:", error);
+        setStatus({ kind: "error", message: messages.invalidLayoutFile });
+      }
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => {
       try {
@@ -330,7 +372,6 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
       }
     };
     reader.readAsText(file);
-    event.target.value = "";
   };
 
   return {

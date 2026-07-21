@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import { resolveAvailableAssetName, validateImageUpload } from "./image-asset";
+import { collectLayoutAssets } from "./layout-assets";
 import {
   deserializeLayoutDocument,
   serializeLayoutDocument,
@@ -57,24 +58,7 @@ export function writeJsonAtomically(filePath: string, data: unknown): void {
   }
 }
 
-export function collectLayoutAssets(layout: unknown): string[] {
-  const data = layout as Partial<Layout> | null;
-  const assets = new Set<string>();
-  const add = (fileName: unknown) => {
-    if (typeof fileName === "string" && fileName.trim()) {
-      assets.add(path.basename(fileName));
-    }
-  };
-
-  add(data?.background?.image);
-  add(data?.defaultbuttons?.img);
-  add(data?.defaultbuttons?.imgp);
-  for (const button of data?.buttons || []) {
-    add(button?.img);
-    add(button?.imgp);
-  }
-  return [...assets];
-}
+export { collectLayoutAssets } from "./layout-assets";
 
 export function findAssetSources(
   sourceDirs: string[],
