@@ -40,6 +40,7 @@ import {
 } from "../layout-save";
 import { selectLayoutAfterDelete } from "../layout-selection";
 import { parseImportedLayoutJson } from "../layout-validation";
+import { runSingleFlight } from "../single-flight";
 import type { Layout, LayoutEntry, OperationStatus } from "../types";
 
 interface UseEditorLayoutsOptions {
@@ -86,6 +87,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
   const imageUploadTargetRef = useRef<ImageUploadTarget>({
     type: "background",
   });
+  const importInProgressRef = useRef(false);
   const [layoutNames, setLayoutNames] = useState<LayoutEntry[]>([]);
   const [selectedLayout, setSelectedLayout] = useState("");
   const [layoutName, setLayoutName] = useState("mypreset");
@@ -93,6 +95,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
   const [defaultLayoutName, setDefaultLayoutName] = useState("");
   const [cleanSignature, setCleanSignature] = useState("");
   const [status, setStatus] = useState<OperationStatus>(null);
+  const [importInProgress, setImportInProgress] = useState(false);
   const [pendingLayoutImport, setPendingLayoutImport] = useState<{
     data: Uint8Array;
     preview: {
@@ -403,27 +406,37 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
 
   const confirmImport = async () => {
     if (!pendingLayoutImport) return;
-    try {
-      const result = await api.importLayoutPackage(pendingLayoutImport.data);
-      setPendingLayoutImport(null);
-      await refreshLayouts();
-      applyLayout(result.layout, result.name, false);
-      setSelectedLayout(layoutSelectionValue(result.name, false));
-      setStatus({ kind: "success", message: messages.saved });
-    } catch (error) {
-      console.error("Failed to import layout package:", error);
-      setStatus({ kind: "error", message: layoutPackageErrorMessage(error) });
-    }
+    await runSingleFlight(importInProgressRef, async () => {
+      setImportInProgress(true);
+      try {
+        const result = await api.importLayoutPackage(pendingLayoutImport.data);
+        setPendingLayoutImport(null);
+        await refreshLayouts();
+        applyLayout(result.layout, result.name, false);
+        setSelectedLayout(layoutSelectionValue(result.name, false));
+        setStatus({ kind: "success", message: messages.saved });
+      } catch (error) {
+        console.error("Failed to import layout package:", error);
+        setStatus({ kind: "error", message: layoutPackageErrorMessage(error) });
+      } finally {
+        setImportInProgress(false);
+      }
+    });
+  };
+
+  const cancelImport = () => {
+    if (!importInProgressRef.current) setPendingLayoutImport(null);
   };
 
   return {
     currentBuiltin,
-    cancelImport: () => setPendingLayoutImport(null),
+    cancelImport,
     confirmImport,
     deleteLayout,
     exportLayout,
     fileInputRef,
     importLayout,
+    importInProgress,
     layoutName,
     layoutNames,
     openLayout,

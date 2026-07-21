@@ -40,6 +40,7 @@ interface LayoutSettingsPanelProps {
   exportLayout: () => void;
   importLayout: (event: ChangeEvent<HTMLInputElement>) => void;
   pendingImport?: LayoutImportPreview | null;
+  importInProgress?: boolean;
   confirmImport?: () => void;
   cancelImport?: () => void;
 }
@@ -53,6 +54,7 @@ export function LayoutSettingsPanel(
     <>
       <LayoutImportPreviewModal
         preview={props.pendingImport ?? null}
+        inProgress={props.importInProgress ?? false}
         onConfirm={() => props.confirmImport?.()}
         onCancel={() => props.cancelImport?.()}
       />

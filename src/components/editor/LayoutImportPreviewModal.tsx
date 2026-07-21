@@ -11,6 +11,7 @@ export interface LayoutImportPreview {
 
 interface LayoutImportPreviewModalProps {
   preview: LayoutImportPreview | null;
+  inProgress: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -23,6 +24,7 @@ function formatBytes(bytes: number): string {
 
 export function LayoutImportPreviewModal({
   preview,
+  inProgress,
   onConfirm,
   onCancel,
 }: LayoutImportPreviewModalProps): React.ReactElement {
@@ -30,10 +32,15 @@ export function LayoutImportPreviewModal({
   return (
     <Modal
       opened={preview != null}
-      onClose={onCancel}
+      onClose={() => {
+        if (!inProgress) onCancel();
+      }}
       title={t("importPreviewTitle")}
       centered
       withinPortal={false}
+      closeOnClickOutside={!inProgress}
+      closeOnEscape={!inProgress}
+      transitionProps={{ duration: 0 }}
     >
       {preview && (
         <Stack gap="xs">
@@ -62,10 +69,16 @@ export function LayoutImportPreviewModal({
             <Text size="sm">{formatBytes(preview.imageBytes)}</Text>
           </Group>
           <Group gap="xs" grow mt="xs">
-            <Button variant="default" onClick={onCancel}>
+            <Button variant="default" onClick={onCancel} disabled={inProgress}>
               {t("cancel")}
             </Button>
-            <Button onClick={onConfirm}>{t("confirmImport")}</Button>
+            <Button
+              onClick={onConfirm}
+              disabled={inProgress}
+              aria-label={t("confirmImport")}
+            >
+              {t(inProgress ? "importing" : "confirmImport")}
+            </Button>
           </Group>
         </Stack>
       )}

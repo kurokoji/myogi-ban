@@ -168,6 +168,42 @@ test("layout panel confirms a package preview before importing", () => {
   assert.equal(cancelCalls, 1);
 });
 
+test("layout panel disables import confirmation and cancellation while importing", () => {
+  const view = renderComponent(
+    <LayoutSettingsPanel
+      layoutNames={[]}
+      selectedLayout=""
+      layoutName="current"
+      currentBuiltin={false}
+      isDefaultLayout={false}
+      isDirty={false}
+      status={null}
+      openLayout={() => {}}
+      saveLayout={() => {}}
+      saveLayoutAs={async () => true}
+      deleteLayout={() => {}}
+      setDefaultLayout={() => {}}
+      exportLayout={() => {}}
+      importLayout={() => {}}
+      pendingImport={{
+        name: "sample",
+        savedName: "sample",
+        formatVersion: 2,
+        imageCount: 0,
+        imageBytes: 0,
+      }}
+      importInProgress={true}
+      confirmImport={() => {}}
+      cancelImport={() => {}}
+    />,
+  );
+
+  const confirm = view.getByRole("button", { name: "confirmImport" });
+  const cancel = view.getByRole("button", { name: "cancel" });
+  assert.equal(confirm.hasAttribute("disabled"), true);
+  assert.equal(cancel.hasAttribute("disabled"), true);
+});
+
 test("linked size inputs update height and can unlink the ratio", () => {
   function Example() {
     const [size, setSize] = useState({ width: "100", height: "50" });

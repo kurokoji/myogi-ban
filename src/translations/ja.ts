@@ -64,6 +64,7 @@ export const jaTranslation = {
   importImageCount: "画像数",
   importImageSize: "画像の合計サイズ",
   confirmImport: "インポート",
+  importing: "インポート中…",
   layout: "レイアウト",
   load: "読込",
   open: "開く",

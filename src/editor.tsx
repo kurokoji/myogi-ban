@@ -145,6 +145,7 @@ function EditorApp(): React.ReactElement {
     deleteLayout,
     exportLayout,
     fileInputRef,
+    importInProgress,
     importLayout,
     layoutName,
     layoutNames,
@@ -460,6 +461,7 @@ function EditorApp(): React.ReactElement {
                   setDefaultLayout={setDefaultLayout}
                   exportLayout={exportLayout}
                   importLayout={importLayout}
+                  importInProgress={importInProgress}
                   pendingImport={pendingImport}
                   confirmImport={confirmImport}
                   cancelImport={cancelImport}

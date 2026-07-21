@@ -66,6 +66,7 @@ export const enTranslation = {
   importImageCount: "Images",
   importImageSize: "Total image size",
   confirmImport: "Import",
+  importing: "Importing…",
   layout: "Layout",
   load: "Load",
   open: "Open",
