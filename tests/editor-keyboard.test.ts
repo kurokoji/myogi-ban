@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  deleteEditorSelection,
   editorNudgeHistoryMode,
   isEditableKeyboardTarget,
   nudgeEditorSelection,
@@ -20,6 +21,48 @@ test("nudgeEditorSelection moves a selected button one pixel", () => {
   assert.equal(result?.buttons[0].x, "226");
   assert.equal(result?.buttons[0].y, "80");
   assert.equal(layout.buttons[0].x, "225");
+});
+
+test("Delete deletes the selected button", () => {
+  const layout = createDefaultLayout();
+  const mappings = [0, 1, 2, 3, 4, 5, 6, 7];
+
+  const result = deleteEditorSelection(
+    layout,
+    mappings,
+    createButtonSelection(1),
+    "Delete",
+  );
+
+  assert.equal(result?.layout.totalbuttonshow, 7);
+  assert.equal(result?.layout.buttons[1].x, "335");
+  assert.deepEqual(result?.mapping.slice(0, 3), [0, 2, 3]);
+  assert.equal(layout.totalbuttonshow, 8);
+  assert.equal(
+    deleteEditorSelection(
+      layout,
+      mappings,
+      createButtonSelection(1),
+      "Backspace",
+    ),
+    null,
+  );
+});
+
+test("Delete hides the selected stick", () => {
+  const layout = createDefaultLayout();
+  const mappings = [0, 1];
+
+  const result = deleteEditorSelection(
+    layout,
+    mappings,
+    { buttonIndexes: [], primaryButtonIndex: null, stick: true },
+    "Delete",
+  );
+
+  assert.equal(result?.layout.showstick, false);
+  assert.deepEqual(result?.mapping, mappings);
+  assert.equal(layout.showstick, true);
 });
 
 test("nudgeEditorSelection moves every selected button in an arrow direction", () => {

@@ -1,6 +1,28 @@
+import { deleteEditorButtons } from "./editor-buttons";
 import { cloneLayout } from "./editor-helpers";
 import type { EditorSelection } from "./editor-selection";
+import type { ButtonMapping } from "./gamepad";
 import type { Layout } from "./types";
+
+export function deleteEditorSelection(
+  layout: Layout,
+  buttonMappings: ButtonMapping[],
+  selection: EditorSelection,
+  key: string,
+): { layout: Layout; mapping: ButtonMapping[] } | null {
+  if (
+    key !== "Delete" ||
+    (selection.buttonIndexes.length === 0 && !selection.stick)
+  )
+    return null;
+  const result = deleteEditorButtons(
+    layout,
+    buttonMappings,
+    selection.buttonIndexes,
+  );
+  if (selection.stick) result.layout.showstick = false;
+  return result;
+}
 
 export function editorNudgeHistoryMode(repeat: boolean): "record" | "continue" {
   return repeat ? "continue" : "record";

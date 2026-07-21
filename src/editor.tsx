@@ -36,6 +36,7 @@ import {
 } from "./editor-buttons";
 import { cloneLayout, updateSelectedButtonSettings } from "./editor-helpers";
 import {
+  deleteEditorSelection,
   editorNudgeHistoryMode,
   isEditableKeyboardTarget,
   nudgeEditorSelection,
@@ -214,6 +215,20 @@ function EditorApp(): React.ReactElement {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (isEditableKeyboardTarget(event.target)) return;
+      const deleted = deleteEditorSelection(
+        layoutRef.current,
+        buttonMappings,
+        selection,
+        event.key,
+      );
+      if (deleted) {
+        event.preventDefault();
+        updateLayout((next) => Object.assign(next, deleted.layout));
+        setButtonMappings(deleted.mapping);
+        setSelection(EMPTY_EDITOR_SELECTION);
+        cancelAssignment();
+        return;
+      }
       const moved = nudgeEditorSelection(
         layoutRef.current,
         selection,
@@ -230,7 +245,7 @@ function EditorApp(): React.ReactElement {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selection, updateLayout]);
+  }, [buttonMappings, cancelAssignment, selection, updateLayout]);
 
   const clearGuides = useCallback(() => {
     updateLayout((next) => {
