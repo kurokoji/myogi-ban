@@ -10,6 +10,7 @@ import {
 import { type ApiClient, ApiError } from "../api";
 import { selectDefaultLayoutEntry } from "../default-layout";
 import {
+  canReplaceCurrentLayout,
   type EditorLayoutUpdater,
   type ImageUploadTarget,
   layoutNameFromSelection,
@@ -202,10 +203,15 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
 
   const openLayout = async (selection: string) => {
     if (!selection || selection === selectedLayout) return;
-    const dirty =
+    const hasUnsavedChanges =
       cleanSignature !==
       createEditorSnapshotSignature(layout, buttonMappings, stickMappings);
-    if (dirty && !window.confirm(messages.discardChanges)) return;
+    if (
+      !canReplaceCurrentLayout(hasUnsavedChanges, () =>
+        window.confirm(messages.discardChanges),
+      )
+    )
+      return;
     const name = layoutNameFromSelection(selection);
     try {
       const entry = layoutNames.find(
@@ -392,10 +398,19 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
       }
       return;
     }
+    const hasUnsavedChanges =
+      cleanSignature !==
+      createEditorSnapshotSignature(layout, buttonMappings, stickMappings);
     const reader = new FileReader();
     reader.onload = () => {
       try {
         const data = parseImportedLayoutJson(String(reader.result));
+        if (
+          !canReplaceCurrentLayout(hasUnsavedChanges, () =>
+            window.confirm(messages.discardChanges),
+          )
+        )
+          return;
         applyLayout(data as Layout, data.name || "imported", false, false);
       } catch {
         setStatus({ kind: "error", message: messages.invalidLayoutFile });

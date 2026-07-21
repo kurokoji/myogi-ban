@@ -204,6 +204,39 @@ test("layout panel disables import confirmation and cancellation while importing
   assert.equal(cancel.hasAttribute("disabled"), true);
 });
 
+test("layout panel warns before an import discards unsaved changes", () => {
+  const view = renderComponent(
+    <LayoutSettingsPanel
+      layoutNames={[]}
+      selectedLayout=""
+      layoutName="current"
+      currentBuiltin={false}
+      isDefaultLayout={false}
+      isDirty={true}
+      status={null}
+      openLayout={() => {}}
+      saveLayout={() => {}}
+      saveLayoutAs={async () => true}
+      deleteLayout={() => {}}
+      setDefaultLayout={() => {}}
+      exportLayout={() => {}}
+      importLayout={() => {}}
+      pendingImport={{
+        name: "sample",
+        savedName: "sample",
+        formatVersion: 2,
+        imageCount: 0,
+        imageBytes: 0,
+      }}
+      confirmImport={() => {}}
+      cancelImport={() => {}}
+    />,
+  );
+
+  assert.ok(view.getByText("importDiscardWarning"));
+  assert.ok(view.getByRole("button", { name: "discardAndImport" }));
+});
+
 test("linked size inputs update height and can unlink the ratio", () => {
   function Example() {
     const [size, setSize] = useState({ width: "100", height: "50" });
@@ -245,6 +278,10 @@ test("background image name is text because file selection owns it", () => {
 
   assert.equal(view.queryByRole("textbox", { name: "bgImage" }), null);
   assert.ok(view.getByText("background.png"));
+  assert.equal(
+    view.getByRole("button", { name: "selectFile" }).style.flexShrink,
+    "0",
+  );
 });
 
 test("button layer renders every member of a multiple selection", () => {

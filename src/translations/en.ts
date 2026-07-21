@@ -67,6 +67,8 @@ export const enTranslation = {
   importImageSize: "Total image size",
   confirmImport: "Import",
   importing: "Importing…",
+  importDiscardWarning: "Unsaved changes will be discarded.",
+  discardAndImport: "Discard changes and import",
   layout: "Layout",
   load: "Load",
   open: "Open",

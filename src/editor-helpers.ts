@@ -25,6 +25,13 @@ const BULK_EDITABLE_BUTTON_KEYS: Array<keyof ButtonLayout> = [
   "cssShape",
 ];
 
+export function canReplaceCurrentLayout(
+  hasUnsavedChanges: boolean,
+  confirmDiscard: () => boolean,
+): boolean {
+  return !hasUnsavedChanges || confirmDiscard();
+}
+
 export function updateSelectedButtonSettings(
   layout: Layout,
   selectedIndexes: number[],

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  canReplaceCurrentLayout,
   cloneLayout,
   updateSelectedButtonSettings,
 } from "../src/editor-helpers";
@@ -93,4 +94,17 @@ test("cloneLayout creates independent nested collections", () => {
   assert.notEqual(cloned.buttons[0].x, original.buttons[0].x);
   assert.deepEqual(original.guides.vertical, []);
   assert.notEqual(cloned.background.cssColor, original.background.cssColor);
+});
+
+test("canReplaceCurrentLayout only asks before discarding unsaved changes", () => {
+  let confirmations = 0;
+  const confirmDiscard = () => {
+    confirmations += 1;
+    return false;
+  };
+
+  assert.equal(canReplaceCurrentLayout(false, confirmDiscard), true);
+  assert.equal(confirmations, 0);
+  assert.equal(canReplaceCurrentLayout(true, confirmDiscard), false);
+  assert.equal(confirmations, 1);
 });

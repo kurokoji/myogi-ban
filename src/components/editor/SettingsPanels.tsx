@@ -1,5 +1,4 @@
 import {
-  Button,
   Group,
   NumberInput,
   Paper,
@@ -17,6 +16,7 @@ import {
 } from "../../editor-helpers";
 import type { Layout } from "../../types";
 import { ColorInput } from "./EditorInputs";
+import { ImageSelectButton } from "./ImageSelectButton";
 import { LinkedSizeInputs } from "./LinkedSizeInputs";
 
 export { DisplaySettingsPanel } from "./DisplaySettingsPanel";
@@ -217,13 +217,9 @@ export function BackgroundSettingsPanel(
                   {layout.background.image || t("noFileSelected")}
                 </Text>
               </Stack>
-              <Button
-                size="xs"
-                variant="light"
+              <ImageSelectButton
                 onClick={() => props.openImagePicker({ type: "background" })}
-              >
-                {t("selectFile")}
-              </Button>
+              />
             </Group>
             <NumberInput
               size="xs"

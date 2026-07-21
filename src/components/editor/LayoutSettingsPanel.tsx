@@ -55,6 +55,7 @@ export function LayoutSettingsPanel(
       <LayoutImportPreviewModal
         preview={props.pendingImport ?? null}
         inProgress={props.importInProgress ?? false}
+        hasUnsavedChanges={props.isDirty}
         onConfirm={() => props.confirmImport?.()}
         onCancel={() => props.cancelImport?.()}
       />

@@ -65,6 +65,8 @@ export const jaTranslation = {
   importImageSize: "画像の合計サイズ",
   confirmImport: "インポート",
   importing: "インポート中…",
+  importDiscardWarning: "未保存の変更は破棄されます。",
+  discardAndImport: "変更を破棄してインポート",
   layout: "レイアウト",
   load: "読込",
   open: "開く",

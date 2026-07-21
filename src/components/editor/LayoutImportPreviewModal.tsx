@@ -12,6 +12,7 @@ export interface LayoutImportPreview {
 interface LayoutImportPreviewModalProps {
   preview: LayoutImportPreview | null;
   inProgress: boolean;
+  hasUnsavedChanges: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -25,6 +26,7 @@ function formatBytes(bytes: number): string {
 export function LayoutImportPreviewModal({
   preview,
   inProgress,
+  hasUnsavedChanges,
   onConfirm,
   onCancel,
 }: LayoutImportPreviewModalProps): React.ReactElement {
@@ -44,6 +46,11 @@ export function LayoutImportPreviewModal({
     >
       {preview && (
         <Stack gap="xs">
+          {hasUnsavedChanges && (
+            <Text size="sm" c="orange" fw={600}>
+              {t("importDiscardWarning")}
+            </Text>
+          )}
           <Group justify="space-between">
             <Text size="sm">{t("importLayoutName")}</Text>
             <Text size="sm" fw={600}>
@@ -68,16 +75,24 @@ export function LayoutImportPreviewModal({
             <Text size="sm">{t("importImageSize")}</Text>
             <Text size="sm">{formatBytes(preview.imageBytes)}</Text>
           </Group>
-          <Group gap="xs" grow mt="xs">
+          <Group gap="xs" justify="flex-end" mt="xs" wrap="wrap-reverse">
             <Button variant="default" onClick={onCancel} disabled={inProgress}>
               {t("cancel")}
             </Button>
             <Button
               onClick={onConfirm}
               disabled={inProgress}
-              aria-label={t("confirmImport")}
+              aria-label={t(
+                hasUnsavedChanges ? "discardAndImport" : "confirmImport",
+              )}
             >
-              {t(inProgress ? "importing" : "confirmImport")}
+              {t(
+                inProgress
+                  ? "importing"
+                  : hasUnsavedChanges
+                    ? "discardAndImport"
+                    : "confirmImport",
+              )}
             </Button>
           </Group>
         </Stack>

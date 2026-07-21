@@ -26,6 +26,7 @@ import {
   SelectedButtonSettings,
 } from "./ButtonSettingsSections";
 import { ColorInput } from "./EditorInputs";
+import { ImageSelectButton } from "./ImageSelectButton";
 import { LinkedSizeInputs } from "./LinkedSizeInputs";
 
 interface ButtonSettingsPanelProps {
@@ -210,18 +211,14 @@ export function ButtonSettingsPanel(
                     placeholder="released.png"
                     className="grow"
                   />
-                  <Button
-                    size="xs"
-                    variant="light"
+                  <ImageSelectButton
                     onClick={() =>
                       props.openImagePicker({
                         type: "defaultButton",
                         state: "released",
                       })
                     }
-                  >
-                    {t("selectFile")}
-                  </Button>
+                  />
                 </Group>
                 <Group gap="xs" align="end" wrap="nowrap">
                   <TextInput
@@ -236,18 +233,14 @@ export function ButtonSettingsPanel(
                     placeholder="pressed.png"
                     className="grow"
                   />
-                  <Button
-                    size="xs"
-                    variant="light"
+                  <ImageSelectButton
                     onClick={() =>
                       props.openImagePicker({
                         type: "defaultButton",
                         state: "pressed",
                       })
                     }
-                  >
-                    {t("selectFile")}
-                  </Button>
+                  />
                 </Group>
               </>
             )}
@@ -562,9 +555,7 @@ export function ButtonSettingsPanel(
                       placeholder={layout.defaultbuttons.img || "released.png"}
                       className="grow"
                     />
-                    <Button
-                      size="xs"
-                      variant="light"
+                    <ImageSelectButton
                       onClick={() =>
                         props.openImagePicker({
                           type: "button",
@@ -572,9 +563,7 @@ export function ButtonSettingsPanel(
                           state: "released",
                         })
                       }
-                    >
-                      {t("selectFile")}
-                    </Button>
+                    />
                   </Group>
                   <Group gap="xs" align="end" wrap="nowrap">
                     <TextInput
@@ -595,9 +584,7 @@ export function ButtonSettingsPanel(
                       placeholder={layout.defaultbuttons.imgp || "pressed.png"}
                       className="grow"
                     />
-                    <Button
-                      size="xs"
-                      variant="light"
+                    <ImageSelectButton
                       onClick={() =>
                         props.openImagePicker({
                           type: "button",
@@ -605,9 +592,7 @@ export function ButtonSettingsPanel(
                           state: "pressed",
                         })
                       }
-                    >
-                      {t("selectFile")}
-                    </Button>
+                    />
                   </Group>
                 </>
               )}
