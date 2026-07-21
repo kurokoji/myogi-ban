@@ -1,5 +1,6 @@
 import { Button, Group, Modal, Stack, Text } from "@mantine/core";
 import { useTranslation } from "react-i18next";
+import { LayoutNameText } from "./LayoutNameText";
 
 export interface LayoutImportPreview {
   name: string;
@@ -53,15 +54,11 @@ export function LayoutImportPreviewModal({
           )}
           <Group justify="space-between">
             <Text size="sm">{t("importLayoutName")}</Text>
-            <Text size="sm" fw={600}>
-              {preview.name}
-            </Text>
+            <LayoutNameText name={preview.name} maxWidth="60%" />
           </Group>
           <Group justify="space-between">
             <Text size="sm">{t("importSavedName")}</Text>
-            <Text size="sm" fw={600}>
-              {preview.savedName}
-            </Text>
+            <LayoutNameText name={preview.savedName} maxWidth="60%" />
           </Group>
           <Group justify="space-between">
             <Text size="sm">{t("importFormatVersion")}</Text>

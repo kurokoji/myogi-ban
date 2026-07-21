@@ -22,6 +22,7 @@ import {
   type LayoutImportPreview,
   LayoutImportPreviewModal,
 } from "./LayoutImportPreviewModal";
+import { LayoutNameText } from "./LayoutNameText";
 import { LayoutSaveControls } from "./LayoutSaveControls";
 
 interface LayoutSettingsPanelProps {
@@ -67,9 +68,7 @@ export function LayoutSettingsPanel(
               {t("currentLayout")}
             </Text>
             <Group gap="xs">
-              <Text size="sm" fw={600}>
-                {props.layoutName}
-              </Text>
+              <LayoutNameText name={props.layoutName} />
               {props.currentBuiltin && (
                 <Text size="xs" c="dimmed">
                   ({t("builtIn")})
