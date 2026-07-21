@@ -1,5 +1,5 @@
 import type { ButtonMapping, GamepadManager, StickMapping } from "./gamepad";
-import { type Layout, STICK_NAMES } from "./types";
+import { type GamepadState, type Layout, STICK_NAMES } from "./types";
 
 export interface GamepadSnapshot {
   stickClass: string;
@@ -7,6 +7,26 @@ export interface GamepadSnapshot {
   pressedButtons: boolean[];
   inputs: number[];
   statusChanged: boolean;
+}
+
+export function areGamepadStatesEqual(
+  previous: GamepadState,
+  next: GamepadState,
+): boolean {
+  return (
+    previous.stick === next.stick &&
+    previous.connected === next.connected &&
+    previous.layout === next.layout &&
+    previous.buttons.length === next.buttons.length &&
+    previous.buttons.every((pressed, index) => pressed === next.buttons[index])
+  );
+}
+
+export function gamepadStateForBroadcast(
+  previous: GamepadState | null,
+  next: GamepadState,
+): GamepadState | null {
+  return previous && areGamepadStatesEqual(previous, next) ? null : next;
 }
 
 export function createEmptySnapshot(layout: Layout): GamepadSnapshot {

@@ -19,7 +19,11 @@ import {
   toggleMappingAssignment,
 } from "../gamepad";
 import { startGamepadMonitor } from "../gamepad-monitor";
-import { createEmptySnapshot, readGamepadSnapshot } from "../gamepad-state";
+import {
+  createEmptySnapshot,
+  gamepadStateForBroadcast,
+  readGamepadSnapshot,
+} from "../gamepad-state";
 import type { GamepadState, Layout } from "../types";
 import { useLatestRef } from "./useLatestRef";
 
@@ -45,6 +49,7 @@ export function useEditorGamepad(options: UseEditorGamepadOptions) {
     buttonLabel,
     stickLabel,
   } = options;
+  const lastBroadcastStateRef = useRef<GamepadState | null>(null);
   const gamepadRef = useRef<GamepadManager | null>(null);
   const [connected, setConnected] = useState(false);
   const [gamepadName, setGamepadName] = useState("");
@@ -116,7 +121,14 @@ export function useEditorGamepad(options: UseEditorGamepadOptions) {
             connected: true,
             layout: layoutRef.current,
           };
-          api.sendState(state);
+          const stateToBroadcast = gamepadStateForBroadcast(
+            lastBroadcastStateRef.current,
+            state,
+          );
+          if (stateToBroadcast) {
+            lastBroadcastStateRef.current = stateToBroadcast;
+            api.sendState(stateToBroadcast);
+          }
         }
       }
     };
