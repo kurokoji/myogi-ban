@@ -561,6 +561,7 @@ function EditorApp(): React.ReactElement {
           onScroll={updateRulerOrigin}
           ref={previewScrollRef}
         >
+          <div className="preview-ruler-corner" aria-hidden="true" />
           <div
             className="preview-ruler preview-ruler-horizontal"
             aria-hidden="true"
@@ -572,7 +573,9 @@ function EditorApp(): React.ReactElement {
                 <span
                   className={`preview-ruler-tick ${major ? "preview-ruler-tick-major" : ""}`}
                   key={value}
-                  style={{ left: rulerOrigin.x + value * previewScale }}
+                  style={{
+                    left: `calc(${rulerOrigin.x + value * previewScale}px - var(--preview-ruler-size))`,
+                  }}
                 >
                   {major && (
                     <span className="preview-ruler-label">{value}</span>
@@ -592,7 +595,9 @@ function EditorApp(): React.ReactElement {
                 <span
                   className={`preview-ruler-tick ${major ? "preview-ruler-tick-major" : ""}`}
                   key={value}
-                  style={{ top: rulerOrigin.y + value * previewScale }}
+                  style={{
+                    top: `calc(${rulerOrigin.y + value * previewScale}px - var(--preview-ruler-size))`,
+                  }}
                 >
                   {major && (
                     <span className="preview-ruler-label">{value}</span>

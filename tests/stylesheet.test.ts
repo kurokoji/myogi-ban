@@ -32,3 +32,19 @@ test("editor title row leaves a small gap below the title", () => {
     /\.sidebar-title-row\s*\{[^}]*margin-bottom:\s*10px;/s,
   );
 });
+
+test("preview rulers reserve a separate top-left corner", () => {
+  assert.match(
+    editorStylesheet,
+    /#preview-scroll\s*\{[^}]*--preview-ruler-size:\s*34px;/s,
+  );
+  assert.match(
+    editorStylesheet,
+    /\.preview-ruler-horizontal\s*\{[^}]*left:\s*var\(--preview-ruler-size\);/s,
+  );
+  assert.match(
+    editorStylesheet,
+    /\.preview-ruler-vertical\s*\{[^}]*top:\s*var\(--preview-ruler-size\);/s,
+  );
+  assert.match(editorStylesheet, /\.preview-ruler-corner\s*\{/);
+});
