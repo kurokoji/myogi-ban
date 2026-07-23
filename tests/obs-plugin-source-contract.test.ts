@@ -27,3 +27,22 @@ test("OBS source can manually show the current default layout", async () => {
   );
   assert.doesNotMatch(serverProcess, /--server-only/);
 });
+
+test("OBS source provides theme-aware custom icons", async () => {
+  const source = await readFile("obs-plugin/src/myogi-ban-source.cpp", "utf8");
+  const darkIcon = await readFile(
+    "obs-plugin/data/icons/myogi-ban-dark.svg",
+    "utf8",
+  );
+  const lightIcon = await readFile(
+    "obs-plugin/data/icons/myogi-ban-light.svg",
+    "utf8",
+  );
+
+  assert.match(source, /\.icon_type = OBS_ICON_TYPE_CUSTOM/);
+  assert.match(source, /\.get_dark_icon = source_dark_icon/);
+  assert.match(source, /\.get_light_icon = source_light_icon/);
+  assert.match(darkIcon, /viewBox="0 0 1024 1024"/);
+  assert.match(darkIcon, /fill="#ffffff"/);
+  assert.match(lightIcon, /fill="#000000"/);
+});

@@ -73,6 +73,16 @@ const char *source_name(void *)
 	return obs_module_text("MyogiBanSource");
 }
 
+const char *source_dark_icon(void *)
+{
+	return obs_module_file("icons/myogi-ban-dark.svg");
+}
+
+const char *source_light_icon(void *)
+{
+	return obs_module_file("icons/myogi-ban-light.svg");
+}
+
 void source_defaults(obs_data_t *settings)
 {
 	const std::string executable = ServerProcess::instance().default_executable_path();
@@ -209,4 +219,7 @@ obs_source_info myogi_ban_source_info = {
 	.video_render = source_render,
 	.enum_active_sources = enumerate_active,
 	.audio_render = source_audio_render,
+	.icon_type = OBS_ICON_TYPE_CUSTOM,
+	.get_dark_icon = source_dark_icon,
+	.get_light_icon = source_light_icon,
 };
