@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { resolveElectronLaunchOptions } from "../src/electron-launch-options";
+import { shouldOpenWindowForSecondInstance } from "../src/electron-single-instance";
 
 test("Electron opens a window by default", () => {
   assert.deepEqual(resolveElectronLaunchOptions([]), {
@@ -24,4 +25,9 @@ test("Electron recognizes launch options alongside other arguments", () => {
       serverOnly: true,
     },
   );
+});
+
+test("a second regular launch asks the existing process to show a window", () => {
+  assert.equal(shouldOpenWindowForSecondInstance([]), true);
+  assert.equal(shouldOpenWindowForSecondInstance(["--server-only"]), false);
 });

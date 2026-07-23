@@ -4,6 +4,7 @@ import * as path from "path";
 import { resolveElectronDataDir } from "./data-paths";
 import { resolveElectronLaunchOptions } from "./electron-launch-options";
 import { resolveElectronRendererUrl } from "./electron-renderer";
+import { shouldOpenWindowForSecondInstance } from "./electron-single-instance";
 import { createLocalServer } from "./local-server";
 import { cleanupLocalServer } from "./server-cleanup";
 import { PORT } from "./types";
@@ -12,6 +13,8 @@ let mainWindow: BrowserWindow | null = null;
 let server: http.Server | null = null;
 let dataDir = "";
 const launchOptions = resolveElectronLaunchOptions(process.argv);
+const hasSingleInstanceLock = app.requestSingleInstanceLock();
+let windowRequested = !launchOptions.serverOnly;
 
 function createWindow(): void {
   mainWindow = new BrowserWindow({
@@ -35,6 +38,17 @@ function createWindow(): void {
   });
 }
 
+function showMainWindow(): void {
+  windowRequested = true;
+  if (!mainWindow) {
+    if (server?.listening) createWindow();
+    return;
+  }
+  if (mainWindow.isMinimized()) mainWindow.restore();
+  mainWindow.show();
+  mainWindow.focus();
+}
+
 function startServer(): void {
   dataDir = resolveElectronDataDir(
     launchOptions.development,
@@ -49,24 +63,32 @@ function startServer(): void {
     userLayoutDir: path.join(dataDir, "user-layouts"),
     defaultLayoutFile: path.join(dataDir, "default-layout.json"),
     pidFile: path.join(dataDir, "server.pid"),
-    onListening: launchOptions.serverOnly ? undefined : createWindow,
+    onListening: () => {
+      if (windowRequested) showMainWindow();
+    },
   });
 }
 
-app.whenReady().then(() => {
-  startServer();
+if (!hasSingleInstanceLock) app.quit();
 
-  app.on("activate", () => {
-    if (
-      !launchOptions.serverOnly &&
-      BrowserWindow.getAllWindows().length === 0
-    ) {
-      createWindow();
-    }
+if (hasSingleInstanceLock) {
+  app.on("second-instance", (_event, commandLine) => {
+    if (shouldOpenWindowForSecondInstance(commandLine)) showMainWindow();
   });
-});
+
+  app.whenReady().then(() => {
+    startServer();
+
+    app.on("activate", () => {
+      if (windowRequested && BrowserWindow.getAllWindows().length === 0) {
+        showMainWindow();
+      }
+    });
+  });
+}
 
 app.on("window-all-closed", () => {
+  if (launchOptions.serverOnly) return;
   cleanupLocalServer(server, path.join(dataDir, "server.pid"));
   server = null;
 
