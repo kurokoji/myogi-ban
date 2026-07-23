@@ -5,6 +5,7 @@ export function createObsPluginConfigureArgs(options) {
     "-B",
     options.buildDir,
     `-DOBS_SDK_DIR=${options.obsSdkDir}`,
+    `-DMYOGI_BAN_VERSION=${options.version}`,
     "-A",
     "x64",
   ];

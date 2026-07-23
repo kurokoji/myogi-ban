@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   createObsPluginConfigureArgs,
@@ -7,6 +7,9 @@ import {
 } from "./obs-plugin-build-options.mjs";
 
 const obsSdkDir = process.env.OBS_SDK_DIR;
+const packageJson = JSON.parse(
+  readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+);
 if (!obsSdkDir) {
   throw new Error(
     "OBS_SDK_DIR must point to an OBS SDK containing the libobs CMake package.",
@@ -46,6 +49,7 @@ run(
     sourceDir: "obs-plugin",
     buildDir,
     obsSdkDir,
+    version: packageJson.version,
   }),
 );
 run(cmake, ["--build", buildDir, "--config", "RelWithDebInfo"]);

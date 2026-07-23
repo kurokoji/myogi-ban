@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.28)
 
-project(myogi-ban-obs VERSION 1.0.0 LANGUAGES CXX)
+if(NOT DEFINED MYOGI_BAN_VERSION)
+  message(FATAL_ERROR "MYOGI_BAN_VERSION must match the application version")
+endif()
+
+project(myogi-ban-obs VERSION ${MYOGI_BAN_VERSION} LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

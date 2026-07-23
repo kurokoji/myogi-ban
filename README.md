@@ -98,6 +98,17 @@ npm run build:obs-plugin
 Windowsの全ユーザー向け配置先は通常 `C:\ProgramData\obs-studio\plugins` です。
 Myogi Banが既定の場所にない場合は、ソースのプロパティで実行ファイルを選択できます。
 
+Windowsの推奨プラグインフォルダ `C:\ProgramData\obs-studio\plugins` へインストールする
+セットアップEXEは、次のコマンドで生成できます。インストール時には管理者権限が必要です。
+
+```powershell
+$env:OBS_SDK_DIR = "C:\path\to\obs-sdk"
+npm run build:obs-plugin-installer
+```
+
+生成先は `release/Myogi-Ban-OBS-Plugin-Setup-<version>.exe` です。
+バージョンにはMyogi Ban本体の `package.json` と同じ値が使われます。
+
 ## OBS設定
 
 1. OBSで「ブラウザソース」を追加
