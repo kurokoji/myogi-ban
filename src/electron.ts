@@ -2,6 +2,7 @@ import { app, BrowserWindow } from "electron";
 import type * as http from "http";
 import * as path from "path";
 import { resolveElectronDataDir } from "./data-paths";
+import { resolveElectronLaunchOptions } from "./electron-launch-options";
 import { resolveElectronRendererUrl } from "./electron-renderer";
 import { createLocalServer } from "./local-server";
 import { cleanupLocalServer } from "./server-cleanup";
@@ -10,7 +11,7 @@ import { PORT } from "./types";
 let mainWindow: BrowserWindow | null = null;
 let server: http.Server | null = null;
 let dataDir = "";
-const development = process.argv.includes("--dev");
+const launchOptions = resolveElectronLaunchOptions(process.argv);
 
 function createWindow(): void {
   mainWindow = new BrowserWindow({
@@ -24,7 +25,10 @@ function createWindow(): void {
   });
 
   mainWindow.loadURL(
-    resolveElectronRendererUrl({ development, serverPort: PORT }),
+    resolveElectronRendererUrl({
+      development: launchOptions.development,
+      serverPort: PORT,
+    }),
   );
   mainWindow.on("closed", () => {
     mainWindow = null;
@@ -33,7 +37,7 @@ function createWindow(): void {
 
 function startServer(): void {
   dataDir = resolveElectronDataDir(
-    development,
+    launchOptions.development,
     path.join(__dirname, ".."),
     app.getPath("userData"),
   );
@@ -45,7 +49,7 @@ function startServer(): void {
     userLayoutDir: path.join(dataDir, "user-layouts"),
     defaultLayoutFile: path.join(dataDir, "default-layout.json"),
     pidFile: path.join(dataDir, "server.pid"),
-    onListening: createWindow,
+    onListening: launchOptions.serverOnly ? undefined : createWindow,
   });
 }
 
@@ -53,7 +57,12 @@ app.whenReady().then(() => {
   startServer();
 
   app.on("activate", () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    if (
+      !launchOptions.serverOnly &&
+      BrowserWindow.getAllWindows().length === 0
+    ) {
+      createWindow();
+    }
   });
 });
 

@@ -39,6 +39,15 @@ npm run dev
 Reactコンポーネントの変更は、ElectronウィンドウへFast Refreshで反映されます。
 Electron mainの変更時はElectronプロセスが再起動します。
 
+配布版をウィンドウなしのサーバー専用モードで起動するには、実行ファイルへ
+`--server-only` を渡します。
+
+```powershell
+& "Myogi Ban.exe" --server-only
+```
+
+サーバーは通常どおり `http://localhost:33770` で待ち受けます。
+
 ### Webサーバー単体
 
 ```bash
