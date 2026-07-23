@@ -4,6 +4,10 @@ import test from "node:test";
 
 test("OBS source can manually show the current default layout", async () => {
   const source = await readFile("obs-plugin/src/myogi-ban-source.cpp", "utf8");
+  const serverProcess = await readFile(
+    "obs-plugin/src/server-process-windows.cpp",
+    "utf8",
+  );
   const japaneseLocale = await readFile(
     "obs-plugin/data/locale/ja-JP.ini",
     "utf8",
@@ -21,4 +25,5 @@ test("OBS source can manually show the current default layout", async () => {
     japaneseLocale,
     /ShowDefaultLayout="現在のデフォルトレイアウトを表示"/,
   );
+  assert.doesNotMatch(serverProcess, /--server-only/);
 });

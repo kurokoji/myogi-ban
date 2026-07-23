@@ -171,7 +171,7 @@ void ServerProcess::start(const std::string &executable_path)
 	}
 
 	const std::wstring executable = widen(executable_path);
-	std::wstring command_line = L"\"" + executable + L"\" --server-only";
+	std::wstring command_line = L"\"" + executable + L"\"";
 	std::vector<wchar_t> mutable_command(command_line.begin(), command_line.end());
 	mutable_command.push_back(L'\0');
 
@@ -199,7 +199,7 @@ void ServerProcess::start(const std::string &executable_path)
 	CloseHandle(process.hThread);
 	process_handle_ = process.hProcess;
 	job_handle_ = job;
-	blog(LOG_INFO, "Started Myogi Ban in server-only mode");
+	blog(LOG_INFO, "Started Myogi Ban");
 }
 
 void ServerProcess::stop()

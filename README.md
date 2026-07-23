@@ -82,7 +82,7 @@ npm stop
 ### OBSプラグイン（Windows）
 
 `obs-plugin/` には、OBSのソース一覧へ「Myogi Ban」を追加するネイティブプラグインがあります。
-ソースを追加するとMyogi Banを `--server-only` で起動し、内蔵Browser Sourceで
+ソースを追加するとMyogi Banを通常起動し、内蔵Browser Sourceで
 `http://127.0.0.1:33770/view` を表示します。
 ソースの幅と高さは、サーバーAPIから現在のデフォルトレイアウトに合わせて自動設定されます。
 
