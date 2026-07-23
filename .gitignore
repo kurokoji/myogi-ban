@@ -151,4 +151,6 @@ public/assets/
 *.psd
 public/user-layouts/
 .dev-data/
+.obs-sdk/
+build/obs-plugin/
 public/default-layout.json

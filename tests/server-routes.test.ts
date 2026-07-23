@@ -11,6 +11,7 @@ test("server route modules own their public paths", () => {
     "/api/layouts/:name",
     "/api/layout-imports",
     "/api/default-layout",
+    "/api/default-layout/dimensions",
   ]);
   assert.deepEqual(IMAGE_ROUTE_PATHS, ["/api/layouts/:name/assets"]);
 });

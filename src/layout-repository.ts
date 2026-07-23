@@ -1,5 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
+import { selectDefaultLayoutEntry } from "./default-layout";
 import { resolveAvailableAssetName, validateImageUpload } from "./image-asset";
 import { collectLayoutAssets } from "./layout-assets";
 import {
@@ -259,6 +260,14 @@ export class LayoutRepository {
       if (error instanceof CorruptLayoutError) return { name: "default" };
       throw error;
     }
+  }
+
+  readDefault(): Layout {
+    const entry = selectDefaultLayoutEntry(
+      this.list(),
+      this.getDefault().name || "default",
+    );
+    return entry ? this.read(entry.name, entry.builtin) : this.read("default");
   }
 
   setDefault(name: string): void {

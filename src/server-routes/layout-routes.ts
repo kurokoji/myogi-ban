@@ -1,5 +1,6 @@
 import express, { type Express } from "express";
 import { apiFailure, apiSuccess } from "../api-response";
+import { resolveLayoutDimensions } from "../layout-dimensions";
 import { InvalidLayoutPackageError } from "../layout-package";
 import {
   CorruptLayoutError,
@@ -12,6 +13,7 @@ export const LAYOUT_ROUTE_PATHS = [
   "/api/layouts/:name",
   "/api/layout-imports",
   "/api/default-layout",
+  "/api/default-layout/dimensions",
 ] as const;
 
 export function registerLayoutRoutes(
@@ -73,6 +75,9 @@ export function registerLayoutRoutes(
   });
   app.get("/api/default-layout", (_req, res) =>
     res.json(apiSuccess(layouts.getDefault())),
+  );
+  app.get("/api/default-layout/dimensions", (_req, res) =>
+    res.json(apiSuccess(resolveLayoutDimensions(layouts.readDefault()))),
   );
   app.put("/api/default-layout", (req, res) => {
     layouts.setDefault(req.body.name);

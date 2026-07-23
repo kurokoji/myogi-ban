@@ -49,6 +49,7 @@ Expressサーバーは以下を提供します。
 | GET | `/api/state` | 直近の入力状態取得 |
 | GET | `/api/default-layout` | デフォルトレイアウト取得 |
 | PUT | `/api/default-layout` | デフォルトレイアウト保存 |
+| GET | `/api/default-layout/dimensions` | デフォルトレイアウトの幅と高さ |
 
 WebSocketは同じポートで待ち受け、`PUT /api/state` された状態を `{ type: "state", data }` として配信します。
 

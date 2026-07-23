@@ -8,6 +8,7 @@
     "build": "npm run build:server && npm run build:electron && npm run build:web",
     "build:server": "esbuild src/server.ts --bundle --platform=node --outfile=dist/server.js --external:ws --external:express",
     "build:electron": "esbuild src/electron.ts --bundle --platform=node --outfile=dist/electron.js --external:electron --external:ws --external:express",
+    "build:obs-plugin": "node scripts/build-obs-plugin.mjs",
     "build:web": "vite build",
     "typecheck": "tsc --noEmit",
     "test": "node scripts/run-tests.mjs",

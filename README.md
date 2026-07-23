@@ -79,6 +79,25 @@ npm stop
 
 `npm stop` はWebサーバー単体起動時に作られる `server.pid` を使って停止します。Electronアプリは通常どおりウィンドウを閉じて終了してください。
 
+### OBSプラグイン（Windows）
+
+`obs-plugin/` には、OBSのソース一覧へ「Myogi Ban」を追加するネイティブプラグインがあります。
+ソースを追加するとMyogi Banを `--server-only` で起動し、内蔵Browser Sourceで
+`http://127.0.0.1:33770/view` を表示します。
+ソースの幅と高さは、サーバーAPIから現在のデフォルトレイアウトに合わせて自動設定されます。
+
+OBS SDKの場所を指定してビルドします。
+
+```powershell
+$env:OBS_SDK_DIR = "C:\path\to\obs-sdk"
+npm run build:obs-plugin
+```
+
+生成した `myogi-ban-obs.dll` と `obs-plugin/data` を、OBSのプラグイン規約に従って
+`myogi-ban-obs/bin/64bit` と `myogi-ban-obs/data` へ配置してください。
+Windowsの全ユーザー向け配置先は通常 `C:\ProgramData\obs-studio\plugins` です。
+Myogi Banが既定の場所にない場合は、ソースのプロパティで実行ファイルを選択できます。
+
 ## OBS設定
 
 1. OBSで「ブラウザソース」を追加

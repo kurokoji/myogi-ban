@@ -5,6 +5,22 @@ import { createDefaultLayout } from "../src/layout";
 import { createLayoutPackage } from "../src/layout-package";
 import { startTestWebServer } from "./web-server-harness";
 
+test("web server reports the current default layout dimensions", async () => {
+  const layout = createDefaultLayout();
+  layout.background.w = "375";
+  layout.background.h = "234";
+  const app = await startTestWebServer({ default: layout });
+
+  try {
+    assert.deepEqual(await app.getJson("/api/default-layout/dimensions"), {
+      width: 375,
+      height: 234,
+    });
+  } finally {
+    await app.close();
+  }
+});
+
 test("web layout flow reaches the viewer websocket", async () => {
   const source = createDefaultLayout();
   const app = await startTestWebServer({ default: source });
