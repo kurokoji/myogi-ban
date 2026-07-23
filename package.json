@@ -1,6 +1,6 @@
 {
   "name": "myogi-ban",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Fighting game controller viewer for OBS",
   "author": "Myogi Ban",
   "main": "dist/electron.js",
