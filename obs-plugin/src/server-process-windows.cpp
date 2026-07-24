@@ -55,6 +55,55 @@ bool read_positive_integer(const std::string &json, const char *field, unsigned 
 	value = static_cast<unsigned int>(parsed);
 	return true;
 }
+
+bool read_api(const std::string &api_path, std::string &body)
+{
+	HINTERNET session = WinHttpOpen(L"Myogi-Ban-OBS/1.0", WINHTTP_ACCESS_TYPE_NO_PROXY,
+					WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
+	if (!session)
+		return false;
+	HINTERNET connection = WinHttpConnect(session, L"127.0.0.1", kServerPort, 0);
+	const std::wstring path = widen(api_path);
+	HINTERNET request = connection
+				    ? WinHttpOpenRequest(connection, L"GET", path.c_str(), nullptr, nullptr,
+							 WINHTTP_DEFAULT_ACCEPT_TYPES, 0)
+				    : nullptr;
+	bool success = request && WinHttpSendRequest(request, WINHTTP_NO_ADDITIONAL_HEADERS, 0,
+						      WINHTTP_NO_REQUEST_DATA, 0, 0, 0) &&
+		       WinHttpReceiveResponse(request, nullptr);
+	DWORD status = 0;
+	DWORD status_size = sizeof(status);
+	if (success)
+		success = WinHttpQueryHeaders(request, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
+					      WINHTTP_HEADER_NAME_BY_INDEX, &status, &status_size,
+					      WINHTTP_NO_HEADER_INDEX) &&
+			  status == 200;
+
+	body.clear();
+	while (success) {
+		DWORD available = 0;
+		if (!WinHttpQueryDataAvailable(request, &available)) {
+			success = false;
+			break;
+		}
+		if (available == 0)
+			break;
+		const size_t offset = body.size();
+		body.resize(offset + available);
+		DWORD read = 0;
+		if (!WinHttpReadData(request, body.data() + offset, available, &read)) {
+			success = false;
+			break;
+		}
+		body.resize(offset + read);
+	}
+	if (request)
+		WinHttpCloseHandle(request);
+	if (connection)
+		WinHttpCloseHandle(connection);
+	WinHttpCloseHandle(session);
+	return success;
+}
 } // namespace
 
 ServerProcess &ServerProcess::instance()
@@ -90,53 +139,16 @@ bool ServerProcess::port_ready()
 	return connected;
 }
 
-bool ServerProcess::read_dimensions(Dimensions &dimensions)
+bool ServerProcess::read_dimensions(const std::string &api_path, Dimensions &dimensions)
 {
-	HINTERNET session = WinHttpOpen(L"Myogi-Ban-OBS/1.0", WINHTTP_ACCESS_TYPE_NO_PROXY,
-					WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
-	if (!session)
-		return false;
-	HINTERNET connection = WinHttpConnect(session, L"127.0.0.1", kServerPort, 0);
-	HINTERNET request = connection
-				    ? WinHttpOpenRequest(connection, L"GET", L"/api/default-layout/dimensions", nullptr,
-							 nullptr, WINHTTP_DEFAULT_ACCEPT_TYPES, 0)
-				    : nullptr;
-	bool success = request && WinHttpSendRequest(request, WINHTTP_NO_ADDITIONAL_HEADERS, 0,
-						      WINHTTP_NO_REQUEST_DATA, 0, 0, 0) &&
-		       WinHttpReceiveResponse(request, nullptr);
-	DWORD status = 0;
-	DWORD status_size = sizeof(status);
-	if (success)
-		success = WinHttpQueryHeaders(request, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
-					      WINHTTP_HEADER_NAME_BY_INDEX, &status, &status_size,
-					      WINHTTP_NO_HEADER_INDEX) &&
-			  status == 200;
-
 	std::string body;
-	while (success) {
-		DWORD available = 0;
-		if (!WinHttpQueryDataAvailable(request, &available)) {
-			success = false;
-			break;
-		}
-		if (available == 0)
-			break;
-		const size_t offset = body.size();
-		body.resize(offset + available);
-		DWORD read = 0;
-		if (!WinHttpReadData(request, body.data() + offset, available, &read)) {
-			success = false;
-			break;
-		}
-		body.resize(offset + read);
-	}
-	if (request)
-		WinHttpCloseHandle(request);
-	if (connection)
-		WinHttpCloseHandle(connection);
-	WinHttpCloseHandle(session);
-	return success && read_positive_integer(body, "width", dimensions.width) &&
+	return read_api(api_path, body) && read_positive_integer(body, "width", dimensions.width) &&
 	       read_positive_integer(body, "height", dimensions.height);
+}
+
+bool ServerProcess::read_layouts(std::string &json)
+{
+	return read_api("/api/layouts", json);
 }
 
 void ServerProcess::acquire(const std::string &executable_path)

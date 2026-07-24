@@ -15,7 +15,8 @@ public:
 	void ensure_started(const std::string &executable_path);
 	void release();
 	bool port_ready();
-	bool read_dimensions(Dimensions &dimensions);
+	bool read_dimensions(const std::string &api_path, Dimensions &dimensions);
+	bool read_layouts(std::string &json);
 	std::string default_executable_path() const;
 
 private:

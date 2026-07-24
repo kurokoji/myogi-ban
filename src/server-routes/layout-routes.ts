@@ -11,6 +11,7 @@ import type { Layout } from "../types";
 export const LAYOUT_ROUTE_PATHS = [
   "/api/layouts",
   "/api/layouts/:name",
+  "/api/layouts/:name/dimensions",
   "/api/layout-imports",
   "/api/default-layout",
   "/api/default-layout/dimensions",
@@ -53,6 +54,15 @@ export function registerLayoutRoutes(
     },
   );
   app.get("/api/layouts", (_req, res) => res.json(apiSuccess(layouts.list())));
+  app.get("/api/layouts/:name/dimensions", (req, res) =>
+    res.json(
+      apiSuccess(
+        resolveLayoutDimensions(
+          layouts.read(req.params.name, req.query.builtin === "true"),
+        ),
+      ),
+    ),
+  );
   app.get("/api/layouts/:name", (req, res) => {
     try {
       res.json(

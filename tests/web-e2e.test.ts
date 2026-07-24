@@ -21,6 +21,22 @@ test("web server reports the current default layout dimensions", async () => {
   }
 });
 
+test("web server reports dimensions for a selected built-in layout", async () => {
+  const layout = createDefaultLayout();
+  layout.background.w = "640";
+  layout.background.h = "360";
+  const app = await startTestWebServer({ arcade: layout });
+
+  try {
+    assert.deepEqual(
+      await app.getJson("/api/layouts/arcade/dimensions?builtin=true"),
+      { width: 640, height: 360 },
+    );
+  } finally {
+    await app.close();
+  }
+});
+
 test("web layout flow reaches the viewer websocket", async () => {
   const source = createDefaultLayout();
   const app = await startTestWebServer({ default: source });

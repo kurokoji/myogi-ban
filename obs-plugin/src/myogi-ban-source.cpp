@@ -9,7 +9,8 @@ namespace {
 constexpr const char *kExecutablePath = "executable_path";
 constexpr const char *kWidth = "width";
 constexpr const char *kHeight = "height";
-constexpr const char *kShowDefaultLayout = "show_default_layout";
+constexpr const char *kLayout = "layout";
+constexpr const char *kRefreshPageCache = "refresh_page_cache";
 struct MyogiBanSource {
 	obs_source_t *source = nullptr;
 	obs_source_t *browser = nullptr;
@@ -23,7 +24,7 @@ void update_browser(MyogiBanSource *context)
 		return;
 	const BrowserSettings browser = context->state.browser_settings();
 	obs_data_t *settings = obs_source_get_settings(context->browser);
-	obs_data_set_string(settings, "url", browser.url.data());
+	obs_data_set_string(settings, "url", browser.url.c_str());
 	obs_data_set_int(settings, "width", browser.width);
 	obs_data_set_int(settings, "height", browser.height);
 	obs_data_set_bool(settings, "shutdown", browser.shutdown);
@@ -35,7 +36,7 @@ void create_browser(MyogiBanSource *context)
 {
 	const BrowserSettings browser = context->state.browser_settings();
 	obs_data_t *settings = obs_data_create();
-	obs_data_set_string(settings, "url", browser.url.data());
+	obs_data_set_string(settings, "url", browser.url.c_str());
 	obs_data_set_int(settings, "width", browser.width);
 	obs_data_set_int(settings, "height", browser.height);
 	obs_data_set_bool(settings, "shutdown", browser.shutdown);
@@ -61,12 +62,6 @@ void destroy_browser(MyogiBanSource *context)
 	context->browser = nullptr;
 }
 
-void recreate_browser(MyogiBanSource *context)
-{
-	destroy_browser(context);
-	create_browser(context);
-}
-
 const char *source_name(void *)
 {
 	return obs_module_text("MyogiBanSource");
@@ -90,6 +85,7 @@ void source_defaults(obs_data_t *settings)
 	obs_data_set_default_string(settings, kExecutablePath, executable.c_str());
 	obs_data_set_default_int(settings, kWidth, 500);
 	obs_data_set_default_int(settings, kHeight, 250);
+	obs_data_set_default_string(settings, kLayout, "");
 }
 
 void source_update(void *data, obs_data_t *settings)
@@ -98,8 +94,21 @@ void source_update(void *data, obs_data_t *settings)
 	context->executable_path = obs_data_get_string(settings, kExecutablePath);
 	context->state.apply_dimensions({static_cast<uint32_t>(obs_data_get_int(settings, kWidth)),
 					 static_cast<uint32_t>(obs_data_get_int(settings, kHeight))});
-	update_browser(context);
+	const bool layout_changed = context->state.select_layout(obs_data_get_string(settings, kLayout));
 	ServerProcess::instance().ensure_started(context->executable_path);
+	if (layout_changed && ServerProcess::instance().port_ready()) {
+		ServerProcess::Dimensions dimensions{};
+		if (ServerProcess::instance().read_dimensions(context->state.dimensions_api_path(), dimensions)) {
+			context->state.apply_dimensions({dimensions.width, dimensions.height});
+			obs_data_set_int(settings, kWidth, dimensions.width);
+			obs_data_set_int(settings, kHeight, dimensions.height);
+			blog(LOG_INFO, "Selected Myogi Ban layout dimensions: %ux%u", dimensions.width,
+			     dimensions.height);
+		} else {
+			blog(LOG_WARNING, "Could not update dimensions for the selected Myogi Ban layout");
+		}
+	}
+	update_browser(context);
 }
 
 void apply_dimensions(MyogiBanSource *context, const ServerProcess::Dimensions &dimensions)
@@ -139,7 +148,7 @@ void source_tick(void *data, float seconds)
 	ServerProcess::instance().ensure_started(context->executable_path);
 	if (ServerProcess::instance().port_ready()) {
 		ServerProcess::Dimensions dimensions{};
-		if (ServerProcess::instance().read_dimensions(dimensions)) {
+		if (ServerProcess::instance().read_dimensions(context->state.dimensions_api_path(), dimensions)) {
 			apply_dimensions(context, dimensions);
 			blog(LOG_INFO, "Myogi Ban source dimensions: %ux%u", context->state.width, context->state.height);
 		}
@@ -176,29 +185,72 @@ bool source_audio_render(void *, uint64_t *, obs_source_audio_mix *, uint32_t, s
 	return false;
 }
 
-bool show_default_layout(obs_properties_t *, obs_property_t *, void *data)
+bool refresh_page_cache(obs_properties_t *, obs_property_t *, void *data)
 {
 	auto *context = static_cast<MyogiBanSource *>(data);
-	ServerProcess::Dimensions dimensions{};
-	const bool dimensions_updated = ServerProcess::instance().read_dimensions(dimensions);
-	if (dimensions_updated) {
-		apply_dimensions(context, dimensions);
-		blog(LOG_INFO, "Showing current Myogi Ban default layout at %ux%u", dimensions.width, dimensions.height);
-	} else {
-		blog(LOG_WARNING, "Could not refresh Myogi Ban source dimensions before showing the default layout");
+	if (!context->browser) {
+		create_browser(context);
+		return false;
 	}
-	recreate_browser(context);
-	return dimensions_updated;
+	proc_handler_t *handler = obs_source_get_proc_handler(context->browser);
+	if (handler)
+		proc_handler_call(handler, "refreshnocache", nullptr);
+	blog(LOG_INFO, "Refreshed the current Myogi Ban viewer page without cache");
+	return false;
 }
 
-obs_properties_t *source_properties(void *)
+bool layout_modified(void *data, obs_properties_t *, obs_property_t *, obs_data_t *settings)
+{
+	auto *context = static_cast<MyogiBanSource *>(data);
+	SourceState selected;
+	selected.select_layout(obs_data_get_string(settings, kLayout));
+	ServerProcess::instance().ensure_started(context->executable_path);
+	ServerProcess::Dimensions dimensions{};
+	if (!ServerProcess::instance().read_dimensions(selected.dimensions_api_path(), dimensions)) {
+		blog(LOG_WARNING, "Could not update properties for the selected Myogi Ban layout");
+		return false;
+	}
+	obs_data_set_int(settings, kWidth, dimensions.width);
+	obs_data_set_int(settings, kHeight, dimensions.height);
+	return true;
+}
+
+obs_properties_t *source_properties(void *data)
 {
 	obs_properties_t *properties = obs_properties_create();
 	obs_properties_add_path(properties, kExecutablePath, obs_module_text("ExecutablePath"), OBS_PATH_FILE,
 				"Executable (*.exe);;All files (*.*)", nullptr);
-	obs_properties_add_int(properties, kWidth, obs_module_text("Width"), 1, 8192, 1);
-	obs_properties_add_int(properties, kHeight, obs_module_text("Height"), 1, 8192, 1);
-	obs_properties_add_button(properties, kShowDefaultLayout, obs_module_text("ShowDefaultLayout"), show_default_layout);
+	obs_property_t *width = obs_properties_add_int(properties, kWidth, obs_module_text("Width"), 1, 8192, 1);
+	obs_property_t *height = obs_properties_add_int(properties, kHeight, obs_module_text("Height"), 1, 8192, 1);
+	obs_property_set_enabled(width, false);
+	obs_property_set_enabled(height, false);
+	obs_property_t *layouts = obs_properties_add_list(properties, kLayout, obs_module_text("Layout"),
+						       OBS_COMBO_TYPE_LIST, OBS_COMBO_FORMAT_STRING);
+	obs_property_list_add_string(layouts, obs_module_text("DefaultLayout"), "");
+	std::string json;
+	if (ServerProcess::instance().read_layouts(json)) {
+		obs_data_t *response = obs_data_create_from_json(json.c_str());
+		obs_data_array_t *items = response ? obs_data_get_array(response, "data") : nullptr;
+		const size_t count = items ? obs_data_array_count(items) : 0;
+		for (size_t index = 0; index < count; ++index) {
+			obs_data_t *item = obs_data_array_item(items, index);
+			const char *name = obs_data_get_string(item, "name");
+			const bool builtin = obs_data_get_bool(item, "builtin");
+			const std::string label = std::string(name) +
+						  (builtin ? obs_module_text("BuiltInLayoutSuffix")
+							   : obs_module_text("UserLayoutSuffix"));
+			const std::string value = std::string(builtin ? "builtin:" : "user:") + name;
+			obs_property_list_add_string(layouts, label.c_str(), value.c_str());
+			obs_data_release(item);
+		}
+		if (items)
+			obs_data_array_release(items);
+		if (response)
+			obs_data_release(response);
+	}
+	obs_property_set_modified_callback2(layouts, layout_modified, data);
+	obs_properties_add_button(properties, kRefreshPageCache, obs_module_text("RefreshPageCache"),
+				  refresh_page_cache);
 	return properties;
 }
 } // namespace
