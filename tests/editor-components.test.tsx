@@ -428,6 +428,53 @@ test("selection overlays show four resize handles only for a resizable selection
   assert.equal(view.container.querySelectorAll(".resize-handle").length, 0);
 });
 
+test("selection overlays show a rotation handle only for a rotatable selection", () => {
+  const view = renderComponent(
+    <SelectionOverlays
+      selectionRect={null}
+      selectedGroupRect={{ left: 10, top: 20, right: 70, bottom: 60 }}
+      rotatable={true}
+      boundsPadding={0}
+      onBoundsMouseDown={() => {}}
+      onBoundsClick={() => {}}
+      onRotateMouseDown={() => {}}
+    />,
+  );
+
+  assert.ok(view.container.querySelector(".rotation-handle"));
+  assert.ok(view.container.querySelector(".rotation-handle svg"));
+  view.rerender(
+    <SelectionOverlays
+      selectionRect={null}
+      selectedGroupRect={{ left: 10, top: 20, right: 70, bottom: 60 }}
+      rotatable={false}
+      boundsPadding={0}
+      onBoundsMouseDown={() => {}}
+      onBoundsClick={() => {}}
+      onRotateMouseDown={() => {}}
+    />,
+  );
+  assert.equal(view.container.querySelector(".rotation-handle"), null);
+});
+
+test("selection overlay rotates its bounds and handles with the selected button", () => {
+  const view = renderComponent(
+    <SelectionOverlays
+      selectionRect={null}
+      selectedGroupRect={{ left: 10, top: 20, right: 70, bottom: 60 }}
+      rotatable={true}
+      rotation={45}
+      boundsPadding={0}
+      onBoundsMouseDown={() => {}}
+      onBoundsClick={() => {}}
+      onRotateMouseDown={() => {}}
+    />,
+  );
+
+  const bounds = view.container.querySelector<HTMLElement>(".selection-bounds");
+  assert.equal(bounds?.style.transform, "rotate(45deg)");
+});
+
 test("dragging a selected button corner reports its resized bounds", () => {
   const layout = createDefaultLayout();
   layout.totalbuttonshow = 1;
@@ -499,6 +546,80 @@ test("dragging a selected button corner follows the linked aspect ratio", () => 
   fireEvent.mouseUp(document);
 
   assert.deepEqual(changes.at(-1), { width: 90, height: 60 });
+});
+
+test("dragging a selected button rotation handle reports the new angle", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 1;
+  layout.buttons[0] = {
+    ...layout.buttons[0],
+    x: "100",
+    y: "80",
+    w: "60",
+    h: "40",
+    rotation: "30",
+  };
+  const changes: Array<{ index: number; rotation: number }> = [];
+  const view = renderComponent(
+    <GamepadView
+      layout={layout}
+      stickClass="stick"
+      pressedButtons={[]}
+      editorMode={true}
+      selectedButtonIndex={0}
+      selectedButtonIndexes={[0]}
+      onRotationChange={(change) => changes.push(change)}
+    />,
+  );
+
+  const handle = view.container.querySelector(".rotation-handle");
+  assert.ok(handle);
+  fireEvent.mouseDown(handle, { button: 0, clientX: 100, clientY: 20 });
+  fireEvent.mouseMove(document, { clientX: 160, clientY: 80 });
+  fireEvent.mouseUp(document);
+
+  assert.deepEqual(changes.at(-1), { index: 0, rotation: 120 });
+});
+
+test("dragging a rotated button corner resizes along its local axes", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 1;
+  layout.buttons[0] = {
+    ...layout.buttons[0],
+    x: "100",
+    y: "80",
+    w: "60",
+    h: "40",
+    rotation: "90",
+  };
+  const changes: unknown[] = [];
+  const view = renderComponent(
+    <GamepadView
+      layout={layout}
+      stickClass="stick"
+      pressedButtons={[]}
+      editorMode={true}
+      selectedButtonIndex={0}
+      selectedButtonIndexes={[0]}
+      aspectRatioLocked={false}
+      onSizeChange={(change) => changes.push(change)}
+    />,
+  );
+
+  const handle = view.container.querySelector(".resize-handle-se");
+  assert.ok(handle);
+  fireEvent.mouseDown(handle, { button: 0, clientX: 120, clientY: 110 });
+  fireEvent.mouseMove(document, { clientX: 120, clientY: 130 });
+  fireEvent.mouseUp(document);
+
+  assert.deepEqual(changes.at(-1), {
+    type: "button",
+    index: 0,
+    x: 100,
+    y: 90,
+    width: 80,
+    height: 40,
+  });
 });
 
 test("zoom percentage resets zoom without a separate reset button", () => {

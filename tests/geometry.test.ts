@@ -3,14 +3,30 @@ import test from "node:test";
 import {
   dragGroupPositions,
   dragPosition,
+  dragRotation,
   rectsIntersect,
   rectsOnSnapGuides,
   resizeRectFromCorner,
+  resizeRotatedRectFromCorner,
   resolveRectSnap,
   snapRect,
   snapRectDelta,
   unionRectsAtIndexes,
 } from "../src/geometry";
+
+test("dragRotation adds the pointer angle change to the initial rotation", () => {
+  assert.equal(
+    dragRotation(30, { x: 100, y: 100 }, { x: 100, y: 50 }, { x: 150, y: 100 }),
+    120,
+  );
+});
+
+test("dragRotation normalizes a negative result into degrees", () => {
+  assert.equal(
+    dragRotation(10, { x: 100, y: 100 }, { x: 150, y: 100 }, { x: 100, y: 50 }),
+    280,
+  );
+});
 
 test("resizeRectFromCorner grows a rectangle from its bottom-right corner", () => {
   assert.deepEqual(
@@ -46,6 +62,20 @@ test("resizeRectFromCorner preserves the initial aspect ratio when locked", () =
       true,
     ),
     { left: 10, top: 20, right: 100, bottom: 80 },
+  );
+});
+
+test("resizeRotatedRectFromCorner resizes along the rotated local axes", () => {
+  assert.deepEqual(
+    resizeRotatedRectFromCorner(
+      { left: 70, top: 60, right: 130, bottom: 100 },
+      "se",
+      { x: 0, y: 20 },
+      12,
+      90,
+      false,
+    ),
+    { x: 100, y: 90, width: 80, height: 40 },
   );
 });
 

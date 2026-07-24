@@ -1,3 +1,4 @@
+import { IconRotateClockwise } from "@tabler/icons-react";
 import type React from "react";
 import type { Rect, RectCorner } from "../../geometry";
 
@@ -8,12 +9,15 @@ interface SelectionOverlaysProps {
   snapTargets?: Rect[];
   boundsPadding: number;
   resizable?: boolean;
+  rotatable?: boolean;
+  rotation?: number;
   onBoundsMouseDown: (event: React.MouseEvent<HTMLDivElement>) => void;
   onBoundsClick: (event: React.MouseEvent<HTMLDivElement>) => void;
   onResizeMouseDown?: (
     event: React.MouseEvent<HTMLDivElement>,
     corner: RectCorner,
   ) => void;
+  onRotateMouseDown?: (event: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 export function SelectionOverlays({
@@ -23,9 +27,12 @@ export function SelectionOverlays({
   snapTargets = [],
   boundsPadding,
   resizable = false,
+  rotatable = false,
+  rotation = 0,
   onBoundsMouseDown,
   onBoundsClick,
   onResizeMouseDown,
+  onRotateMouseDown,
 }: SelectionOverlaysProps): React.ReactElement {
   return (
     <>
@@ -80,6 +87,7 @@ export function SelectionOverlays({
               selectedGroupRect.bottom -
               selectedGroupRect.top +
               boundsPadding * 2,
+            transform: rotatable ? `rotate(${rotation}deg)` : undefined,
           }}
         >
           {resizable &&
@@ -90,6 +98,13 @@ export function SelectionOverlays({
                 onMouseDown={(event) => onResizeMouseDown?.(event, corner)}
               />
             ))}
+          {rotatable && (
+            <div className="rotation-handle-stem">
+              <div className="rotation-handle" onMouseDown={onRotateMouseDown}>
+                <IconRotateClockwise size={17} stroke={2.5} />
+              </div>
+            </div>
+          )}
         </div>
       )}
     </>

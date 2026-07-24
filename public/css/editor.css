@@ -540,17 +540,6 @@ body {
   pointer-events: auto;
 }
 
-#preview .selection-bounds::before {
-  position: absolute;
-  top: -9px;
-  left: 10px;
-  width: 34px;
-  height: 6px;
-  border-radius: 999px;
-  background: #4dabf7;
-  content: "";
-}
-
 #preview .resize-handle {
   position: absolute;
   z-index: 2;
@@ -584,4 +573,36 @@ body {
   right: -7px;
   bottom: -7px;
   cursor: nwse-resize;
+}
+
+#preview .rotation-handle-stem {
+  position: absolute;
+  top: -31px;
+  left: 50%;
+  width: 2px;
+  height: 29px;
+  background: #228be6;
+  transform: translateX(-50%);
+}
+
+#preview .rotation-handle {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  display: flex;
+  width: 26px;
+  height: 26px;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #228be6;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  color: #fff;
+  cursor: grab;
+  transform: translateX(-50%);
+}
+
+#preview .rotation-handle:active {
+  cursor: grabbing;
 }

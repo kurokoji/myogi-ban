@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { applyEditorResize } from "../src/editor-resize";
+import { applyEditorResize, applyEditorRotation } from "../src/editor-resize";
 import { createDefaultLayout } from "../src/layout";
 
 test("applyEditorResize stores a selected button position and explicit size", () => {
@@ -46,4 +46,13 @@ test("applyEditorResize converts the stick pixel size to its percentage scale", 
     },
     { x: "120", y: "90", w: "150", h: "50" },
   );
+});
+
+test("applyEditorRotation stores an explicit button rotation immutably", () => {
+  const layout = createDefaultLayout();
+  const rotated = applyEditorRotation(layout, { index: 0, rotation: 120 });
+
+  assert.equal(rotated.buttons[0].rotation, "120");
+  assert.notEqual(rotated, layout);
+  assert.equal(layout.buttons[0].rotation, undefined);
 });

@@ -12,6 +12,19 @@ export interface Point {
 
 export type RectCorner = "nw" | "ne" | "sw" | "se";
 
+export function dragRotation(
+  initialRotation: number,
+  center: Point,
+  start: Point,
+  current: Point,
+): number {
+  const pointerAngle = (point: Point) =>
+    (Math.atan2(point.y - center.y, point.x - center.x) * 180) / Math.PI;
+  const rotation =
+    initialRotation + pointerAngle(current) - pointerAngle(start);
+  return Math.round(((rotation % 360) + 360) % 360);
+}
+
 export function resizeRectFromCorner(
   initial: Rect,
   corner: RectCorner,
@@ -54,6 +67,50 @@ export function resizeRectFromCorner(
     top: movesTop ? initial.bottom - height : initial.top,
     right: movesLeft ? initial.right : initial.left + width,
     bottom: movesTop ? initial.bottom : initial.top + height,
+  };
+}
+
+function rotatePoint(point: Point, degrees: number): Point {
+  const radians = (degrees * Math.PI) / 180;
+  return {
+    x: point.x * Math.cos(radians) - point.y * Math.sin(radians),
+    y: point.x * Math.sin(radians) + point.y * Math.cos(radians),
+  };
+}
+
+export function resizeRotatedRectFromCorner(
+  initial: Rect,
+  corner: RectCorner,
+  delta: Point,
+  minimumSize: number,
+  rotation: number,
+  aspectRatioLocked: boolean,
+): { x: number; y: number; width: number; height: number } {
+  const localDelta = rotatePoint(delta, -rotation);
+  const resized = resizeRectFromCorner(
+    initial,
+    corner,
+    localDelta,
+    minimumSize,
+    aspectRatioLocked,
+  );
+  const initialCenter = {
+    x: (initial.left + initial.right) / 2,
+    y: (initial.top + initial.bottom) / 2,
+  };
+  const resizedCenterOffset = rotatePoint(
+    {
+      x: (resized.left + resized.right) / 2 - initialCenter.x,
+      y: (resized.top + resized.bottom) / 2 - initialCenter.y,
+    },
+    rotation,
+  );
+  const stable = (value: number) => Math.round(value * 1e10) / 1e10;
+  return {
+    x: stable(initialCenter.x + resizedCenterOffset.x),
+    y: stable(initialCenter.y + resizedCenterOffset.y),
+    width: stable(resized.right - resized.left),
+    height: stable(resized.bottom - resized.top),
   };
 }
 

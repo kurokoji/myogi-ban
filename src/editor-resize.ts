@@ -30,3 +30,14 @@ export function applyEditorResize(
   }
   return next;
 }
+
+export function applyEditorRotation(
+  layout: Layout,
+  change: { index: number; rotation: number },
+): Layout {
+  const button = layout.buttons[change.index];
+  if (!button) return layout;
+  const next = cloneLayout(layout);
+  next.buttons[change.index].rotation = String(change.rotation);
+  return next;
+}

@@ -66,3 +66,7 @@ test("preview snapping icon is explicitly centered across platforms", () => {
     /\.preview-snapping-button svg\s*\{[^}]*display:\s*block;[^}]*margin:\s*auto;/s,
   );
 });
+
+test("selection bounds do not render a redundant drag grip", () => {
+  assert.doesNotMatch(editorStylesheet, /\.selection-bounds::before/);
+});

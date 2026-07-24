@@ -41,7 +41,11 @@ import {
   isEditableKeyboardTarget,
   nudgeEditorSelection,
 } from "./editor-keyboard";
-import { applyEditorResize, type EditorResizeChange } from "./editor-resize";
+import {
+  applyEditorResize,
+  applyEditorRotation,
+  type EditorResizeChange,
+} from "./editor-resize";
 import {
   createButtonSelection,
   EMPTY_EDITOR_SELECTION,
@@ -314,6 +318,17 @@ function EditorApp(): React.ReactElement {
       return next;
     });
   }, []);
+
+  const handleRotationChange = useCallback(
+    (change: { index: number; rotation: number }) => {
+      setLayout((current) => {
+        const next = applyEditorRotation(current, change);
+        layoutRef.current = next;
+        return next;
+      });
+    },
+    [],
+  );
 
   const updateSelection = useCallback(
     (nextSelection: { buttonIndexes: number[]; stick: boolean }) => {
@@ -703,6 +718,7 @@ function EditorApp(): React.ReactElement {
                 onLayoutDragEnd={endLayoutDrag}
                 onPositionsChange={handlePositionsChange}
                 onSizeChange={handleSizeChange}
+                onRotationChange={handleRotationChange}
               />
             </div>
           </div>
