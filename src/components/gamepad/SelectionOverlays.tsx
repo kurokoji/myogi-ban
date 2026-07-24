@@ -13,6 +13,7 @@ interface SelectionOverlaysProps {
   rotation?: number;
   onBoundsMouseDown: (event: React.MouseEvent<HTMLDivElement>) => void;
   onBoundsClick: (event: React.MouseEvent<HTMLDivElement>) => void;
+  onBoundsContextMenu?: (event: React.MouseEvent<HTMLDivElement>) => void;
   onResizeMouseDown?: (
     event: React.MouseEvent<HTMLDivElement>,
     corner: RectCorner,
@@ -31,6 +32,7 @@ export function SelectionOverlays({
   rotation = 0,
   onBoundsMouseDown,
   onBoundsClick,
+  onBoundsContextMenu,
   onResizeMouseDown,
   onRotateMouseDown,
 }: SelectionOverlaysProps): React.ReactElement {
@@ -76,6 +78,7 @@ export function SelectionOverlays({
           className="selection-bounds"
           onMouseDown={onBoundsMouseDown}
           onClick={onBoundsClick}
+          onContextMenu={onBoundsContextMenu}
           style={{
             left: selectedGroupRect.left - boundsPadding,
             top: selectedGroupRect.top - boundsPadding,

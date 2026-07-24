@@ -17,6 +17,7 @@ interface StickLayerProps {
     initialY: number,
   ) => void;
   onDirectionClick: (index: number, event: React.MouseEvent) => void;
+  onContextMenu?: (event: React.MouseEvent) => void;
 }
 
 export function StickLayer({
@@ -29,6 +30,7 @@ export function StickLayer({
   selected,
   onDragMouseDown,
   onDirectionClick,
+  onContextMenu,
 }: StickLayerProps): React.ReactElement {
   const direction = stickClass.startsWith("stick ") ? stickClass.slice(6) : "";
   return (
@@ -48,6 +50,7 @@ export function StickLayer({
           "--stick-easing": stick.cssEasing ?? "ease",
         }),
       }}
+      onContextMenu={editorMode ? onContextMenu : undefined}
     >
       {editorMode && (
         <div

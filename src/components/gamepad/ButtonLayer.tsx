@@ -21,6 +21,7 @@ interface ButtonLayerProps {
     initialX: number,
     initialY: number,
   ) => void;
+  onButtonContextMenu?: (index: number, event: React.MouseEvent) => void;
 }
 
 function buttonStyle(
@@ -79,6 +80,7 @@ export function ButtonLayer({
   selectedButtonIndexes,
   onButtonClick,
   onButtonMouseDown,
+  onButtonContextMenu,
 }: ButtonLayerProps): React.ReactElement {
   const defaultButton = layout.defaultbuttons;
   const selected = new Set(selectedButtonIndexes);
@@ -106,6 +108,11 @@ export function ButtonLayer({
                       Number.parseFloat(button.x || defaultButton.x || "0"),
                       Number.parseFloat(button.y || defaultButton.y || "0"),
                     )
+                : undefined
+            }
+            onContextMenu={
+              editorMode
+                ? (event) => onButtonContextMenu?.(index, event)
                 : undefined
             }
             style={{

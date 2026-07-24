@@ -41,6 +41,7 @@ export const jaTranslation = {
   buttonCount: "ボタン数: {{count}}",
   addButton: "＋ ボタンを追加",
   deleteSelectedButtons: "選択中のボタンを削除 ({{count}})",
+  deleteSelection: "削除",
   showBackground: "背景を表示",
   bgScale: "倍率",
   bgImage: "背景画像",

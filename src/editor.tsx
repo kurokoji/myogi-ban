@@ -219,21 +219,32 @@ function EditorApp(): React.ReactElement {
     selectedButtonIndexes,
   ]);
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (isEditableKeyboardTarget(event.target)) return;
+  const deleteSelection = useCallback(
+    (target: { buttonIndexes: number[]; stick: boolean }) => {
       const deleted = deleteEditorSelection(
         layoutRef.current,
         buttonMappings,
-        selection,
-        event.key,
+        {
+          ...target,
+          primaryButtonIndex: target.buttonIndexes[0] ?? null,
+        },
+        "Delete",
       );
-      if (deleted) {
+      if (!deleted) return false;
+      updateLayout((next) => Object.assign(next, deleted.layout));
+      setButtonMappings(deleted.mapping);
+      setSelection(EMPTY_EDITOR_SELECTION);
+      cancelAssignment();
+      return true;
+    },
+    [buttonMappings, cancelAssignment, updateLayout],
+  );
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (isEditableKeyboardTarget(event.target)) return;
+      if (event.key === "Delete" && deleteSelection(selection)) {
         event.preventDefault();
-        updateLayout((next) => Object.assign(next, deleted.layout));
-        setButtonMappings(deleted.mapping);
-        setSelection(EMPTY_EDITOR_SELECTION);
-        cancelAssignment();
         return;
       }
       const moved = nudgeEditorSelection(
@@ -252,7 +263,7 @@ function EditorApp(): React.ReactElement {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [buttonMappings, cancelAssignment, selection, updateLayout]);
+  }, [deleteSelection, selection, updateLayout]);
 
   const clearGuides = useCallback(() => {
     updateLayout((next) => {
@@ -719,6 +730,7 @@ function EditorApp(): React.ReactElement {
                 onPositionsChange={handlePositionsChange}
                 onSizeChange={handleSizeChange}
                 onRotationChange={handleRotationChange}
+                onDeleteSelection={deleteSelection}
               />
             </div>
           </div>

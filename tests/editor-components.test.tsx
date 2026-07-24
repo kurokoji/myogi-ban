@@ -17,6 +17,70 @@ import { SelectionOverlays } from "../src/components/gamepad/SelectionOverlays";
 import { createDefaultLayout } from "../src/layout";
 import { BackgroundSettingsPanel } from "../src/components/editor/SettingsPanels";
 import { ThemeControl } from "../src/components/editor/ThemeControl";
+import { EditorContextMenu } from "../src/components/editor/EditorContextMenu";
+
+test("editor context menu offers deletion and closes after the action", () => {
+  let deletes = 0;
+  let closes = 0;
+  renderComponent(
+    <EditorContextMenu
+      x={120}
+      y={80}
+      onDelete={() => {
+        deletes += 1;
+      }}
+      onClose={() => {
+        closes += 1;
+      }}
+    />,
+  );
+
+  const menu = componentDocument.body.querySelector<HTMLElement>(
+    ".editor-context-menu",
+  );
+  assert.equal(menu?.style.left, "120px");
+  assert.equal(menu?.style.top, "80px");
+  const deleteButton = within(menu as HTMLElement).getByRole("menuitem", {
+    name: "deleteSelection",
+  });
+  fireEvent.click(deleteButton);
+  assert.equal(deletes, 1);
+  assert.equal(closes, 1);
+});
+
+test("right-clicking an unselected button selects it and opens its delete menu", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 2;
+  const selections: unknown[] = [];
+  const deletions: unknown[] = [];
+  const view = renderComponent(
+    <GamepadView
+      layout={layout}
+      stickClass="stick"
+      pressedButtons={[]}
+      editorMode={true}
+      selectedButtonIndex={0}
+      selectedButtonIndexes={[0]}
+      onSelectionChange={(selection) => selections.push(selection)}
+      onDeleteSelection={(selection) => deletions.push(selection)}
+    />,
+  );
+
+  const button = view.container.querySelector("#button1");
+  assert.ok(button);
+  fireEvent.contextMenu(button, { clientX: 140, clientY: 90 });
+
+  assert.deepEqual(selections.at(-1), {
+    buttonIndexes: [1],
+    stick: false,
+  });
+  const menu = componentDocument.body.querySelector<HTMLElement>(
+    ".editor-context-menu",
+  );
+  assert.ok(menu);
+  fireEvent.click(within(menu).getByRole("menuitem"));
+  assert.deepEqual(deletions, [{ buttonIndexes: [1], stick: false }]);
+});
 
 test("component tests clean up rendered DOM after each test", () => {
   renderComponent(<p data-testid="cleanup-marker">Rendered</p>);

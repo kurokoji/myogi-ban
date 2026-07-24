@@ -606,3 +606,38 @@ body {
 #preview .rotation-handle:active {
   cursor: grabbing;
 }
+
+.editor-context-menu {
+  position: fixed;
+  z-index: 1000;
+  min-width: 150px;
+  padding: 4px;
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: 6px;
+  background: var(--mantine-color-body);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+.editor-context-menu-item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--mantine-color-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+}
+
+.editor-context-menu-item:hover {
+  background: var(--mantine-color-default-hover);
+}
+
+.editor-context-menu-item-danger {
+  color: var(--mantine-color-red-6);
+}

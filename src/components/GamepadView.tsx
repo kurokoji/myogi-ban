@@ -14,6 +14,7 @@ import {
   unionRectsAtIndexes,
 } from "../geometry";
 import type { Layout } from "../types";
+import { EditorContextMenu } from "./editor/EditorContextMenu";
 import { ButtonLayer } from "./gamepad/ButtonLayer";
 import { GamepadBackgroundLayer } from "./gamepad/GamepadBackgroundLayer";
 import { SelectionOverlays } from "./gamepad/SelectionOverlays";
@@ -57,6 +58,10 @@ export interface GamepadViewProps {
     height: number;
   }) => void;
   onRotationChange?: (change: { index: number; rotation: number }) => void;
+  onDeleteSelection?: (selection: {
+    buttonIndexes: number[];
+    stick: boolean;
+  }) => void;
 }
 
 type DragState =
@@ -255,6 +260,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     onPositionsChange,
     onSizeChange,
     onRotationChange,
+    onDeleteSelection,
   } = props;
   const backgroundSize = useBackgroundSize(layout, onBackgroundSizeChange);
   const defaultButton = layout.defaultbuttons;
@@ -272,6 +278,11 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     x?: number;
     y?: number;
     targets: Rect[];
+  } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    selection: { buttonIndexes: number[]; stick: boolean };
   } | null>(null);
 
   const buttonRects = useMemo(
@@ -822,6 +833,40 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     [onButtonClick],
   );
 
+  const openContextMenu = useCallback(
+    (
+      event: React.MouseEvent,
+      target?: { type: "button"; index: number } | { type: "stick" },
+    ) => {
+      if (!editorMode) return;
+      event.preventDefault();
+      event.stopPropagation();
+      let nextSelection = {
+        buttonIndexes: selectedButtonIndexes,
+        stick: selectedStick,
+      };
+      if (target?.type === "button" && !selectedButtonSet.has(target.index)) {
+        nextSelection = { buttonIndexes: [target.index], stick: false };
+        onSelectionChange?.(nextSelection);
+      } else if (target?.type === "stick" && !selectedStick) {
+        nextSelection = { buttonIndexes: [], stick: true };
+        onSelectionChange?.(nextSelection);
+      }
+      setContextMenu({
+        x: event.clientX,
+        y: event.clientY,
+        selection: nextSelection,
+      });
+    },
+    [
+      editorMode,
+      onSelectionChange,
+      selectedButtonIndexes,
+      selectedButtonSet,
+      selectedStick,
+    ],
+  );
+
   const handleStickClick = useCallback(
     (index: number, event: React.MouseEvent) => {
       if (dragMovedRef.current) {
@@ -862,6 +907,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
             handleMouseDown(event, "stick", 0, initialX, initialY)
           }
           onDirectionClick={handleStickClick}
+          onContextMenu={(event) => openContextMenu(event, { type: "stick" })}
         />
         <ButtonLayer
           layout={layout}
@@ -872,6 +918,9 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
           onButtonClick={handleButtonClick}
           onButtonMouseDown={(event, index, initialX, initialY) =>
             handleMouseDown(event, "button", index, initialX, initialY)
+          }
+          onButtonContextMenu={(index, event) =>
+            openContextMenu(event, { type: "button", index })
           }
         />
         <SelectionOverlays
@@ -885,9 +934,18 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
           rotation={selectedButtonRotation}
           onBoundsMouseDown={handleGroupBoundsMouseDown}
           onBoundsClick={handleGroupBoundsClick}
+          onBoundsContextMenu={openContextMenu}
           onResizeMouseDown={handleResizeMouseDown}
           onRotateMouseDown={handleRotateMouseDown}
         />
+        {contextMenu && (
+          <EditorContextMenu
+            x={contextMenu.x}
+            y={contextMenu.y}
+            onDelete={() => onDeleteSelection?.(contextMenu.selection)}
+            onClose={() => setContextMenu(null)}
+          />
+        )}
       </div>
     </div>
   );

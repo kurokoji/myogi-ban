@@ -43,6 +43,7 @@ export const enTranslation = {
   buttonCount: "Buttons: {{count}}",
   addButton: "+ Add button",
   deleteSelectedButtons: "Delete selected buttons ({{count}})",
+  deleteSelection: "Delete",
   showBackground: "Show Background",
   bgScale: "Scale",
   bgImage: "BG Image",
