@@ -1,5 +1,7 @@
 import {
   IconCopy,
+  IconLayersSelected,
+  IconLayersSelectedBottom,
   IconRestore,
   IconRotateClockwise,
   IconTrash,
@@ -16,6 +18,8 @@ interface EditorContextMenuProps {
   onDuplicate: () => void;
   onResetToDefault: () => void;
   onResetRotation: () => void;
+  onBringToFront?: () => void;
+  onSendToBack?: () => void;
   onDelete: () => void;
   onClose: () => void;
 }
@@ -28,6 +32,8 @@ export function EditorContextMenu({
   onDuplicate,
   onResetToDefault,
   onResetRotation,
+  onBringToFront,
+  onSendToBack,
   onDelete,
   onClose,
 }: EditorContextMenuProps): React.ReactElement {
@@ -87,6 +93,24 @@ export function EditorContextMenu({
           >
             <IconRotateClockwise size={16} />
             {t("resetRotation")}
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            className="editor-context-menu-item"
+            onClick={() => runAndClose(() => onBringToFront?.())}
+          >
+            <IconLayersSelected size={16} />
+            {t("bringToFront")}
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            className="editor-context-menu-item"
+            onClick={() => runAndClose(() => onSendToBack?.())}
+          >
+            <IconLayersSelectedBottom size={16} />
+            {t("sendToBack")}
           </button>
           <div className="editor-context-menu-separator" />
         </>

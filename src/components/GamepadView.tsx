@@ -75,6 +75,10 @@ export interface GamepadViewProps {
     buttonIndexes: number[];
     stick: boolean;
   }) => void;
+  onReorderSelection?: (
+    selection: { buttonIndexes: number[]; stick: boolean },
+    edge: "front" | "back",
+  ) => void;
 }
 
 type DragState =
@@ -277,6 +281,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     onDuplicateSelection,
     onResetSelectionToDefault,
     onResetSelectionRotation,
+    onReorderSelection,
   } = props;
   const backgroundSize = useBackgroundSize(layout, onBackgroundSizeChange);
   const defaultButton = layout.defaultbuttons;
@@ -966,6 +971,12 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
             }
             onResetRotation={() =>
               onResetSelectionRotation?.(contextMenu.selection)
+            }
+            onBringToFront={() =>
+              onReorderSelection?.(contextMenu.selection, "front")
+            }
+            onSendToBack={() =>
+              onReorderSelection?.(contextMenu.selection, "back")
             }
             onDelete={() => onDeleteSelection?.(contextMenu.selection)}
             onClose={() => setContextMenu(null)}

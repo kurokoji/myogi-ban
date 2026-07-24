@@ -45,6 +45,8 @@ export const enTranslation = {
   deleteSelectedButtons: "Delete selected buttons ({{count}})",
   deleteSelection: "Delete",
   duplicateSelection: "Duplicate",
+  bringToFront: "Bring to front",
+  sendToBack: "Send to back",
   showBackground: "Show Background",
   bgScale: "Scale",
   bgImage: "BG Image",

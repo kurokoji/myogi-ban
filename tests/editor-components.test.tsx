@@ -67,7 +67,7 @@ test("editor context menu shows button actions only for button selections", () =
   );
   assert.equal(
     componentDocument.body.querySelectorAll('[role="menuitem"]').length,
-    4,
+    6,
   );
   view.rerender(
     <EditorContextMenu
@@ -112,6 +112,31 @@ test("editor context menu actions do not bubble as preview clicks", () => {
     within(menu).getByRole("menuitem", { name: "resetRotation" }),
   );
   assert.equal(bubbledClicks, 0);
+});
+
+test("editor context menu requests moving button selections between layers", () => {
+  const moves: string[] = [];
+  renderComponent(
+    <EditorContextMenu
+      x={0}
+      y={0}
+      showButtonActions={true}
+      onDuplicate={() => {}}
+      onResetToDefault={() => {}}
+      onResetRotation={() => {}}
+      onBringToFront={() => moves.push("front")}
+      onSendToBack={() => moves.push("back")}
+      onDelete={() => {}}
+      onClose={() => {}}
+    />,
+  );
+  const menu = componentDocument.body.querySelector<HTMLElement>(
+    ".editor-context-menu",
+  );
+  assert.ok(menu);
+
+  fireEvent.click(within(menu).getByRole("menuitem", { name: "bringToFront" }));
+  assert.deepEqual(moves, ["front"]);
 });
 
 test("right-clicking an unselected button selects it and opens its delete menu", () => {

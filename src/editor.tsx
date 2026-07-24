@@ -34,6 +34,7 @@ import {
   type ButtonPositionUpdate,
   deleteEditorButtons,
   duplicateEditorButtons,
+  reorderEditorButtons,
   withButtonPositions,
 } from "./editor-buttons";
 import { cloneLayout, updateSelectedButtonSettings } from "./editor-helpers";
@@ -288,6 +289,29 @@ function EditorApp(): React.ReactElement {
       });
     },
     [updateLayout],
+  );
+
+  const reorderSelection = useCallback(
+    (
+      target: { buttonIndexes: number[]; stick: boolean },
+      edge: "front" | "back",
+    ) => {
+      const reordered = reorderEditorButtons(
+        layoutRef.current,
+        buttonMappings,
+        target.buttonIndexes,
+        edge,
+      );
+      updateLayout((next) => Object.assign(next, reordered.layout));
+      setButtonMappings(reordered.mapping);
+      setSelection({
+        buttonIndexes: reordered.indexes,
+        primaryButtonIndex: reordered.indexes[0] ?? null,
+        stick: false,
+      });
+      cancelAssignment();
+    },
+    [buttonMappings, cancelAssignment, updateLayout],
   );
 
   useEffect(() => {
@@ -784,6 +808,7 @@ function EditorApp(): React.ReactElement {
                 onDuplicateSelection={duplicateSelection}
                 onResetSelectionToDefault={resetSelectionToDefault}
                 onResetSelectionRotation={resetSelectionRotation}
+                onReorderSelection={reorderSelection}
               />
             </div>
           </div>

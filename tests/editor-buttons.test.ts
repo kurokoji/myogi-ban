@@ -4,6 +4,7 @@ import {
   addEditorButton,
   deleteEditorButtons,
   duplicateEditorButtons,
+  reorderEditorButtons,
   withButtonPositions,
 } from "../src/editor-buttons";
 import { createDefaultLayout } from "../src/layout";
@@ -73,4 +74,42 @@ test("duplicateEditorButtons copies only as many buttons as the limit allows", (
     duplicateEditorButtons(result?.layout ?? layout, [], [0], 4),
     null,
   );
+});
+
+test("reorderEditorButtons brings selected buttons to the front with mappings", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 4;
+  layout.buttons.slice(0, 4).forEach((button, index) => {
+    button.x = String(index);
+  });
+  const result = reorderEditorButtons(
+    layout,
+    [10, 11, 12, 13],
+    [0, 2],
+    "front",
+  );
+
+  assert.deepEqual(
+    result.layout.buttons.slice(0, 4).map((button) => button.x),
+    ["1", "3", "0", "2"],
+  );
+  assert.deepEqual(result.mapping, [11, 13, 10, 12]);
+  assert.deepEqual(result.indexes, [2, 3]);
+  assert.equal(layout.buttons[0].x, "0");
+});
+
+test("reorderEditorButtons sends selected buttons to the back in stable order", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 4;
+  layout.buttons.slice(0, 4).forEach((button, index) => {
+    button.x = String(index);
+  });
+  const result = reorderEditorButtons(layout, [10, 11, 12, 13], [1, 3], "back");
+
+  assert.deepEqual(
+    result.layout.buttons.slice(0, 4).map((button) => button.x),
+    ["1", "3", "0", "2"],
+  );
+  assert.deepEqual(result.mapping, [11, 13, 10, 12]);
+  assert.deepEqual(result.indexes, [0, 1]);
 });

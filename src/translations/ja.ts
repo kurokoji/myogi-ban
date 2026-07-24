@@ -43,6 +43,8 @@ export const jaTranslation = {
   deleteSelectedButtons: "選択中のボタンを削除 ({{count}})",
   deleteSelection: "削除",
   duplicateSelection: "複製",
+  bringToFront: "最前面へ",
+  sendToBack: "最背面へ",
   showBackground: "背景を表示",
   bgScale: "倍率",
   bgImage: "背景画像",

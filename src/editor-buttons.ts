@@ -90,3 +90,42 @@ export function duplicateEditorButtons(
   nextMapping.splice(limit);
   return { layout: next, mapping: nextMapping, indexes };
 }
+
+export function reorderEditorButtons(
+  layout: Layout,
+  mapping: ButtonMapping[],
+  selected: number[],
+  edge: "front" | "back",
+) {
+  const selectedSet = new Set(
+    selected.filter((index) => index >= 0 && index < layout.totalbuttonshow),
+  );
+  const visibleIndexes = Array.from(
+    { length: layout.totalbuttonshow },
+    (_, index) => index,
+  );
+  const selectedIndexes = visibleIndexes.filter((index) =>
+    selectedSet.has(index),
+  );
+  const unselectedIndexes = visibleIndexes.filter(
+    (index) => !selectedSet.has(index),
+  );
+  const order =
+    edge === "front"
+      ? [...unselectedIndexes, ...selectedIndexes]
+      : [...selectedIndexes, ...unselectedIndexes];
+  const next = cloneLayout(layout);
+  const nextMapping = [...mapping];
+  const visibleButtons = order.map((index) => next.buttons[index]);
+  const visibleMappings = order.map(
+    (index) => mapping[index] ?? UNASSIGNED_MAPPING,
+  );
+  next.buttons.splice(0, order.length, ...visibleButtons);
+  nextMapping.splice(0, order.length, ...visibleMappings);
+  const firstSelectedIndex = edge === "front" ? unselectedIndexes.length : 0;
+  return {
+    layout: next,
+    mapping: nextMapping,
+    indexes: selectedIndexes.map((_, offset) => firstSelectedIndex + offset),
+  };
+}
