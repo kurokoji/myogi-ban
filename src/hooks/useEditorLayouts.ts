@@ -240,7 +240,6 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
       await api.saveLayout(name, data, overwrite);
       await refreshLayouts();
       restoreLayout(data);
-      clearLayoutHistory();
       setLayoutName(name);
       setCurrentBuiltin(false);
       setSelectedLayout(layoutSelectionValue(name, false));
