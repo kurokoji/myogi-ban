@@ -1,4 +1,9 @@
-import { IconTrash } from "@tabler/icons-react";
+import {
+  IconCopy,
+  IconRestore,
+  IconRotateClockwise,
+  IconTrash,
+} from "@tabler/icons-react";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
@@ -6,6 +11,11 @@ import { useTranslation } from "react-i18next";
 interface EditorContextMenuProps {
   x: number;
   y: number;
+  showButtonActions: boolean;
+  canDuplicate?: boolean;
+  onDuplicate: () => void;
+  onResetToDefault: () => void;
+  onResetRotation: () => void;
   onDelete: () => void;
   onClose: () => void;
 }
@@ -13,10 +23,19 @@ interface EditorContextMenuProps {
 export function EditorContextMenu({
   x,
   y,
+  showButtonActions,
+  canDuplicate = true,
+  onDuplicate,
+  onResetToDefault,
+  onResetRotation,
   onDelete,
   onClose,
 }: EditorContextMenuProps): React.ReactElement {
   const { t } = useTranslation();
+  const runAndClose = (action: () => void) => {
+    action();
+    onClose();
+  };
 
   useEffect(() => {
     const closeOnPointerDown = () => onClose();
@@ -37,15 +56,46 @@ export function EditorContextMenu({
       role="menu"
       style={{ left: x, top: y }}
       onMouseDown={(event) => event.stopPropagation()}
+      onClick={(event) => event.stopPropagation()}
     >
+      {showButtonActions && (
+        <>
+          <button
+            type="button"
+            role="menuitem"
+            className="editor-context-menu-item"
+            disabled={!canDuplicate}
+            onClick={() => runAndClose(onDuplicate)}
+          >
+            <IconCopy size={16} />
+            {t("duplicateSelection")}
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            className="editor-context-menu-item"
+            onClick={() => runAndClose(onResetToDefault)}
+          >
+            <IconRestore size={16} />
+            {t("resetToDefault")}
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            className="editor-context-menu-item"
+            onClick={() => runAndClose(onResetRotation)}
+          >
+            <IconRotateClockwise size={16} />
+            {t("resetRotation")}
+          </button>
+          <div className="editor-context-menu-separator" />
+        </>
+      )}
       <button
         type="button"
         role="menuitem"
         className="editor-context-menu-item editor-context-menu-item-danger"
-        onClick={() => {
-          onDelete();
-          onClose();
-        }}
+        onClick={() => runAndClose(onDelete)}
       >
         <IconTrash size={16} />
         {t("deleteSelection")}

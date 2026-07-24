@@ -16,6 +16,7 @@ import { createRoot } from "react-dom/client";
 import { useTranslation } from "react-i18next";
 import "./i18n";
 import { ApiClient } from "./api";
+import { resetButtonToDefaults } from "./button-settings";
 import { PreviewZoomControls } from "./components/editor/PreviewZoomControls";
 import {
   BackgroundSettingsPanel,
@@ -32,6 +33,7 @@ import {
   addEditorButton,
   type ButtonPositionUpdate,
   deleteEditorButtons,
+  duplicateEditorButtons,
   withButtonPositions,
 } from "./editor-buttons";
 import { cloneLayout, updateSelectedButtonSettings } from "./editor-helpers";
@@ -238,6 +240,54 @@ function EditorApp(): React.ReactElement {
       return true;
     },
     [buttonMappings, cancelAssignment, updateLayout],
+  );
+
+  const duplicateSelection = useCallback(
+    (target: { buttonIndexes: number[]; stick: boolean }) => {
+      const duplicated = duplicateEditorButtons(
+        layoutRef.current,
+        buttonMappings,
+        target.buttonIndexes,
+      );
+      if (!duplicated) return;
+      updateLayout((next) => Object.assign(next, duplicated.layout));
+      setButtonMappings(duplicated.mapping);
+      setSelection({
+        buttonIndexes: duplicated.indexes,
+        primaryButtonIndex: duplicated.indexes[0] ?? null,
+        stick: false,
+      });
+      cancelAssignment();
+    },
+    [buttonMappings, cancelAssignment, updateLayout],
+  );
+
+  const resetSelectionToDefault = useCallback(
+    (target: { buttonIndexes: number[]; stick: boolean }) => {
+      updateLayout((next) => {
+        for (const index of target.buttonIndexes) {
+          const button = next.buttons[index];
+          if (button) {
+            next.buttons[index] = resetButtonToDefaults(
+              button,
+              next.defaultbuttons,
+            );
+          }
+        }
+      });
+    },
+    [updateLayout],
+  );
+
+  const resetSelectionRotation = useCallback(
+    (target: { buttonIndexes: number[]; stick: boolean }) => {
+      updateLayout((next) => {
+        for (const index of target.buttonIndexes) {
+          if (next.buttons[index]) next.buttons[index].rotation = "0";
+        }
+      });
+    },
+    [updateLayout],
   );
 
   useEffect(() => {
@@ -731,6 +781,9 @@ function EditorApp(): React.ReactElement {
                 onSizeChange={handleSizeChange}
                 onRotationChange={handleRotationChange}
                 onDeleteSelection={deleteSelection}
+                onDuplicateSelection={duplicateSelection}
+                onResetSelectionToDefault={resetSelectionToDefault}
+                onResetSelectionRotation={resetSelectionRotation}
               />
             </div>
           </div>

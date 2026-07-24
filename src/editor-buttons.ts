@@ -60,3 +60,33 @@ export function deleteEditorButtons(
   next.totalbuttonshow -= indexes.length;
   return { layout: next, mapping: nextMapping };
 }
+
+export function duplicateEditorButtons(
+  layout: Layout,
+  mapping: ButtonMapping[],
+  selected: number[],
+  limit = MAX_VISIBLE_BUTTONS,
+) {
+  const indexesToCopy = [...new Set(selected)]
+    .filter((index) => index >= 0 && index < layout.totalbuttonshow)
+    .slice(0, Math.max(0, limit - layout.totalbuttonshow));
+  if (indexesToCopy.length === 0) return null;
+  const next = cloneLayout(layout);
+  const nextMapping = [...mapping];
+  const indexes: number[] = [];
+  for (const sourceIndex of indexesToCopy) {
+    const source = layout.buttons[sourceIndex];
+    const index = next.totalbuttonshow;
+    next.buttons.splice(index, 0, {
+      ...source,
+      x: String((Number.parseFloat(source.x) || 0) + 16),
+      y: String((Number.parseFloat(source.y) || 0) + 16),
+    });
+    nextMapping.splice(index, 0, UNASSIGNED_MAPPING);
+    next.totalbuttonshow += 1;
+    indexes.push(index);
+  }
+  next.buttons.splice(limit);
+  nextMapping.splice(limit);
+  return { layout: next, mapping: nextMapping, indexes };
+}

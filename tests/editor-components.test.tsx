@@ -26,6 +26,10 @@ test("editor context menu offers deletion and closes after the action", () => {
     <EditorContextMenu
       x={120}
       y={80}
+      showButtonActions={true}
+      onDuplicate={() => {}}
+      onResetToDefault={() => {}}
+      onResetRotation={() => {}}
       onDelete={() => {
         deletes += 1;
       }}
@@ -46,6 +50,68 @@ test("editor context menu offers deletion and closes after the action", () => {
   fireEvent.click(deleteButton);
   assert.equal(deletes, 1);
   assert.equal(closes, 1);
+});
+
+test("editor context menu shows button actions only for button selections", () => {
+  const view = renderComponent(
+    <EditorContextMenu
+      x={0}
+      y={0}
+      showButtonActions={true}
+      onDuplicate={() => {}}
+      onResetToDefault={() => {}}
+      onResetRotation={() => {}}
+      onDelete={() => {}}
+      onClose={() => {}}
+    />,
+  );
+  assert.equal(
+    componentDocument.body.querySelectorAll('[role="menuitem"]').length,
+    4,
+  );
+  view.rerender(
+    <EditorContextMenu
+      x={0}
+      y={0}
+      showButtonActions={false}
+      onDuplicate={() => {}}
+      onResetToDefault={() => {}}
+      onResetRotation={() => {}}
+      onDelete={() => {}}
+      onClose={() => {}}
+    />,
+  );
+  assert.equal(
+    componentDocument.body.querySelectorAll('[role="menuitem"]').length,
+    1,
+  );
+});
+
+test("editor context menu actions do not bubble as preview clicks", () => {
+  let bubbledClicks = 0;
+  renderComponent(
+    <div onClick={() => (bubbledClicks += 1)}>
+      <EditorContextMenu
+        x={0}
+        y={0}
+        showButtonActions={true}
+        onDuplicate={() => {}}
+        onResetToDefault={() => {}}
+        onResetRotation={() => {}}
+        onDelete={() => {}}
+        onClose={() => {}}
+      />
+    </div>,
+  );
+  const menu = componentDocument.body.querySelector<HTMLElement>(
+    ".editor-context-menu",
+  );
+  assert.ok(menu);
+
+  fireEvent.click(
+    within(menu).getByRole("menuitem", { name: "resetRotation" }),
+  );
+  assert.equal(bubbledClicks, 0);
 });
 
 test("right-clicking an unselected button selects it and opens its delete menu", () => {
@@ -78,7 +144,9 @@ test("right-clicking an unselected button selects it and opens its delete menu",
     ".editor-context-menu",
   );
   assert.ok(menu);
-  fireEvent.click(within(menu).getByRole("menuitem"));
+  fireEvent.click(
+    within(menu).getByRole("menuitem", { name: "deleteSelection" }),
+  );
   assert.deepEqual(deletions, [{ buttonIndexes: [1], stick: false }]);
 });
 

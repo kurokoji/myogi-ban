@@ -638,6 +638,21 @@ body {
   background: var(--mantine-color-default-hover);
 }
 
+.editor-context-menu-item:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.editor-context-menu-item:disabled:hover {
+  background: transparent;
+}
+
+.editor-context-menu-separator {
+  height: 1px;
+  margin: 4px 2px;
+  background: var(--mantine-color-default-border);
+}
+
 .editor-context-menu-item-danger {
   color: var(--mantine-color-red-6);
 }

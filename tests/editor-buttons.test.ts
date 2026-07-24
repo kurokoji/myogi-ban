@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   addEditorButton,
   deleteEditorButtons,
+  duplicateEditorButtons,
   withButtonPositions,
 } from "../src/editor-buttons";
 import { createDefaultLayout } from "../src/layout";
@@ -42,4 +43,34 @@ test("withButtonPositions applies a group move in one immutable update", () => {
   assert.notEqual(result.buttons, layout.buttons);
   assert.notEqual(result.buttons[1], layout.buttons[1]);
   assert.notEqual(layout.buttons[1].x, "120");
+});
+
+test("duplicateEditorButtons appends offset copies with unassigned mappings", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 2;
+  layout.buttons[0].x = "100";
+  layout.buttons[0].y = "50";
+  layout.buttons[0].cssColor = "#ff0000";
+  const result = duplicateEditorButtons(layout, [3, 4], [0]);
+
+  assert.deepEqual(result?.indexes, [2]);
+  assert.equal(result?.layout.totalbuttonshow, 3);
+  assert.equal(result?.layout.buttons[2].x, "116");
+  assert.equal(result?.layout.buttons[2].y, "66");
+  assert.equal(result?.layout.buttons[2].cssColor, "#ff0000");
+  assert.deepEqual(result?.mapping, [3, 4, -1]);
+  assert.equal(layout.totalbuttonshow, 2);
+});
+
+test("duplicateEditorButtons copies only as many buttons as the limit allows", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 3;
+  const result = duplicateEditorButtons(layout, [0, 1, 2], [0, 1, 2], 4);
+
+  assert.deepEqual(result?.indexes, [3]);
+  assert.equal(result?.layout.totalbuttonshow, 4);
+  assert.equal(
+    duplicateEditorButtons(result?.layout ?? layout, [], [0], 4),
+    null,
+  );
 });

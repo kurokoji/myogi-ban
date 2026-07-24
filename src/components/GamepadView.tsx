@@ -1,5 +1,6 @@
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { MAX_VISIBLE_BUTTONS } from "../app-constants";
 import type { ButtonPositionUpdate } from "../editor-buttons";
 import {
   dragGroupPositions,
@@ -59,6 +60,18 @@ export interface GamepadViewProps {
   }) => void;
   onRotationChange?: (change: { index: number; rotation: number }) => void;
   onDeleteSelection?: (selection: {
+    buttonIndexes: number[];
+    stick: boolean;
+  }) => void;
+  onDuplicateSelection?: (selection: {
+    buttonIndexes: number[];
+    stick: boolean;
+  }) => void;
+  onResetSelectionToDefault?: (selection: {
+    buttonIndexes: number[];
+    stick: boolean;
+  }) => void;
+  onResetSelectionRotation?: (selection: {
     buttonIndexes: number[];
     stick: boolean;
   }) => void;
@@ -261,6 +274,9 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     onSizeChange,
     onRotationChange,
     onDeleteSelection,
+    onDuplicateSelection,
+    onResetSelectionToDefault,
+    onResetSelectionRotation,
   } = props;
   const backgroundSize = useBackgroundSize(layout, onBackgroundSizeChange);
   const defaultButton = layout.defaultbuttons;
@@ -942,6 +958,15 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
           <EditorContextMenu
             x={contextMenu.x}
             y={contextMenu.y}
+            showButtonActions={contextMenu.selection.buttonIndexes.length > 0}
+            canDuplicate={layout.totalbuttonshow < MAX_VISIBLE_BUTTONS}
+            onDuplicate={() => onDuplicateSelection?.(contextMenu.selection)}
+            onResetToDefault={() =>
+              onResetSelectionToDefault?.(contextMenu.selection)
+            }
+            onResetRotation={() =>
+              onResetSelectionRotation?.(contextMenu.selection)
+            }
             onDelete={() => onDeleteSelection?.(contextMenu.selection)}
             onClose={() => setContextMenu(null)}
           />
