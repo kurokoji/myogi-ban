@@ -1,3 +1,5 @@
+import { posix, win32 } from "node:path";
+
 export function createObsPluginConfigureArgs(options) {
   return [
     "-S",
@@ -11,6 +13,17 @@ export function createObsPluginConfigureArgs(options) {
   ];
 }
 
+export function createObsPluginNativeTestConfigureArgs(options) {
+  return [
+    "-S",
+    options.sourceDir,
+    "-B",
+    options.buildDir,
+    `-DMYOGI_BAN_VERSION=${options.version}`,
+    "-DMYOGI_BAN_BUILD_PLUGIN=OFF",
+  ];
+}
+
 export function createObsPluginTestArgs(buildDir) {
   return [
     "--test-dir",
@@ -19,6 +32,12 @@ export function createObsPluginTestArgs(buildDir) {
     "RelWithDebInfo",
     "--output-on-failure",
   ];
+}
+
+export function resolveCtestCommand(cmakeCommand, platform) {
+  const paths = platform === "win32" ? win32 : posix;
+  const executable = platform === "win32" ? "ctest.exe" : "ctest";
+  return paths.join(paths.dirname(cmakeCommand), executable);
 }
 
 export function resolveCmakeCommand(options) {

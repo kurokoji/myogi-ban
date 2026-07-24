@@ -3,8 +3,10 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import {
   createObsPluginConfigureArgs,
+  createObsPluginNativeTestConfigureArgs,
   createObsPluginTestArgs,
   resolveCmakeCommand,
+  resolveCtestCommand,
 } from "../scripts/obs-plugin-build-options.mjs";
 
 test("OBS plugin configure points CMake at the plugin and OBS SDK", () => {
@@ -36,6 +38,35 @@ test("OBS plugin build runs native tests from the configured build", () => {
     "RelWithDebInfo",
     "--output-on-failure",
   ]);
+});
+
+test("native OBS tests configure without an OBS SDK or Visual Studio architecture", () => {
+  assert.deepEqual(
+    createObsPluginNativeTestConfigureArgs({
+      sourceDir: "obs-plugin",
+      buildDir: "build/obs-plugin-tests",
+      version: "1.0.14",
+    }),
+    [
+      "-S",
+      "obs-plugin",
+      "-B",
+      "build/obs-plugin-tests",
+      "-DMYOGI_BAN_VERSION=1.0.14",
+      "-DMYOGI_BAN_BUILD_PLUGIN=OFF",
+    ],
+  );
+});
+
+test("CTest command follows the host platform", () => {
+  assert.equal(
+    resolveCtestCommand("C:/tools/cmake.exe", "win32"),
+    "C:\\tools\\ctest.exe",
+  );
+  assert.equal(
+    resolveCtestCommand("/usr/bin/cmake", "linux"),
+    "/usr/bin/ctest",
+  );
 });
 
 test("OBS plugin build uses Visual Studio CMake when it is not on PATH", () => {

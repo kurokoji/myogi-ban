@@ -153,5 +153,6 @@ public/user-layouts/
 .dev-data/
 .obs-sdk/
 build/obs-plugin/
+build/obs-plugin-tests/
 release/
 public/default-layout.json

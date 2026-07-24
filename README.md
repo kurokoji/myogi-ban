@@ -96,6 +96,11 @@ npm run build:obs-plugin
 ```
 
 ビルド時にはOBS非依存のC++単体テストがCTestで自動実行されます。
+OBS SDKがないUbuntuなどでは、次のコマンドでC++単体テストだけを実行できます。
+
+```bash
+npm run test:obs-plugin
+```
 
 生成した `myogi-ban-obs.dll` と `obs-plugin/data` を、OBSのプラグイン規約に従って
 `myogi-ban-obs/bin/64bit` と `myogi-ban-obs/data` へ配置してください。

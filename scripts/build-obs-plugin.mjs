@@ -1,10 +1,11 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 import {
   createObsPluginConfigureArgs,
   createObsPluginTestArgs,
   resolveCmakeCommand,
+  resolveCtestCommand,
 } from "./obs-plugin-build-options.mjs";
 
 const obsSdkDir = process.env.OBS_SDK_DIR;
@@ -54,4 +55,7 @@ run(
   }),
 );
 run(cmake, ["--build", buildDir, "--config", "RelWithDebInfo"]);
-run(join(dirname(cmake), "ctest.exe"), createObsPluginTestArgs(buildDir));
+run(
+  resolveCtestCommand(cmake, process.platform),
+  createObsPluginTestArgs(buildDir),
+);
