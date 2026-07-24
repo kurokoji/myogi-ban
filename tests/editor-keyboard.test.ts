@@ -3,9 +3,68 @@ import test from "node:test";
 import {
   deleteEditorSelection,
   editorNudgeHistoryMode,
+  editorShortcutFromKey,
   isEditableKeyboardTarget,
   nudgeEditorSelection,
 } from "../src/editor-keyboard";
+
+test("editorShortcutFromKey maps editing shortcuts across control and command", () => {
+  assert.equal(
+    editorShortcutFromKey({ key: "Delete", ctrlKey: false, metaKey: false }),
+    "delete",
+  );
+  assert.equal(
+    editorShortcutFromKey({ key: "Escape", ctrlKey: false, metaKey: false }),
+    "clearSelection",
+  );
+  assert.equal(
+    editorShortcutFromKey({ key: "s", ctrlKey: true, metaKey: false }),
+    "save",
+  );
+  assert.equal(
+    editorShortcutFromKey({ key: "a", ctrlKey: false, metaKey: true }),
+    "selectAll",
+  );
+  assert.equal(
+    editorShortcutFromKey({
+      key: "z",
+      ctrlKey: true,
+      metaKey: false,
+      shiftKey: false,
+    }),
+    "undo",
+  );
+  assert.equal(
+    editorShortcutFromKey({
+      key: "Z",
+      ctrlKey: false,
+      metaKey: true,
+      shiftKey: true,
+    }),
+    "redo",
+  );
+  assert.equal(
+    editorShortcutFromKey({ key: "d", ctrlKey: true, metaKey: false }),
+    "duplicate",
+  );
+  assert.equal(
+    editorShortcutFromKey({ key: "C", ctrlKey: false, metaKey: true }),
+    null,
+  );
+  assert.equal(
+    editorShortcutFromKey({ key: "v", ctrlKey: true, metaKey: false }),
+    null,
+  );
+  assert.equal(
+    editorShortcutFromKey({ key: "r", ctrlKey: false, metaKey: false }),
+    "resetRotation",
+  );
+  assert.equal(
+    editorShortcutFromKey({ key: "r", ctrlKey: true, metaKey: false }),
+    null,
+  );
+});
+
 import { createButtonSelection } from "../src/editor-selection";
 import { createDefaultLayout } from "../src/layout";
 

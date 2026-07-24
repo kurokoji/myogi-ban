@@ -20,13 +20,6 @@ interface UseLayoutHistoryOptions {
   onRestore: (layout: Layout) => void;
 }
 
-function isEditableTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false;
-  return Boolean(
-    target.closest("input, textarea, select, [contenteditable='true']"),
-  );
-}
-
 export function useLayoutHistory({
   layout,
   layoutRef,
@@ -126,19 +119,6 @@ export function useLayoutHistory({
     redoStackRef.current = [];
     syncAvailability();
   }, [layoutRef, pushUndoSnapshot, syncAvailability]);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (isEditableTarget(event.target)) return;
-      if (!event.ctrlKey || event.altKey || event.metaKey) return;
-      if (event.key.toLowerCase() !== "z") return;
-      event.preventDefault();
-      if (event.shiftKey) redo();
-      else undo();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [redo, undo]);
 
   return {
     beginDrag,

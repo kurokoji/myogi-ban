@@ -4,6 +4,38 @@ import type { EditorSelection } from "./editor-selection";
 import type { ButtonMapping } from "./gamepad";
 import type { Layout } from "./types";
 
+export type EditorShortcut =
+  | "clearSelection"
+  | "delete"
+  | "duplicate"
+  | "resetRotation"
+  | "save"
+  | "selectAll"
+  | "undo"
+  | "redo";
+
+export function editorShortcutFromKey(event: {
+  key: string;
+  ctrlKey: boolean;
+  metaKey: boolean;
+  shiftKey?: boolean;
+  altKey?: boolean;
+}): EditorShortcut | null {
+  const key = event.key.toLowerCase();
+  const commandModifier = event.ctrlKey || event.metaKey;
+  if (commandModifier) {
+    if (event.altKey) return null;
+    if (key === "z") return event.shiftKey ? "redo" : "undo";
+    if (key === "s") return "save";
+    if (key === "a") return "selectAll";
+    if (key === "d") return "duplicate";
+    return null;
+  }
+  if (key === "escape") return "clearSelection";
+  if (key === "delete") return "delete";
+  return key === "r" ? "resetRotation" : null;
+}
+
 export function deleteEditorSelection(
   layout: Layout,
   buttonMappings: ButtonMapping[],

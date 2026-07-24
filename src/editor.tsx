@@ -41,6 +41,7 @@ import { cloneLayout, updateSelectedButtonSettings } from "./editor-helpers";
 import {
   deleteEditorSelection,
   editorNudgeHistoryMode,
+  editorShortcutFromKey,
   isEditableKeyboardTarget,
   nudgeEditorSelection,
 } from "./editor-keyboard";
@@ -317,8 +318,56 @@ function EditorApp(): React.ReactElement {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (isEditableKeyboardTarget(event.target)) return;
-      if (event.key === "Delete" && deleteSelection(selection)) {
+
+      const shortcut = editorShortcutFromKey(event);
+      if (shortcut === "save") {
         event.preventDefault();
+        if (!event.repeat && !currentBuiltin) saveLayout();
+        return;
+      }
+      if (shortcut === "clearSelection") {
+        if (selection.buttonIndexes.length === 0 && !selection.stick) return;
+        event.preventDefault();
+        setSelection(EMPTY_EDITOR_SELECTION);
+        cancelAssignment();
+        return;
+      }
+      if (shortcut === "selectAll") {
+        event.preventDefault();
+        const buttonIndexes = Array.from(
+          { length: layoutRef.current.totalbuttonshow },
+          (_, index) => index,
+        );
+        setSelection({
+          buttonIndexes,
+          primaryButtonIndex: buttonIndexes[0] ?? null,
+          stick: false,
+        });
+        cancelAssignment();
+        return;
+      }
+      if (shortcut === "undo") {
+        event.preventDefault();
+        if (!event.repeat) undoLayout();
+        return;
+      }
+      if (shortcut === "redo") {
+        event.preventDefault();
+        if (!event.repeat) redoLayout();
+        return;
+      }
+      if (shortcut === "delete" && deleteSelection(selection)) {
+        event.preventDefault();
+        return;
+      }
+      if (shortcut === "duplicate" && selection.buttonIndexes.length > 0) {
+        event.preventDefault();
+        if (!event.repeat) duplicateSelection(selection);
+        return;
+      }
+      if (shortcut === "resetRotation" && selection.buttonIndexes.length > 0) {
+        event.preventDefault();
+        if (!event.repeat) resetSelectionRotation(selection);
         return;
       }
       const moved = nudgeEditorSelection(
@@ -337,7 +386,18 @@ function EditorApp(): React.ReactElement {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [deleteSelection, selection, updateLayout]);
+  }, [
+    cancelAssignment,
+    currentBuiltin,
+    deleteSelection,
+    duplicateSelection,
+    redoLayout,
+    resetSelectionRotation,
+    saveLayout,
+    selection,
+    undoLayout,
+    updateLayout,
+  ]);
 
   const clearGuides = useCallback(() => {
     updateLayout((next) => {

@@ -87,6 +87,27 @@ test("editor context menu shows button actions only for button selections", () =
   );
 });
 
+test("editor context menu shows shortcuts for assigned actions", () => {
+  renderComponent(
+    <EditorContextMenu
+      x={0}
+      y={0}
+      showButtonActions={true}
+      onDuplicate={() => {}}
+      onResetToDefault={() => {}}
+      onResetRotation={() => {}}
+      onDelete={() => {}}
+      onClose={() => {}}
+    />,
+  );
+
+  const shortcuts = Array.from(
+    componentDocument.body.querySelectorAll(".editor-context-menu-shortcut"),
+    (element) => element.textContent,
+  );
+  assert.deepEqual(shortcuts, ["Ctrl/Cmd+D", "R", "Delete"]);
+});
+
 test("editor context menu actions do not bubble as preview clicks", () => {
   let bubbledClicks = 0;
   renderComponent(

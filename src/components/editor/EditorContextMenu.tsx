@@ -46,7 +46,10 @@ export function EditorContextMenu({
   useEffect(() => {
     const closeOnPointerDown = () => onClose();
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      event.stopPropagation();
+      onClose();
     };
     document.addEventListener("mousedown", closeOnPointerDown);
     document.addEventListener("keydown", closeOnEscape);
@@ -70,11 +73,15 @@ export function EditorContextMenu({
             type="button"
             role="menuitem"
             className="editor-context-menu-item"
+            aria-label={t("duplicateSelection")}
             disabled={!canDuplicate}
             onClick={() => runAndClose(onDuplicate)}
           >
             <IconCopy size={16} />
-            {t("duplicateSelection")}
+            <span className="editor-context-menu-label">
+              {t("duplicateSelection")}
+            </span>
+            <kbd className="editor-context-menu-shortcut">Ctrl/Cmd+D</kbd>
           </button>
           <button
             type="button"
@@ -89,10 +96,14 @@ export function EditorContextMenu({
             type="button"
             role="menuitem"
             className="editor-context-menu-item"
+            aria-label={t("resetRotation")}
             onClick={() => runAndClose(onResetRotation)}
           >
             <IconRotateClockwise size={16} />
-            {t("resetRotation")}
+            <span className="editor-context-menu-label">
+              {t("resetRotation")}
+            </span>
+            <kbd className="editor-context-menu-shortcut">R</kbd>
           </button>
           <button
             type="button"
@@ -119,10 +130,14 @@ export function EditorContextMenu({
         type="button"
         role="menuitem"
         className="editor-context-menu-item editor-context-menu-item-danger"
+        aria-label={t("deleteSelection")}
         onClick={() => runAndClose(onDelete)}
       >
         <IconTrash size={16} />
-        {t("deleteSelection")}
+        <span className="editor-context-menu-label">
+          {t("deleteSelection")}
+        </span>
+        <kbd className="editor-context-menu-shortcut">Delete</kbd>
       </button>
     </div>,
     document.body,
