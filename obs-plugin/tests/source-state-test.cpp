@@ -1,4 +1,5 @@
 #include "source-state.hpp"
+#include "server-launch-options.hpp"
 
 #include <cstdlib>
 #include <iostream>
@@ -16,6 +17,13 @@ void expect(bool condition, std::string_view message)
 
 int main()
 {
+	expect(build_server_command_line(L"C:\\Myogi Ban\\Myogi Ban.exe", true) ==
+		       L"\"C:\\Myogi Ban\\Myogi Ban.exe\" --server-only",
+	       "adds server-only to the launch command by default");
+	expect(build_server_command_line(L"C:\\Myogi Ban\\Myogi Ban.exe", false) ==
+		       L"\"C:\\Myogi Ban\\Myogi Ban.exe\"",
+	       "can launch Myogi Ban with its regular window");
+
 	SourceState state;
 	expect(state.width == 500 && state.height == 250, "uses the default source dimensions");
 

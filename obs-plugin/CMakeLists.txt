@@ -16,6 +16,7 @@ include(CTest)
 if(BUILD_TESTING)
   add_executable(myogi-ban-obs-tests
     tests/source-state-test.cpp
+    src/server-launch-options.cpp
     src/source-state.cpp
   )
   target_include_directories(myogi-ban-obs-tests PRIVATE src)
@@ -28,6 +29,7 @@ if(MYOGI_BAN_BUILD_PLUGIN)
   add_library(myogi-ban-obs MODULE
     src/plugin-main.cpp
     src/myogi-ban-source.cpp
+    src/server-launch-options.cpp
     src/server-process-windows.cpp
     src/source-state.cpp
   )

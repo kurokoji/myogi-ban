@@ -1,4 +1,5 @@
 #include "server-process-windows.hpp"
+#include "server-launch-options.hpp"
 
 #include <obs-module.h>
 
@@ -151,12 +152,12 @@ bool ServerProcess::read_layouts(std::string &json)
 	return read_api("/api/layouts", json);
 }
 
-void ServerProcess::acquire(const std::string &executable_path)
+void ServerProcess::acquire(const std::string &executable_path, bool server_only)
 {
 	std::lock_guard lock(process_mutex);
 	++references_;
 	if (references_ == 1 && !port_ready())
-		start(executable_path);
+		start(executable_path, server_only);
 }
 
 void ServerProcess::release()
@@ -168,14 +169,14 @@ void ServerProcess::release()
 		stop();
 }
 
-void ServerProcess::ensure_started(const std::string &executable_path)
+void ServerProcess::ensure_started(const std::string &executable_path, bool server_only)
 {
 	std::lock_guard lock(process_mutex);
 	if (references_ > 0 && !process_handle_ && !port_ready())
-		start(executable_path);
+		start(executable_path, server_only);
 }
 
-void ServerProcess::start(const std::string &executable_path)
+void ServerProcess::start(const std::string &executable_path, bool server_only)
 {
 	if (executable_path.empty() || !std::filesystem::exists(widen(executable_path))) {
 		blog(LOG_ERROR, "Myogi Ban executable was not found: %s", executable_path.c_str());
@@ -183,7 +184,7 @@ void ServerProcess::start(const std::string &executable_path)
 	}
 
 	const std::wstring executable = widen(executable_path);
-	std::wstring command_line = L"\"" + executable + L"\"";
+	std::wstring command_line = build_server_command_line(executable, server_only);
 	std::vector<wchar_t> mutable_command(command_line.begin(), command_line.end());
 	mutable_command.push_back(L'\0');
 

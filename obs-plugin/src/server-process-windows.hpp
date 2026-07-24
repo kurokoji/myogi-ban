@@ -11,8 +11,8 @@ public:
 
 	static ServerProcess &instance();
 
-	void acquire(const std::string &executable_path);
-	void ensure_started(const std::string &executable_path);
+	void acquire(const std::string &executable_path, bool server_only);
+	void ensure_started(const std::string &executable_path, bool server_only);
 	void release();
 	bool port_ready();
 	bool read_dimensions(const std::string &api_path, Dimensions &dimensions);
@@ -25,7 +25,7 @@ private:
 	ServerProcess(const ServerProcess &) = delete;
 	ServerProcess &operator=(const ServerProcess &) = delete;
 
-	void start(const std::string &executable_path);
+	void start(const std::string &executable_path, bool server_only);
 	void stop();
 
 	void *process_handle_ = nullptr;

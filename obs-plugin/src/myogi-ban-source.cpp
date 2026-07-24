@@ -7,6 +7,7 @@
 
 namespace {
 constexpr const char *kExecutablePath = "executable_path";
+constexpr const char *kServerOnly = "server_only";
 constexpr const char *kWidth = "width";
 constexpr const char *kHeight = "height";
 constexpr const char *kLayout = "layout";
@@ -15,6 +16,7 @@ struct MyogiBanSource {
 	obs_source_t *source = nullptr;
 	obs_source_t *browser = nullptr;
 	std::string executable_path;
+	bool server_only = true;
 	SourceState state;
 };
 
@@ -83,6 +85,7 @@ void source_defaults(obs_data_t *settings)
 {
 	const std::string executable = ServerProcess::instance().default_executable_path();
 	obs_data_set_default_string(settings, kExecutablePath, executable.c_str());
+	obs_data_set_default_bool(settings, kServerOnly, true);
 	obs_data_set_default_int(settings, kWidth, 500);
 	obs_data_set_default_int(settings, kHeight, 250);
 	obs_data_set_default_string(settings, kLayout, "");
@@ -92,10 +95,11 @@ void source_update(void *data, obs_data_t *settings)
 {
 	auto *context = static_cast<MyogiBanSource *>(data);
 	context->executable_path = obs_data_get_string(settings, kExecutablePath);
+	context->server_only = obs_data_get_bool(settings, kServerOnly);
 	context->state.apply_dimensions({static_cast<uint32_t>(obs_data_get_int(settings, kWidth)),
 					 static_cast<uint32_t>(obs_data_get_int(settings, kHeight))});
 	const bool layout_changed = context->state.select_layout(obs_data_get_string(settings, kLayout));
-	ServerProcess::instance().ensure_started(context->executable_path);
+	ServerProcess::instance().ensure_started(context->executable_path, context->server_only);
 	if (layout_changed && ServerProcess::instance().port_ready()) {
 		ServerProcess::Dimensions dimensions{};
 		if (ServerProcess::instance().read_dimensions(context->state.dimensions_api_path(), dimensions)) {
@@ -126,7 +130,7 @@ void *source_create(obs_data_t *settings, obs_source_t *source)
 	auto *context = new MyogiBanSource;
 	context->source = source;
 	source_update(context, settings);
-	ServerProcess::instance().acquire(context->executable_path);
+	ServerProcess::instance().acquire(context->executable_path, context->server_only);
 	return context;
 }
 
@@ -145,7 +149,7 @@ void source_tick(void *data, float seconds)
 		return;
 	if (!context->state.advance_readiness_check(seconds))
 		return;
-	ServerProcess::instance().ensure_started(context->executable_path);
+	ServerProcess::instance().ensure_started(context->executable_path, context->server_only);
 	if (ServerProcess::instance().port_ready()) {
 		ServerProcess::Dimensions dimensions{};
 		if (ServerProcess::instance().read_dimensions(context->state.dimensions_api_path(), dimensions)) {
@@ -204,7 +208,7 @@ bool layout_modified(void *data, obs_properties_t *, obs_property_t *, obs_data_
 	auto *context = static_cast<MyogiBanSource *>(data);
 	SourceState selected;
 	selected.select_layout(obs_data_get_string(settings, kLayout));
-	ServerProcess::instance().ensure_started(context->executable_path);
+	ServerProcess::instance().ensure_started(context->executable_path, context->server_only);
 	ServerProcess::Dimensions dimensions{};
 	if (!ServerProcess::instance().read_dimensions(selected.dimensions_api_path(), dimensions)) {
 		blog(LOG_WARNING, "Could not update properties for the selected Myogi Ban layout");
@@ -220,6 +224,7 @@ obs_properties_t *source_properties(void *data)
 	obs_properties_t *properties = obs_properties_create();
 	obs_properties_add_path(properties, kExecutablePath, obs_module_text("ExecutablePath"), OBS_PATH_FILE,
 				"Executable (*.exe);;All files (*.*)", nullptr);
+	obs_properties_add_bool(properties, kServerOnly, obs_module_text("ServerOnly"));
 	obs_property_t *width = obs_properties_add_int(properties, kWidth, obs_module_text("Width"), 1, 8192, 1);
 	obs_property_t *height = obs_properties_add_int(properties, kHeight, obs_module_text("Height"), 1, 8192, 1);
 	obs_property_set_enabled(width, false);
