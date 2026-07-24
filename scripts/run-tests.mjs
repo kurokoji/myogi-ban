@@ -4,14 +4,14 @@ import { join, resolve } from "node:path";
 import { build } from "esbuild";
 import {
   createTestRunnerArguments,
-  isTestFile,
+  isTestFileForPlatform,
 } from "./test-runner-options.mjs";
 
 const outputDir = mkdtempSync(join("node_modules", ".myogi-ban-tests-"));
 
 try {
   const entryPoints = readdirSync("tests")
-    .filter(isTestFile)
+    .filter((name) => isTestFileForPlatform(name, process.platform))
     .map((name) => join("tests", name));
 
   await build({

@@ -7,6 +7,12 @@ import {
   resolveCmakeCommand,
   resolveCtestCommand,
 } from "./obs-plugin-build-options.mjs";
+import { shouldRunObsTests } from "./test-runner-options.mjs";
+
+if (!shouldRunObsTests(process.platform)) {
+  console.log("Skipping OBS native tests outside Windows.");
+  process.exit(0);
+}
 
 const packageJson = JSON.parse(
   readFileSync(new URL("../package.json", import.meta.url), "utf8"),
@@ -19,13 +25,6 @@ function run(command, args) {
 }
 
 function findCmake() {
-  if (process.platform !== "win32") {
-    return resolveCmakeCommand({
-      configuredCommand: process.env.CMAKE_COMMAND,
-      pathCommand: "cmake",
-    });
-  }
-
   const pathLookup = spawnSync("where.exe", ["cmake.exe"], {
     encoding: "utf8",
   });
