@@ -26,6 +26,7 @@ import {
   LayoutSettingsPanel,
   StickSettingsPanel,
 } from "./components/editor/SettingsPanels";
+import { ShortcutCheatSheet } from "./components/editor/ShortcutCheatSheet";
 import { SidebarAccordion } from "./components/editor/SidebarAccordion";
 import { ThemeControl } from "./components/editor/ThemeControl";
 import { GamepadView } from "./components/GamepadView";
@@ -763,6 +764,7 @@ function EditorApp(): React.ReactElement {
               <IconArrowForwardUp size={16} />
             </ActionIcon>
           </Tooltip>
+          <ShortcutCheatSheet />
         </div>
         <PreviewZoomControls
           zoomPercent={zoomPercent}

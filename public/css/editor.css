@@ -256,6 +256,27 @@ body {
   margin: auto;
 }
 
+.shortcut-cheat-sheet {
+  margin: 0;
+}
+
+.shortcut-cheat-sheet-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--mantine-color-default-border);
+}
+
+.shortcut-cheat-sheet-row:last-child {
+  border-bottom: 0;
+}
+
+.shortcut-cheat-sheet-row dd {
+  margin: 0;
+}
+
 #preview-scroll {
   --preview-ruler-size: 34px;
 

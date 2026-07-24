@@ -18,6 +18,33 @@ import { createDefaultLayout } from "../src/layout";
 import { BackgroundSettingsPanel } from "../src/components/editor/SettingsPanels";
 import { ThemeControl } from "../src/components/editor/ThemeControl";
 import { EditorContextMenu } from "../src/components/editor/EditorContextMenu";
+import { ShortcutCheatSheet } from "../src/components/editor/ShortcutCheatSheet";
+
+test("shortcut cheat sheet lists editor commands for the current platform", () => {
+  renderComponent(<ShortcutCheatSheet platform="MacIntel" />);
+  fireEvent.click(
+    componentDocument.body.querySelector<HTMLButtonElement>(
+      '[aria-label="keyboardShortcuts"]',
+    ) as HTMLButtonElement,
+  );
+
+  const shortcuts = Array.from(
+    componentDocument.body.querySelectorAll(".shortcut-cheat-sheet-key"),
+    (element) => element.textContent,
+  );
+  assert.deepEqual(shortcuts, [
+    "Cmd+S",
+    "Cmd+Z",
+    "Cmd+Shift+Z",
+    "Cmd+A",
+    "Escape",
+    "Cmd+D",
+    "Delete",
+    "R",
+    "Arrow keys",
+    "Cmd+Wheel",
+  ]);
+});
 
 test("editor context menu offers deletion and closes after the action", () => {
   let deletes = 0;

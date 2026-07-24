@@ -15,15 +15,31 @@ export type EditorShortcut =
   | "redo";
 
 export function editorShortcutHint(
-  shortcut: "duplicate" | "save" | "undo" | "redo",
+  shortcut:
+    | "clearSelection"
+    | "delete"
+    | "duplicate"
+    | "move"
+    | "redo"
+    | "resetRotation"
+    | "save"
+    | "selectAll"
+    | "undo"
+    | "zoom",
   platform = globalThis.navigator?.platform ?? "",
 ): string {
   const modifier = platform.toLowerCase().includes("mac") ? "Cmd" : "Ctrl";
   return {
+    clearSelection: "Escape",
+    delete: "Delete",
     duplicate: `${modifier}+D`,
-    save: `${modifier}+S`,
-    undo: `${modifier}+Z`,
+    move: "Arrow keys",
     redo: `${modifier}+Shift+Z`,
+    resetRotation: "R",
+    save: `${modifier}+S`,
+    selectAll: `${modifier}+A`,
+    undo: `${modifier}+Z`,
+    zoom: `${modifier}+Wheel`,
   }[shortcut];
 }
 
