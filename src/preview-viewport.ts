@@ -12,3 +12,12 @@ export function clampPreviewScale(scale: number): number {
 export function zoomPreviewScale(current: number, delta: number): number {
   return clampPreviewScale(current + delta);
 }
+
+export function previewWheelZoomDelta(event: {
+  deltaY: number;
+  ctrlKey: boolean;
+  metaKey: boolean;
+}): number | null {
+  if ((!event.ctrlKey && !event.metaKey) || event.deltaY === 0) return null;
+  return event.deltaY < 0 ? 0.1 : -0.1;
+}

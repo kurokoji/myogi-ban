@@ -70,6 +70,7 @@ import { useLayoutHistory } from "./hooks/useLayoutHistory";
 import { usePreviewViewport } from "./hooks/usePreviewViewport";
 import i18n from "./i18n";
 import { createDefaultLayout } from "./layout";
+import { previewWheelZoomDelta } from "./preview-viewport";
 import { type Layout, SERVER_URL } from "./types";
 
 const PREVIEW_SCALE_STEP = 0.1;
@@ -142,6 +143,19 @@ function EditorApp(): React.ReactElement {
     zoomPercent,
     zoomPreview,
   } = usePreviewViewport(layout.background);
+
+  useEffect(() => {
+    const previewScroll = previewScrollRef.current;
+    if (!previewScroll) return;
+    const zoomOnWheel = (event: WheelEvent) => {
+      const delta = previewWheelZoomDelta(event);
+      if (delta === null) return;
+      event.preventDefault();
+      zoomPreview(delta);
+    };
+    previewScroll.addEventListener("wheel", zoomOnWheel, { passive: false });
+    return () => previewScroll.removeEventListener("wheel", zoomOnWheel);
+  }, [zoomPreview]);
   const {
     previewContainerRef,
     previewRef,

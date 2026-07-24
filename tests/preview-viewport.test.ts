@@ -1,6 +1,25 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { clampPreviewScale, zoomPreviewScale } from "../src/preview-viewport";
+import {
+  clampPreviewScale,
+  previewWheelZoomDelta,
+  zoomPreviewScale,
+} from "../src/preview-viewport";
+
+test("preview wheel zoom requires a command modifier and follows direction", () => {
+  assert.equal(
+    previewWheelZoomDelta({ deltaY: -10, ctrlKey: true, metaKey: false }),
+    0.1,
+  );
+  assert.equal(
+    previewWheelZoomDelta({ deltaY: 10, ctrlKey: false, metaKey: true }),
+    -0.1,
+  );
+  assert.equal(
+    previewWheelZoomDelta({ deltaY: -10, ctrlKey: false, metaKey: false }),
+    null,
+  );
+});
 
 test("preview scale clamps to limits and rounds to tenths", () => {
   assert.equal(clampPreviewScale(0), 0.1);
