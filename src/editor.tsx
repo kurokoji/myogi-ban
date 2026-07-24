@@ -42,6 +42,7 @@ import {
   deleteEditorSelection,
   editorNudgeHistoryMode,
   editorShortcutFromKey,
+  editorShortcutHint,
   isEditableKeyboardTarget,
   nudgeEditorSelection,
 } from "./editor-keyboard";
@@ -720,7 +721,10 @@ function EditorApp(): React.ReactElement {
         ref={previewRef}
       >
         <div className="preview-history-toolbar" role="toolbar">
-          <Tooltip label={t("undo")} openDelay={300}>
+          <Tooltip
+            label={`${t("undo")} (${editorShortcutHint("undo")})`}
+            openDelay={300}
+          >
             <ActionIcon
               size="sm"
               variant="light"
@@ -731,7 +735,10 @@ function EditorApp(): React.ReactElement {
               <IconArrowBackUp size={16} />
             </ActionIcon>
           </Tooltip>
-          <Tooltip label={t("redo")} openDelay={300}>
+          <Tooltip
+            label={`${t("redo")} (${editorShortcutHint("redo")})`}
+            openDelay={300}
+          >
             <ActionIcon
               size="sm"
               variant="light"

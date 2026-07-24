@@ -14,6 +14,19 @@ export type EditorShortcut =
   | "undo"
   | "redo";
 
+export function editorShortcutHint(
+  shortcut: "duplicate" | "save" | "undo" | "redo",
+  platform = globalThis.navigator?.platform ?? "",
+): string {
+  const modifier = platform.toLowerCase().includes("mac") ? "Cmd" : "Ctrl";
+  return {
+    duplicate: `${modifier}+D`,
+    save: `${modifier}+S`,
+    undo: `${modifier}+Z`,
+    redo: `${modifier}+Shift+Z`,
+  }[shortcut];
+}
+
 export function editorShortcutFromKey(event: {
   key: string;
   ctrlKey: boolean;

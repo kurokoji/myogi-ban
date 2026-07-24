@@ -105,7 +105,7 @@ test("editor context menu shows shortcuts for assigned actions", () => {
     componentDocument.body.querySelectorAll(".editor-context-menu-shortcut"),
     (element) => element.textContent,
   );
-  assert.deepEqual(shortcuts, ["Ctrl/Cmd+D", "R", "Delete"]);
+  assert.deepEqual(shortcuts, ["Ctrl+D", "R", "Delete"]);
 });
 
 test("editor context menu actions do not bubble as preview clicks", () => {
@@ -265,6 +265,32 @@ test("duplicate layout names disable save-as before submitting", () => {
     true,
   );
   assert.equal(saveCalls, 0);
+});
+
+test("layout save action exposes its shortcut on hover", () => {
+  const view = renderComponent(
+    <LayoutSettingsPanel
+      layoutNames={[]}
+      selectedLayout="custom:user"
+      layoutName="custom"
+      currentBuiltin={false}
+      isDefaultLayout={false}
+      isDirty={true}
+      status={null}
+      openLayout={() => {}}
+      saveLayout={() => {}}
+      saveLayoutAs={async () => true}
+      deleteLayout={() => {}}
+      setDefaultLayout={() => {}}
+      exportLayout={() => {}}
+      importLayout={() => {}}
+    />,
+  );
+
+  assert.equal(
+    view.getByRole("button", { name: "overwriteSave" }).getAttribute("title"),
+    "overwriteSave (Ctrl+S)",
+  );
 });
 
 test("layout panel keeps secondary actions in a more menu", () => {

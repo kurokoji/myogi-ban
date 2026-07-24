@@ -9,6 +9,7 @@ import {
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
+import { editorShortcutHint } from "../../editor-keyboard";
 
 interface EditorContextMenuProps {
   x: number;
@@ -81,7 +82,9 @@ export function EditorContextMenu({
             <span className="editor-context-menu-label">
               {t("duplicateSelection")}
             </span>
-            <kbd className="editor-context-menu-shortcut">Ctrl/Cmd+D</kbd>
+            <kbd className="editor-context-menu-shortcut">
+              {editorShortcutHint("duplicate")}
+            </kbd>
           </button>
           <button
             type="button"

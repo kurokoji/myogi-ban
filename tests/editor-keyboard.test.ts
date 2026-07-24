@@ -4,9 +4,17 @@ import {
   deleteEditorSelection,
   editorNudgeHistoryMode,
   editorShortcutFromKey,
+  editorShortcutHint,
   isEditableKeyboardTarget,
   nudgeEditorSelection,
 } from "../src/editor-keyboard";
+
+test("editorShortcutHint formats shortcuts for hover descriptions", () => {
+  assert.equal(editorShortcutHint("save", "Win32"), "Ctrl+S");
+  assert.equal(editorShortcutHint("undo", "MacIntel"), "Cmd+Z");
+  assert.equal(editorShortcutHint("redo", "MacIntel"), "Cmd+Shift+Z");
+  assert.equal(editorShortcutHint("duplicate", "Linux x86_64"), "Ctrl+D");
+});
 
 test("editorShortcutFromKey maps editing shortcuts across control and command", () => {
   assert.equal(

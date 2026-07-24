@@ -1,6 +1,7 @@
 import { Button, Group, Stack, Text, TextInput } from "@mantine/core";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { editorShortcutHint } from "../../editor-keyboard";
 import { isLayoutNameTaken, normalizeLayoutName } from "../../layout-name";
 import type { LayoutEntry } from "../../types";
 
@@ -38,6 +39,7 @@ export function LayoutSaveControls(
       <Button
         size="xs"
         fullWidth
+        title={`${t("overwriteSave")} (${editorShortcutHint("save")})`}
         onClick={props.saveLayout}
         disabled={props.currentBuiltin}
       >
