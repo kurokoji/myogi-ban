@@ -7,3 +7,8 @@ std::wstring build_server_command_line(const std::wstring &executable, bool serv
 		command_line += L" --server-only";
 	return command_line;
 }
+
+unsigned long server_creation_flags()
+{
+	return 0;
+}

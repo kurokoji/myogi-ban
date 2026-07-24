@@ -7,6 +7,7 @@ import { LayoutRepository } from "./layout-repository";
 import { registerImageRoutes } from "./server-routes/image-routes";
 import { registerLayoutRoutes } from "./server-routes/layout-routes";
 import { registerStateRoutes } from "./server-routes/state-routes";
+import { registerWindowRoutes } from "./server-routes/window-routes";
 import type { GamepadState } from "./types";
 
 export interface LocalServerOptions {
@@ -17,6 +18,7 @@ export interface LocalServerOptions {
   defaultLayoutFile: string;
   pidFile?: string;
   onListening?: (server: http.Server) => void;
+  onShowWindow?: () => void;
 }
 
 function ensureDir(dir: string): void {
@@ -57,6 +59,7 @@ export function createLocalServer(options: LocalServerOptions): http.Server {
   registerStateRoutes(expressApp, stateStore, broadcastState);
   registerLayoutRoutes(expressApp, layouts);
   registerImageRoutes(expressApp, layouts);
+  registerWindowRoutes(expressApp, options.onShowWindow ?? (() => {}));
 
   wss.on("connection", (ws) => {
     if (stateStore.latest) {

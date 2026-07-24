@@ -5,6 +5,7 @@ import { resolveElectronDataDir } from "./data-paths";
 import { resolveElectronLaunchOptions } from "./electron-launch-options";
 import { resolveElectronRendererUrl } from "./electron-renderer";
 import { shouldOpenWindowForSecondInstance } from "./electron-single-instance";
+import { requestRunningWindow } from "./electron-window-request";
 import { createLocalServer } from "./local-server";
 import { cleanupLocalServer } from "./server-cleanup";
 import { PORT } from "./types";
@@ -66,10 +67,17 @@ function startServer(): void {
     onListening: () => {
       if (windowRequested) showMainWindow();
     },
+    onShowWindow: showMainWindow,
   });
 }
 
-if (!hasSingleInstanceLock) app.quit();
+if (!hasSingleInstanceLock) {
+  if (launchOptions.serverOnly) {
+    app.quit();
+  } else {
+    void requestRunningWindow(PORT).finally(() => app.quit());
+  }
+}
 
 if (hasSingleInstanceLock) {
   app.on("second-instance", (_event, commandLine) => {

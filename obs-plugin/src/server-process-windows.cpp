@@ -192,7 +192,7 @@ void ServerProcess::start(const std::string &executable_path, bool server_only)
 	startup.cb = sizeof(startup);
 	PROCESS_INFORMATION process{};
 	if (!CreateProcessW(executable.c_str(), mutable_command.data(), nullptr, nullptr, FALSE,
-				    CREATE_NO_WINDOW, nullptr, nullptr, &startup, &process)) {
+				    server_creation_flags(), nullptr, nullptr, &startup, &process)) {
 		blog(LOG_ERROR, "Could not start Myogi Ban (Windows error %lu)", GetLastError());
 		return;
 	}

@@ -5,6 +5,20 @@ import { createDefaultLayout } from "../src/layout";
 import { createLayoutPackage } from "../src/layout-package";
 import { startTestWebServer } from "./web-server-harness";
 
+test("web server forwards a window display request to Electron", async () => {
+  let requests = 0;
+  const app = await startTestWebServer({}, () => {
+    requests += 1;
+  });
+
+  try {
+    await app.postJson("/api/window/show", {});
+    assert.equal(requests, 1);
+  } finally {
+    await app.close();
+  }
+});
+
 test("web server reports the current default layout dimensions", async () => {
   const layout = createDefaultLayout();
   layout.background.w = "375";

@@ -22,6 +22,7 @@ export interface TestWebServer {
 
 export async function startTestWebServer(
   builtins: Record<string, Layout>,
+  onShowWindow?: () => void,
 ): Promise<TestWebServer> {
   const root = mkdtempSync(join(tmpdir(), "myogi-ban-web-e2e-"));
   const publicDir = join(root, "public");
@@ -47,6 +48,7 @@ export async function startTestWebServer(
         builtinLayoutDir,
         userLayoutDir,
         defaultLayoutFile: join(root, "default-layout.json"),
+        onShowWindow,
         onListening: () => resolve(instance),
       });
     },

@@ -8,8 +8,11 @@ test("Electron routes later launches to the existing process", async () => {
   assert.match(source, /app\.requestSingleInstanceLock\(\)/);
   assert.match(source, /app\.on\("second-instance"/);
   assert.match(source, /shouldOpenWindowForSecondInstance\(commandLine\)/);
+  assert.match(source, /requestRunningWindow\(PORT\)/);
+  assert.match(source, /onShowWindow: showMainWindow/);
   assert.match(source, /mainWindow\.isMinimized\(\)/);
   assert.match(source, /mainWindow\.restore\(\)/);
   assert.match(source, /mainWindow\.focus\(\)/);
-  assert.match(source, /if \(!hasSingleInstanceLock\) app\.quit\(\)/);
+  assert.match(source, /if \(!hasSingleInstanceLock\) \{/);
+  assert.match(source, /requestRunningWindow\(PORT\)\.finally/);
 });

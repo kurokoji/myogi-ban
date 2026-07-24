@@ -23,6 +23,8 @@ int main()
 	expect(build_server_command_line(L"C:\\Myogi Ban\\Myogi Ban.exe", false) ==
 		       L"\"C:\\Myogi Ban\\Myogi Ban.exe\"",
 	       "can launch Myogi Ban with its regular window");
+	expect(server_creation_flags() == 0,
+	       "does not permanently suppress windows for a server-only Electron process");
 
 	SourceState state;
 	expect(state.width == 500 && state.height == 250, "uses the default source dimensions");
