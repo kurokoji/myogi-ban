@@ -73,6 +73,7 @@ const char *source_name(void *)
 	return obs_module_text("MyogiBanSource");
 }
 
+#if LIBOBS_API_VER >= MAKE_SEMANTIC_VERSION(32, 2, 0)
 const char *source_dark_icon(void *)
 {
 	return obs_module_file("icons/myogi-ban-dark.svg");
@@ -82,6 +83,7 @@ const char *source_light_icon(void *)
 {
 	return obs_module_file("icons/myogi-ban-light.svg");
 }
+#endif
 
 void source_defaults(obs_data_t *settings)
 {
@@ -219,7 +221,9 @@ obs_source_info myogi_ban_source_info = {
 	.video_render = source_render,
 	.enum_active_sources = enumerate_active,
 	.audio_render = source_audio_render,
+#if LIBOBS_API_VER >= MAKE_SEMANTIC_VERSION(32, 2, 0)
 	.icon_type = OBS_ICON_TYPE_CUSTOM,
 	.get_dark_icon = source_dark_icon,
 	.get_light_icon = source_light_icon,
+#endif
 };

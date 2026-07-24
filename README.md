@@ -86,10 +86,12 @@ npm stop
 `http://127.0.0.1:33770/view` を表示します。
 ソースの幅と高さは、サーバーAPIから現在のデフォルトレイアウトに合わせて自動設定されます。
 
-OBS SDKの場所を指定してビルドします。
+stable版OBS 32.1.2向けのSDKを公式配布物から用意し、ビルドします。
+stable版OBS本体をインストールする必要はありません。初回のみVisual Studio C++ Build Toolsが必要です。
 
 ```powershell
-$env:OBS_SDK_DIR = "C:\path\to\obs-sdk"
+pwsh -File scripts/setup-obs-sdk.ps1
+$env:OBS_SDK_DIR = "$PWD\.obs-sdk"
 npm run build:obs-plugin
 ```
 
@@ -102,7 +104,7 @@ Windowsの推奨プラグインフォルダ `C:\ProgramData\obs-studio\plugins` 
 セットアップEXEは、次のコマンドで生成できます。インストール時には管理者権限が必要です。
 
 ```powershell
-$env:OBS_SDK_DIR = "C:\path\to\obs-sdk"
+$env:OBS_SDK_DIR = "$PWD\.obs-sdk"
 npm run build:obs-plugin-installer
 ```
 

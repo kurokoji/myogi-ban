@@ -42,6 +42,10 @@ test("OBS source provides theme-aware custom icons", async () => {
   assert.match(source, /\.icon_type = OBS_ICON_TYPE_CUSTOM/);
   assert.match(source, /\.get_dark_icon = source_dark_icon/);
   assert.match(source, /\.get_light_icon = source_light_icon/);
+  assert.match(
+    source,
+    /#if LIBOBS_API_VER >= MAKE_SEMANTIC_VERSION\(32, 2, 0\)/,
+  );
   assert.match(darkIcon, /viewBox="0 0 1024 1024"/);
   assert.match(darkIcon, /fill="#ffffff"/);
   assert.match(lightIcon, /fill="#000000"/);
