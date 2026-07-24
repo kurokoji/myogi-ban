@@ -41,6 +41,7 @@ import {
   isEditableKeyboardTarget,
   nudgeEditorSelection,
 } from "./editor-keyboard";
+import { applyEditorResize, type EditorResizeChange } from "./editor-resize";
 import {
   createButtonSelection,
   EMPTY_EDITOR_SELECTION,
@@ -83,6 +84,8 @@ function EditorApp(): React.ReactElement {
   const [language, setLanguage] = useState(i18n.language);
   const [copiedObsUrl, setCopiedObsUrl] = useState(false);
   const [snappingEnabled, setSnappingEnabled] = useState(true);
+  const [buttonAspectRatioLinked, setButtonAspectRatioLinked] = useState(true);
+  const [stickAspectRatioLinked, setStickAspectRatioLinked] = useState(true);
   const layoutRef = useRef(layout);
   const previewScrollRef = useRef<HTMLDivElement | null>(null);
   const {
@@ -304,6 +307,14 @@ function EditorApp(): React.ReactElement {
     [],
   );
 
+  const handleSizeChange = useCallback((change: EditorResizeChange) => {
+    setLayout((current) => {
+      const next = applyEditorResize(current, change);
+      layoutRef.current = next;
+      return next;
+    });
+  }, []);
+
   const updateSelection = useCallback(
     (nextSelection: { buttonIndexes: number[]; stick: boolean }) => {
       setSelection({
@@ -507,6 +518,8 @@ function EditorApp(): React.ReactElement {
                   <StickSettingsPanel
                     layout={layout}
                     updateLayout={updateLayout}
+                    aspectRatioLinked={stickAspectRatioLinked}
+                    onAspectRatioLinkedChange={setStickAspectRatioLinked}
                   />
                 ) : (
                   <ButtonSettingsPanel
@@ -522,6 +535,8 @@ function EditorApp(): React.ReactElement {
                     onSelectedButtonChange={selectButtonForSettings}
                     openImagePicker={openImagePicker}
                     cancelAssignment={cancelAssignment}
+                    aspectRatioLinked={buttonAspectRatioLinked}
+                    onAspectRatioLinkedChange={setButtonAspectRatioLinked}
                   />
                 ),
             })),
@@ -674,6 +689,11 @@ function EditorApp(): React.ReactElement {
                 selectedButtonIndexes={selectedButtonIndexes}
                 selectedStick={selectedStick}
                 snappingEnabled={snappingEnabled}
+                aspectRatioLocked={
+                  selectedStick
+                    ? stickAspectRatioLinked
+                    : buttonAspectRatioLinked
+                }
                 selectionSurfaceRef={previewScrollRef}
                 onBackgroundSizeChange={updateBackgroundSize}
                 onButtonClick={selectButtonAndStartAssignment}
@@ -682,6 +702,7 @@ function EditorApp(): React.ReactElement {
                 onLayoutDragStart={beginLayoutDrag}
                 onLayoutDragEnd={endLayoutDrag}
                 onPositionsChange={handlePositionsChange}
+                onSizeChange={handleSizeChange}
               />
             </div>
           </div>

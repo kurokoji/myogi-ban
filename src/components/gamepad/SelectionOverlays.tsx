@@ -1,5 +1,5 @@
 import type React from "react";
-import type { Rect } from "../../geometry";
+import type { Rect, RectCorner } from "../../geometry";
 
 interface SelectionOverlaysProps {
   selectionRect: Rect | null;
@@ -7,8 +7,13 @@ interface SelectionOverlaysProps {
   snapGuides?: { x?: number; y?: number } | null;
   snapTargets?: Rect[];
   boundsPadding: number;
+  resizable?: boolean;
   onBoundsMouseDown: (event: React.MouseEvent<HTMLDivElement>) => void;
   onBoundsClick: (event: React.MouseEvent<HTMLDivElement>) => void;
+  onResizeMouseDown?: (
+    event: React.MouseEvent<HTMLDivElement>,
+    corner: RectCorner,
+  ) => void;
 }
 
 export function SelectionOverlays({
@@ -17,8 +22,10 @@ export function SelectionOverlays({
   snapGuides,
   snapTargets = [],
   boundsPadding,
+  resizable = false,
   onBoundsMouseDown,
   onBoundsClick,
+  onResizeMouseDown,
 }: SelectionOverlaysProps): React.ReactElement {
   return (
     <>
@@ -74,7 +81,16 @@ export function SelectionOverlays({
               selectedGroupRect.top +
               boundsPadding * 2,
           }}
-        />
+        >
+          {resizable &&
+            (["nw", "ne", "sw", "se"] as const).map((corner) => (
+              <div
+                className={`resize-handle resize-handle-${corner}`}
+                key={corner}
+                onMouseDown={(event) => onResizeMouseDown?.(event, corner)}
+              />
+            ))}
+        </div>
       )}
     </>
   );

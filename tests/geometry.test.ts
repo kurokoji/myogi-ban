@@ -5,11 +5,49 @@ import {
   dragPosition,
   rectsIntersect,
   rectsOnSnapGuides,
+  resizeRectFromCorner,
   resolveRectSnap,
   snapRect,
   snapRectDelta,
   unionRectsAtIndexes,
 } from "../src/geometry";
+
+test("resizeRectFromCorner grows a rectangle from its bottom-right corner", () => {
+  assert.deepEqual(
+    resizeRectFromCorner(
+      { left: 10, top: 20, right: 70, bottom: 60 },
+      "se",
+      { x: 15, y: 10 },
+      12,
+    ),
+    { left: 10, top: 20, right: 85, bottom: 70 },
+  );
+});
+
+test("resizeRectFromCorner moves the selected corner and enforces a minimum size", () => {
+  assert.deepEqual(
+    resizeRectFromCorner(
+      { left: 10, top: 20, right: 70, bottom: 60 },
+      "nw",
+      { x: 100, y: 100 },
+      12,
+    ),
+    { left: 58, top: 48, right: 70, bottom: 60 },
+  );
+});
+
+test("resizeRectFromCorner preserves the initial aspect ratio when locked", () => {
+  assert.deepEqual(
+    resizeRectFromCorner(
+      { left: 10, top: 20, right: 70, bottom: 60 },
+      "se",
+      { x: 30, y: 5 },
+      12,
+      true,
+    ),
+    { left: 10, top: 20, right: 100, bottom: 80 },
+  );
+});
 
 test("rectsIntersect detects overlap and touching edges", () => {
   const rect = { left: 0, top: 0, right: 10, bottom: 10 };

@@ -15,6 +15,8 @@ interface LinkedSizeInputsProps {
   fallbackWidth?: string;
   fallbackHeight?: string;
   min?: number;
+  linked?: boolean;
+  onLinkedChange?: (linked: boolean) => void;
   onChange: (width: string, height: string) => void;
 }
 
@@ -28,10 +30,19 @@ export function LinkedSizeInputs({
   fallbackWidth,
   fallbackHeight,
   min,
+  linked: controlledLinked,
+  onLinkedChange,
   onChange,
 }: LinkedSizeInputsProps): React.ReactElement {
   const { t } = useTranslation();
-  const [linked, setLinked] = useState(true);
+  const [internalLinked, setInternalLinked] = useState(true);
+  const linked = controlledLinked ?? internalLinked;
+
+  const toggleLinked = () => {
+    const next = !linked;
+    if (controlledLinked === undefined) setInternalLinked(next);
+    onLinkedChange?.(next);
+  };
 
   const changeWidth = (value: string | number) => {
     const next = resizeWithAspectRatio({
@@ -76,7 +87,7 @@ export function LinkedSizeInputs({
         aria-label={linked ? t("unlinkAspectRatio") : t("linkAspectRatio")}
         title={linked ? t("unlinkAspectRatio") : t("linkAspectRatio")}
         aria-pressed={linked}
-        onClick={() => setLinked((current) => !current)}
+        onClick={toggleLinked}
       >
         {linked ? <IconLink size={16} /> : <IconUnlink size={16} />}
       </ActionIcon>

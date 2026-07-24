@@ -42,6 +42,8 @@ interface ButtonSettingsPanelProps {
   onDeleteSelectedButtons: () => void;
   openImagePicker: (target: ImageUploadTarget) => void;
   cancelAssignment: () => void;
+  aspectRatioLinked?: boolean;
+  onAspectRatioLinkedChange?: (linked: boolean) => void;
 }
 
 export function ButtonSettingsPanel(
@@ -633,6 +635,8 @@ export function ButtonSettingsPanel(
                   heightPlaceholder={layout.defaultbuttons.h || "60"}
                   fallbackWidth={layout.defaultbuttons.w || "60"}
                   fallbackHeight={layout.defaultbuttons.h || "60"}
+                  linked={props.aspectRatioLinked}
+                  onLinkedChange={props.onAspectRatioLinkedChange}
                   onChange={(width, height) =>
                     props.updateSelectedButtons((next) => {
                       next.buttons[selectedButtonIndex].w = width;

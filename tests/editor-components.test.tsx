@@ -400,6 +400,107 @@ test("selection overlays show active snap alignment guides", () => {
   assert.equal(target?.style.height, "40px");
 });
 
+test("selection overlays show four resize handles only for a resizable selection", () => {
+  const view = renderComponent(
+    <SelectionOverlays
+      selectionRect={null}
+      selectedGroupRect={{ left: 10, top: 20, right: 70, bottom: 60 }}
+      resizable={true}
+      boundsPadding={0}
+      onBoundsMouseDown={() => {}}
+      onBoundsClick={() => {}}
+      onResizeMouseDown={() => {}}
+    />,
+  );
+
+  assert.equal(view.container.querySelectorAll(".resize-handle").length, 4);
+  view.rerender(
+    <SelectionOverlays
+      selectionRect={null}
+      selectedGroupRect={{ left: 10, top: 20, right: 70, bottom: 60 }}
+      resizable={false}
+      boundsPadding={0}
+      onBoundsMouseDown={() => {}}
+      onBoundsClick={() => {}}
+      onResizeMouseDown={() => {}}
+    />,
+  );
+  assert.equal(view.container.querySelectorAll(".resize-handle").length, 0);
+});
+
+test("dragging a selected button corner reports its resized bounds", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 1;
+  layout.buttons[0] = {
+    ...layout.buttons[0],
+    x: "100",
+    y: "80",
+    w: "60",
+    h: "40",
+  };
+  const changes: unknown[] = [];
+  const view = renderComponent(
+    <GamepadView
+      layout={layout}
+      stickClass="stick"
+      pressedButtons={[]}
+      editorMode={true}
+      selectedButtonIndex={0}
+      selectedButtonIndexes={[0]}
+      aspectRatioLocked={false}
+      onSizeChange={(change) => changes.push(change)}
+    />,
+  );
+
+  const handle = view.container.querySelector(".resize-handle-se");
+  assert.ok(handle);
+  fireEvent.mouseDown(handle, { button: 0, clientX: 130, clientY: 100 });
+  fireEvent.mouseMove(document, { clientX: 150, clientY: 110 });
+  fireEvent.mouseUp(document);
+
+  assert.deepEqual(changes.at(-1), {
+    type: "button",
+    index: 0,
+    x: 110,
+    y: 85,
+    width: 80,
+    height: 50,
+  });
+});
+
+test("dragging a selected button corner follows the linked aspect ratio", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 1;
+  layout.buttons[0] = {
+    ...layout.buttons[0],
+    x: "100",
+    y: "80",
+    w: "60",
+    h: "40",
+  };
+  const changes: Array<{ width: number; height: number }> = [];
+  const view = renderComponent(
+    <GamepadView
+      layout={layout}
+      stickClass="stick"
+      pressedButtons={[]}
+      editorMode={true}
+      selectedButtonIndex={0}
+      selectedButtonIndexes={[0]}
+      aspectRatioLocked={true}
+      onSizeChange={({ width, height }) => changes.push({ width, height })}
+    />,
+  );
+
+  const handle = view.container.querySelector(".resize-handle-se");
+  assert.ok(handle);
+  fireEvent.mouseDown(handle, { button: 0, clientX: 130, clientY: 100 });
+  fireEvent.mouseMove(document, { clientX: 160, clientY: 105 });
+  fireEvent.mouseUp(document);
+
+  assert.deepEqual(changes.at(-1), { width: 90, height: 60 });
+});
+
 test("zoom percentage resets zoom without a separate reset button", () => {
   const changes: number[] = [];
   const snappingChanges: boolean[] = [];

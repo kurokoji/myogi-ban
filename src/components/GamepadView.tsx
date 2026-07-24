@@ -5,8 +5,10 @@ import {
   dragGroupPositions,
   dragPosition,
   type Rect,
+  type RectCorner,
   rectsIntersect,
   rectsOnSnapGuides,
+  resizeRectFromCorner,
   resolveRectSnap,
   unionRectsAtIndexes,
 } from "../geometry";
@@ -30,6 +32,7 @@ export interface GamepadViewProps {
   selectedButtonIndexes?: number[];
   selectedStick?: boolean;
   snappingEnabled?: boolean;
+  aspectRatioLocked?: boolean;
   selectionSurfaceRef?: React.RefObject<HTMLElement | null>;
   onBackgroundSizeChange?: (width: number, height: number) => void;
   onButtonClick?: (index: number, toggleSelection: boolean) => void;
@@ -44,9 +47,26 @@ export interface GamepadViewProps {
     buttons: ButtonPositionUpdate[];
     stick?: { x: number; y: number };
   }) => void;
+  onSizeChange?: (change: {
+    type: "button" | "stick";
+    index: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }) => void;
 }
 
 type DragState =
+  | {
+      type: "resize";
+      target: "button" | "stick";
+      index: number;
+      corner: RectCorner;
+      startX: number;
+      startY: number;
+      initialRect: Rect;
+    }
   | {
       type: "button" | "stick";
       index: number;
@@ -214,6 +234,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     selectedButtonIndexes = [],
     selectedStick = false,
     snappingEnabled = true,
+    aspectRatioLocked = true,
     selectionSurfaceRef,
     onBackgroundSizeChange,
     onButtonClick,
@@ -222,6 +243,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     onLayoutDragStart,
     onLayoutDragEnd,
     onPositionsChange,
+    onSizeChange,
   } = props;
   const backgroundSize = useBackgroundSize(layout, onBackgroundSizeChange);
   const defaultButton = layout.defaultbuttons;
@@ -295,6 +317,8 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
           ...(selectedStick && layout.showstick ? [stickRect] : []),
         ])
       : null;
+  const resizableSelection =
+    selectedButtonIndexes.length + (selectedStick ? 1 : 0) === 1;
 
   const createGroupDragState = useCallback(
     (local: { x: number; y: number }): DragState => {
@@ -434,6 +458,39 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     ],
   );
 
+  const handleResizeMouseDown = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>, corner: RectCorner) => {
+      if (!editorMode || event.button !== 0 || !resizableSelection) return;
+      event.stopPropagation();
+      const area = areaRef.current;
+      if (!area) return;
+      const local = pointerToLocal(event, area, backgroundSize);
+      const buttonIndex = selectedButtonIndexes[0];
+      dragMovedRef.current = false;
+      setSnapGuides(null);
+      onLayoutDragStart?.();
+      setDragState({
+        type: "resize",
+        target: buttonIndex === undefined ? "stick" : "button",
+        index: buttonIndex ?? 0,
+        corner,
+        startX: local.x,
+        startY: local.y,
+        initialRect:
+          buttonIndex === undefined ? stickRect : buttonRects[buttonIndex],
+      });
+    },
+    [
+      backgroundSize,
+      buttonRects,
+      editorMode,
+      onLayoutDragStart,
+      resizableSelection,
+      selectedButtonIndexes,
+      stickRect,
+    ],
+  );
+
   const handleSelectionMouseDown = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       if (!editorMode || event.button !== 0) return;
@@ -531,6 +588,32 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
             ? { ...current, currentX: local.x, currentY: local.y }
             : current,
         );
+        return;
+      }
+
+      if (dragState.type === "resize") {
+        const area = areaRef.current;
+        if (!area) return;
+        const local = pointerToLocal(e, area, backgroundSize);
+        const resized = resizeRectFromCorner(
+          dragState.initialRect,
+          dragState.corner,
+          {
+            x: local.x - dragState.startX,
+            y: local.y - dragState.startY,
+          },
+          12,
+          aspectRatioLocked,
+        );
+        dragMovedRef.current = true;
+        onSizeChange?.({
+          type: dragState.target,
+          index: dragState.index,
+          x: Math.round((resized.left + resized.right) / 2),
+          y: Math.round((resized.top + resized.bottom) / 2),
+          width: Math.round(resized.right - resized.left),
+          height: Math.round(resized.bottom - resized.top),
+        });
         return;
       }
 
@@ -639,10 +722,12 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     };
   }, [
     dragState,
+    aspectRatioLocked,
     backgroundSize,
     buttonRects,
     layout.showstick,
     onPositionsChange,
+    onSizeChange,
     onLayoutDragEnd,
     onSelectionChange,
     snappingEnabled,
@@ -718,8 +803,10 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
           snapGuides={snapGuides}
           snapTargets={snapGuides?.targets}
           boundsPadding={SELECTION_BOUNDS_PADDING}
+          resizable={resizableSelection}
           onBoundsMouseDown={handleGroupBoundsMouseDown}
           onBoundsClick={handleGroupBoundsClick}
+          onResizeMouseDown={handleResizeMouseDown}
         />
       </div>
     </div>

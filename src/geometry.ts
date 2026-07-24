@@ -10,6 +10,53 @@ export interface Point {
   y: number;
 }
 
+export type RectCorner = "nw" | "ne" | "sw" | "se";
+
+export function resizeRectFromCorner(
+  initial: Rect,
+  corner: RectCorner,
+  delta: Point,
+  minimumSize: number,
+  aspectRatioLocked = false,
+): Rect {
+  const movesLeft = corner.endsWith("w");
+  const movesTop = corner.startsWith("n");
+  const resized = {
+    left: movesLeft
+      ? Math.min(initial.left + delta.x, initial.right - minimumSize)
+      : initial.left,
+    top: movesTop
+      ? Math.min(initial.top + delta.y, initial.bottom - minimumSize)
+      : initial.top,
+    right: movesLeft
+      ? initial.right
+      : Math.max(initial.right + delta.x, initial.left + minimumSize),
+    bottom: movesTop
+      ? initial.bottom
+      : Math.max(initial.bottom + delta.y, initial.top + minimumSize),
+  };
+  if (!aspectRatioLocked) return resized;
+
+  const initialWidth = initial.right - initial.left;
+  const initialHeight = initial.bottom - initial.top;
+  const ratio = initialWidth / initialHeight;
+  const resizedWidth = resized.right - resized.left;
+  const resizedHeight = resized.bottom - resized.top;
+  const widthChangedMore =
+    Math.abs(resizedWidth / initialWidth - 1) >=
+    Math.abs(resizedHeight / initialHeight - 1);
+  const width = widthChangedMore
+    ? Math.max(resizedWidth, minimumSize, minimumSize * ratio)
+    : Math.max(resizedHeight * ratio, minimumSize, minimumSize * ratio);
+  const height = width / ratio;
+  return {
+    left: movesLeft ? initial.right - width : initial.left,
+    top: movesTop ? initial.bottom - height : initial.top,
+    right: movesLeft ? initial.right : initial.left + width,
+    bottom: movesTop ? initial.bottom : initial.top + height,
+  };
+}
+
 export function dragPosition(
   initial: Point,
   start: Point,

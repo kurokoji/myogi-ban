@@ -26,11 +26,15 @@ export { LayoutSettingsPanel } from "./LayoutSettingsPanel";
 interface StickSettingsPanelProps {
   layout: Layout;
   updateLayout: EditorLayoutUpdater;
+  aspectRatioLinked?: boolean;
+  onAspectRatioLinkedChange?: (linked: boolean) => void;
 }
 
 export function StickSettingsPanel({
   layout,
   updateLayout,
+  aspectRatioLinked,
+  onAspectRatioLinkedChange,
 }: StickSettingsPanelProps): React.ReactElement {
   const { t } = useTranslation();
 
@@ -77,6 +81,8 @@ export function StickSettingsPanel({
           heightLabel="H (%)"
           fallbackWidth="100"
           fallbackHeight="100"
+          linked={aspectRatioLinked}
+          onLinkedChange={onAspectRatioLinkedChange}
           onChange={(width, height) =>
             updateLayout((next) => {
               next.stick.w = width;
