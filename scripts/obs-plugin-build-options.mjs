@@ -11,6 +11,16 @@ export function createObsPluginConfigureArgs(options) {
   ];
 }
 
+export function createObsPluginTestArgs(buildDir) {
+  return [
+    "--test-dir",
+    buildDir,
+    "-C",
+    "RelWithDebInfo",
+    "--output-on-failure",
+  ];
+}
+
 export function resolveCmakeCommand(options) {
   const command =
     options.configuredCommand ??

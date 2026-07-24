@@ -1,4 +1,5 @@
 #include "server-process-windows.hpp"
+#include "source-state.hpp"
 
 #include <obs-module.h>
 
@@ -9,37 +10,35 @@ constexpr const char *kExecutablePath = "executable_path";
 constexpr const char *kWidth = "width";
 constexpr const char *kHeight = "height";
 constexpr const char *kShowDefaultLayout = "show_default_layout";
-constexpr const char *kViewerUrl = "http://127.0.0.1:33770/view";
-
 struct MyogiBanSource {
 	obs_source_t *source = nullptr;
 	obs_source_t *browser = nullptr;
 	std::string executable_path;
-	uint32_t width = 500;
-	uint32_t height = 250;
-	float readiness_check_elapsed = 0.0f;
+	SourceState state;
 };
 
 void update_browser(MyogiBanSource *context)
 {
 	if (!context->browser)
 		return;
+	const BrowserSettings browser = context->state.browser_settings();
 	obs_data_t *settings = obs_source_get_settings(context->browser);
-	obs_data_set_string(settings, "url", kViewerUrl);
-	obs_data_set_int(settings, "width", context->width);
-	obs_data_set_int(settings, "height", context->height);
-	obs_data_set_bool(settings, "shutdown", false);
+	obs_data_set_string(settings, "url", browser.url.data());
+	obs_data_set_int(settings, "width", browser.width);
+	obs_data_set_int(settings, "height", browser.height);
+	obs_data_set_bool(settings, "shutdown", browser.shutdown);
 	obs_source_update(context->browser, settings);
 	obs_data_release(settings);
 }
 
 void create_browser(MyogiBanSource *context)
 {
+	const BrowserSettings browser = context->state.browser_settings();
 	obs_data_t *settings = obs_data_create();
-	obs_data_set_string(settings, "url", kViewerUrl);
-	obs_data_set_int(settings, "width", context->width);
-	obs_data_set_int(settings, "height", context->height);
-	obs_data_set_bool(settings, "shutdown", false);
+	obs_data_set_string(settings, "url", browser.url.data());
+	obs_data_set_int(settings, "width", browser.width);
+	obs_data_set_int(settings, "height", browser.height);
+	obs_data_set_bool(settings, "shutdown", browser.shutdown);
 	context->browser = obs_source_create_private("browser_source", "Myogi Ban Viewer", settings);
 	obs_data_release(settings);
 	if (!context->browser) {
@@ -97,14 +96,15 @@ void source_update(void *data, obs_data_t *settings)
 {
 	auto *context = static_cast<MyogiBanSource *>(data);
 	context->executable_path = obs_data_get_string(settings, kExecutablePath);
-	context->width = static_cast<uint32_t>(obs_data_get_int(settings, kWidth));
-	context->height = static_cast<uint32_t>(obs_data_get_int(settings, kHeight));
+	context->state.apply_dimensions({static_cast<uint32_t>(obs_data_get_int(settings, kWidth)),
+					 static_cast<uint32_t>(obs_data_get_int(settings, kHeight))});
 	update_browser(context);
 	ServerProcess::instance().ensure_started(context->executable_path);
 }
 
 void apply_dimensions(MyogiBanSource *context, const ServerProcess::Dimensions &dimensions)
 {
+	context->state.apply_dimensions({dimensions.width, dimensions.height});
 	obs_data_t *settings = obs_source_get_settings(context->source);
 	obs_data_set_int(settings, kWidth, dimensions.width);
 	obs_data_set_int(settings, kHeight, dimensions.height);
@@ -134,16 +134,14 @@ void source_tick(void *data, float seconds)
 	auto *context = static_cast<MyogiBanSource *>(data);
 	if (context->browser)
 		return;
-	context->readiness_check_elapsed += seconds;
-	if (context->readiness_check_elapsed < 0.25f)
+	if (!context->state.advance_readiness_check(seconds))
 		return;
-	context->readiness_check_elapsed = 0.0f;
 	ServerProcess::instance().ensure_started(context->executable_path);
 	if (ServerProcess::instance().port_ready()) {
 		ServerProcess::Dimensions dimensions{};
 		if (ServerProcess::instance().read_dimensions(dimensions)) {
 			apply_dimensions(context, dimensions);
-			blog(LOG_INFO, "Myogi Ban source dimensions: %ux%u", context->width, context->height);
+			blog(LOG_INFO, "Myogi Ban source dimensions: %ux%u", context->state.width, context->state.height);
 		}
 		create_browser(context);
 	}
@@ -158,12 +156,12 @@ void source_render(void *data, gs_effect_t *)
 
 uint32_t source_width(void *data)
 {
-	return static_cast<MyogiBanSource *>(data)->width;
+	return static_cast<MyogiBanSource *>(data)->state.width;
 }
 
 uint32_t source_height(void *data)
 {
-	return static_cast<MyogiBanSource *>(data)->height;
+	return static_cast<MyogiBanSource *>(data)->state.height;
 }
 
 void enumerate_active(void *data, obs_source_enum_proc_t callback, void *parameter)

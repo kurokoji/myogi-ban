@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import {
   createObsPluginConfigureArgs,
+  createObsPluginTestArgs,
   resolveCmakeCommand,
 } from "../scripts/obs-plugin-build-options.mjs";
 
@@ -25,6 +26,16 @@ test("OBS plugin configure points CMake at the plugin and OBS SDK", () => {
       "x64",
     ],
   );
+});
+
+test("OBS plugin build runs native tests from the configured build", () => {
+  assert.deepEqual(createObsPluginTestArgs("build/obs-plugin"), [
+    "--test-dir",
+    "build/obs-plugin",
+    "-C",
+    "RelWithDebInfo",
+    "--output-on-failure",
+  ]);
 });
 
 test("OBS plugin build uses Visual Studio CMake when it is not on PATH", () => {

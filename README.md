@@ -95,6 +95,8 @@ $env:OBS_SDK_DIR = "$PWD\.obs-sdk"
 npm run build:obs-plugin
 ```
 
+ビルド時にはOBS非依存のC++単体テストがCTestで自動実行されます。
+
 生成した `myogi-ban-obs.dll` と `obs-plugin/data` を、OBSのプラグイン規約に従って
 `myogi-ban-obs/bin/64bit` と `myogi-ban-obs/data` へ配置してください。
 Windowsの全ユーザー向け配置先は通常 `C:\ProgramData\obs-studio\plugins` です。

@@ -9,12 +9,24 @@ project(myogi-ban-obs VERSION ${MYOGI_BAN_VERSION} LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+include(CTest)
+
+if(BUILD_TESTING)
+  add_executable(myogi-ban-obs-tests
+    tests/source-state-test.cpp
+    src/source-state.cpp
+  )
+  target_include_directories(myogi-ban-obs-tests PRIVATE src)
+  add_test(NAME myogi-ban-obs-tests COMMAND myogi-ban-obs-tests)
+endif()
+
 find_package(libobs REQUIRED PATHS "${OBS_SDK_DIR}/cmake" NO_DEFAULT_PATH)
 
 add_library(myogi-ban-obs MODULE
   src/plugin-main.cpp
   src/myogi-ban-source.cpp
   src/server-process-windows.cpp
+  src/source-state.cpp
 )
 
 target_include_directories(myogi-ban-obs PRIVATE src)
