@@ -127,6 +127,16 @@ npm run build:obs-plugin-installer
 3. 編集画面の「背景」セクションに表示される幅/高さをOBS側にも設定
 4. 必要に応じてカスタムCSSや透過設定を調整
 
+特定のレイアウトを固定して表示する場合は、URLへレイアウト名を指定します。
+
+```text
+http://localhost:33770/view?layout=レイアウト名
+http://localhost:33770/view?layout=レイアウト名&builtin=true
+```
+
+指定したレイアウトが存在しない場合は、デフォルトのレイアウトを表示します。
+OBS連携から選択肢を作る場合は `GET http://localhost:33770/api/layouts` でレイアウト一覧と `builtin` 区分を取得できます。
+
 ## 使い方
 
 1. ゲームパッドを接続し、任意のボタンを押してブラウザに認識させる

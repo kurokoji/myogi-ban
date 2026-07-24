@@ -17,12 +17,18 @@ import { createDefaultLayout, ensureLayoutDefaults } from "./layout";
 import type { GamepadState, Layout } from "./types";
 import {
   createViewerWebSocketUrl,
+  layoutForViewerState,
   nextViewerConnectionStatus,
   type ViewerConnectionStatus,
+  viewerLayoutRequestFromSearch,
 } from "./viewer-connection";
 
 function ViewerApp(): React.ReactElement {
   const apiRef = useRef(new ApiClient());
+  const layoutRequestRef = useRef(
+    viewerLayoutRequestFromSearch(location.search),
+  );
+  const fixedLayoutRef = useRef(layoutRequestRef.current !== null);
   const [layout, setLayout] = useState<Layout>(() => createDefaultLayout());
   const [buttonMappings, setButtonMappings] = useState<ButtonMapping[]>(() =>
     GamepadManager.createDefaultButtonMappings(),
@@ -45,12 +51,23 @@ function ViewerApp(): React.ReactElement {
       apiRef.current.getLayouts(),
     ])
       .then(([defaultLayout, entries]) => {
-        const entry = selectDefaultLayoutEntry(
-          entries,
-          defaultLayout.name || "default",
-        );
+        const request = layoutRequestRef.current;
+        const requestedEntry = request
+          ? entries.find(
+              (entry) =>
+                entry.name === request.name &&
+                (!request.builtin || entry.builtin),
+            )
+          : undefined;
+        fixedLayoutRef.current = Boolean(requestedEntry);
+        const entry =
+          requestedEntry ??
+          selectDefaultLayoutEntry(entries, defaultLayout.name || "default");
         return entry
-          ? apiRef.current.getLayout(entry.name, entry.builtin)
+          ? apiRef.current.getLayout(
+              entry.name,
+              requestedEntry ? (request?.builtin ?? false) : entry.builtin,
+            )
           : null;
       })
       .then((data) => {
@@ -90,7 +107,13 @@ function ViewerApp(): React.ReactElement {
         };
         if (message.type !== "state" || !message.data) return;
         const state = message.data;
-        const nextLayout = ensureLayoutDefaults(state.layout);
+        const nextLayout = ensureLayoutDefaults(
+          layoutForViewerState(
+            layoutRef.current,
+            state.layout,
+            fixedLayoutRef.current,
+          ),
+        );
         setLayout(nextLayout);
         setSnapshot({
           ...createEmptySnapshot(nextLayout),
@@ -112,7 +135,7 @@ function ViewerApp(): React.ReactElement {
       window.clearTimeout(retryTimer);
       socket?.close();
     };
-  }, []);
+  }, [layoutRef]);
 
   useEffect(() => {
     const manager = new GamepadManager();

@@ -1,9 +1,30 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { createDefaultLayout } from "../src/layout";
 import {
   createViewerWebSocketUrl,
+  layoutForViewerState,
   nextViewerConnectionStatus,
+  viewerLayoutRequestFromSearch,
 } from "../src/viewer-connection";
+
+test("viewer layout request parses an optional layout and built-in flag", () => {
+  assert.deepEqual(
+    viewerLayoutRequestFromSearch("?layout=arcade%20stick&builtin=true"),
+    { name: "arcade stick", builtin: true },
+  );
+  assert.equal(viewerLayoutRequestFromSearch(""), null);
+});
+
+test("fixed viewer layouts ignore layouts delivered with input state", () => {
+  const current = createDefaultLayout();
+  current.name = "requested";
+  const incoming = createDefaultLayout();
+  incoming.name = "default";
+
+  assert.equal(layoutForViewerState(current, incoming, true), current);
+  assert.equal(layoutForViewerState(current, incoming, false), incoming);
+});
 
 test("viewer websocket uses the dedicated application path", () => {
   assert.equal(
