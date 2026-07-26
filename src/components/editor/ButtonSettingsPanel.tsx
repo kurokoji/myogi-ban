@@ -167,6 +167,7 @@ export function ButtonSettingsPanel(
                   }
                   data={[
                     { value: "circle", label: t("shapeCircle") },
+                    { value: "pill", label: t("shapePill") },
                     { value: "rounded", label: t("shapeRounded") },
                     { value: "square", label: t("shapeSquare") },
                   ]}
@@ -496,6 +497,7 @@ export function ButtonSettingsPanel(
                     data={[
                       { value: "", label: t("inheritDefault") },
                       { value: "circle", label: t("shapeCircle") },
+                      { value: "pill", label: t("shapePill") },
                       { value: "rounded", label: t("shapeRounded") },
                       { value: "square", label: t("shapeSquare") },
                     ]}

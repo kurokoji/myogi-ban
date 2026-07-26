@@ -637,6 +637,26 @@ test("button layer renders every member of a multiple selection", () => {
   assert.equal(view.container.querySelector("#button1.button-selected"), null);
 });
 
+test("button layer renders pill buttons with fully rounded ends", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 1;
+  Object.assign(layout.defaultbuttons, { cssShape: "pill" });
+  const view = renderComponent(
+    <ButtonLayer
+      layout={layout}
+      pressedButtons={[]}
+      editorMode={false}
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      onButtonClick={() => {}}
+      onButtonMouseDown={() => {}}
+    />,
+  );
+
+  const button = view.container.querySelector<HTMLElement>("#button0");
+  assert.equal(button?.style.getPropertyValue("--button-radius"), "9999px");
+});
+
 test("control-clicking the stick center requests selection toggle", () => {
   const layout = createDefaultLayout();
   const clicks: Array<{ index: number; toggle: boolean }> = [];
@@ -1280,6 +1300,15 @@ test("inherited per-button choice fields select their effective default values",
     ).value,
     "linear",
   );
+});
+
+test("default and per-button shape controls offer the pill shape", () => {
+  const layout = createDefaultLayout();
+  layout.defaultbuttons.useCss = true;
+  delete layout.buttons[0].useCss;
+  const { view } = renderSelectedButtonSettings(layout);
+
+  assert.equal(view.getAllByRole("option", { name: "shapePill" }).length, 2);
 });
 
 test("inherited per-button image fields show their effective default values", () => {

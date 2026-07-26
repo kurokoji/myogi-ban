@@ -64,6 +64,7 @@ export const jaTranslation = {
   colorPressed: "押下時色",
   buttonShape: "形状",
   shapeCircle: "丸",
+  shapePill: "カプセル",
   shapeRounded: "角丸",
   shapeSquare: "四角",
   rotation: "角度(°)",

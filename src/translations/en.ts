@@ -66,6 +66,7 @@ export const enTranslation = {
   colorPressed: "Pressed",
   buttonShape: "Shape",
   shapeCircle: "Circle",
+  shapePill: "Pill",
   shapeRounded: "Rounded",
   shapeSquare: "Square",
   rotation: "Rotation (°)",

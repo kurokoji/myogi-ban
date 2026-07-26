@@ -11,6 +11,15 @@ test("parseImportedLayoutJson accepts partial legacy layouts", () => {
   });
 });
 
+test("parseImportedLayoutJson accepts pill button shapes", () => {
+  const parsed = parseImportedLayoutJson(
+    '{"defaultbuttons":{"cssShape":"pill"},"buttons":[{"cssShape":"pill"}]}',
+  );
+
+  assert.equal(parsed.defaultbuttons?.cssShape, "pill");
+  assert.equal(parsed.buttons?.[0]?.cssShape, "pill");
+});
+
 test("parseImportedLayoutJson rejects invalid known field types", () => {
   assert.throws(
     () => parseImportedLayoutJson('{"buttons":{},"showstick":"yes"}'),

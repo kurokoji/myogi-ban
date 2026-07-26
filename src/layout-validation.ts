@@ -39,7 +39,7 @@ function validateButton(value: unknown): void {
     throw new InvalidLayoutError();
   if (
     "cssShape" in value &&
-    !["circle", "rounded", "square"].includes(String(value.cssShape))
+    !["circle", "pill", "rounded", "square"].includes(String(value.cssShape))
   )
     throw new InvalidLayoutError();
 }

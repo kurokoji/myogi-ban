@@ -5,6 +5,7 @@ import type { ButtonLayout, ButtonShape, Layout } from "../../types";
 function buttonRadiusForShape(shape: ButtonShape): string {
   if (shape === "square") return "0";
   if (shape === "rounded") return "8px";
+  if (shape === "pill") return "9999px";
   return "50%";
 }
 

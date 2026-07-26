@@ -1,4 +1,4 @@
-export type ButtonShape = "circle" | "rounded" | "square";
+export type ButtonShape = "circle" | "pill" | "rounded" | "square";
 
 export interface ButtonLayout {
   x: string;

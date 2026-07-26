@@ -7,6 +7,8 @@ import { isTranslationKey } from "../src/translations/keys";
 test("split translations preserve representative Japanese and English values", () => {
   assert.equal(jaTranslation.save, "保存");
   assert.equal(enTranslation.save, "Save");
+  assert.equal(jaTranslation.shapePill, "カプセル");
+  assert.equal(enTranslation.shapePill, "Pill");
   assert.deepEqual(Object.keys(jaTranslation), Object.keys(enTranslation));
 });
 

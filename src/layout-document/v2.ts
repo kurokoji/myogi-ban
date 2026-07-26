@@ -117,7 +117,7 @@ function validButton(value: unknown): boolean {
     ) &&
     hasOptionalType(value, "useCss", "boolean") &&
     (value.shape === undefined ||
-      ["circle", "rounded", "square"].includes(String(value.shape)))
+      ["circle", "pill", "rounded", "square"].includes(String(value.shape)))
   );
 }
 

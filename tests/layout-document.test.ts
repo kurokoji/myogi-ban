@@ -47,6 +47,17 @@ test("deserializeLayoutDocument restores v2 data to the runtime layout", () => {
   assert.equal(restored.sourceFormatVersion, 2);
 });
 
+test("layout documents round trip pill button shapes", () => {
+  const source = createDefaultLayout();
+  source.defaultbuttons.cssShape = "pill";
+  source.buttons[0].cssShape = "pill";
+
+  const restored = deserializeLayoutDocument(serializeLayoutDocument(source));
+
+  assert.equal(restored.defaultbuttons.cssShape, "pill");
+  assert.equal(restored.buttons[0].cssShape, undefined);
+});
+
 test("deserializeLayoutDocument keeps v1 documents readable", () => {
   const restored = deserializeLayoutDocument({
     version: "v1.0.5",
