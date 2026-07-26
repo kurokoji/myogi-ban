@@ -273,20 +273,6 @@ export function ButtonSettingsPanel(
                 })
               }
             />
-            <LinkedSizeInputs
-              width={layout.defaultbuttons.wp}
-              height={layout.defaultbuttons.hp}
-              widthLabel={t("pressedWidth")}
-              heightLabel={t("pressedHeight")}
-              fallbackWidth={layout.defaultbuttons.w || "60"}
-              fallbackHeight={layout.defaultbuttons.h || "60"}
-              onChange={(width, height) =>
-                updateLayout((next) => {
-                  next.defaultbuttons.wp = width;
-                  next.defaultbuttons.hp = height;
-                })
-              }
-            />
             <NumberInput
               size="xs"
               label={t("rotation")}
@@ -630,29 +616,6 @@ export function ButtonSettingsPanel(
                     props.updateSelectedButtons((next) => {
                       next.buttons[selectedButtonIndex].w = width;
                       next.buttons[selectedButtonIndex].h = height;
-                    })
-                  }
-                />
-                <Text size="xs" fw={600}>
-                  {t("pressedSize")}
-                </Text>
-                <InheritedSizeInputs
-                  width={layout.buttons[selectedButtonIndex]?.wp}
-                  height={layout.buttons[selectedButtonIndex]?.hp}
-                  defaultWidth={layout.defaultbuttons.wp}
-                  defaultHeight={layout.defaultbuttons.hp}
-                  effectiveWidth={
-                    layout.defaultbuttons.wp || layout.defaultbuttons.w || "60"
-                  }
-                  effectiveHeight={
-                    layout.defaultbuttons.hp || layout.defaultbuttons.h || "60"
-                  }
-                  widthLabel={t("pressedWidth")}
-                  heightLabel={t("pressedHeight")}
-                  onChange={(width, height) =>
-                    props.updateSelectedButtons((next) => {
-                      next.buttons[selectedButtonIndex].wp = width;
-                      next.buttons[selectedButtonIndex].hp = height;
                     })
                   }
                 />

@@ -35,8 +35,6 @@ function buttonStyle(
   const pressedImage = button.imgp === defaultButton.imgp ? "" : button.imgp;
   const releasedWidth = button.w === defaultButton.w ? "" : button.w;
   const releasedHeight = button.h === defaultButton.h ? "" : button.h;
-  const pressedWidth = button.wp === defaultButton.wp ? "" : button.wp;
-  const pressedHeight = button.hp === defaultButton.hp ? "" : button.hp;
   const useCss = button.useCss ?? defaultButton.useCss ?? false;
   const useImage = pressed ? pressedImage : releasedImage;
   const cssColor = button.cssColor ?? defaultButton.cssColor ?? "#cccccc";
@@ -50,8 +48,8 @@ function buttonStyle(
   const style: CSSVariableStyle = cssVariables({
     left: `${button.x || defaultButton.x || 0}px`,
     top: `${button.y || defaultButton.y || 0}px`,
-    width: `${pressed ? pressedWidth || defaultButton.wp || defaultButton.w || "60" : releasedWidth || defaultButton.w || "60"}px`,
-    height: `${pressed ? pressedHeight || defaultButton.hp || defaultButton.h || "60" : releasedHeight || defaultButton.h || "60"}px`,
+    width: `${releasedWidth || defaultButton.w || "60"}px`,
+    height: `${releasedHeight || defaultButton.h || "60"}px`,
     "--button-color": pressed ? cssPressedColor : cssColor,
     "--button-shadow-color": pressed
       ? "rgba(0, 0, 0, 0.4)"

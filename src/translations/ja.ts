@@ -40,7 +40,6 @@ export const jaTranslation = {
   releasedImage: "通常画像",
   pressedImage: "押下画像",
   releasedSize: "通常サイズ",
-  pressedSize: "押下サイズ",
   useDefaultWhenBlank: "「標準準拠」の項目は標準設定に追従します。",
   count: "表示数",
   buttonCount: "ボタン数: {{count}}",
@@ -140,8 +139,6 @@ export const jaTranslation = {
   deleted: "レイアウトを削除しました",
   width: "幅(px)",
   height: "高さ(px)",
-  pressedWidth: "押下時の幅(px)",
-  pressedHeight: "押下時の高さ(px)",
   layoutNamePlaceholder: "レイアウト名",
   layoutNameExists: "同じ名前のレイアウトがすでに存在します",
 } as const;

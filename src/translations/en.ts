@@ -42,7 +42,6 @@ export const enTranslation = {
   releasedImage: "Released image",
   pressedImage: "Pressed image",
   releasedSize: "Released size",
-  pressedSize: "Pressed size",
   useDefaultWhenBlank: 'Fields marked "Use default" follow default settings.',
   count: "Count",
   buttonCount: "Buttons: {{count}}",
@@ -141,8 +140,6 @@ export const enTranslation = {
   deleted: "Layout deleted",
   width: "Width (px)",
   height: "Height (px)",
-  pressedWidth: "Pressed width (px)",
-  pressedHeight: "Pressed height (px)",
   layoutNamePlaceholder: "name",
   layoutNameExists: "A layout with this name already exists",
 } as const satisfies Record<TranslationKey, string>;

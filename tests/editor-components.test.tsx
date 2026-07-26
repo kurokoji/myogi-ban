@@ -657,6 +657,34 @@ test("button layer renders pill buttons with fully rounded ends", () => {
   assert.equal(button?.style.getPropertyValue("--button-radius"), "9999px");
 });
 
+test("pressed buttons keep their released size", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 1;
+  layout.defaultbuttons.w = "48";
+  layout.defaultbuttons.h = "40";
+  layout.defaultbuttons.wp = "72";
+  layout.defaultbuttons.hp = "60";
+  layout.buttons[0].w = "52";
+  layout.buttons[0].h = "44";
+  layout.buttons[0].wp = "80";
+  layout.buttons[0].hp = "70";
+  const view = renderComponent(
+    <ButtonLayer
+      layout={layout}
+      pressedButtons={[true]}
+      editorMode={false}
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      onButtonClick={() => {}}
+      onButtonMouseDown={() => {}}
+    />,
+  );
+
+  const button = view.container.querySelector<HTMLElement>("#button0");
+  assert.equal(button?.style.width, "52px");
+  assert.equal(button?.style.height, "44px");
+});
+
 test("control-clicking the stick center requests selection toggle", () => {
   const layout = createDefaultLayout();
   const clicks: Array<{ index: number; toggle: boolean }> = [];
@@ -1138,6 +1166,14 @@ function renderSelectedButtonSettings(
   return { selectedSettings, view };
 }
 
+test("button settings omit pressed size controls", () => {
+  const { view } = renderSelectedButtonSettings(createDefaultLayout());
+
+  assert.equal(view.queryByRole("textbox", { name: "pressedWidth" }), null);
+  assert.equal(view.queryByRole("textbox", { name: "pressedHeight" }), null);
+  assert.equal(view.queryByText("pressedSize"), null);
+});
+
 test("inherited per-button size fields show their effective default values", () => {
   const layout = createDefaultLayout();
   layout.defaultbuttons.w = "48";
@@ -1159,24 +1195,6 @@ test("inherited per-button size fields show their effective default values", () 
     (
       within(selectedSettings).getByRole("textbox", {
         name: "height",
-        description: "inheritDefault",
-      }) as HTMLInputElement
-    ).value,
-    "48",
-  );
-  assert.equal(
-    (
-      within(selectedSettings).getByRole("textbox", {
-        name: "pressedWidth",
-        description: "inheritDefault",
-      }) as HTMLInputElement
-    ).value,
-    "48",
-  );
-  assert.equal(
-    (
-      within(selectedSettings).getByRole("textbox", {
-        name: "pressedHeight",
         description: "inheritDefault",
       }) as HTMLInputElement
     ).value,
