@@ -27,6 +27,12 @@ import {
 } from "./ButtonSettingsSections";
 import { ColorInput } from "./EditorInputs";
 import { ImageSelectButton } from "./ImageSelectButton";
+import {
+  InheritedNumberInput,
+  InheritedSelect,
+  InheritedTextInput,
+} from "./InheritedInputs";
+import { InheritedSizeInputs } from "./InheritedSizeInputs";
 import { LinkedSizeInputs } from "./LinkedSizeInputs";
 
 interface ButtonSettingsPanelProps {
@@ -326,6 +332,14 @@ export function ButtonSettingsPanel(
                   <Switch
                     size="sm"
                     label={t("useCssButton")}
+                    description={
+                      layout.buttons[selectedButtonIndex]?.useCss ===
+                        undefined ||
+                      layout.buttons[selectedButtonIndex]?.useCss ===
+                        layout.defaultbuttons.useCss
+                        ? t("inheritDefault")
+                        : undefined
+                    }
                     checked={
                       !(
                         layout.buttons[selectedButtonIndex]?.useCss ??
@@ -416,13 +430,17 @@ export function ButtonSettingsPanel(
                 <div className="control row">
                   <ColorInput
                     label={t("colorNormal")}
-                    value={
+                    description={
+                      !layout.buttons[selectedButtonIndex]?.cssColor ||
                       layout.buttons[selectedButtonIndex]?.cssColor ===
-                      layout.defaultbuttons.cssColor
-                        ? "#cccccc"
-                        : (layout.buttons[selectedButtonIndex]?.cssColor ??
-                          layout.defaultbuttons.cssColor ??
-                          "#cccccc")
+                        layout.defaultbuttons.cssColor
+                        ? t("inheritDefault")
+                        : undefined
+                    }
+                    value={
+                      layout.buttons[selectedButtonIndex]?.cssColor ||
+                      layout.defaultbuttons.cssColor ||
+                      "#cccccc"
                     }
                     onChange={(event) =>
                       props.updateSelectedButtons((next) => {
@@ -433,14 +451,17 @@ export function ButtonSettingsPanel(
                   />
                   <ColorInput
                     label={t("colorPressed")}
-                    value={
+                    description={
+                      !layout.buttons[selectedButtonIndex]?.cssPressedColor ||
                       layout.buttons[selectedButtonIndex]?.cssPressedColor ===
-                      layout.defaultbuttons.cssPressedColor
-                        ? "#999999"
-                        : (layout.buttons[selectedButtonIndex]
-                            ?.cssPressedColor ??
-                          layout.defaultbuttons.cssPressedColor ??
-                          "#999999")
+                        layout.defaultbuttons.cssPressedColor
+                        ? t("inheritDefault")
+                        : undefined
+                    }
+                    value={
+                      layout.buttons[selectedButtonIndex]?.cssPressedColor ||
+                      layout.defaultbuttons.cssPressedColor ||
+                      "#999999"
                     }
                     onChange={(event) =>
                       props.updateSelectedButtons((next) => {
@@ -456,15 +477,12 @@ export function ButtonSettingsPanel(
                 layout.defaultbuttons.useCss ??
                 false) && (
                 <div className="control row">
-                  <NativeSelect
+                  <InheritedSelect
                     size="xs"
                     label={t("buttonShape")}
-                    value={
-                      layout.buttons[selectedButtonIndex]?.cssShape ===
-                      layout.defaultbuttons.cssShape
-                        ? ""
-                        : (layout.buttons[selectedButtonIndex]?.cssShape ?? "")
-                    }
+                    value={layout.buttons[selectedButtonIndex]?.cssShape}
+                    defaultValue={layout.defaultbuttons.cssShape}
+                    fallbackValue="circle"
                     onChange={(event) =>
                       props.updateSelectedButtons((next) => {
                         if (event.target.value === "") {
@@ -482,23 +500,15 @@ export function ButtonSettingsPanel(
                       { value: "square", label: t("shapeSquare") },
                     ]}
                   />
-                  <NumberInput
+                  <InheritedNumberInput
                     size="xs"
                     label={t("transition")}
                     min={0}
                     max={1}
                     step={0.01}
-                    value={
-                      layout.buttons[selectedButtonIndex]?.cssTransition ===
-                      layout.defaultbuttons.cssTransition
-                        ? ""
-                        : parseFloat(
-                            layout.buttons[selectedButtonIndex]
-                              ?.cssTransition ??
-                              layout.defaultbuttons.cssTransition ??
-                              "0.02",
-                          )
-                    }
+                    value={layout.buttons[selectedButtonIndex]?.cssTransition}
+                    defaultValue={layout.defaultbuttons.cssTransition}
+                    fallbackValue="0.02"
                     onChange={(value) =>
                       props.updateSelectedButtons((next) => {
                         next.buttons[selectedButtonIndex].cssTransition =
@@ -513,17 +523,12 @@ export function ButtonSettingsPanel(
               (layout.buttons[selectedButtonIndex]?.useCss ??
                 layout.defaultbuttons.useCss ??
                 false) && (
-                <NativeSelect
+                <InheritedSelect
                   size="xs"
                   label={t("easing")}
-                  value={
-                    layout.buttons[selectedButtonIndex]?.cssEasing ===
-                    layout.defaultbuttons.cssEasing
-                      ? ""
-                      : (layout.buttons[selectedButtonIndex]?.cssEasing ??
-                        layout.defaultbuttons.cssEasing ??
-                        "ease")
-                  }
+                  value={layout.buttons[selectedButtonIndex]?.cssEasing}
+                  defaultValue={layout.defaultbuttons.cssEasing}
+                  fallbackValue="ease"
                   onChange={(event) =>
                     props.updateSelectedButtons((next) => {
                       if (event.target.value === "") {
@@ -552,15 +557,11 @@ export function ButtonSettingsPanel(
               ) && (
                 <>
                   <Group gap="xs" align="end" wrap="nowrap">
-                    <TextInput
+                    <InheritedTextInput
                       size="xs"
                       label={t("releasedImage")}
-                      value={
-                        layout.buttons[selectedButtonIndex]?.img ===
-                        layout.defaultbuttons.img
-                          ? ""
-                          : layout.buttons[selectedButtonIndex]?.img || ""
-                      }
+                      value={layout.buttons[selectedButtonIndex]?.img}
+                      defaultValue={layout.defaultbuttons.img}
                       onChange={(event) =>
                         props.updateSelectedButtons((next) => {
                           next.buttons[selectedButtonIndex].img =
@@ -581,15 +582,11 @@ export function ButtonSettingsPanel(
                     />
                   </Group>
                   <Group gap="xs" align="end" wrap="nowrap">
-                    <TextInput
+                    <InheritedTextInput
                       size="xs"
                       label={t("pressedImage")}
-                      value={
-                        layout.buttons[selectedButtonIndex]?.imgp ===
-                        layout.defaultbuttons.imgp
-                          ? ""
-                          : layout.buttons[selectedButtonIndex]?.imgp || ""
-                      }
+                      value={layout.buttons[selectedButtonIndex]?.imgp}
+                      defaultValue={layout.defaultbuttons.imgp}
                       onChange={(event) =>
                         props.updateSelectedButtons((next) => {
                           next.buttons[selectedButtonIndex].imgp =
@@ -616,25 +613,15 @@ export function ButtonSettingsPanel(
                 <Text size="xs" fw={600}>
                   {t("releasedSize")}
                 </Text>
-                <LinkedSizeInputs
-                  width={
-                    layout.buttons[selectedButtonIndex]?.w ===
-                    layout.defaultbuttons.w
-                      ? ""
-                      : layout.buttons[selectedButtonIndex]?.w || ""
-                  }
-                  height={
-                    layout.buttons[selectedButtonIndex]?.h ===
-                    layout.defaultbuttons.h
-                      ? ""
-                      : layout.buttons[selectedButtonIndex]?.h || ""
-                  }
+                <InheritedSizeInputs
+                  width={layout.buttons[selectedButtonIndex]?.w}
+                  height={layout.buttons[selectedButtonIndex]?.h}
+                  defaultWidth={layout.defaultbuttons.w}
+                  defaultHeight={layout.defaultbuttons.h}
+                  effectiveWidth={layout.defaultbuttons.w || "60"}
+                  effectiveHeight={layout.defaultbuttons.h || "60"}
                   widthLabel={t("width")}
                   heightLabel={t("height")}
-                  widthPlaceholder={layout.defaultbuttons.w || "60"}
-                  heightPlaceholder={layout.defaultbuttons.h || "60"}
-                  fallbackWidth={layout.defaultbuttons.w || "60"}
-                  fallbackHeight={layout.defaultbuttons.h || "60"}
                   linked={props.aspectRatioLinked}
                   onLinkedChange={props.onAspectRatioLinkedChange}
                   onChange={(width, height) =>
@@ -647,29 +634,19 @@ export function ButtonSettingsPanel(
                 <Text size="xs" fw={600}>
                   {t("pressedSize")}
                 </Text>
-                <LinkedSizeInputs
-                  width={
-                    layout.buttons[selectedButtonIndex]?.wp ===
-                    layout.defaultbuttons.wp
-                      ? ""
-                      : layout.buttons[selectedButtonIndex]?.wp || ""
+                <InheritedSizeInputs
+                  width={layout.buttons[selectedButtonIndex]?.wp}
+                  height={layout.buttons[selectedButtonIndex]?.hp}
+                  defaultWidth={layout.defaultbuttons.wp}
+                  defaultHeight={layout.defaultbuttons.hp}
+                  effectiveWidth={
+                    layout.defaultbuttons.wp || layout.defaultbuttons.w || "60"
                   }
-                  height={
-                    layout.buttons[selectedButtonIndex]?.hp ===
-                    layout.defaultbuttons.hp
-                      ? ""
-                      : layout.buttons[selectedButtonIndex]?.hp || ""
+                  effectiveHeight={
+                    layout.defaultbuttons.hp || layout.defaultbuttons.h || "60"
                   }
                   widthLabel={t("pressedWidth")}
                   heightLabel={t("pressedHeight")}
-                  widthPlaceholder={layout.defaultbuttons.wp || "60"}
-                  heightPlaceholder={layout.defaultbuttons.hp || "60"}
-                  fallbackWidth={
-                    layout.defaultbuttons.wp || layout.defaultbuttons.w || "60"
-                  }
-                  fallbackHeight={
-                    layout.defaultbuttons.hp || layout.defaultbuttons.h || "60"
-                  }
                   onChange={(width, height) =>
                     props.updateSelectedButtons((next) => {
                       next.buttons[selectedButtonIndex].wp = width;
@@ -677,20 +654,15 @@ export function ButtonSettingsPanel(
                     })
                   }
                 />
-                <NumberInput
+                <InheritedNumberInput
                   size="xs"
                   label={t("rotation")}
                   min={-180}
                   max={180}
                   step={1}
-                  value={
-                    layout.buttons[selectedButtonIndex]?.rotation ===
-                    layout.defaultbuttons.rotation
-                      ? ""
-                      : numericValue(
-                          layout.buttons[selectedButtonIndex]?.rotation ?? "",
-                        )
-                  }
+                  value={layout.buttons[selectedButtonIndex]?.rotation}
+                  defaultValue={layout.defaultbuttons.rotation}
+                  fallbackValue="0"
                   onChange={(value) =>
                     props.updateSelectedButtons((next) => {
                       if (value === "" || value === null) {

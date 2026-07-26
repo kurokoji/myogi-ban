@@ -43,7 +43,7 @@ export const enTranslation = {
   pressedImage: "Pressed image",
   releasedSize: "Released size",
   pressedSize: "Pressed size",
-  useDefaultWhenBlank: "Blank fields use default settings",
+  useDefaultWhenBlank: 'Fields marked "Use default" follow default settings.',
   count: "Count",
   buttonCount: "Buttons: {{count}}",
   addButton: "+ Add button",

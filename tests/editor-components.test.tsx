@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { componentDocument, renderComponent } from "./component-render";
 import { fireEvent, within } from "@testing-library/react";
-import { createRef, useState } from "react";
+import { createRef, type ComponentProps, useState } from "react";
 import { LayoutSettingsPanel } from "../src/components/editor/LayoutSettingsPanel";
 import { DisplaySettingsPanel } from "../src/components/editor/DisplaySettingsPanel";
 import { LinkedSizeInputs } from "../src/components/editor/LinkedSizeInputs";
@@ -1083,6 +1083,263 @@ test("button settings distinguish default and selected scopes", () => {
   assert.ok(view.getByRole("heading", { name: "selectedButtonSettings" }));
   assert.ok(view.container.querySelector(".button-settings-card-default"));
   assert.ok(view.container.querySelector(".button-settings-card-selected"));
+});
+
+function renderSelectedButtonSettings(
+  layout: ReturnType<typeof createDefaultLayout>,
+  updateSelectedButtons: ComponentProps<
+    typeof ButtonSettingsPanel
+  >["updateSelectedButtons"] = () => {},
+) {
+  const view = renderComponent(
+    <ButtonSettingsPanel
+      layout={layout}
+      assigningTarget={null}
+      assignmentName=""
+      selectedButtonIndex={0}
+      selectedButtonIndexes={[0]}
+      updateLayout={() => {}}
+      updateSelectedButtons={updateSelectedButtons}
+      onSelectedButtonChange={() => {}}
+      onAddButton={() => {}}
+      onDeleteSelectedButtons={() => {}}
+      openImagePicker={() => {}}
+      cancelAssignment={() => {}}
+    />,
+  );
+  const details = view.container.querySelector("details");
+  assert.ok(details);
+  details.open = true;
+  fireEvent(details, new componentDocument.defaultView.Event("toggle"));
+  const selectedSettings = view.container.querySelector<HTMLElement>(
+    ".button-settings-card-selected",
+  );
+  assert.ok(selectedSettings);
+  return { selectedSettings, view };
+}
+
+test("inherited per-button size fields show their effective default values", () => {
+  const layout = createDefaultLayout();
+  layout.defaultbuttons.w = "48";
+  layout.defaultbuttons.h = "48";
+  layout.buttons[0].w = "";
+  layout.buttons[0].h = "";
+  const { selectedSettings } = renderSelectedButtonSettings(layout);
+
+  assert.equal(
+    (
+      within(selectedSettings).getByRole("textbox", {
+        name: "width",
+        description: "inheritDefault",
+      }) as HTMLInputElement
+    ).value,
+    "48",
+  );
+  assert.equal(
+    (
+      within(selectedSettings).getByRole("textbox", {
+        name: "height",
+        description: "inheritDefault",
+      }) as HTMLInputElement
+    ).value,
+    "48",
+  );
+  assert.equal(
+    (
+      within(selectedSettings).getByRole("textbox", {
+        name: "pressedWidth",
+        description: "inheritDefault",
+      }) as HTMLInputElement
+    ).value,
+    "48",
+  );
+  assert.equal(
+    (
+      within(selectedSettings).getByRole("textbox", {
+        name: "pressedHeight",
+        description: "inheritDefault",
+      }) as HTMLInputElement
+    ).value,
+    "48",
+  );
+  assert.equal(layout.buttons[0].w, "");
+  assert.equal(layout.buttons[0].h, "");
+});
+
+test("incrementing an inherited per-button size starts from the effective default", () => {
+  const layout = createDefaultLayout();
+  layout.defaultbuttons.w = "48";
+  layout.defaultbuttons.h = "48";
+  layout.buttons[0].w = "";
+  layout.buttons[0].h = "";
+  let updatedLayout: typeof layout | undefined;
+  const { selectedSettings } = renderSelectedButtonSettings(
+    layout,
+    (update) => {
+      const next = structuredClone(layout);
+      update(next);
+      updatedLayout = next;
+    },
+  );
+  const widthInput = within(selectedSettings).getByRole("textbox", {
+    name: "width",
+  });
+
+  fireEvent.keyDown(widthInput, { key: "ArrowUp" });
+
+  assert.equal(updatedLayout?.buttons[0].w, "49");
+  assert.equal(updatedLayout?.buttons[0].h, "49");
+});
+
+test("inherited per-button number fields show their effective default values", () => {
+  const layout = createDefaultLayout();
+  layout.defaultbuttons.useCss = true;
+  layout.defaultbuttons.cssTransition = "0.12";
+  layout.defaultbuttons.rotation = "48";
+  delete layout.buttons[0].useCss;
+  delete layout.buttons[0].cssTransition;
+  delete layout.buttons[0].rotation;
+  const { selectedSettings } = renderSelectedButtonSettings(layout);
+
+  assert.equal(
+    (
+      within(selectedSettings).getByRole("textbox", {
+        name: "transition",
+        description: "inheritDefault",
+      }) as HTMLInputElement
+    ).value,
+    "0.12",
+  );
+  assert.equal(
+    (
+      within(selectedSettings).getByRole("textbox", {
+        name: "rotation",
+        description: "inheritDefault",
+      }) as HTMLInputElement
+    ).value,
+    "48",
+  );
+});
+
+test("incrementing inherited per-button number fields starts from each effective default", () => {
+  const layout = createDefaultLayout();
+  layout.defaultbuttons.useCss = true;
+  layout.defaultbuttons.cssTransition = "0.12";
+  layout.defaultbuttons.rotation = "48";
+  delete layout.buttons[0].useCss;
+  delete layout.buttons[0].cssTransition;
+  delete layout.buttons[0].rotation;
+  const updates: Array<typeof layout> = [];
+  const { selectedSettings } = renderSelectedButtonSettings(
+    layout,
+    (update) => {
+      const next = structuredClone(layout);
+      update(next);
+      updates.push(next);
+    },
+  );
+
+  fireEvent.keyDown(
+    within(selectedSettings).getByRole("textbox", { name: "transition" }),
+    { key: "ArrowUp" },
+  );
+  fireEvent.keyDown(
+    within(selectedSettings).getByRole("textbox", { name: "rotation" }),
+    { key: "ArrowUp" },
+  );
+
+  assert.equal(updates[0]?.buttons[0].cssTransition, "0.13");
+  assert.equal(updates[1]?.buttons[0].rotation, "49");
+});
+
+test("inherited per-button choice fields select their effective default values", () => {
+  const layout = createDefaultLayout();
+  layout.defaultbuttons.useCss = true;
+  layout.defaultbuttons.cssShape = "rounded";
+  layout.defaultbuttons.cssEasing = "linear";
+  delete layout.buttons[0].useCss;
+  delete layout.buttons[0].cssShape;
+  delete layout.buttons[0].cssEasing;
+  const { selectedSettings } = renderSelectedButtonSettings(layout);
+
+  assert.equal(
+    (
+      within(selectedSettings).getByRole("combobox", {
+        name: "buttonShape",
+        description: "inheritDefault",
+      }) as HTMLSelectElement
+    ).value,
+    "rounded",
+  );
+  assert.equal(
+    (
+      within(selectedSettings).getByRole("combobox", {
+        name: "easing",
+        description: "inheritDefault",
+      }) as HTMLSelectElement
+    ).value,
+    "linear",
+  );
+});
+
+test("inherited per-button image fields show their effective default values", () => {
+  const layout = createDefaultLayout();
+  layout.defaultbuttons.useCss = false;
+  layout.defaultbuttons.img = "released-default.png";
+  layout.defaultbuttons.imgp = "pressed-default.png";
+  delete layout.buttons[0].useCss;
+  delete layout.buttons[0].img;
+  delete layout.buttons[0].imgp;
+  const { selectedSettings } = renderSelectedButtonSettings(layout);
+
+  assert.equal(
+    (
+      within(selectedSettings).getByRole("textbox", {
+        name: "releasedImage",
+        description: "inheritDefault",
+      }) as HTMLInputElement
+    ).value,
+    "released-default.png",
+  );
+  assert.equal(
+    (
+      within(selectedSettings).getByRole("textbox", {
+        name: "pressedImage",
+        description: "inheritDefault",
+      }) as HTMLInputElement
+    ).value,
+    "pressed-default.png",
+  );
+});
+
+test("inherited per-button color and mode controls show their effective defaults", () => {
+  const layout = createDefaultLayout();
+  layout.defaultbuttons.useCss = true;
+  layout.defaultbuttons.cssColor = "#123456";
+  layout.defaultbuttons.cssPressedColor = "#654321";
+  delete layout.buttons[0].useCss;
+  delete layout.buttons[0].cssColor;
+  delete layout.buttons[0].cssPressedColor;
+  const { selectedSettings } = renderSelectedButtonSettings(layout);
+
+  const mode = within(selectedSettings).getByRole("switch", {
+    name: "useCssButton inheritDefault",
+    description: "inheritDefault",
+  });
+  assert.equal((mode as HTMLInputElement).checked, false);
+
+  for (const [name, value] of [
+    ["colorNormal", "#123456"],
+    ["colorPressed", "#654321"],
+  ]) {
+    const input = within(selectedSettings).getByLabelText(name);
+    assert.equal((input as HTMLInputElement).value, value);
+    const descriptionId = input.getAttribute("aria-describedby");
+    assert.ok(descriptionId);
+    const description = componentDocument.getElementById(descriptionId);
+    assert.equal(description?.textContent, "inheritDefault");
+    assert.equal(description?.style.color, "var(--mantine-color-dimmed)");
+  }
 });
 
 test("button settings explain how to open per-button settings when unselected", () => {

@@ -8,6 +8,10 @@ import { resizeWithAspectRatio } from "../../linked-size";
 interface LinkedSizeInputsProps {
   width: string;
   height: string;
+  displayWidth?: string;
+  displayHeight?: string;
+  widthDescription?: string;
+  heightDescription?: string;
   widthLabel: string;
   heightLabel: string;
   widthPlaceholder?: string;
@@ -23,6 +27,10 @@ interface LinkedSizeInputsProps {
 export function LinkedSizeInputs({
   width,
   height,
+  displayWidth,
+  displayHeight,
+  widthDescription,
+  heightDescription,
   widthLabel,
   heightLabel,
   widthPlaceholder,
@@ -75,8 +83,9 @@ export function LinkedSizeInputs({
       <NumberInput
         size="xs"
         label={widthLabel}
+        description={widthDescription}
         min={min}
-        value={numericValue(width)}
+        value={numericValue(displayWidth ?? width)}
         placeholder={widthPlaceholder}
         onChange={changeWidth}
         className="grow"
@@ -94,8 +103,9 @@ export function LinkedSizeInputs({
       <NumberInput
         size="xs"
         label={heightLabel}
+        description={heightDescription}
         min={min}
-        value={numericValue(height)}
+        value={numericValue(displayHeight ?? height)}
         placeholder={heightPlaceholder}
         onChange={changeHeight}
         className="grow"

@@ -1,8 +1,9 @@
-import type { ChangeEventHandler } from "react";
+import { type ChangeEventHandler, useId } from "react";
 
 interface ColorInputProps {
   id?: string;
   label: string;
+  description?: string;
   value: string;
   onChange: ChangeEventHandler<HTMLInputElement>;
 }
@@ -11,19 +12,38 @@ interface ColorInputProps {
 export function ColorInput({
   id,
   label,
+  description,
   value,
   onChange,
 }: ColorInputProps): React.ReactElement {
+  const generatedId = useId();
+  const inputId = id ?? generatedId;
+  const descriptionId = description ? `${inputId}-description` : undefined;
+
   return (
     <div>
       <label
-        htmlFor={id}
+        htmlFor={inputId}
         style={{ fontSize: "11px", display: "block", marginBottom: "4px" }}
       >
         {label}
       </label>
+      {description && (
+        <span
+          id={descriptionId}
+          style={{
+            color: "var(--mantine-color-dimmed)",
+            fontSize: "10px",
+            display: "block",
+            marginBottom: "4px",
+          }}
+        >
+          {description}
+        </span>
+      )}
       <input
-        id={id}
+        id={inputId}
+        aria-describedby={descriptionId}
         type="color"
         value={value}
         onChange={onChange}

@@ -41,7 +41,7 @@ export const jaTranslation = {
   pressedImage: "押下画像",
   releasedSize: "通常サイズ",
   pressedSize: "押下サイズ",
-  useDefaultWhenBlank: "空欄なら標準設定を使用",
+  useDefaultWhenBlank: "「標準準拠」の項目は標準設定に追従します。",
   count: "表示数",
   buttonCount: "ボタン数: {{count}}",
   addButton: "＋ ボタンを追加",
