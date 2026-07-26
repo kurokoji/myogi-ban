@@ -79,6 +79,10 @@ export interface GamepadViewProps {
     selection: { buttonIndexes: number[]; stick: boolean },
     edge: "front" | "back",
   ) => void;
+  onDistributeSelection?: (
+    selection: { buttonIndexes: number[]; stick: boolean },
+    direction: "horizontal" | "vertical",
+  ) => void;
 }
 
 type DragState =
@@ -282,6 +286,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     onResetSelectionToDefault,
     onResetSelectionRotation,
     onReorderSelection,
+    onDistributeSelection,
   } = props;
   const backgroundSize = useBackgroundSize(layout, onBackgroundSizeChange);
   const defaultButton = layout.defaultbuttons;
@@ -964,6 +969,9 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
             x={contextMenu.x}
             y={contextMenu.y}
             showButtonActions={contextMenu.selection.buttonIndexes.length > 0}
+            showDistributionActions={
+              contextMenu.selection.buttonIndexes.length >= 3
+            }
             canDuplicate={layout.totalbuttonshow < MAX_VISIBLE_BUTTONS}
             onDuplicate={() => onDuplicateSelection?.(contextMenu.selection)}
             onResetToDefault={() =>
@@ -977,6 +985,12 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
             }
             onSendToBack={() =>
               onReorderSelection?.(contextMenu.selection, "back")
+            }
+            onDistributeHorizontally={() =>
+              onDistributeSelection?.(contextMenu.selection, "horizontal")
+            }
+            onDistributeVertically={() =>
+              onDistributeSelection?.(contextMenu.selection, "vertical")
             }
             onDelete={() => onDeleteSelection?.(contextMenu.selection)}
             onClose={() => setContextMenu(null)}

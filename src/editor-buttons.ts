@@ -24,6 +24,34 @@ export function withButtonPositions(
   return next;
 }
 
+export function distributeEditorButtons(
+  layout: Layout,
+  selected: number[],
+  direction: "horizontal" | "vertical",
+): Layout | null {
+  const indexes = [...new Set(selected)].filter(
+    (index) => index >= 0 && index < layout.totalbuttonshow,
+  );
+  if (indexes.length < 3) return null;
+  const axis = direction === "horizontal" ? "x" : "y";
+  indexes.sort(
+    (left, right) =>
+      (Number.parseFloat(layout.buttons[left][axis]) || 0) -
+      (Number.parseFloat(layout.buttons[right][axis]) || 0),
+  );
+  const first = Number.parseFloat(layout.buttons[indexes[0]][axis]) || 0;
+  const last =
+    Number.parseFloat(layout.buttons[indexes[indexes.length - 1]][axis]) || 0;
+  const next = cloneLayout(layout);
+  for (let offset = 1; offset < indexes.length - 1; offset += 1) {
+    const position = first + ((last - first) * offset) / (indexes.length - 1);
+    next.buttons[indexes[offset]][axis] = String(
+      Math.round(position * 1000) / 1000,
+    );
+  }
+  return next;
+}
+
 export function addEditorButton(
   layout: Layout,
   mapping: ButtonMapping[],

@@ -47,6 +47,8 @@ export const jaTranslation = {
   deleteSelectedButtons: "選択中のボタンを削除 ({{count}})",
   deleteSelection: "削除",
   duplicateSelection: "複製",
+  distributeHorizontally: "横方向に等間隔配置",
+  distributeVertically: "縦方向に等間隔配置",
   bringToFront: "最前面へ",
   sendToBack: "最背面へ",
   showBackground: "背景を表示",

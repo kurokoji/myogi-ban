@@ -188,6 +188,40 @@ test("editor context menu requests moving button selections between layers", () 
   assert.deepEqual(moves, ["front"]);
 });
 
+test("editor context menu offers horizontal and vertical distribution", () => {
+  const distributions: string[] = [];
+  renderComponent(
+    <EditorContextMenu
+      x={0}
+      y={0}
+      showButtonActions={true}
+      showDistributionActions={true}
+      onDuplicate={() => {}}
+      onResetToDefault={() => {}}
+      onResetRotation={() => {}}
+      onDistributeHorizontally={() => distributions.push("horizontal")}
+      onDistributeVertically={() => distributions.push("vertical")}
+      onDelete={() => {}}
+      onClose={() => {}}
+    />,
+  );
+  const menu = componentDocument.body.querySelector<HTMLElement>(
+    ".editor-context-menu",
+  );
+  assert.ok(menu);
+
+  assert.ok(
+    within(menu).getByRole("menuitem", { name: "distributeHorizontally" }),
+  );
+  assert.ok(
+    within(menu).getByRole("menuitem", { name: "distributeVertically" }),
+  );
+  fireEvent.click(
+    within(menu).getByRole("menuitem", { name: "distributeHorizontally" }),
+  );
+  assert.deepEqual(distributions, ["horizontal"]);
+});
+
 test("right-clicking an unselected button selects it and opens its delete menu", () => {
   const layout = createDefaultLayout();
   layout.totalbuttonshow = 2;
@@ -222,6 +256,41 @@ test("right-clicking an unselected button selects it and opens its delete menu",
     within(menu).getByRole("menuitem", { name: "deleteSelection" }),
   );
   assert.deepEqual(deletions, [{ buttonIndexes: [1], stick: false }]);
+});
+
+test("right-clicking three selected buttons offers distribution", () => {
+  const distributions: unknown[] = [];
+  const view = renderComponent(
+    <GamepadView
+      layout={createDefaultLayout()}
+      stickClass="stick"
+      pressedButtons={[]}
+      editorMode={true}
+      selectedButtonIndex={0}
+      selectedButtonIndexes={[0, 1, 2]}
+      onDistributeSelection={(selection, direction) =>
+        distributions.push({ selection, direction })
+      }
+    />,
+  );
+  const button = view.container.querySelector("#button0");
+  assert.ok(button);
+  fireEvent.contextMenu(button, { clientX: 140, clientY: 90 });
+  const menu = componentDocument.body.querySelector<HTMLElement>(
+    ".editor-context-menu",
+  );
+  assert.ok(menu);
+
+  fireEvent.click(
+    within(menu).getByRole("menuitem", { name: "distributeVertically" }),
+  );
+
+  assert.deepEqual(distributions, [
+    {
+      selection: { buttonIndexes: [0, 1, 2], stick: false },
+      direction: "vertical",
+    },
+  ]);
 });
 
 test("component tests clean up rendered DOM after each test", () => {

@@ -4,6 +4,8 @@ import {
   IconLayersSelectedBottom,
   IconRestore,
   IconRotateClockwise,
+  IconSpacingHorizontal,
+  IconSpacingVertical,
   IconTrash,
 } from "@tabler/icons-react";
 import { useEffect } from "react";
@@ -15,10 +17,13 @@ interface EditorContextMenuProps {
   x: number;
   y: number;
   showButtonActions: boolean;
+  showDistributionActions?: boolean;
   canDuplicate?: boolean;
   onDuplicate: () => void;
   onResetToDefault: () => void;
   onResetRotation: () => void;
+  onDistributeHorizontally?: () => void;
+  onDistributeVertically?: () => void;
   onBringToFront?: () => void;
   onSendToBack?: () => void;
   onDelete: () => void;
@@ -29,10 +34,13 @@ export function EditorContextMenu({
   x,
   y,
   showButtonActions,
+  showDistributionActions = false,
   canDuplicate = true,
   onDuplicate,
   onResetToDefault,
   onResetRotation,
+  onDistributeHorizontally,
+  onDistributeVertically,
   onBringToFront,
   onSendToBack,
   onDelete,
@@ -86,6 +94,28 @@ export function EditorContextMenu({
               {editorShortcutHint("duplicate")}
             </kbd>
           </button>
+          {showDistributionActions && (
+            <>
+              <button
+                type="button"
+                role="menuitem"
+                className="editor-context-menu-item"
+                onClick={() => runAndClose(() => onDistributeHorizontally?.())}
+              >
+                <IconSpacingHorizontal size={16} />
+                {t("distributeHorizontally")}
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className="editor-context-menu-item"
+                onClick={() => runAndClose(() => onDistributeVertically?.())}
+              >
+                <IconSpacingVertical size={16} />
+                {t("distributeVertically")}
+              </button>
+            </>
+          )}
           <button
             type="button"
             role="menuitem"

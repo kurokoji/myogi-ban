@@ -36,6 +36,7 @@ import {
   addEditorButton,
   type ButtonPositionUpdate,
   deleteEditorButtons,
+  distributeEditorButtons,
   duplicateEditorButtons,
   reorderEditorButtons,
   withButtonPositions,
@@ -340,6 +341,23 @@ function EditorApp(): React.ReactElement {
       cancelAssignment();
     },
     [buttonMappings, cancelAssignment, updateLayout],
+  );
+
+  const distributeSelection = useCallback(
+    (
+      target: { buttonIndexes: number[]; stick: boolean },
+      direction: "horizontal" | "vertical",
+    ) => {
+      const distributed = distributeEditorButtons(
+        layoutRef.current,
+        target.buttonIndexes,
+        direction,
+      );
+      if (!distributed) return;
+      updateLayout((next) => Object.assign(next, distributed));
+      cancelAssignment();
+    },
+    [cancelAssignment, updateLayout],
   );
 
   useEffect(() => {
@@ -903,6 +921,7 @@ function EditorApp(): React.ReactElement {
                 onResetSelectionToDefault={resetSelectionToDefault}
                 onResetSelectionRotation={resetSelectionRotation}
                 onReorderSelection={reorderSelection}
+                onDistributeSelection={distributeSelection}
               />
             </div>
           </div>

@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   addEditorButton,
   deleteEditorButtons,
+  distributeEditorButtons,
   duplicateEditorButtons,
   reorderEditorButtons,
   withButtonPositions,
@@ -44,6 +45,66 @@ test("withButtonPositions applies a group move in one immutable update", () => {
   assert.notEqual(result.buttons, layout.buttons);
   assert.notEqual(result.buttons[1], layout.buttons[1]);
   assert.notEqual(layout.buttons[1].x, "120");
+});
+
+test("distributeEditorButtons spaces selected buttons evenly by x coordinate", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 3;
+  layout.buttons[0].x = "90";
+  layout.buttons[0].y = "10";
+  layout.buttons[1].x = "0";
+  layout.buttons[1].y = "20";
+  layout.buttons[2].x = "30";
+  layout.buttons[2].y = "30";
+
+  const result = distributeEditorButtons(layout, [0, 1, 2], "horizontal");
+
+  assert.deepEqual(
+    result?.buttons.slice(0, 3).map((button) => button.x),
+    ["90", "0", "45"],
+  );
+  assert.deepEqual(
+    result?.buttons.slice(0, 3).map((button) => button.y),
+    ["10", "20", "30"],
+  );
+  assert.equal(layout.buttons[2].x, "30");
+});
+
+test("distributeEditorButtons spaces selected buttons evenly by y coordinate", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 3;
+  layout.buttons[0].x = "10";
+  layout.buttons[0].y = "100";
+  layout.buttons[1].x = "20";
+  layout.buttons[1].y = "20";
+  layout.buttons[2].x = "30";
+  layout.buttons[2].y = "40";
+
+  const result = distributeEditorButtons(layout, [0, 1, 2], "vertical");
+
+  assert.deepEqual(
+    result?.buttons.slice(0, 3).map((button) => button.x),
+    ["10", "20", "30"],
+  );
+  assert.deepEqual(
+    result?.buttons.slice(0, 3).map((button) => button.y),
+    ["100", "20", "60"],
+  );
+});
+
+test("distributeEditorButtons limits fractional coordinates to three decimals", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 4;
+  for (const [index, x] of ["0", "5", "6", "100"].entries()) {
+    layout.buttons[index].x = x;
+  }
+
+  const result = distributeEditorButtons(layout, [0, 1, 2, 3], "horizontal");
+
+  assert.deepEqual(
+    result?.buttons.slice(0, 4).map((button) => button.x),
+    ["0", "33.333", "66.667", "100"],
+  );
 });
 
 test("duplicateEditorButtons appends offset copies with unassigned mappings", () => {

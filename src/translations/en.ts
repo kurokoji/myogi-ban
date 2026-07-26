@@ -49,6 +49,8 @@ export const enTranslation = {
   deleteSelectedButtons: "Delete selected buttons ({{count}})",
   deleteSelection: "Delete",
   duplicateSelection: "Duplicate",
+  distributeHorizontally: "Distribute horizontally",
+  distributeVertically: "Distribute vertically",
   bringToFront: "Bring to front",
   sendToBack: "Send to back",
   showBackground: "Show Background",
