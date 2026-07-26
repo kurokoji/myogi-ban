@@ -1,10 +1,14 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, dialog } from "electron";
 import type * as http from "http";
 import * as path from "path";
 import { resolveElectronDataDir } from "./data-paths";
 import { resolveElectronLaunchOptions } from "./electron-launch-options";
 import { resolveElectronRendererUrl } from "./electron-renderer";
 import { shouldOpenWindowForSecondInstance } from "./electron-single-instance";
+import {
+  confirmElectronUnload,
+  electronUnsavedChangesDialog,
+} from "./electron-unsaved-changes";
 import { requestRunningWindow } from "./electron-window-request";
 import { createLocalServer } from "./local-server";
 import { cleanupLocalServer } from "./server-cleanup";
@@ -18,7 +22,7 @@ const hasSingleInstanceLock = app.requestSingleInstanceLock();
 let windowRequested = !launchOptions.serverOnly;
 
 function createWindow(): void {
-  mainWindow = new BrowserWindow({
+  const window = new BrowserWindow({
     width: 1200,
     height: 850,
     webPreferences: {
@@ -27,14 +31,25 @@ function createWindow(): void {
     },
     autoHideMenuBar: true,
   });
+  mainWindow = window;
 
-  mainWindow.loadURL(
+  window.loadURL(
     resolveElectronRendererUrl({
       development: launchOptions.development,
       serverPort: PORT,
     }),
   );
-  mainWindow.on("closed", () => {
+  window.webContents.on("will-prevent-unload", (event) => {
+    confirmElectronUnload(
+      event,
+      () =>
+        dialog.showMessageBoxSync(
+          window,
+          electronUnsavedChangesDialog(app.getLocale()),
+        ) === 0,
+    );
+  });
+  window.on("closed", () => {
     mainWindow = null;
   });
 }

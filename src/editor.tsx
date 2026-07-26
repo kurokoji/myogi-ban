@@ -69,6 +69,7 @@ import { useEditorGuides } from "./hooks/useEditorGuides";
 import { useEditorLayouts } from "./hooks/useEditorLayouts";
 import { useLayoutHistory } from "./hooks/useLayoutHistory";
 import { usePreviewViewport } from "./hooks/usePreviewViewport";
+import { useUnsavedChangesWarning } from "./hooks/useUnsavedChangesWarning";
 import i18n from "./i18n";
 import { createDefaultLayout } from "./layout";
 import { previewWheelZoomDelta } from "./preview-viewport";
@@ -218,6 +219,7 @@ function EditorApp(): React.ReactElement {
       layoutNameExists: t("layoutNameExists"),
     },
   });
+  useUnsavedChangesWarning(isDirty);
 
   const obsUrl = `${SERVER_URL}/view`;
 
