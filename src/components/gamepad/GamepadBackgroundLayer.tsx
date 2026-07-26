@@ -31,6 +31,7 @@ export function GamepadBackgroundLayer({
               "--bg-radius": `${background.cssBorderRadius ?? 0}px`,
             })
           : imageStyle),
+        borderRadius: `${background.cssBorderRadius ?? 0}px`,
         width,
         height,
         opacity,

@@ -130,6 +130,20 @@ export function BackgroundSettingsPanel(
 ): React.ReactElement {
   const { t } = useTranslation();
   const { layout, updateLayout } = props;
+  const borderRadiusInput = (
+    <NumberInput
+      size="xs"
+      label={t("borderRadius")}
+      min={0}
+      max={999}
+      value={layout.background.cssBorderRadius ?? 0}
+      onChange={(value) =>
+        updateLayout((next) => {
+          next.background.cssBorderRadius = Number(value) || 0;
+        })
+      }
+    />
+  );
 
   return (
     <Paper className="panel" withBorder>
@@ -184,18 +198,7 @@ export function BackgroundSettingsPanel(
                 })
               }
             />
-            <NumberInput
-              size="xs"
-              label={t("borderRadius")}
-              min={0}
-              max={999}
-              value={layout.background.cssBorderRadius ?? 0}
-              onChange={(value) =>
-                updateLayout((next) => {
-                  next.background.cssBorderRadius = Number(value) || 0;
-                })
-              }
-            />
+            {borderRadiusInput}
             <LinkedSizeInputs
               width={layout.background.w}
               height={layout.background.h}
@@ -240,6 +243,7 @@ export function BackgroundSettingsPanel(
                 })
               }
             />
+            {borderRadiusInput}
             {layout.background.image && (
               <div className="control row obs-size-row">
                 <label>{t("obsWidth")}</label>

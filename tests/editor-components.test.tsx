@@ -13,6 +13,7 @@ import { ButtonLayer } from "../src/components/gamepad/ButtonLayer";
 import { ButtonAdvancedSettings } from "../src/components/editor/ButtonSettingsSections";
 import { ButtonSettingsPanel } from "../src/components/editor/ButtonSettingsPanel";
 import { GamepadView } from "../src/components/GamepadView";
+import { GamepadBackgroundLayer } from "../src/components/gamepad/GamepadBackgroundLayer";
 import { SelectionOverlays } from "../src/components/gamepad/SelectionOverlays";
 import { createDefaultLayout } from "../src/layout";
 import { BackgroundSettingsPanel } from "../src/components/editor/SettingsPanels";
@@ -562,6 +563,59 @@ test("background image name is text because file selection owns it", () => {
     view.getByRole("button", { name: "selectFile" }).style.flexShrink,
     "0",
   );
+});
+
+test("background image settings allow changing the border radius", () => {
+  const layout = createDefaultLayout();
+  layout.background.useCss = false;
+  layout.background.image = "background.png";
+  layout.background.cssBorderRadius = 12;
+  let updatedRadius: number | undefined;
+
+  const view = renderComponent(
+    <BackgroundSettingsPanel
+      layout={layout}
+      fileInputRef={createRef<HTMLInputElement>()}
+      updateLayout={(update) => {
+        const next = structuredClone(layout);
+        update(next);
+        updatedRadius = next.background.cssBorderRadius;
+      }}
+      uploadImage={() => {}}
+      openImagePicker={() => {}}
+    />,
+  );
+
+  const radiusInput = view.getByRole("textbox", { name: "borderRadius" });
+  assert.equal((radiusInput as HTMLInputElement).value, "12");
+  fireEvent.change(radiusInput, { target: { value: "24" } });
+  assert.equal(updatedRadius, 24);
+});
+
+test("background image layer applies the configured border radius", () => {
+  const background = createDefaultLayout().background;
+  background.useCss = false;
+  background.image = "background.png";
+  background.cssBorderRadius = 18;
+
+  const view = renderComponent(
+    <GamepadBackgroundLayer
+      background={background}
+      layoutName="sample"
+      width={500}
+      height={250}
+      opacity={1}
+    />,
+  );
+
+  const layer = view.container.querySelector<HTMLElement>(
+    "#gamepad-area-background",
+  );
+  assert.equal(
+    layer?.style.backgroundImage,
+    'url("layout/sample/background.png")',
+  );
+  assert.equal(layer?.style.borderRadius, "18px");
 });
 
 test("button layer renders every member of a multiple selection", () => {
