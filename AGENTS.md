@@ -18,6 +18,19 @@ For existing behavior that lacks coverage, add characterization tests before ref
 
 Prefer extracting domain logic into small pure functions. Test repository and API boundaries with real temporary files or lightweight fakes where practical; use mocks only at genuine external boundaries.
 
+## Test Memory Safety
+
+Component tests use JSDOM, React, and Mantine and can consume enough memory to terminate WSL when a failure tries to format a DOM object. Follow these rules when adding or changing tests:
+
+- Never compare a DOM node directly with `null` in an assertion that may fail. For example, avoid `assert.equal(view.queryByRole(...), null)`. Compare the boolean result instead: `assert.equal(view.queryByRole(...) === null, true)`. A failed direct comparison can make Node.js inspect the full JSDOM/React object graph and cause a large memory spike.
+- Keep `afterEach(cleanup)` in `tests/component-render.tsx`. It releases rendered React trees between component tests.
+- Keep the test runner concurrency bounded. `scripts/test-runner-options.mjs` currently uses `--test-concurrency=4`; do not remove or increase this limit without measuring peak memory use.
+- Do not assume `--test-name-pattern` makes a run lightweight. The current runner still builds and starts every discovered test file, then filters individual tests by name.
+- Explicitly unmount extra renders created within a single test when their lifetime matters, and close timers, servers, and other external resources in teardown.
+- If a test run is killed, inspect `node_modules/.myogi-ban-tests-*`. These temporary build directories are normally removed by `finally`, so a leftover directory indicates abrupt termination, not a persistent application memory leak.
+
+Historical context: commit `5564553` added Testing Library cleanup and limited test concurrency after an earlier component-test memory leak. On 2026-07-27, a failed `assert.equal(DOMElement, null)` caused another WSL termination even with those protections, which is why the boolean-assertion rule above is required.
+
 ## Component Design
 
 Keep UI components focused on one cohesive responsibility. Before adding UI to an existing component, review its current responsibilities and extract a child component when the change introduces a separate workflow, independent state, reusable formatting, or a distinct dialog/panel.

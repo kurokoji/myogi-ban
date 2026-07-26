@@ -34,6 +34,7 @@ import {
 } from "./InheritedInputs";
 import { InheritedSizeInputs } from "./InheritedSizeInputs";
 import { LinkedSizeInputs } from "./LinkedSizeInputs";
+import { PositionInputs } from "./PositionInputs";
 
 interface ButtonSettingsPanelProps {
   layout: Layout;
@@ -315,6 +316,22 @@ export function ButtonSettingsPanel(
           >
             {selectedButtonIndex !== null && (
               <Stack gap="xs">
+                {props.selectedButtonIndexes.length === 1 && (
+                  <PositionInputs
+                    x={layout.buttons[selectedButtonIndex]?.x ?? ""}
+                    y={layout.buttons[selectedButtonIndex]?.y ?? ""}
+                    onXChange={(value) =>
+                      updateLayout((next) => {
+                        next.buttons[selectedButtonIndex].x = value;
+                      })
+                    }
+                    onYChange={(value) =>
+                      updateLayout((next) => {
+                        next.buttons[selectedButtonIndex].y = value;
+                      })
+                    }
+                  />
+                )}
                 <Group gap="xs">
                   <Switch
                     size="sm"

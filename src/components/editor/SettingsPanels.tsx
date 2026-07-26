@@ -18,6 +18,7 @@ import type { Layout } from "../../types";
 import { ColorInput } from "./EditorInputs";
 import { ImageSelectButton } from "./ImageSelectButton";
 import { LinkedSizeInputs } from "./LinkedSizeInputs";
+import { PositionInputs } from "./PositionInputs";
 
 export { DisplaySettingsPanel } from "./DisplaySettingsPanel";
 export { GamepadStatusPanel } from "./GamepadStatusPanel";
@@ -52,28 +53,20 @@ export function StickSettingsPanel({
             })
           }
         />
-        <div className="control row">
-          <NumberInput
-            size="xs"
-            label="X (px)"
-            value={numericValue(layout.stick.x)}
-            onChange={(value) =>
-              updateLayout((next) => {
-                next.stick.x = String(value ?? "");
-              })
-            }
-          />
-          <NumberInput
-            size="xs"
-            label="Y (px)"
-            value={numericValue(layout.stick.y)}
-            onChange={(value) =>
-              updateLayout((next) => {
-                next.stick.y = String(value ?? "");
-              })
-            }
-          />
-        </div>
+        <PositionInputs
+          x={layout.stick.x}
+          y={layout.stick.y}
+          onXChange={(value) =>
+            updateLayout((next) => {
+              next.stick.x = value;
+            })
+          }
+          onYChange={(value) =>
+            updateLayout((next) => {
+              next.stick.y = value;
+            })
+          }
+        />
         <LinkedSizeInputs
           width={layout.stick.w}
           height={layout.stick.h}

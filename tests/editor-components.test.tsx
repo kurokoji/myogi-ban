@@ -1133,6 +1133,91 @@ test("button settings distinguish default and selected scopes", () => {
   assert.ok(view.container.querySelector(".button-settings-card-selected"));
 });
 
+test("single-button settings show and update its coordinates", () => {
+  const layout = createDefaultLayout();
+  let updatedLayout: typeof layout | undefined;
+  const view = renderComponent(
+    <ButtonSettingsPanel
+      layout={layout}
+      assigningTarget={null}
+      assignmentName=""
+      selectedButtonIndex={1}
+      selectedButtonIndexes={[1]}
+      updateLayout={(update) => {
+        const next = structuredClone(layout);
+        update(next);
+        updatedLayout = next;
+      }}
+      updateSelectedButtons={() => {}}
+      onSelectedButtonChange={() => {}}
+      onAddButton={() => {}}
+      onDeleteSelectedButtons={() => {}}
+      openImagePicker={() => {}}
+      cancelAssignment={() => {}}
+    />,
+  );
+  const details = view.container.querySelector("details");
+  assert.ok(details);
+  details.open = true;
+  fireEvent(details, new componentDocument.defaultView.Event("toggle"));
+  const selectedSettings = view.container.querySelector<HTMLElement>(
+    ".button-settings-card-selected",
+  );
+  assert.ok(selectedSettings);
+  const xInput = within(selectedSettings).getByRole("textbox", {
+    name: "X (px)",
+  });
+  const yInput = within(selectedSettings).getByRole("textbox", {
+    name: "Y (px)",
+  });
+
+  assert.equal((xInput as HTMLInputElement).value, "280");
+  assert.equal((yInput as HTMLInputElement).value, "68");
+
+  fireEvent.keyDown(xInput, { key: "ArrowUp" });
+
+  assert.equal(updatedLayout?.buttons[1].x, "281");
+  assert.equal(updatedLayout?.buttons[0].x, "225");
+});
+
+test("multiple-button settings omit ambiguous coordinates", () => {
+  const view = renderComponent(
+    <ButtonSettingsPanel
+      layout={createDefaultLayout()}
+      assigningTarget={null}
+      assignmentName=""
+      selectedButtonIndex={1}
+      selectedButtonIndexes={[0, 1]}
+      updateLayout={() => {}}
+      updateSelectedButtons={() => {}}
+      onSelectedButtonChange={() => {}}
+      onAddButton={() => {}}
+      onDeleteSelectedButtons={() => {}}
+      openImagePicker={() => {}}
+      cancelAssignment={() => {}}
+    />,
+  );
+  const details = view.container.querySelector("details");
+  assert.ok(details);
+  details.open = true;
+  fireEvent(details, new componentDocument.defaultView.Event("toggle"));
+  const selectedSettings = view.container.querySelector<HTMLElement>(
+    ".button-settings-card-selected",
+  );
+  assert.ok(selectedSettings);
+
+  assert.equal(
+    within(selectedSettings).queryByRole("textbox", { name: "X (px)" }) ===
+      null,
+    true,
+  );
+  assert.equal(
+    within(selectedSettings).queryByRole("textbox", { name: "Y (px)" }) ===
+      null,
+    true,
+  );
+});
+
 function renderSelectedButtonSettings(
   layout: ReturnType<typeof createDefaultLayout>,
   updateSelectedButtons: ComponentProps<
