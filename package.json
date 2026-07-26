@@ -62,6 +62,8 @@
     }
   },
   "dependencies": {
+    "@fontsource-variable/m-plus-2": "^5.3.0",
+    "@fontsource-variable/m-plus-code-latin": "^5.3.0",
     "@mantine/core": "^9.4.1",
     "@mantine/hooks": "^9.4.1",
     "@tabler/icons-react": "^3.45.0",

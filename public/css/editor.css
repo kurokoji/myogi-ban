@@ -63,6 +63,10 @@ body {
   word-break: break-all;
 }
 
+.server-url-value {
+  font-family: var(--mantine-font-family-monospace);
+}
+
 .copy-feedback {
   flex: none;
   color: var(--mantine-color-green-7);
@@ -309,7 +313,7 @@ body {
   z-index: 40;
   overflow: hidden;
   color: rgba(255, 255, 255, 0.85);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
   line-height: 1;
   user-select: none;
@@ -374,6 +378,7 @@ body {
 }
 
 .preview-ruler-label {
+  font-family: var(--mantine-font-family-monospace);
   pointer-events: none;
 }
 

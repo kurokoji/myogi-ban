@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
+import "@fontsource-variable/m-plus-2/wght.css";
 import "./i18n";
 import { ApiClient } from "./api";
 import { VIEWER_RECONNECT_DELAY_MS } from "./app-constants";

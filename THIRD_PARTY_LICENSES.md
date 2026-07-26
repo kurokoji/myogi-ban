@@ -1,5 +1,21 @@
 # Third-Party Licenses
 
+## M PLUS Code Latin
+
+- Package: `@fontsource-variable/m-plus-code-latin`
+- Package source: https://github.com/fontsource/font-files
+- Source: https://github.com/coz-m/MPLUS_FONTS
+- License: SIL Open Font License 1.1
+- Full license: `public/fonts/MPLUS2-OFL.txt`
+
+## M PLUS 2
+
+- Package: `@fontsource-variable/m-plus-2`
+- Package source: https://github.com/fontsource/font-files
+- Source: https://github.com/coz-m/MPLUS_FONTS
+- License: SIL Open Font License 1.1
+- Full license: `public/fonts/MPLUS2-OFL.txt`
+
 ## Tabler Icons
 
 Package: `@tabler/icons-react`  

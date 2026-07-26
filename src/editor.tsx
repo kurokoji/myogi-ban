@@ -14,6 +14,8 @@ import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { useTranslation } from "react-i18next";
+import "@fontsource-variable/m-plus-2/wght.css";
+import "@fontsource-variable/m-plus-code-latin/wght.css";
 import "./i18n";
 import { ApiClient } from "./api";
 import { resetButtonToDefaults } from "./button-settings";
@@ -59,6 +61,7 @@ import {
   toggleButtonInSelection,
   visibleInspectorTargets,
 } from "./editor-selection";
+import { editorTheme } from "./editor-theme";
 import {
   type ButtonMapping,
   GamepadManager,
@@ -610,7 +613,7 @@ function EditorApp(): React.ReactElement {
   };
 
   return (
-    <MantineProvider defaultColorScheme="auto">
+    <MantineProvider defaultColorScheme="auto" theme={editorTheme}>
       <aside id="sidebar">
         <div className="sidebar-header">
           <div className="sidebar-title-row">
@@ -621,7 +624,7 @@ function EditorApp(): React.ReactElement {
             <ThemeControl />
           </div>
           <p className="server-url">
-            {t("obs")}: <span>{obsUrl}</span>
+            {t("obs")}: <span className="server-url-value">{obsUrl}</span>
             <ActionIcon
               size="sm"
               variant="light"
