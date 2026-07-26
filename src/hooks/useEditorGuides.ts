@@ -22,12 +22,16 @@ interface UseEditorGuidesOptions {
   layoutRef: MutableRefObject<Layout>;
   previewScale: number;
   setLayout: Dispatch<SetStateAction<Layout>>;
+  onDragStart: () => void;
+  onDragEnd: () => void;
 }
 
 export function useEditorGuides({
   layoutRef,
   previewScale,
   setLayout,
+  onDragStart,
+  onDragEnd,
 }: UseEditorGuidesOptions) {
   const previewRef = useRef<HTMLElement | null>(null);
   const previewContainerRef = useRef<HTMLDivElement | null>(null);
@@ -74,16 +78,14 @@ export function useEditorGuides({
 
   const moveGuide = useCallback(
     (axis: GuideAxis, index: number, value: number, limit?: number) => {
-      setLayout((current) => {
-        const next = cloneLayout(current);
-        const guides =
-          axis === "x" ? next.guides.vertical : next.guides.horizontal;
-        const updated = updateGuidePosition(guides, index, value, limit);
-        if (axis === "x") next.guides.vertical = updated;
-        else next.guides.horizontal = updated;
-        layoutRef.current = next;
-        return next;
-      });
+      const next = cloneLayout(layoutRef.current);
+      const guides =
+        axis === "x" ? next.guides.vertical : next.guides.horizontal;
+      const updated = updateGuidePosition(guides, index, value, limit);
+      if (axis === "x") next.guides.vertical = updated;
+      else next.guides.horizontal = updated;
+      layoutRef.current = next;
+      setLayout(next);
     },
     [layoutRef, setLayout],
   );
@@ -92,6 +94,7 @@ export function useEditorGuides({
     (axis: GuideAxis, event: React.MouseEvent<HTMLElement>) => {
       event.preventDefault();
       event.stopPropagation();
+      onDragStart();
       const value = coordinateFromPointer(event, axis);
       setLayout((current) => {
         const next = cloneLayout(current);
@@ -103,16 +106,17 @@ export function useEditorGuides({
         return next;
       });
     },
-    [coordinateFromPointer, layoutRef, setLayout],
+    [coordinateFromPointer, layoutRef, onDragStart, setLayout],
   );
 
   const startExistingGuideDrag = useCallback(
     (axis: GuideAxis, index: number, event: React.MouseEvent<HTMLElement>) => {
       event.preventDefault();
       event.stopPropagation();
+      onDragStart();
       setGuideDrag({ axis, index });
     },
-    [],
+    [onDragStart],
   );
 
   useEffect(() => {
@@ -142,6 +146,7 @@ export function useEditorGuides({
         value,
         Number.isFinite(parsed) && parsed > 0 ? parsed : fallback,
       );
+      onDragEnd();
       setGuideDrag(null);
     };
     window.addEventListener("mousemove", handleMouseMove);
@@ -150,7 +155,7 @@ export function useEditorGuides({
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [coordinateFromPointer, guideDrag, moveGuide, layoutRef.current]);
+  }, [coordinateFromPointer, guideDrag, layoutRef, moveGuide, onDragEnd]);
 
   return {
     previewContainerRef,

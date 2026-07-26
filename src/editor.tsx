@@ -164,7 +164,13 @@ function EditorApp(): React.ReactElement {
     startExistingGuideDrag,
     startGuideDrag,
     updateRulerOrigin,
-  } = useEditorGuides({ layoutRef, previewScale, setLayout });
+  } = useEditorGuides({
+    layoutRef,
+    previewScale,
+    setLayout,
+    onDragStart: beginLayoutDrag,
+    onDragEnd: endLayoutDrag,
+  });
   const {
     cancelImport,
     confirmImport,
