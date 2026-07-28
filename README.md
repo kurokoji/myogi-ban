@@ -2,6 +2,9 @@
 
 格闘ゲーム向けコントローラー入力を可視化するOBS用ビューアです。編集画面でレイアウトを作り、OBSのブラウザソースには `/view` を指定して使います。
 
+<img width="1186" height="843" alt="image" src="https://github.com/user-attachments/assets/fc3f1be9-d993-4dc6-9466-00ec2bc7d492" />
+
+
 ## 主な機能
 
 - リアルタイムなレバー/ボタン入力表示
