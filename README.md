@@ -86,7 +86,7 @@ npm stop
 `http://127.0.0.1:33770/view` を表示します。
 ソースの幅と高さは、サーバーAPIから現在のデフォルトレイアウトに合わせて自動設定されます。
 
-stable版OBS 32.1.2向けのSDKを公式配布物から用意し、ビルドします。
+stable版OBS 32.2.1向けのSDKを公式配布物から用意し、ビルドします。
 stable版OBS本体をインストールする必要はありません。初回のみVisual Studio C++ Build Toolsが必要です。
 
 ```powershell

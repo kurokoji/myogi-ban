@@ -6,11 +6,11 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$obsVersion = "32.1.2"
-$windowsArchiveName = "OBS-Studio-32.1.2-Windows-x64.zip"
-$windowsArchiveHash = "8d97e4563bd8d22d03e63042aa7dccede1d555c9bd35ce8a9e5019b0d0201bf6"
-$sourceArchiveName = "OBS-Studio-32.1.2-Sources.tar.gz"
-$sourceArchiveHash = "c6532380c68a75327fe8b551461adeca8f184dcbe4015096251a6de76362a554"
+$obsVersion = "32.2.1"
+$windowsArchiveName = "OBS-Studio-32.2.1-Windows-x64.zip"
+$windowsArchiveHash = "db64a2934f8261f85b1410b84be011207a0afda5400d008289f1f1e211bcc7de"
+$sourceArchiveName = "OBS-Studio-32.2.1-Sources.tar.gz"
+$sourceArchiveHash = "6a2532b1094bc51bc2fdeb1068d5c19cfe04216191a5b35c8707625401a80bf4"
 $releaseBaseUrl = "https://github.com/obsproject/obs-studio/releases/download/$obsVersion"
 
 function Get-VerifiedArchive {
