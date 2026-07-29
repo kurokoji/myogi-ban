@@ -138,6 +138,10 @@ export const enTranslation = {
   operationFailed: "Operation failed",
   discardChanges:
     "You have unsaved changes. Discard them and open another layout?",
+  discardAndOpen: "Discard changes and open",
+  discardAndQuitMessage:
+    "You have unsaved changes. Discard them and quit the application?",
+  discardAndQuit: "Discard and quit",
   confirmDelete: "Delete layout “{{name}}”? This cannot be undone.",
   deleted: "Layout deleted",
   width: "Width (px)",

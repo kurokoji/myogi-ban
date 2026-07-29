@@ -4,6 +4,7 @@ import test from "node:test";
 import { componentDocument, renderComponent } from "./component-render";
 import { fireEvent, within } from "@testing-library/react";
 import { createRef, type ComponentProps, useState } from "react";
+import { ConfirmationModal } from "../src/components/editor/ConfirmationModal";
 import { LayoutSettingsPanel } from "../src/components/editor/LayoutSettingsPanel";
 import { DisplaySettingsPanel } from "../src/components/editor/DisplaySettingsPanel";
 import { LinkedSizeInputs } from "../src/components/editor/LinkedSizeInputs";
@@ -1837,4 +1838,37 @@ test("stick settings omit the assigning status for a button target", () => {
   );
 
   assert.equal(view.queryByText("Button 1") === null, true);
+});
+
+test("confirmation modal is hidden when there is no pending message", () => {
+  const view = renderComponent(
+    <ConfirmationModal
+      message={null}
+      confirmLabel="Discard and open"
+      onConfirm={() => {}}
+      onCancel={() => {}}
+    />,
+  );
+
+  assert.equal(view.queryByText("Discard and open") === null, true);
+});
+
+test("confirmation modal confirms or cancels the pending action", () => {
+  const confirms: number[] = [];
+  const cancels: number[] = [];
+  const view = renderComponent(
+    <ConfirmationModal
+      message="Discard unsaved changes?"
+      confirmLabel="Discard and open"
+      onConfirm={() => confirms.push(1)}
+      onCancel={() => cancels.push(1)}
+    />,
+  );
+
+  assert.ok(view.getByText("Discard unsaved changes?"));
+  fireEvent.click(view.getByRole("button", { name: "Discard and open" }));
+  assert.deepEqual(confirms, [1]);
+
+  fireEvent.click(view.getByRole("button", { name: "cancel" }));
+  assert.deepEqual(cancels, [1]);
 });

@@ -10,7 +10,6 @@ import {
 import { type ApiClient, ApiError } from "../api";
 import { selectDefaultLayoutEntry } from "../default-layout";
 import {
-  canReplaceCurrentLayout,
   type EditorLayoutUpdater,
   type ImageUploadTarget,
   layoutNameFromSelection,
@@ -64,10 +63,19 @@ interface UseEditorLayoutsOptions {
     layoutPackageUnsafe: string;
     operationFailed: string;
     discardChanges: string;
+    discardAndOpen: string;
+    discardAndImport: string;
     confirmDelete: string;
+    deleteLayout: string;
     deleted: string;
     layoutNameExists: string;
   };
+}
+
+export interface PendingConfirmation {
+  message: string;
+  confirmLabel: string;
+  onConfirm: () => void | Promise<void>;
 }
 
 export function useEditorLayouts(options: UseEditorLayoutsOptions) {
@@ -97,6 +105,8 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
   const [cleanSignature, setCleanSignature] = useState("");
   const [status, setStatus] = useState<OperationStatus>(null);
   const [importInProgress, setImportInProgress] = useState(false);
+  const [pendingConfirmation, setPendingConfirmation] =
+    useState<PendingConfirmation | null>(null);
   const [pendingLayoutImport, setPendingLayoutImport] = useState<{
     data: Uint8Array;
     preview: {
@@ -201,17 +211,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     };
   }, [api, applyLayout, refreshLayouts]);
 
-  const openLayout = async (selection: string) => {
-    if (!selection || selection === selectedLayout) return;
-    const hasUnsavedChanges =
-      cleanSignature !==
-      createEditorSnapshotSignature(layout, buttonMappings, stickMappings);
-    if (
-      !canReplaceCurrentLayout(hasUnsavedChanges, () =>
-        window.confirm(messages.discardChanges),
-      )
-    )
-      return;
+  const performOpenLayout = async (selection: string) => {
     const name = layoutNameFromSelection(selection);
     try {
       const entry = layoutNames.find(
@@ -227,6 +227,22 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
       console.error("Failed to load layout:", error);
       setStatus({ kind: "error", message: messages.operationFailed });
     }
+  };
+
+  const openLayout = (selection: string) => {
+    if (!selection || selection === selectedLayout) return;
+    const hasUnsavedChanges =
+      cleanSignature !==
+      createEditorSnapshotSignature(layout, buttonMappings, stickMappings);
+    if (!hasUnsavedChanges) {
+      void performOpenLayout(selection);
+      return;
+    }
+    setPendingConfirmation({
+      message: messages.discardChanges,
+      confirmLabel: messages.discardAndOpen,
+      onConfirm: () => performOpenLayout(selection),
+    });
   };
 
   const saveToName = async (name: string, overwrite = true) => {
@@ -288,10 +304,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     }
   };
 
-  const deleteLayout = async () => {
-    if (currentBuiltin || !layoutName) return;
-    if (!window.confirm(messages.confirmDelete.replace("{{name}}", layoutName)))
-      return;
+  const performDeleteLayout = async () => {
     try {
       const defaultLayout = await api.getDefaultLayout();
       await api.deleteLayout(layoutName);
@@ -318,6 +331,15 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
       console.error("Failed to delete layout:", error);
       setStatus({ kind: "error", message: messages.operationFailed });
     }
+  };
+
+  const deleteLayout = () => {
+    if (currentBuiltin || !layoutName) return;
+    setPendingConfirmation({
+      message: messages.confirmDelete.replace("{{name}}", layoutName),
+      confirmLabel: messages.deleteLayout,
+      onConfirm: performDeleteLayout,
+    });
   };
 
   const openImagePicker = (target: ImageUploadTarget) => {
@@ -404,13 +426,17 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     reader.onload = () => {
       try {
         const data = parseImportedLayoutJson(String(reader.result));
-        if (
-          !canReplaceCurrentLayout(hasUnsavedChanges, () =>
-            window.confirm(messages.discardChanges),
-          )
-        )
-          return;
-        applyLayout(data as Layout, data.name || "imported", false, false);
+        const apply = () =>
+          applyLayout(data as Layout, data.name || "imported", false, false);
+        if (hasUnsavedChanges) {
+          setPendingConfirmation({
+            message: messages.discardChanges,
+            confirmLabel: messages.discardAndImport,
+            onConfirm: apply,
+          });
+        } else {
+          apply();
+        }
       } catch {
         setStatus({ kind: "error", message: messages.invalidLayoutFile });
       }
@@ -442,15 +468,28 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     if (!importInProgressRef.current) setPendingLayoutImport(null);
   };
 
+  const confirmPendingAction = async () => {
+    const pending = pendingConfirmation;
+    setPendingConfirmation(null);
+    if (pending) await pending.onConfirm();
+  };
+
+  const cancelPendingAction = () => {
+    setPendingConfirmation(null);
+  };
+
   return {
     currentBuiltin,
     cancelImport,
+    cancelPendingAction,
     confirmImport,
+    confirmPendingAction,
     deleteLayout,
     exportLayout,
     fileInputRef,
     importLayout,
     importInProgress,
+    pendingConfirmation,
     layoutName,
     layoutNames,
     openLayout,

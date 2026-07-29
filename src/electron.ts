@@ -1,14 +1,10 @@
-import { app, BrowserWindow, dialog } from "electron";
+import { app, BrowserWindow } from "electron";
 import type * as http from "http";
 import * as path from "path";
 import { resolveElectronDataDir } from "./data-paths";
 import { resolveElectronLaunchOptions } from "./electron-launch-options";
 import { resolveElectronRendererUrl } from "./electron-renderer";
 import { shouldOpenWindowForSecondInstance } from "./electron-single-instance";
-import {
-  confirmElectronUnload,
-  electronUnsavedChangesDialog,
-} from "./electron-unsaved-changes";
 import { requestRunningWindow } from "./electron-window-request";
 import { createLocalServer } from "./local-server";
 import { cleanupLocalServer } from "./server-cleanup";
@@ -39,16 +35,6 @@ function createWindow(): void {
       serverPort: PORT,
     }),
   );
-  window.webContents.on("will-prevent-unload", (event) => {
-    confirmElectronUnload(
-      event,
-      () =>
-        dialog.showMessageBoxSync(
-          window,
-          electronUnsavedChangesDialog(app.getLocale()),
-        ) === 0,
-    );
-  });
   window.on("closed", () => {
     mainWindow = null;
   });

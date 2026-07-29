@@ -19,6 +19,7 @@ import "@fontsource-variable/m-plus-code-latin/wght.css";
 import "./i18n";
 import { ApiClient } from "./api";
 import { resetButtonToDefaults } from "./button-settings";
+import { ConfirmationModal } from "./components/editor/ConfirmationModal";
 import { InspectorTabs } from "./components/editor/InspectorTabs";
 import { PreviewZoomControls } from "./components/editor/PreviewZoomControls";
 import {
@@ -185,7 +186,9 @@ function EditorApp(): React.ReactElement {
   });
   const {
     cancelImport,
+    cancelPendingAction,
     confirmImport,
+    confirmPendingAction,
     currentBuiltin,
     deleteLayout,
     exportLayout,
@@ -196,6 +199,7 @@ function EditorApp(): React.ReactElement {
     layoutNames,
     openLayout,
     openImagePicker,
+    pendingConfirmation,
     pendingImport,
     saveLayout,
     saveLayoutAs,
@@ -225,12 +229,16 @@ function EditorApp(): React.ReactElement {
       layoutPackageUnsafe: t("layoutPackageUnsafe"),
       operationFailed: t("operationFailed"),
       discardChanges: t("discardChanges"),
+      discardAndOpen: t("discardAndOpen"),
+      discardAndImport: t("discardAndImport"),
       confirmDelete: t("confirmDelete"),
+      deleteLayout: t("deleteLayout"),
       deleted: t("deleted"),
       layoutNameExists: t("layoutNameExists"),
     },
   });
-  useUnsavedChangesWarning(isDirty);
+  const { confirmingClose, confirmClose, cancelClose } =
+    useUnsavedChangesWarning(isDirty);
 
   const obsUrl = `${SERVER_URL}/view`;
 
@@ -639,6 +647,12 @@ function EditorApp(): React.ReactElement {
 
   return (
     <MantineProvider defaultColorScheme="auto" theme={editorTheme}>
+      <ConfirmationModal
+        message={confirmingClose ? t("discardAndQuitMessage") : null}
+        confirmLabel={t("discardAndQuit")}
+        onConfirm={confirmClose}
+        onCancel={cancelClose}
+      />
       <aside id="sidebar">
         <div className="sidebar-header">
           <div className="sidebar-title-row">
@@ -703,6 +717,9 @@ function EditorApp(): React.ReactElement {
                   pendingImport={pendingImport}
                   confirmImport={confirmImport}
                   cancelImport={cancelImport}
+                  pendingConfirmation={pendingConfirmation}
+                  confirmPendingAction={confirmPendingAction}
+                  cancelPendingAction={cancelPendingAction}
                   status={status}
                 />
               ),

@@ -136,6 +136,10 @@ export const jaTranslation = {
   operationFailed: "操作に失敗しました",
   discardChanges:
     "未保存の変更があります。破棄して別のレイアウトを開きますか？",
+  discardAndOpen: "変更を破棄して開く",
+  discardAndQuitMessage:
+    "未保存の変更があります。破棄してアプリを終了しますか？",
+  discardAndQuit: "破棄して終了",
   confirmDelete:
     "レイアウト「{{name}}」を削除しますか？この操作は元に戻せません。",
   deleted: "レイアウトを削除しました",

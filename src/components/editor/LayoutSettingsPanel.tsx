@@ -18,7 +18,9 @@ import {
 } from "@tabler/icons-react";
 import type { ChangeEvent } from "react";
 import { useTranslation } from "react-i18next";
+import type { PendingConfirmation } from "../../hooks/useEditorLayouts";
 import type { LayoutEntry, OperationStatus } from "../../types";
+import { ConfirmationModal } from "./ConfirmationModal";
 import {
   type LayoutImportPreview,
   LayoutImportPreviewModal,
@@ -46,6 +48,9 @@ interface LayoutSettingsPanelProps {
   importInProgress?: boolean;
   confirmImport?: () => void;
   cancelImport?: () => void;
+  pendingConfirmation?: PendingConfirmation | null;
+  confirmPendingAction?: () => void;
+  cancelPendingAction?: () => void;
 }
 
 export function LayoutSettingsPanel(
@@ -61,6 +66,12 @@ export function LayoutSettingsPanel(
         hasUnsavedChanges={props.isDirty}
         onConfirm={() => props.confirmImport?.()}
         onCancel={() => props.cancelImport?.()}
+      />
+      <ConfirmationModal
+        message={props.pendingConfirmation?.message ?? null}
+        confirmLabel={props.pendingConfirmation?.confirmLabel ?? ""}
+        onConfirm={() => props.confirmPendingAction?.()}
+        onCancel={() => props.cancelPendingAction?.()}
       />
       <Paper className="panel" withBorder>
         <Stack gap="xs">
