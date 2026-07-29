@@ -158,11 +158,17 @@ function nearestSnapCorrection(
   return nearestDistance <= threshold ? { correction, guide } : { correction };
 }
 
+export interface SnapGuideLines {
+  vertical: number[];
+  horizontal: number[];
+}
+
 export function snapRect(
   movingRect: Rect,
   delta: Point,
   targets: Rect[],
   threshold: number,
+  guideLines?: SnapGuideLines,
 ): { delta: Point; guideX?: number; guideY?: number } {
   const movingX = [
     movingRect.left + delta.x,
@@ -174,16 +180,22 @@ export function snapRect(
     (movingRect.top + movingRect.bottom) / 2 + delta.y,
     movingRect.bottom + delta.y,
   ];
-  const targetX = targets.flatMap((target) => [
-    target.left,
-    (target.left + target.right) / 2,
-    target.right,
-  ]);
-  const targetY = targets.flatMap((target) => [
-    target.top,
-    (target.top + target.bottom) / 2,
-    target.bottom,
-  ]);
+  const targetX = [
+    ...targets.flatMap((target) => [
+      target.left,
+      (target.left + target.right) / 2,
+      target.right,
+    ]),
+    ...(guideLines?.vertical ?? []),
+  ];
+  const targetY = [
+    ...targets.flatMap((target) => [
+      target.top,
+      (target.top + target.bottom) / 2,
+      target.bottom,
+    ]),
+    ...(guideLines?.horizontal ?? []),
+  ];
   const horizontalSnap = nearestSnapCorrection(movingX, targetX, threshold);
   const verticalSnap = nearestSnapCorrection(movingY, targetY, threshold);
   return {
@@ -202,8 +214,11 @@ export function resolveRectSnap(
   delta: Point,
   targets: Rect[],
   threshold: number,
+  guideLines?: SnapGuideLines,
 ): { delta: Point; guideX?: number; guideY?: number } {
-  return enabled ? snapRect(movingRect, delta, targets, threshold) : { delta };
+  return enabled
+    ? snapRect(movingRect, delta, targets, threshold, guideLines)
+    : { delta };
 }
 
 export function snapRectDelta(
@@ -236,6 +251,14 @@ export function rectsOnSnapGuides(
       (guideY !== undefined && yAnchors.includes(guideY))
     );
   });
+}
+
+export function visibleSnapGuide(
+  snapped: number | undefined,
+  existingGuides: number[],
+): number | undefined {
+  if (snapped === undefined) return undefined;
+  return existingGuides.includes(snapped) ? undefined : snapped;
 }
 
 export function rectsIntersect(a: Rect, b: Rect): boolean {

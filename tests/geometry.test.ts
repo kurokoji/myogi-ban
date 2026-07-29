@@ -12,6 +12,7 @@ import {
   snapRect,
   snapRectDelta,
   unionRectsAtIndexes,
+  visibleSnapGuide,
 } from "../src/geometry";
 
 test("dragRotation adds the pointer angle change to the initial rotation", () => {
@@ -182,6 +183,77 @@ test("resolveRectSnap preserves raw movement when snapping is disabled", () => {
     { x: 47, y: 18 },
     [{ left: 100, top: 30, right: 140, bottom: 70 }],
     6,
+  );
+
+  assert.deepEqual(result, { delta: { x: 47, y: 18 } });
+});
+
+test("snapRect also aligns moving edges with guide lines", () => {
+  const result = snapRect(
+    { left: 10, top: 10, right: 50, bottom: 50 },
+    { x: 47, y: 18 },
+    [],
+    6,
+    { vertical: [100], horizontal: [30] },
+  );
+
+  assert.deepEqual(result, {
+    delta: { x: 50, y: 20 },
+    guideX: 100,
+    guideY: 30,
+  });
+});
+
+test("snapRect prefers a closer button target over a farther guide line", () => {
+  const result = snapRect(
+    { left: 10, top: 10, right: 50, bottom: 50 },
+    { x: 47, y: 0 },
+    [{ left: 100, top: 0, right: 140, bottom: 40 }],
+    6,
+    { vertical: [102], horizontal: [] },
+  );
+
+  assert.equal(result.guideX, 100);
+});
+
+test("resolveRectSnap also honors guide lines when enabled", () => {
+  const result = resolveRectSnap(
+    true,
+    { left: 10, top: 10, right: 50, bottom: 50 },
+    { x: 47, y: 18 },
+    [],
+    6,
+    { vertical: [100], horizontal: [30] },
+  );
+
+  assert.deepEqual(result, {
+    delta: { x: 50, y: 20 },
+    guideX: 100,
+    guideY: 30,
+  });
+});
+
+test("visibleSnapGuide hides the indicator when a guide line already marks the spot", () => {
+  assert.equal(visibleSnapGuide(100, [100]), undefined);
+});
+
+test("visibleSnapGuide keeps the indicator when nothing already marks the spot", () => {
+  assert.equal(visibleSnapGuide(100, [50]), 100);
+  assert.equal(visibleSnapGuide(100, []), 100);
+});
+
+test("visibleSnapGuide passes through an unsnapped axis", () => {
+  assert.equal(visibleSnapGuide(undefined, [100]), undefined);
+});
+
+test("resolveRectSnap ignores guide lines when snapping is disabled", () => {
+  const result = resolveRectSnap(
+    false,
+    { left: 10, top: 10, right: 50, bottom: 50 },
+    { x: 47, y: 18 },
+    [],
+    6,
+    { vertical: [100], horizontal: [30] },
   );
 
   assert.deepEqual(result, { delta: { x: 47, y: 18 } });

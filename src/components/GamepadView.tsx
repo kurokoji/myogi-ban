@@ -13,6 +13,7 @@ import {
   resizeRotatedRectFromCorner,
   resolveRectSnap,
   unionRectsAtIndexes,
+  visibleSnapGuide,
 } from "../geometry";
 import type { Layout } from "../types";
 import { EditorContextMenu } from "./editor/EditorContextMenu";
@@ -745,14 +746,15 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
         { x: deltaX, y: deltaY },
         dragState.snapTargets,
         SNAP_THRESHOLD,
+        layout.guides,
       );
       const snappedDelta = snap.delta;
       setSnapGuides(
         snap.guideX === undefined && snap.guideY === undefined
           ? null
           : {
-              x: snap.guideX,
-              y: snap.guideY,
+              x: visibleSnapGuide(snap.guideX, layout.guides.vertical),
+              y: visibleSnapGuide(snap.guideY, layout.guides.horizontal),
               targets: rectsOnSnapGuides(
                 dragState.snapTargets,
                 snap.guideX,
@@ -839,6 +841,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     aspectRatioLocked,
     backgroundSize,
     buttonRects,
+    layout.guides,
     layout.showstick,
     onPositionsChange,
     onSizeChange,
