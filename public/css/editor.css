@@ -657,6 +657,21 @@ body {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
 }
 
+.drag-coordinate-tooltip {
+  position: fixed;
+  z-index: 1000;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: var(--mantine-color-body);
+  border: 1px solid var(--mantine-color-default-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.24);
+  font-family: var(--mantine-font-family-monospace);
+  font-size: 11px;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translate(14px, 18px);
+}
+
 .editor-context-menu-label {
   flex: 1;
 }

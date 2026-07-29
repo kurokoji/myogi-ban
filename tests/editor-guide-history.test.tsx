@@ -10,7 +10,12 @@ import { useLayoutHistory } from "../src/hooks/useLayoutHistory";
 import { createDefaultLayout } from "../src/layout";
 import type { Layout } from "../src/types";
 
-function useGuideHistory(initialLayout = createDefaultLayout()) {
+function useGuideHistory(
+  initialLayout = createDefaultLayout(),
+  onDragCoordinateChange?: (
+    coordinate: { x: number; y: number; label: string } | null,
+  ) => void,
+) {
   const [layout, setLayout] = useState<Layout>(() => initialLayout);
   const layoutRef = useRef(layout);
   const history = useLayoutHistory({
@@ -25,6 +30,7 @@ function useGuideHistory(initialLayout = createDefaultLayout()) {
     setLayout,
     onDragStart: history.beginDrag,
     onDragEnd: history.endDrag,
+    onDragCoordinateChange,
   });
 
   return { layout, ...history, ...guides };
@@ -85,6 +91,29 @@ test("moving an existing guide can be undone as one history entry", () => {
 
   assert.deepEqual(result.current.layout.guides.vertical, [20]);
   assert.equal(result.current.historyAvailability.canUndo, false);
+});
+
+test("dragging an existing guide reports its live coordinate and clears it on release", () => {
+  const layout = createDefaultLayout();
+  layout.guides.vertical = [20];
+  const coordinates: Array<{ x: number; y: number; label: string } | null> = [];
+  const { result } = renderHook(() =>
+    useGuideHistory(layout, (coordinate) => coordinates.push(coordinate)),
+  );
+  attachPreview(result.current.previewRef);
+
+  act(() =>
+    result.current.startExistingGuideDrag("x", 0, guideMouseEvent(20, 0)),
+  );
+  act(() =>
+    window.dispatchEvent(new window.MouseEvent("mousemove", { clientX: 30 })),
+  );
+  act(() =>
+    window.dispatchEvent(new window.MouseEvent("mouseup", { clientX: 40 })),
+  );
+
+  assert.deepEqual(coordinates.at(-2), { x: 30, y: 0, label: "X: 30" });
+  assert.equal(coordinates.at(-1), null);
 });
 
 test("removing a guide by dragging it outside can be undone", () => {

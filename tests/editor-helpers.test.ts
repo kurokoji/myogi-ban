@@ -2,6 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   cloneLayout,
+  formatDragCoordinateLabel,
+  formatDragDeltaLabel,
+  formatGuideCoordinateLabel,
   isStickAssignmentTarget,
   updateSelectedButtonSettings,
 } from "../src/editor-helpers";
@@ -89,6 +92,23 @@ test("updateSelectedButtonSettings does nothing when no buttons are selected", (
 
   assert.equal(updaterCalled, false);
   assert.equal(JSON.stringify(layout), before);
+});
+
+test("formatDragCoordinateLabel formats an absolute position", () => {
+  assert.equal(formatDragCoordinateLabel(225, 80), "X: 225, Y: 80");
+});
+
+test("formatDragDeltaLabel formats a positive and negative movement", () => {
+  assert.equal(formatDragDeltaLabel(15, -8), "ΔX: +15, ΔY: -8");
+  assert.equal(formatDragDeltaLabel(0, 0), "ΔX: +0, ΔY: +0");
+});
+
+test("formatGuideCoordinateLabel formats a vertical guide as its X value", () => {
+  assert.equal(formatGuideCoordinateLabel("x", 150), "X: 150");
+});
+
+test("formatGuideCoordinateLabel formats a horizontal guide as its Y value", () => {
+  assert.equal(formatGuideCoordinateLabel("y", 80), "Y: 80");
 });
 
 test("cloneLayout creates independent nested collections", () => {

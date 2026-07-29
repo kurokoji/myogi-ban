@@ -20,6 +20,7 @@ import "./i18n";
 import { ApiClient } from "./api";
 import { resetButtonToDefaults } from "./button-settings";
 import { ConfirmationModal } from "./components/editor/ConfirmationModal";
+import { DragCoordinateTooltip } from "./components/editor/DragCoordinateTooltip";
 import { InspectorTabs } from "./components/editor/InspectorTabs";
 import { PreviewZoomControls } from "./components/editor/PreviewZoomControls";
 import {
@@ -103,6 +104,11 @@ function EditorApp(): React.ReactElement {
   const [language, setLanguage] = useState(i18n.language);
   const [copiedObsUrl, setCopiedObsUrl] = useState(false);
   const [snappingEnabled, setSnappingEnabled] = useState(true);
+  const [dragCoordinate, setDragCoordinate] = useState<{
+    x: number;
+    y: number;
+    label: string;
+  } | null>(null);
   const [buttonAspectRatioLinked, setButtonAspectRatioLinked] = useState(true);
   const [stickAspectRatioLinked, setStickAspectRatioLinked] = useState(true);
   const layoutRef = useRef(layout);
@@ -183,6 +189,7 @@ function EditorApp(): React.ReactElement {
     setLayout,
     onDragStart: beginLayoutDrag,
     onDragEnd: endLayoutDrag,
+    onDragCoordinateChange: setDragCoordinate,
   });
   const {
     cancelImport,
@@ -901,11 +908,19 @@ function EditorApp(): React.ReactElement {
                 onResetSelectionRotation={resetSelectionRotation}
                 onReorderSelection={reorderSelection}
                 onDistributeSelection={distributeSelection}
+                onDragCoordinateChange={setDragCoordinate}
               />
             </div>
           </div>
         </div>
       </main>
+      {dragCoordinate && (
+        <DragCoordinateTooltip
+          x={dragCoordinate.x}
+          y={dragCoordinate.y}
+          label={dragCoordinate.label}
+        />
+      )}
 
       <aside id="inspector" onPointerDownCapture={beginLayoutDrag}>
         <InspectorTabs

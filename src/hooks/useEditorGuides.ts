@@ -12,7 +12,7 @@ import {
   guideCoordinateFromPointer,
   updateGuidePosition,
 } from "../editor-guides";
-import { cloneLayout } from "../editor-helpers";
+import { cloneLayout, formatGuideCoordinateLabel } from "../editor-helpers";
 import type { Layout } from "../types";
 
 type GuideAxis = "x" | "y";
@@ -24,6 +24,9 @@ interface UseEditorGuidesOptions {
   setLayout: Dispatch<SetStateAction<Layout>>;
   onDragStart: () => void;
   onDragEnd: () => void;
+  onDragCoordinateChange?: (
+    coordinate: { x: number; y: number; label: string } | null,
+  ) => void;
 }
 
 export function useEditorGuides({
@@ -32,6 +35,7 @@ export function useEditorGuides({
   setLayout,
   onDragStart,
   onDragEnd,
+  onDragCoordinateChange,
 }: UseEditorGuidesOptions) {
   const previewRef = useRef<HTMLElement | null>(null);
   const previewContainerRef = useRef<HTMLDivElement | null>(null);
@@ -122,11 +126,13 @@ export function useEditorGuides({
   useEffect(() => {
     if (!guideDrag) return;
     const handleMouseMove = (event: MouseEvent) => {
-      moveGuide(
-        guideDrag.axis,
-        guideDrag.index,
-        coordinateFromPointer(event, guideDrag.axis),
-      );
+      const value = coordinateFromPointer(event, guideDrag.axis);
+      moveGuide(guideDrag.axis, guideDrag.index, value);
+      onDragCoordinateChange?.({
+        x: event.clientX,
+        y: event.clientY,
+        label: formatGuideCoordinateLabel(guideDrag.axis, value),
+      });
     };
     const handleMouseUp = (event: MouseEvent) => {
       const value = coordinateFromPointer(event, guideDrag.axis);
@@ -147,6 +153,7 @@ export function useEditorGuides({
         Number.isFinite(parsed) && parsed > 0 ? parsed : fallback,
       );
       onDragEnd();
+      onDragCoordinateChange?.(null);
       setGuideDrag(null);
     };
     window.addEventListener("mousemove", handleMouseMove);
@@ -155,7 +162,14 @@ export function useEditorGuides({
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [coordinateFromPointer, guideDrag, layoutRef, moveGuide, onDragEnd]);
+  }, [
+    coordinateFromPointer,
+    guideDrag,
+    layoutRef,
+    moveGuide,
+    onDragCoordinateChange,
+    onDragEnd,
+  ]);
 
   return {
     previewContainerRef,

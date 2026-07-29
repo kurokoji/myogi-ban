@@ -116,6 +116,22 @@ export function layoutSelectionValue(name: string, builtin: boolean): string {
   return `${name}:${builtin ? "builtin" : "user"}`;
 }
 
+export function formatDragCoordinateLabel(x: number, y: number): string {
+  return `X: ${x}, Y: ${y}`;
+}
+
+export function formatDragDeltaLabel(deltaX: number, deltaY: number): string {
+  const signed = (value: number) => (value >= 0 ? `+${value}` : `${value}`);
+  return `ΔX: ${signed(deltaX)}, ΔY: ${signed(deltaY)}`;
+}
+
+export function formatGuideCoordinateLabel(
+  axis: "x" | "y",
+  value: number,
+): string {
+  return axis === "x" ? `X: ${value}` : `Y: ${value}`;
+}
+
 export function readFileAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

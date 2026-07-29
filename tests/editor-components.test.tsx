@@ -23,6 +23,7 @@ import {
 } from "../src/components/editor/SettingsPanels";
 import { ThemeControl } from "../src/components/editor/ThemeControl";
 import { EditorContextMenu } from "../src/components/editor/EditorContextMenu";
+import { DragCoordinateTooltip } from "../src/components/editor/DragCoordinateTooltip";
 import { ShortcutCheatSheet } from "../src/components/editor/ShortcutCheatSheet";
 
 test("shortcut cheat sheet lists editor commands for the current platform", () => {
@@ -82,6 +83,19 @@ test("editor context menu offers deletion and closes after the action", () => {
   fireEvent.click(deleteButton);
   assert.equal(deletes, 1);
   assert.equal(closes, 1);
+});
+
+test("drag coordinate tooltip renders its label near the given position", () => {
+  renderComponent(
+    <DragCoordinateTooltip x={140} y={90} label="X: 225, Y: 80" />,
+  );
+
+  const tooltip = componentDocument.body.querySelector<HTMLElement>(
+    ".drag-coordinate-tooltip",
+  );
+  assert.equal(tooltip?.style.left, "140px");
+  assert.equal(tooltip?.style.top, "90px");
+  assert.equal(tooltip?.textContent, "X: 225, Y: 80");
 });
 
 test("editor context menu shows button actions only for button selections", () => {
@@ -1025,6 +1039,70 @@ test("dragging a selected button corner reports its resized bounds", () => {
     width: 80,
     height: 50,
   });
+});
+
+test("dragging a button reports its live coordinate near the cursor", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 1;
+  layout.buttons[0] = { ...layout.buttons[0], x: "100", y: "80" };
+  const coordinates: Array<{ x: number; y: number; label: string } | null> = [];
+  const view = renderComponent(
+    <GamepadView
+      layout={layout}
+      stickClass="stick"
+      pressedButtons={[]}
+      editorMode={true}
+      selectedButtonIndex={0}
+      selectedButtonIndexes={[0]}
+      snappingEnabled={false}
+      onDragCoordinateChange={(coordinate) => coordinates.push(coordinate)}
+    />,
+  );
+
+  const button = view.container.querySelector("#button0");
+  assert.ok(button);
+  fireEvent.mouseDown(button, { button: 0, clientX: 100, clientY: 80 });
+  fireEvent.mouseMove(document, { clientX: 115, clientY: 95 });
+  fireEvent.mouseUp(document);
+
+  assert.deepEqual(coordinates.at(-2), {
+    x: 115,
+    y: 95,
+    label: "X: 115, Y: 95",
+  });
+  assert.equal(coordinates.at(-1), null);
+});
+
+test("dragging multiple selected buttons reports the movement delta", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 2;
+  layout.buttons[0] = { ...layout.buttons[0], x: "100", y: "80" };
+  layout.buttons[1] = { ...layout.buttons[1], x: "200", y: "80" };
+  const coordinates: Array<{ x: number; y: number; label: string } | null> = [];
+  const view = renderComponent(
+    <GamepadView
+      layout={layout}
+      stickClass="stick"
+      pressedButtons={[]}
+      editorMode={true}
+      selectedButtonIndexes={[0, 1]}
+      snappingEnabled={false}
+      onDragCoordinateChange={(coordinate) => coordinates.push(coordinate)}
+    />,
+  );
+
+  const bounds = view.container.querySelector(".selection-bounds");
+  assert.ok(bounds);
+  fireEvent.mouseDown(bounds, { button: 0, clientX: 100, clientY: 80 });
+  fireEvent.mouseMove(document, { clientX: 115, clientY: 95 });
+  fireEvent.mouseUp(document);
+
+  assert.deepEqual(coordinates.at(-2), {
+    x: 115,
+    y: 95,
+    label: "ΔX: +15, ΔY: +15",
+  });
+  assert.equal(coordinates.at(-1), null);
 });
 
 test("dragging a selected button corner follows the linked aspect ratio", () => {

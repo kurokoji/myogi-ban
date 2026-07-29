@@ -3,6 +3,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MAX_VISIBLE_BUTTONS } from "../app-constants";
 import type { ButtonPositionUpdate } from "../editor-buttons";
 import {
+  formatDragCoordinateLabel,
+  formatDragDeltaLabel,
+} from "../editor-helpers";
+import {
   dragGroupPositions,
   dragPosition,
   dragRotation,
@@ -52,6 +56,9 @@ export interface GamepadViewProps {
     buttons: ButtonPositionUpdate[];
     stick?: { x: number; y: number };
   }) => void;
+  onDragCoordinateChange?: (
+    coordinate: { x: number; y: number; label: string } | null,
+  ) => void;
   onSizeChange?: (change: {
     type: "button" | "stick";
     index: number;
@@ -281,6 +288,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     onLayoutDragStart,
     onLayoutDragEnd,
     onPositionsChange,
+    onDragCoordinateChange,
     onSizeChange,
     onRotationChange,
     onDeleteSelection,
@@ -764,21 +772,34 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
       );
 
       if (dragState.type === "group") {
-        onPositionsChange?.({
-          buttons: dragGroupPositions(
-            dragState.buttons,
-            { x: dragState.startX, y: dragState.startY },
-            {
-              x: dragState.startX + snappedDelta.x,
-              y: dragState.startY + snappedDelta.y,
-            },
-          ),
-          stick: dragState.stick
-            ? {
-                x: Math.round(dragState.stick.initialX + snappedDelta.x),
-                y: Math.round(dragState.stick.initialY + snappedDelta.y),
-              }
-            : undefined,
+        const groupButtons = dragGroupPositions(
+          dragState.buttons,
+          { x: dragState.startX, y: dragState.startY },
+          {
+            x: dragState.startX + snappedDelta.x,
+            y: dragState.startY + snappedDelta.y,
+          },
+        );
+        const groupStick = dragState.stick
+          ? {
+              x: Math.round(dragState.stick.initialX + snappedDelta.x),
+              y: Math.round(dragState.stick.initialY + snappedDelta.y),
+            }
+          : undefined;
+        onPositionsChange?.({ buttons: groupButtons, stick: groupStick });
+        const singleItem =
+          groupButtons.length + (groupStick ? 1 : 0) === 1
+            ? (groupButtons[0] ?? groupStick)
+            : undefined;
+        onDragCoordinateChange?.({
+          x: e.clientX,
+          y: e.clientY,
+          label: singleItem
+            ? formatDragCoordinateLabel(singleItem.x, singleItem.y)
+            : formatDragDeltaLabel(
+                Math.round(snappedDelta.x),
+                Math.round(snappedDelta.y),
+              ),
         });
         return;
       }
@@ -796,10 +817,16 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
       } else if (dragState.type === "stick") {
         onPositionsChange?.({ buttons: [], stick: position });
       }
+      onDragCoordinateChange?.({
+        x: e.clientX,
+        y: e.clientY,
+        label: formatDragCoordinateLabel(position.x, position.y),
+      });
     };
 
     const handleMouseUp = () => {
       setSnapGuides(null);
+      onDragCoordinateChange?.(null);
       if (dragState.type === "selection") {
         const selectedRect = normalizedRect(
           dragState.startX,
@@ -844,6 +871,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     layout.guides,
     layout.showstick,
     onPositionsChange,
+    onDragCoordinateChange,
     onSizeChange,
     onRotationChange,
     onLayoutDragEnd,
