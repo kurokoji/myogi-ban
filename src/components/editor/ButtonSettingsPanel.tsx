@@ -314,6 +314,20 @@ export function ButtonSettingsPanel(
                         })
                       }
                     />
+                    <Button
+                      size="xs"
+                      variant="light"
+                      color="gray"
+                      onClick={() =>
+                        updateLayout((next) => {
+                          next.buttons = next.buttons.map((b) =>
+                            resetButtonToDefaults(b, next.defaultbuttons),
+                          );
+                        })
+                      }
+                    >
+                      {t("resetAllToDefault")}
+                    </Button>
                   </DefaultButtonSettings>
                 ),
               },
@@ -420,38 +434,6 @@ export function ButtonSettingsPanel(
                         </Group>
                       </Stack>
                     )}
-                    <Button
-                      size="xs"
-                      variant="light"
-                      color="gray"
-                      onClick={() =>
-                        props.updateSelectedButtons((next) => {
-                          next.buttons = next.buttons.map((b) =>
-                            resetButtonToDefaults(b, next.defaultbuttons),
-                          ); /* ({
-                x: b.x,
-                y: b.y,
-                w: next.defaultbuttons.w,
-                h: next.defaultbuttons.h,
-                img: next.defaultbuttons.img,
-                xp: next.defaultbuttons.xp,
-                yp: next.defaultbuttons.yp,
-                wp: next.defaultbuttons.wp,
-                hp: next.defaultbuttons.hp,
-                imgp: next.defaultbuttons.imgp,
-                rotation: next.defaultbuttons.rotation,
-                useCss: next.defaultbuttons.useCss,
-                cssColor: next.defaultbuttons.cssColor,
-                cssPressedColor: next.defaultbuttons.cssPressedColor,
-                cssTransition: next.defaultbuttons.cssTransition,
-                cssEasing: next.defaultbuttons.cssEasing,
-                cssShape: next.defaultbuttons.cssShape,
-              })); */
-                        })
-                      }
-                    >
-                      {t("resetAllToDefault")}
-                    </Button>
                     {selectedButtonIndex !== null &&
                       (layout.buttons[selectedButtonIndex]?.useCss ??
                         layout.defaultbuttons.useCss ??

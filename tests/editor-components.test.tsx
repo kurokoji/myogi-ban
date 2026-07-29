@@ -1322,6 +1322,40 @@ test("button settings default to the selected-button tab once a button is select
   );
 });
 
+test("resetting all buttons to default lives in the default settings tab", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 2;
+  const view = renderComponent(
+    <ButtonSettingsPanel
+      layout={layout}
+      assigningTarget={null}
+      assignmentName=""
+      selectedButtonIndex={0}
+      selectedButtonIndexes={[0]}
+      updateLayout={() => {}}
+      updateSelectedButtons={() => {}}
+      onSelectedButtonChange={() => {}}
+      onAddButton={() => {}}
+      onDeleteSelectedButtons={() => {}}
+      openImagePicker={() => {}}
+      cancelAssignment={() => {}}
+    />,
+  );
+  const details = view.container.querySelector("details");
+  assert.ok(details);
+  details.open = true;
+  fireEvent(details, new componentDocument.defaultView.Event("toggle"));
+
+  assert.equal(
+    view.queryByRole("button", { name: "resetAllToDefault" }) === null,
+    true,
+  );
+
+  fireEvent.click(view.getByRole("tab", { name: "defaultButtonSettings" }));
+
+  assert.ok(view.getByRole("button", { name: "resetAllToDefault" }));
+});
+
 test("single-button settings show and update its coordinates", () => {
   const layout = createDefaultLayout();
   let updatedLayout: typeof layout | undefined;

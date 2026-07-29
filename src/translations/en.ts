@@ -74,7 +74,7 @@ export const enTranslation = {
   resetRotation: "Reset rotation",
   select: "Select",
   resetToDefault: "Reset to default",
-  resetAllToDefault: "Reset all to default",
+  resetAllToDefault: "Reset all buttons to default",
   export: "Export",
   import: "Import",
   importPreviewTitle: "Confirm import",

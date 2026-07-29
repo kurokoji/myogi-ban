@@ -72,7 +72,7 @@ export const jaTranslation = {
   resetRotation: "回転をリセット",
   select: "選択してください",
   resetToDefault: "標準に戻す",
-  resetAllToDefault: "すべて標準に戻す",
+  resetAllToDefault: "すべてのボタンを標準に戻す",
   export: "エクスポート",
   import: "インポート",
   importPreviewTitle: "インポート内容の確認",
