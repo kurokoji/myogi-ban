@@ -2,8 +2,7 @@
 
 格闘ゲーム向けコントローラー入力を可視化するOBS用ビューアです。編集画面でレイアウトを作り、OBSのブラウザソースには `/view` を指定して使います。
 
-<img width="1186" height="843" alt="image" src="https://github.com/user-attachments/assets/fc3f1be9-d993-4dc6-9466-00ec2bc7d492" />
-
+<img width="1586" height="993" alt="image" src="https://github.com/user-attachments/assets/2ab2c88d-99b8-4676-9a71-e998e8d45511" />
 
 ## 主な機能
 
