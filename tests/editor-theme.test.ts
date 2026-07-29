@@ -12,6 +12,12 @@ test("editor theme keeps Mantine text on the bundled app font", () => {
   );
 });
 
+test("number inputs keep incrementing while their up/down control is held", () => {
+  const numberInputDefaults = editorTheme.components?.NumberInput?.defaultProps;
+  assert.equal(numberInputDefaults?.stepHoldDelay, 500);
+  assert.equal(numberInputDefaults?.stepHoldInterval, 100);
+});
+
 test("editor provides the app font theme to Mantine", () => {
   const editorSource = readFileSync("src/editor.tsx", "utf8");
 

@@ -164,6 +164,11 @@ function EditorApp(): React.ReactElement {
     previewScroll.addEventListener("wheel", zoomOnWheel, { passive: false });
     return () => previewScroll.removeEventListener("wheel", zoomOnWheel);
   }, [zoomPreview]);
+
+  useEffect(() => {
+    window.addEventListener("pointerup", endLayoutDrag);
+    return () => window.removeEventListener("pointerup", endLayoutDrag);
+  }, [endLayoutDrag]);
   const {
     previewContainerRef,
     previewRef,
@@ -885,7 +890,7 @@ function EditorApp(): React.ReactElement {
         </div>
       </main>
 
-      <aside id="inspector">
+      <aside id="inspector" onPointerDownCapture={beginLayoutDrag}>
         <InspectorTabs
           activeTab={resolveInspectorTarget(selection)}
           tabs={visibleInspectorTargets().map((target) => ({

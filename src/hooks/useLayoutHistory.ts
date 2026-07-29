@@ -12,6 +12,11 @@ import { areLayoutSnapshotsEqual } from "../layout-history";
 import type { Layout } from "../types";
 
 const MAX_LAYOUT_HISTORY = 100;
+// A press-to-release gesture (beginDrag()/endDrag(), e.g. a NumberInput
+// hold) always collapses into one entry regardless of how long it lasts;
+// this only groups bursts with no such explicit boundary, such as typing
+// several keystrokes in a row.
+export const COALESCE_DEBOUNCE_MS = 300;
 
 interface UseLayoutHistoryOptions {
   layout: Layout;
@@ -29,6 +34,8 @@ export function useLayoutHistory({
   const undoStackRef = useRef<Layout[]>([]);
   const redoStackRef = useRef<Layout[]>([]);
   const dragHistoryStartRef = useRef<Layout | null>(null);
+  const coalesceStartRef = useRef<Layout | null>(null);
+  const coalesceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [availability, setAvailability] = useState({
     canUndo: false,
     canRedo: false,
@@ -45,13 +52,6 @@ export function useLayoutHistory({
     });
   }, []);
 
-  const clearHistory = useCallback(() => {
-    undoStackRef.current = [];
-    redoStackRef.current = [];
-    dragHistoryStartRef.current = null;
-    syncAvailability();
-  }, [syncAvailability]);
-
   const pushUndoSnapshot = useCallback(
     (snapshot: Layout) => {
       const nextStack = [...undoStackRef.current, cloneLayout(snapshot)];
@@ -61,6 +61,32 @@ export function useLayoutHistory({
     },
     [syncAvailability],
   );
+
+  const cancelCoalescedUpdate = useCallback(() => {
+    if (coalesceTimeoutRef.current !== null) {
+      clearTimeout(coalesceTimeoutRef.current);
+      coalesceTimeoutRef.current = null;
+    }
+    coalesceStartRef.current = null;
+  }, []);
+
+  const flushCoalescedUpdate = useCallback(() => {
+    const startLayout = coalesceStartRef.current;
+    cancelCoalescedUpdate();
+    if (!startLayout || areLayoutSnapshotsEqual(startLayout, layoutRef.current))
+      return;
+    pushUndoSnapshot(startLayout);
+  }, [cancelCoalescedUpdate, layoutRef, pushUndoSnapshot]);
+
+  useEffect(() => cancelCoalescedUpdate, [cancelCoalescedUpdate]);
+
+  const clearHistory = useCallback(() => {
+    cancelCoalescedUpdate();
+    undoStackRef.current = [];
+    redoStackRef.current = [];
+    dragHistoryStartRef.current = null;
+    syncAvailability();
+  }, [cancelCoalescedUpdate, syncAvailability]);
 
   const restoreLayout = useCallback(
     (nextLayout: Layout) => {
@@ -72,6 +98,7 @@ export function useLayoutHistory({
   );
 
   const undo = useCallback(() => {
+    flushCoalescedUpdate();
     const previous = undoStackRef.current.pop();
     if (!previous) return;
     redoStackRef.current = [
@@ -80,15 +107,22 @@ export function useLayoutHistory({
     ];
     restoreLayout(previous);
     syncAvailability();
-  }, [layoutRef, restoreLayout, syncAvailability]);
+  }, [flushCoalescedUpdate, layoutRef, restoreLayout, syncAvailability]);
 
   const redo = useCallback(() => {
+    flushCoalescedUpdate();
     const next = redoStackRef.current.pop();
     if (!next) return;
     pushUndoSnapshot(layoutRef.current);
     restoreLayout(next);
     syncAvailability();
-  }, [layoutRef, pushUndoSnapshot, restoreLayout, syncAvailability]);
+  }, [
+    flushCoalescedUpdate,
+    layoutRef,
+    pushUndoSnapshot,
+    restoreLayout,
+    syncAvailability,
+  ]);
 
   const updateLayout = useCallback(
     (updater: (layout: Layout) => void) => {
@@ -96,19 +130,35 @@ export function useLayoutHistory({
         const next = cloneLayout(current);
         updater(next);
         if (areLayoutSnapshotsEqual(current, next)) return current;
-        pushUndoSnapshot(current);
-        redoStackRef.current = [];
-        syncAvailability();
         layoutRef.current = next;
+        if (dragHistoryStartRef.current !== null) {
+          // An explicit beginDrag()/endDrag() session (canvas drag, or a
+          // NumberInput hold) owns this update; endDrag() records the
+          // single history entry once the gesture ends.
+          return next;
+        }
+        if (coalesceStartRef.current === null) {
+          coalesceStartRef.current = current;
+          redoStackRef.current = [];
+          syncAvailability();
+        }
+        if (coalesceTimeoutRef.current !== null) {
+          clearTimeout(coalesceTimeoutRef.current);
+        }
+        coalesceTimeoutRef.current = setTimeout(
+          flushCoalescedUpdate,
+          COALESCE_DEBOUNCE_MS,
+        );
         return next;
       });
     },
-    [layoutRef, pushUndoSnapshot, setLayout, syncAvailability],
+    [flushCoalescedUpdate, layoutRef, setLayout, syncAvailability],
   );
 
   const beginDrag = useCallback(() => {
+    flushCoalescedUpdate();
     dragHistoryStartRef.current = cloneLayout(layoutRef.current);
-  }, [layoutRef]);
+  }, [flushCoalescedUpdate, layoutRef]);
 
   const endDrag = useCallback(() => {
     const startLayout = dragHistoryStartRef.current;
