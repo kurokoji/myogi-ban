@@ -486,11 +486,21 @@ body {
 }
 
 #preview .stick-block {
-  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-#preview .stick-block:hover {
-  filter: brightness(1.3);
+#preview .stick-block-active {
+  z-index: 71;
+  cursor: pointer;
+  color: #fff;
+  filter: drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000)
+    drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000);
+}
+
+#preview .stick-block-active:hover {
+  color: #74c0fc;
 }
 
 #preview .gamepad-button:active,
@@ -502,25 +512,6 @@ body {
 #preview .gamepad-button.button-selected {
   outline: 3px solid #4dabf7;
   outline-offset: 3px;
-}
-
-#preview .stick-area.stick-selected {
-  border-radius: 50%;
-}
-
-#preview .stick-area.stick-selected::before {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  z-index: 20;
-  width: 96px;
-  height: 96px;
-  border: 2px dashed rgba(116, 192, 252, 0.95);
-  border-radius: 50%;
-  background: rgba(77, 171, 247, 0.18);
-  content: "";
-  pointer-events: none;
-  transform: translate(-50%, -50%);
 }
 
 #preview .stick-drag-handle {

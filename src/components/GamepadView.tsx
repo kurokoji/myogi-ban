@@ -19,6 +19,7 @@ import { EditorContextMenu } from "./editor/EditorContextMenu";
 import { ButtonLayer } from "./gamepad/ButtonLayer";
 import { GamepadBackgroundLayer } from "./gamepad/GamepadBackgroundLayer";
 import { SelectionOverlays } from "./gamepad/SelectionOverlays";
+import { StickDirectionZones } from "./gamepad/StickDirectionZones";
 import { StickLayer } from "./gamepad/StickLayer";
 
 const STICK_SELECTION_SIZE = 96;
@@ -39,7 +40,7 @@ export interface GamepadViewProps {
   selectionSurfaceRef?: React.RefObject<HTMLElement | null>;
   onBackgroundSizeChange?: (width: number, height: number) => void;
   onButtonClick?: (index: number, toggleSelection: boolean) => void;
-  onStickClick?: (index: number, toggleSelection: boolean) => void;
+  onStickClick?: (index: number | null, toggleSelection: boolean) => void;
   onSelectionChange?: (selection: {
     buttonIndexes: number[];
     stick: boolean;
@@ -501,7 +502,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
       if (button) {
         onButtonClick?.(button.index, true);
       } else if (layout.showstick && rectContainsPoint(stickRect, local)) {
-        onStickClick?.(0, true);
+        onStickClick?.(null, true);
       }
     },
     [
@@ -894,7 +895,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
   );
 
   const handleStickClick = useCallback(
-    (index: number, event: React.MouseEvent) => {
+    (index: number | null, event: React.MouseEvent) => {
       if (dragMovedRef.current) {
         dragMovedRef.current = false;
         return;
@@ -902,6 +903,11 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
       onStickClick?.(index, event.ctrlKey || event.metaKey);
     },
     [onStickClick],
+  );
+
+  const handleStickCenterClick = useCallback(
+    (event: React.MouseEvent) => handleStickClick(null, event),
+    [handleStickClick],
   );
 
   return (
@@ -928,13 +934,21 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
           scaleX={stickScaleX}
           scaleY={stickScaleY}
           editorMode={editorMode}
-          selected={selectedStick}
           onDragMouseDown={(event, initialX, initialY) =>
             handleMouseDown(event, "stick", 0, initialX, initialY)
           }
-          onDirectionClick={handleStickClick}
+          onCenterClick={handleStickCenterClick}
           onContextMenu={(event) => openContextMenu(event, { type: "stick" })}
         />
+        {editorMode && selectedStick && layout.showstick && (
+          <StickDirectionZones
+            centerX={(stickRect.left + stickRect.right) / 2}
+            centerY={(stickRect.top + stickRect.bottom) / 2}
+            scaleX={stickScaleX}
+            scaleY={stickScaleY}
+            onDirectionClick={handleStickClick}
+          />
+        )}
         <ButtonLayer
           layout={layout}
           pressedButtons={pressedButtons}

@@ -756,7 +756,7 @@ test("pressed buttons keep their released size", () => {
 
 test("control-clicking the stick center requests selection toggle", () => {
   const layout = createDefaultLayout();
-  const clicks: Array<{ index: number; toggle: boolean }> = [];
+  const clicks: Array<{ index: number | null; toggle: boolean }> = [];
   const view = renderComponent(
     <GamepadView
       layout={layout}
@@ -771,7 +771,113 @@ test("control-clicking the stick center requests selection toggle", () => {
   assert.ok(handle);
   fireEvent.click(handle, { ctrlKey: true });
 
-  assert.deepEqual(clicks, [{ index: 0, toggle: true }]);
+  assert.deepEqual(clicks, [{ index: null, toggle: true }]);
+});
+
+test("clicking the stick center selects it without starting an assignment", () => {
+  const layout = createDefaultLayout();
+  const clicks: Array<{ index: number | null; toggle: boolean }> = [];
+  const view = renderComponent(
+    <GamepadView
+      layout={layout}
+      stickClass="stick"
+      pressedButtons={[]}
+      editorMode={true}
+      onStickClick={(index, toggle) => clicks.push({ index, toggle })}
+    />,
+  );
+
+  const handle = view.container.querySelector(".stick-drag-handle");
+  assert.ok(handle);
+  fireEvent.click(handle);
+
+  assert.deepEqual(clicks, [{ index: null, toggle: false }]);
+});
+
+test("clicking a stick direction zone selects the stick and requests its assignment", () => {
+  const layout = createDefaultLayout();
+  const clicks: Array<{ index: number | null; toggle: boolean }> = [];
+  const view = renderComponent(
+    <GamepadView
+      layout={layout}
+      stickClass="stick"
+      pressedButtons={[]}
+      editorMode={true}
+      selectedStick={true}
+      onStickClick={(index, toggle) => clicks.push({ index, toggle })}
+    />,
+  );
+
+  assert.equal(
+    view.container.querySelectorAll(".tabler-icon-arrow-big-up-filled").length,
+    4,
+  );
+  const upZone = view.container.querySelector("#stick-up");
+  assert.ok(upZone);
+  fireEvent.click(upZone);
+
+  assert.deepEqual(clicks, [{ index: 0, toggle: false }]);
+});
+
+test("stick direction zones render outside #stick-area, not shadowed by its stacking context", () => {
+  // #stick-area gets a transform (for centering/scaling), which forces a
+  // new stacking context; a high z-index on a descendant can never outrank
+  // .selection-bounds (a sibling of #stick-area) from inside that context.
+  // The zones must be true siblings of .selection-bounds for their z-index
+  // to actually apply.
+  const layout = createDefaultLayout();
+  const view = renderComponent(
+    <GamepadView
+      layout={layout}
+      stickClass="stick"
+      pressedButtons={[]}
+      editorMode={true}
+      selectedStick={true}
+      onStickClick={() => {}}
+    />,
+  );
+
+  const stickArea = view.container.querySelector("#stick-area");
+  const upZone = view.container.querySelector("#stick-up");
+  assert.ok(stickArea);
+  assert.ok(upZone);
+  assert.equal(stickArea.contains(upZone), false);
+});
+
+test("stick direction zones do not exist until the stick is selected", () => {
+  const layout = createDefaultLayout();
+  const view = renderComponent(
+    <GamepadView
+      layout={layout}
+      stickClass="stick"
+      pressedButtons={[]}
+      editorMode={true}
+      selectedStick={false}
+      onStickClick={() => {}}
+    />,
+  );
+
+  assert.equal(
+    view.container.querySelectorAll(".tabler-icon-arrow-big-up-filled").length,
+    0,
+  );
+  assert.equal(view.container.querySelector("#stick-up") === null, true);
+});
+
+test("stick direction zones do not exist outside editor mode", () => {
+  const layout = createDefaultLayout();
+  const view = renderComponent(
+    <GamepadView
+      layout={layout}
+      stickClass="stick"
+      pressedButtons={[]}
+      editorMode={false}
+      selectedStick={true}
+      onStickClick={() => {}}
+    />,
+  );
+
+  assert.equal(view.container.querySelector("#stick-up") === null, true);
 });
 
 test("selection overlays show active snap alignment guides", () => {

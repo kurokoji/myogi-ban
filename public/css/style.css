@@ -52,25 +52,12 @@ body {
 }
 
 .stick-block {
-  width: 60px;
-  height: 60px;
-  left: calc(50% - 30px);
-  top: calc(50% - 30px);
+  width: 40px;
+  height: 40px;
+  left: calc(50% - 20px);
+  top: calc(50% - 20px);
   background-size: 100%;
   position: absolute;
-}
-
-.stick-block.stick-up {
-  transform: rotate(0deg) translateY(-60px);
-}
-.stick-block.stick-down {
-  transform: rotate(180deg) translateY(-60px);
-}
-.stick-block.stick-left {
-  transform: rotate(270deg) translateY(-60px);
-}
-.stick-block.stick-right {
-  transform: rotate(90deg) translateY(-60px);
 }
 
 .gamepad-button {

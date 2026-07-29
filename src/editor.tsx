@@ -597,7 +597,7 @@ function EditorApp(): React.ReactElement {
   );
 
   const selectStickAndStartAssignment = useCallback(
-    (index: number, toggleSelection: boolean) => {
+    (index: number | null, toggleSelection: boolean) => {
       if (toggleSelection) {
         setSelection((current) => ({ ...current, stick: !current.stick }));
         cancelAssignment();
@@ -608,7 +608,7 @@ function EditorApp(): React.ReactElement {
         primaryButtonIndex: null,
         stick: true,
       });
-      startAssignment(1000 + index);
+      if (index !== null) startAssignment(1000 + index);
     },
     [cancelAssignment, startAssignment],
   );
