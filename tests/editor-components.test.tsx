@@ -772,6 +772,191 @@ test("pressed buttons keep their released size", () => {
   assert.equal(button?.style.height, "44px");
 });
 
+test("a button with text renders a label inside it", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 1;
+  layout.buttons[0].text = "P1";
+  const view = renderComponent(
+    <ButtonLayer
+      layout={layout}
+      pressedButtons={[]}
+      editorMode={false}
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      onButtonClick={() => {}}
+      onButtonMouseDown={() => {}}
+    />,
+  );
+
+  const label = view.container.querySelector("#button0 .gamepad-button-label");
+  assert.equal(label?.textContent, "P1");
+});
+
+test("a button without text renders no label", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 1;
+  const view = renderComponent(
+    <ButtonLayer
+      layout={layout}
+      pressedButtons={[]}
+      editorMode={false}
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      onButtonClick={() => {}}
+      onButtonMouseDown={() => {}}
+    />,
+  );
+
+  assert.equal(
+    view.container.querySelector("#button0 .gamepad-button-label") === null,
+    true,
+  );
+});
+
+test("button text color and size fall back to the defaults, then to a button's own values", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 2;
+  layout.defaultbuttons.cssTextColor = "#111111";
+  layout.defaultbuttons.cssTextSize = "20";
+  layout.buttons[0].text = "P1";
+  layout.buttons[1].text = "P2";
+  layout.buttons[1].cssTextColor = "#eeeeee";
+  layout.buttons[1].cssTextSize = "32";
+  const view = renderComponent(
+    <ButtonLayer
+      layout={layout}
+      pressedButtons={[]}
+      editorMode={false}
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      onButtonClick={() => {}}
+      onButtonMouseDown={() => {}}
+    />,
+  );
+
+  const inherited = view.container.querySelector<HTMLElement>("#button0");
+  assert.equal(
+    inherited?.style.getPropertyValue("--button-text-color"),
+    "#111111",
+  );
+  assert.equal(inherited?.style.getPropertyValue("--button-text-size"), "20px");
+
+  const overridden = view.container.querySelector<HTMLElement>("#button1");
+  assert.equal(
+    overridden?.style.getPropertyValue("--button-text-color"),
+    "#eeeeee",
+  );
+  assert.equal(
+    overridden?.style.getPropertyValue("--button-text-size"),
+    "32px",
+  );
+});
+
+test("button text renders bold, italic, and outline styling", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 1;
+  layout.buttons[0].text = "P1";
+  layout.buttons[0].cssTextBold = true;
+  layout.buttons[0].cssTextItalic = true;
+  layout.buttons[0].cssTextOutline = true;
+  layout.buttons[0].cssTextOutlineColor = "#00ff00";
+  const view = renderComponent(
+    <ButtonLayer
+      layout={layout}
+      pressedButtons={[]}
+      editorMode={false}
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      onButtonClick={() => {}}
+      onButtonMouseDown={() => {}}
+    />,
+  );
+
+  const button = view.container.querySelector<HTMLElement>("#button0");
+  assert.equal(button?.style.getPropertyValue("--button-text-weight"), "bold");
+  assert.equal(button?.style.getPropertyValue("--button-text-style"), "italic");
+  assert.equal(
+    button?.style.getPropertyValue("--button-text-stroke-color"),
+    "#00ff00",
+  );
+  assert.notEqual(
+    button?.style.getPropertyValue("--button-text-stroke-width"),
+    "0px",
+  );
+});
+
+test("button text has no outline stroke width by default", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 1;
+  layout.buttons[0].text = "P1";
+  const view = renderComponent(
+    <ButtonLayer
+      layout={layout}
+      pressedButtons={[]}
+      editorMode={false}
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      onButtonClick={() => {}}
+      onButtonMouseDown={() => {}}
+    />,
+  );
+
+  const button = view.container.querySelector<HTMLElement>("#button0");
+  assert.equal(
+    button?.style.getPropertyValue("--button-text-weight"),
+    "normal",
+  );
+  assert.equal(button?.style.getPropertyValue("--button-text-style"), "normal");
+  assert.equal(
+    button?.style.getPropertyValue("--button-text-stroke-width"),
+    "0px",
+  );
+});
+
+test("a button without outline does not get the outline label class, so color emoji still render", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 1;
+  layout.buttons[0].text = "😢";
+  const view = renderComponent(
+    <ButtonLayer
+      layout={layout}
+      pressedButtons={[]}
+      editorMode={false}
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      onButtonClick={() => {}}
+      onButtonMouseDown={() => {}}
+    />,
+  );
+
+  const label = view.container.querySelector(".gamepad-button-label");
+  assert.equal(
+    label?.classList.contains("gamepad-button-label-outline"),
+    false,
+  );
+});
+
+test("a button with outline enabled gets the outline label class", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 1;
+  layout.buttons[0].text = "P1";
+  layout.buttons[0].cssTextOutline = true;
+  const view = renderComponent(
+    <ButtonLayer
+      layout={layout}
+      pressedButtons={[]}
+      editorMode={false}
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      onButtonClick={() => {}}
+      onButtonMouseDown={() => {}}
+    />,
+  );
+
+  const label = view.container.querySelector(".gamepad-button-label");
+  assert.equal(label?.classList.contains("gamepad-button-label-outline"), true);
+});
+
 test("control-clicking the stick center requests selection toggle", () => {
   const layout = createDefaultLayout();
   const clicks: Array<{ index: number | null; toggle: boolean }> = [];
@@ -1435,6 +1620,46 @@ test("resetting all buttons to default lives in the default settings tab", () =>
   assert.ok(view.getByRole("button", { name: "resetAllToDefault" }));
 });
 
+test("default text styling controls update the layout defaults", () => {
+  const layout = createDefaultLayout();
+  let updatedLayout: typeof layout | undefined;
+  const view = renderComponent(
+    <ButtonSettingsPanel
+      layout={layout}
+      assigningTarget={null}
+      assignmentName=""
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      updateLayout={(update) => {
+        const next = structuredClone(layout);
+        update(next);
+        updatedLayout = next;
+      }}
+      updateSelectedButtons={() => {}}
+      onSelectedButtonChange={() => {}}
+      onAddButton={() => {}}
+      onDeleteSelectedButtons={() => {}}
+      openImagePicker={() => {}}
+      cancelAssignment={() => {}}
+    />,
+  );
+  const details = view.container.querySelector("details");
+  assert.ok(details);
+  details.open = true;
+  fireEvent(details, new componentDocument.defaultView.Event("toggle"));
+
+  fireEvent.click(view.getByRole("switch", { name: "textBold" }));
+  assert.equal(updatedLayout?.defaultbuttons.cssTextBold, true);
+
+  fireEvent.click(view.getByRole("switch", { name: "textItalic" }));
+  assert.equal(updatedLayout?.defaultbuttons.cssTextItalic, true);
+
+  assert.equal(view.queryByLabelText("textOutlineColor") === null, true);
+
+  fireEvent.click(view.getByRole("switch", { name: "textOutline" }));
+  assert.equal(updatedLayout?.defaultbuttons.cssTextOutline, true);
+});
+
 test("single-button settings show and update its coordinates", () => {
   const layout = createDefaultLayout();
   let updatedLayout: typeof layout | undefined;
@@ -1559,6 +1784,81 @@ test("button settings omit pressed size controls", () => {
   assert.equal(view.queryByRole("textbox", { name: "pressedWidth" }), null);
   assert.equal(view.queryByRole("textbox", { name: "pressedHeight" }), null);
   assert.equal(view.queryByText("pressedSize"), null);
+});
+
+test("editing the selected button's text label updates it", () => {
+  const layout = createDefaultLayout();
+  layout.buttons[0].text = "P1";
+  let updatedLayout: typeof layout | undefined;
+  const { selectedSettings } = renderSelectedButtonSettings(
+    layout,
+    (update) => {
+      const next = structuredClone(layout);
+      update(next);
+      updatedLayout = next;
+    },
+  );
+
+  const textInput = within(selectedSettings).getByRole("textbox", {
+    name: "buttonText",
+  }) as HTMLInputElement;
+  assert.equal(textInput.value, "P1");
+
+  fireEvent.change(textInput, { target: { value: "P2" } });
+
+  assert.equal(updatedLayout?.buttons[0].text, "P2");
+});
+
+test("toggling bold and italic switches updates the selected button", () => {
+  const layout = createDefaultLayout();
+  let updatedLayout: typeof layout | undefined;
+  const { selectedSettings } = renderSelectedButtonSettings(
+    layout,
+    (update) => {
+      const next = structuredClone(layout);
+      update(next);
+      updatedLayout = next;
+    },
+  );
+
+  fireEvent.click(
+    within(selectedSettings).getByRole("switch", {
+      name: "textBold inheritDefault",
+    }),
+  );
+  assert.equal(updatedLayout?.buttons[0].cssTextBold, true);
+
+  fireEvent.click(
+    within(selectedSettings).getByRole("switch", {
+      name: "textItalic inheritDefault",
+    }),
+  );
+  assert.equal(updatedLayout?.buttons[0].cssTextItalic, true);
+});
+
+test("enabling the outline switch reveals an outline color picker", () => {
+  const layout = createDefaultLayout();
+  let updatedLayout: typeof layout | undefined;
+  const { selectedSettings } = renderSelectedButtonSettings(
+    layout,
+    (update) => {
+      const next = structuredClone(layout);
+      update(next);
+      updatedLayout = next;
+    },
+  );
+
+  assert.equal(
+    within(selectedSettings).queryByLabelText("textOutlineColor") === null,
+    true,
+  );
+
+  fireEvent.click(
+    within(selectedSettings).getByRole("switch", {
+      name: "textOutline inheritDefault",
+    }),
+  );
+  assert.equal(updatedLayout?.buttons[0].cssTextOutline, true);
 });
 
 test("inherited per-button size fields show their effective default values", () => {

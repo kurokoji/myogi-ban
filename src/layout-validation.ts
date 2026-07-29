@@ -28,6 +28,16 @@ const buttonStrings = [
   "cssPressedColor",
   "cssTransition",
   "cssEasing",
+  "text",
+  "cssTextColor",
+  "cssTextSize",
+  "cssTextOutlineColor",
+];
+const buttonBooleans = [
+  "useCss",
+  "cssTextBold",
+  "cssTextItalic",
+  "cssTextOutline",
 ];
 
 function validateButton(value: unknown): void {
@@ -35,8 +45,9 @@ function validateButton(value: unknown): void {
   for (const key of buttonStrings)
     if (key in value && typeof value[key] !== "string")
       throw new InvalidLayoutError();
-  if ("useCss" in value && typeof value.useCss !== "boolean")
-    throw new InvalidLayoutError();
+  for (const key of buttonBooleans)
+    if (key in value && typeof value[key] !== "boolean")
+      throw new InvalidLayoutError();
   if (
     "cssShape" in value &&
     !["circle", "pill", "rounded", "square"].includes(String(value.cssShape))

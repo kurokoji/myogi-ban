@@ -314,6 +314,90 @@ export function ButtonSettingsPanel(
                         })
                       }
                     />
+                    <Text size="xs" fw={600}>
+                      {t("buttonText")}
+                    </Text>
+                    <div className="control row">
+                      <ColorInput
+                        label={t("textColor")}
+                        value={layout.defaultbuttons.cssTextColor || "#ffffff"}
+                        onChange={(event) =>
+                          updateLayout((next) => {
+                            next.defaultbuttons.cssTextColor =
+                              event.target.value;
+                          })
+                        }
+                      />
+                      <NumberInput
+                        size="xs"
+                        label={t("textSize")}
+                        min={1}
+                        max={200}
+                        step={1}
+                        value={numericValue(
+                          layout.defaultbuttons.cssTextSize || "14",
+                        )}
+                        onChange={(value) =>
+                          updateLayout((next) => {
+                            next.defaultbuttons.cssTextSize = String(
+                              value ?? 14,
+                            );
+                          })
+                        }
+                      />
+                    </div>
+                    <Group gap="xs">
+                      <Switch
+                        size="sm"
+                        label={t("textBold")}
+                        checked={layout.defaultbuttons.cssTextBold ?? false}
+                        onChange={(event) =>
+                          updateLayout((next) => {
+                            next.defaultbuttons.cssTextBold =
+                              event.target.checked;
+                          })
+                        }
+                      />
+                      <Switch
+                        size="sm"
+                        label={t("textItalic")}
+                        checked={layout.defaultbuttons.cssTextItalic ?? false}
+                        onChange={(event) =>
+                          updateLayout((next) => {
+                            next.defaultbuttons.cssTextItalic =
+                              event.target.checked;
+                          })
+                        }
+                      />
+                    </Group>
+                    <Group gap="xs" align="end">
+                      <Switch
+                        size="sm"
+                        label={t("textOutline")}
+                        checked={layout.defaultbuttons.cssTextOutline ?? false}
+                        onChange={(event) =>
+                          updateLayout((next) => {
+                            next.defaultbuttons.cssTextOutline =
+                              event.target.checked;
+                          })
+                        }
+                      />
+                      {layout.defaultbuttons.cssTextOutline && (
+                        <ColorInput
+                          label={t("textOutlineColor")}
+                          value={
+                            layout.defaultbuttons.cssTextOutlineColor ||
+                            "#000000"
+                          }
+                          onChange={(event) =>
+                            updateLayout((next) => {
+                              next.defaultbuttons.cssTextOutlineColor =
+                                event.target.value;
+                            })
+                          }
+                        />
+                      )}
+                    </Group>
                     <Button
                       size="xs"
                       variant="light"
@@ -355,6 +439,168 @@ export function ButtonSettingsPanel(
                   >
                     {selectedButtonIndex !== null && (
                       <Stack gap="xs">
+                        <TextInput
+                          size="xs"
+                          label={t("buttonText")}
+                          value={
+                            layout.buttons[selectedButtonIndex]?.text ?? ""
+                          }
+                          onChange={(event) =>
+                            props.updateSelectedButtons((next) => {
+                              next.buttons[selectedButtonIndex].text =
+                                event.target.value;
+                            })
+                          }
+                        />
+                        <div className="control row">
+                          <ColorInput
+                            label={t("textColor")}
+                            description={
+                              !layout.buttons[selectedButtonIndex]
+                                ?.cssTextColor ||
+                              layout.buttons[selectedButtonIndex]
+                                ?.cssTextColor ===
+                                layout.defaultbuttons.cssTextColor
+                                ? t("inheritDefault")
+                                : undefined
+                            }
+                            value={
+                              layout.buttons[selectedButtonIndex]
+                                ?.cssTextColor ||
+                              layout.defaultbuttons.cssTextColor ||
+                              "#ffffff"
+                            }
+                            onChange={(event) =>
+                              props.updateSelectedButtons((next) => {
+                                next.buttons[selectedButtonIndex].cssTextColor =
+                                  event.target.value;
+                              })
+                            }
+                          />
+                          <InheritedNumberInput
+                            size="xs"
+                            label={t("textSize")}
+                            min={1}
+                            max={200}
+                            step={1}
+                            value={
+                              layout.buttons[selectedButtonIndex]?.cssTextSize
+                            }
+                            defaultValue={layout.defaultbuttons.cssTextSize}
+                            fallbackValue="14"
+                            onChange={(value) =>
+                              props.updateSelectedButtons((next) => {
+                                next.buttons[selectedButtonIndex].cssTextSize =
+                                  String(value ?? 14);
+                              })
+                            }
+                            placeholder={
+                              layout.defaultbuttons.cssTextSize || "14"
+                            }
+                          />
+                        </div>
+                        <Group gap="xs">
+                          <Switch
+                            size="sm"
+                            label={t("textBold")}
+                            description={
+                              layout.buttons[selectedButtonIndex]
+                                ?.cssTextBold === undefined
+                                ? t("inheritDefault")
+                                : undefined
+                            }
+                            checked={
+                              layout.buttons[selectedButtonIndex]
+                                ?.cssTextBold ??
+                              layout.defaultbuttons.cssTextBold ??
+                              false
+                            }
+                            onChange={(event) =>
+                              props.updateSelectedButtons((next) => {
+                                next.buttons[selectedButtonIndex].cssTextBold =
+                                  event.target.checked;
+                              })
+                            }
+                          />
+                          <Switch
+                            size="sm"
+                            label={t("textItalic")}
+                            description={
+                              layout.buttons[selectedButtonIndex]
+                                ?.cssTextItalic === undefined
+                                ? t("inheritDefault")
+                                : undefined
+                            }
+                            checked={
+                              layout.buttons[selectedButtonIndex]
+                                ?.cssTextItalic ??
+                              layout.defaultbuttons.cssTextItalic ??
+                              false
+                            }
+                            onChange={(event) =>
+                              props.updateSelectedButtons((next) => {
+                                next.buttons[
+                                  selectedButtonIndex
+                                ].cssTextItalic = event.target.checked;
+                              })
+                            }
+                          />
+                        </Group>
+                        <Group gap="xs" align="end">
+                          <Switch
+                            size="sm"
+                            label={t("textOutline")}
+                            description={
+                              layout.buttons[selectedButtonIndex]
+                                ?.cssTextOutline === undefined
+                                ? t("inheritDefault")
+                                : undefined
+                            }
+                            checked={
+                              layout.buttons[selectedButtonIndex]
+                                ?.cssTextOutline ??
+                              layout.defaultbuttons.cssTextOutline ??
+                              false
+                            }
+                            onChange={(event) =>
+                              props.updateSelectedButtons((next) => {
+                                next.buttons[
+                                  selectedButtonIndex
+                                ].cssTextOutline = event.target.checked;
+                              })
+                            }
+                          />
+                          {(layout.buttons[selectedButtonIndex]
+                            ?.cssTextOutline ??
+                            layout.defaultbuttons.cssTextOutline ??
+                            false) && (
+                            <ColorInput
+                              label={t("textOutlineColor")}
+                              description={
+                                !layout.buttons[selectedButtonIndex]
+                                  ?.cssTextOutlineColor ||
+                                layout.buttons[selectedButtonIndex]
+                                  ?.cssTextOutlineColor ===
+                                  layout.defaultbuttons.cssTextOutlineColor
+                                  ? t("inheritDefault")
+                                  : undefined
+                              }
+                              value={
+                                layout.buttons[selectedButtonIndex]
+                                  ?.cssTextOutlineColor ||
+                                layout.defaultbuttons.cssTextOutlineColor ||
+                                "#000000"
+                              }
+                              onChange={(event) =>
+                                props.updateSelectedButtons((next) => {
+                                  next.buttons[
+                                    selectedButtonIndex
+                                  ].cssTextOutlineColor = event.target.value;
+                                })
+                              }
+                            />
+                          )}
+                        </Group>
                         {props.selectedButtonIndexes.length === 1 && (
                           <PositionInputs
                             x={layout.buttons[selectedButtonIndex]?.x ?? ""}

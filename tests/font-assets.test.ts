@@ -27,6 +27,24 @@ test("both browser entry points load M PLUS 2 from Fontsource", () => {
   );
 });
 
+test("emoji rely on native system fonts instead of a self-hosted Fontsource package", () => {
+  const packageJson = JSON.parse(readFileSync("package.json", "utf8"));
+  assert.equal(
+    "@fontsource/noto-color-emoji" in packageJson.dependencies,
+    false,
+  );
+
+  for (const entryPoint of ["src/editor.tsx", "src/viewer.tsx"]) {
+    const source = readFileSync(entryPoint, "utf8");
+    assert.doesNotMatch(source, /@fontsource\/noto-color-emoji/);
+  }
+
+  const stylesheet = readFileSync("public/css/style.css", "utf8");
+  assert.doesNotMatch(stylesheet, /"Noto Color Emoji"/);
+  assert.match(stylesheet, /"Segoe UI Emoji"/);
+  assert.match(stylesheet, /"Apple Color Emoji"/);
+});
+
 test("the editor loads M PLUS Code Latin from Fontsource", () => {
   const packageJson = JSON.parse(readFileSync("package.json", "utf8"));
   assert.equal(

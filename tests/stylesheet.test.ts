@@ -25,6 +25,16 @@ test("shared styles use the Fontsource M PLUS 2 variable family", () => {
   );
 });
 
+test("emoji render via native system color-emoji fonts", () => {
+  const match = stylesheet.match(/--app-font-family:\s*([^;]+);/);
+  assert.ok(match);
+  const stack = match[1];
+
+  assert.notEqual(stack.indexOf("Segoe UI Emoji"), -1);
+  assert.notEqual(stack.indexOf("Apple Color Emoji"), -1);
+  assert.doesNotMatch(stack, /Noto Color Emoji/);
+});
+
 test("OBS URL uses the application monospace family", () => {
   assert.match(
     editorStylesheet,

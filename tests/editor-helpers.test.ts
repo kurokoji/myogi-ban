@@ -42,6 +42,36 @@ test("updateSelectedButtonSettings applies changed settings to every selected bu
   assert.equal(layout.buttons[1].cssShape, "rounded");
 });
 
+test("updateSelectedButtonSettings applies text label changes to every selected button", () => {
+  const layout = createDefaultLayout();
+
+  updateSelectedButtonSettings(layout, [0, 1], (next) => {
+    next.buttons[0].text = "P1";
+    next.buttons[0].cssTextColor = "#111111";
+    next.buttons[0].cssTextSize = "20";
+  });
+
+  assert.equal(layout.buttons[1].text, "P1");
+  assert.equal(layout.buttons[1].cssTextColor, "#111111");
+  assert.equal(layout.buttons[1].cssTextSize, "20");
+});
+
+test("updateSelectedButtonSettings applies bold, italic, and outline changes to every selected button", () => {
+  const layout = createDefaultLayout();
+
+  updateSelectedButtonSettings(layout, [0, 1], (next) => {
+    next.buttons[0].cssTextBold = true;
+    next.buttons[0].cssTextItalic = true;
+    next.buttons[0].cssTextOutline = true;
+    next.buttons[0].cssTextOutlineColor = "#00ff00";
+  });
+
+  assert.equal(layout.buttons[1].cssTextBold, true);
+  assert.equal(layout.buttons[1].cssTextItalic, true);
+  assert.equal(layout.buttons[1].cssTextOutline, true);
+  assert.equal(layout.buttons[1].cssTextOutlineColor, "#00ff00");
+});
+
 test("updateSelectedButtonSettings preserves settings that were not changed", () => {
   const layout = createDefaultLayout();
   layout.buttons[0].w = "40";

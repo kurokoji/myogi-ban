@@ -23,6 +23,13 @@ const BULK_EDITABLE_BUTTON_KEYS: Array<keyof ButtonLayout> = [
   "cssTransition",
   "cssEasing",
   "cssShape",
+  "text",
+  "cssTextColor",
+  "cssTextSize",
+  "cssTextBold",
+  "cssTextItalic",
+  "cssTextOutline",
+  "cssTextOutlineColor",
 ];
 
 export function updateSelectedButtonSettings(

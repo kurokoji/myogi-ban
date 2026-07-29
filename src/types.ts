@@ -18,6 +18,13 @@ export interface ButtonLayout {
   cssTransition?: string;
   cssEasing?: string;
   cssShape?: ButtonShape;
+  text?: string;
+  cssTextColor?: string;
+  cssTextSize?: string;
+  cssTextBold?: boolean;
+  cssTextItalic?: boolean;
+  cssTextOutline?: boolean;
+  cssTextOutlineColor?: string;
 }
 
 export interface StickLayout {

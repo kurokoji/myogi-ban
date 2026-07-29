@@ -1,7 +1,11 @@
 :root {
+  /* Segoe UI Emoji / Apple Color Emoji render emoji in color via the OS's
+     own font, avoiding a self-hosted color-emoji font entirely (Windows
+     Chromium does not reliably rasterize bitmap-format @font-face color
+     glyphs, e.g. Noto Color Emoji). */
   --app-font-family:
     "M PLUS 2 Variable", -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
   --app-font-family-monospace: "M PLUS Code Latin Variable", monospace;
   --mantine-font-family: var(--app-font-family);
   --mantine-font-family-headings: var(--app-font-family);
@@ -64,6 +68,9 @@ body {
   transform: translate(-50%, -50%) rotate(var(--button-rotation, 0deg));
   background-size: 100% 100%;
   position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .button0 {
@@ -143,6 +150,29 @@ body {
     0 1px 3px rgba(0, 0, 0, 0.4);
   transform: translate(-50%, -50%) translateY(2px)
     rotate(var(--button-rotation, 0deg));
+}
+
+.gamepad-button-label {
+  color: var(--button-text-color, #ffffff);
+  font-size: var(--button-text-size, 14px);
+  font-weight: var(--button-text-weight, normal);
+  font-style: var(--button-text-style, normal);
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  /* Most fonts' descent metric is taller than their ascent leaves credit
+     for, so text centered by line-box metrics alone reads slightly low. */
+  transform: translateY(-0.08em);
+}
+
+/* -webkit-text-stroke disables color-glyph (COLR/CBDT) rendering in
+   Chromium even at 0 width, so only apply it when outline is enabled -
+   otherwise emoji in button labels render blank. */
+.gamepad-button-label-outline {
+  -webkit-text-stroke: var(--button-text-stroke-width, 0px)
+    var(--button-text-stroke-color, transparent);
+  paint-order: stroke fill;
 }
 
 /* Z-index */

@@ -35,6 +35,13 @@ interface ButtonDocument {
   transitionSeconds?: number;
   easing?: string;
   shape?: ButtonShape;
+  text?: string;
+  textColor?: string;
+  textSize?: number;
+  bold?: boolean;
+  italic?: boolean;
+  outline?: boolean;
+  outlineColor?: string;
 }
 
 interface StickDocument {
@@ -109,13 +116,23 @@ function validButton(value: unknown): boolean {
     validSize(value.size) &&
     validPoint(value.pressedPosition) &&
     validSize(value.pressedSize) &&
-    ["releasedImage", "pressedImage", "color", "pressedColor", "easing"].every(
-      (key) => hasOptionalType(value, key, "string"),
-    ) &&
-    ["rotation", "transitionSeconds"].every((key) =>
+    [
+      "releasedImage",
+      "pressedImage",
+      "color",
+      "pressedColor",
+      "easing",
+      "text",
+      "textColor",
+      "outlineColor",
+    ].every((key) => hasOptionalType(value, key, "string")) &&
+    ["rotation", "transitionSeconds", "textSize"].every((key) =>
       hasOptionalType(value, key, "number"),
     ) &&
     hasOptionalType(value, "useCss", "boolean") &&
+    hasOptionalType(value, "bold", "boolean") &&
+    hasOptionalType(value, "italic", "boolean") &&
+    hasOptionalType(value, "outline", "boolean") &&
     (value.shape === undefined ||
       ["circle", "pill", "rounded", "square"].includes(String(value.shape)))
   );
@@ -187,6 +204,13 @@ function buttonDocument(button: ButtonLayout): ButtonDocument {
     transitionSeconds: numeric(button.cssTransition),
     easing: button.cssEasing,
     shape: button.cssShape,
+    text: button.text || undefined,
+    textColor: button.cssTextColor,
+    textSize: numeric(button.cssTextSize),
+    bold: button.cssTextBold,
+    italic: button.cssTextItalic,
+    outline: button.cssTextOutline,
+    outlineColor: button.cssTextOutlineColor,
   };
 }
 
@@ -206,6 +230,13 @@ function buttonOverrideDocument(
     "transitionSeconds",
     "easing",
     "shape",
+    "text",
+    "textColor",
+    "textSize",
+    "bold",
+    "italic",
+    "outline",
+    "outlineColor",
   ] as const) {
     if (document[key] === defaultDocument[key]) delete document[key];
   }
@@ -281,6 +312,14 @@ function runtimeButton(button: ButtonDocument): ButtonLayout {
         : String(button.transitionSeconds),
     cssEasing: button.easing,
     cssShape: button.shape,
+    text: button.text,
+    cssTextColor: button.textColor,
+    cssTextSize:
+      button.textSize === undefined ? undefined : String(button.textSize),
+    cssTextBold: button.bold,
+    cssTextItalic: button.italic,
+    cssTextOutline: button.outline,
+    cssTextOutlineColor: button.outlineColor,
   };
 }
 

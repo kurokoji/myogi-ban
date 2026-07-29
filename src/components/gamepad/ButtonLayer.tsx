@@ -45,6 +45,21 @@ function buttonStyle(
   const cssEasing = button.cssEasing ?? defaultButton.cssEasing ?? "ease";
   const cssShape = button.cssShape ?? defaultButton.cssShape ?? "circle";
   const rotation = button.rotation ?? defaultButton.rotation ?? "0";
+  const textColor =
+    button.cssTextColor ?? defaultButton.cssTextColor ?? "#ffffff";
+  const textSize = button.cssTextSize ?? defaultButton.cssTextSize ?? "14";
+  const textBold = button.cssTextBold ?? defaultButton.cssTextBold ?? false;
+  const textItalic =
+    button.cssTextItalic ?? defaultButton.cssTextItalic ?? false;
+  const textOutline =
+    button.cssTextOutline ?? defaultButton.cssTextOutline ?? false;
+  const textOutlineColor =
+    button.cssTextOutlineColor ??
+    defaultButton.cssTextOutlineColor ??
+    "#000000";
+  const textStrokeWidth = textOutline
+    ? `${Math.max(1, Math.round(Number.parseFloat(textSize) * 0.12))}px`
+    : "0px";
   const style: CSSVariableStyle = cssVariables({
     left: `${button.x || defaultButton.x || 0}px`,
     top: `${button.y || defaultButton.y || 0}px`,
@@ -58,6 +73,12 @@ function buttonStyle(
     "--button-radius": buttonRadiusForShape(cssShape),
     "--button-transition": `${cssTransition}s`,
     "--button-easing": cssEasing,
+    "--button-text-color": textColor,
+    "--button-text-size": `${textSize}px`,
+    "--button-text-weight": textBold ? "bold" : "normal",
+    "--button-text-style": textItalic ? "italic" : "normal",
+    "--button-text-stroke-width": textStrokeWidth,
+    "--button-text-stroke-color": textOutlineColor,
   });
   if (!useCss && useImage) {
     style.backgroundImage = `url("layout/${layout.name}/${useImage}")`;
@@ -89,6 +110,9 @@ export function ButtonLayer({
         const button = layout.buttons[index] || defaultButton;
         const pressed = pressedButtons[index] || false;
         const useCss = button.useCss ?? defaultButton.useCss ?? false;
+        const label = button.text ?? defaultButton.text ?? "";
+        const textOutline =
+          button.cssTextOutline ?? defaultButton.cssTextOutline ?? false;
         const className = `gamepad-button button${index} ${pressed ? "button-pressed" : "button-released"} ${useCss ? "button-css" : ""} ${editorMode && (selectedButtonIndex === index || selected.has(index)) ? "button-selected" : ""}`;
         return (
           <div
@@ -118,7 +142,15 @@ export function ButtonLayer({
               ...buttonStyle(layout, button, defaultButton, pressed),
               cursor: editorMode ? "move" : undefined,
             }}
-          />
+          >
+            {label && (
+              <span
+                className={`gamepad-button-label ${textOutline ? "gamepad-button-label-outline" : ""}`}
+              >
+                {label}
+              </span>
+            )}
+          </div>
         );
       })}
     </div>

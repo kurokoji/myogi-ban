@@ -20,6 +20,41 @@ test("parseImportedLayoutJson accepts pill button shapes", () => {
   assert.equal(parsed.buttons?.[0]?.cssShape, "pill");
 });
 
+test("parseImportedLayoutJson accepts a legacy button text label", () => {
+  const parsed = parseImportedLayoutJson(
+    '{"defaultbuttons":{"cssTextColor":"#111111"},"buttons":[{"text":"P1","cssTextSize":"20"}]}',
+  );
+
+  assert.equal(parsed.defaultbuttons?.cssTextColor, "#111111");
+  assert.equal(parsed.buttons?.[0]?.text, "P1");
+  assert.equal(parsed.buttons?.[0]?.cssTextSize, "20");
+});
+
+test("parseImportedLayoutJson rejects a non-string button text field", () => {
+  assert.throws(
+    () => parseImportedLayoutJson('{"buttons":[{"cssTextSize":20}]}'),
+    /Invalid layout/,
+  );
+});
+
+test("parseImportedLayoutJson accepts bold, italic, and outline text styling", () => {
+  const parsed = parseImportedLayoutJson(
+    '{"buttons":[{"cssTextBold":true,"cssTextItalic":true,"cssTextOutline":true,"cssTextOutlineColor":"#00ff00"}]}',
+  );
+
+  assert.equal(parsed.buttons?.[0]?.cssTextBold, true);
+  assert.equal(parsed.buttons?.[0]?.cssTextItalic, true);
+  assert.equal(parsed.buttons?.[0]?.cssTextOutline, true);
+  assert.equal(parsed.buttons?.[0]?.cssTextOutlineColor, "#00ff00");
+});
+
+test("parseImportedLayoutJson rejects a non-boolean outline flag", () => {
+  assert.throws(
+    () => parseImportedLayoutJson('{"buttons":[{"cssTextOutline":"yes"}]}'),
+    /Invalid layout/,
+  );
+});
+
 test("parseImportedLayoutJson rejects invalid known field types", () => {
   assert.throws(
     () => parseImportedLayoutJson('{"buttons":{},"showstick":"yes"}'),

@@ -58,6 +58,50 @@ test("layout documents round trip pill button shapes", () => {
   assert.equal(restored.buttons[0].cssShape, undefined);
 });
 
+test("layout documents round trip button text, color, and size", () => {
+  const source = createDefaultLayout();
+  source.defaultbuttons.cssTextColor = "#111111";
+  source.defaultbuttons.cssTextSize = "20";
+  source.buttons[0].text = "P1";
+  source.buttons[0].cssTextColor = "#eeeeee";
+  source.buttons[0].cssTextSize = "32";
+
+  const document = serializeLayoutDocument(source);
+  assert.equal(document.buttonDefaults.textColor, "#111111");
+  assert.equal(document.buttonDefaults.textSize, 20);
+  assert.equal(document.buttons[0]?.text, "P1");
+  assert.equal(document.buttons[0]?.textColor, "#eeeeee");
+  assert.equal(document.buttons[0]?.textSize, 32);
+
+  const restored = deserializeLayoutDocument(document);
+  assert.equal(restored.defaultbuttons.cssTextColor, "#111111");
+  assert.equal(restored.defaultbuttons.cssTextSize, "20");
+  assert.equal(restored.buttons[0].text, "P1");
+  assert.equal(restored.buttons[0].cssTextColor, "#eeeeee");
+  assert.equal(restored.buttons[0].cssTextSize, "32");
+});
+
+test("layout documents round trip bold, italic, and outline text styling", () => {
+  const source = createDefaultLayout();
+  source.buttons[0].text = "P1";
+  source.buttons[0].cssTextBold = true;
+  source.buttons[0].cssTextItalic = true;
+  source.buttons[0].cssTextOutline = true;
+  source.buttons[0].cssTextOutlineColor = "#00ff00";
+
+  const document = serializeLayoutDocument(source);
+  assert.equal(document.buttons[0]?.bold, true);
+  assert.equal(document.buttons[0]?.italic, true);
+  assert.equal(document.buttons[0]?.outline, true);
+  assert.equal(document.buttons[0]?.outlineColor, "#00ff00");
+
+  const restored = deserializeLayoutDocument(document);
+  assert.equal(restored.buttons[0].cssTextBold, true);
+  assert.equal(restored.buttons[0].cssTextItalic, true);
+  assert.equal(restored.buttons[0].cssTextOutline, true);
+  assert.equal(restored.buttons[0].cssTextOutlineColor, "#00ff00");
+});
+
 test("deserializeLayoutDocument keeps v1 documents readable", () => {
   const restored = deserializeLayoutDocument({
     version: "v1.0.5",

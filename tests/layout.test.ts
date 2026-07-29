@@ -28,6 +28,12 @@ test("ensureLayoutDefaults removes button values duplicated from defaults", () =
       imgp: "pressed.png",
       rotation: "15",
       cssShape: "rounded",
+      cssTextColor: "#111111",
+      cssTextSize: "20",
+      cssTextBold: true,
+      cssTextItalic: true,
+      cssTextOutline: true,
+      cssTextOutlineColor: "#00ff00",
     } as never,
     buttons: [
       {
@@ -37,6 +43,12 @@ test("ensureLayoutDefaults removes button values duplicated from defaults", () =
         imgp: "pressed.png",
         rotation: "15",
         cssShape: "rounded",
+        cssTextColor: "#111111",
+        cssTextSize: "20",
+        cssTextBold: true,
+        cssTextItalic: true,
+        cssTextOutline: true,
+        cssTextOutlineColor: "#00ff00",
       } as never,
     ],
   });
@@ -46,4 +58,10 @@ test("ensureLayoutDefaults removes button values duplicated from defaults", () =
   assert.equal(layout.buttons[0].img, "");
   assert.equal(layout.buttons[0].rotation, undefined);
   assert.equal(layout.buttons[0].cssShape, undefined);
+  assert.equal(layout.buttons[0].cssTextColor, undefined);
+  assert.equal(layout.buttons[0].cssTextSize, undefined);
+  assert.equal(layout.buttons[0].cssTextBold, undefined);
+  assert.equal(layout.buttons[0].cssTextItalic, undefined);
+  assert.equal(layout.buttons[0].cssTextOutline, undefined);
+  assert.equal(layout.buttons[0].cssTextOutlineColor, undefined);
 });

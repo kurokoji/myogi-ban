@@ -108,6 +108,8 @@ export function createDefaultLayout(): Layout {
       cssTransition: "0",
       cssEasing: "linear",
       cssShape: "circle",
+      cssTextColor: "#ffffff",
+      cssTextSize: "14",
     }),
     buttons,
     background: createDefaultBackgroundConfig({
@@ -146,6 +148,15 @@ export function ensureLayoutDefaults(layout: Partial<Layout>): Layout {
     if (b.imgp === defaultbuttons.imgp) b.imgp = "";
     if (b.rotation === defaultbuttons.rotation) delete b.rotation;
     if (b.cssShape === defaultbuttons.cssShape) delete b.cssShape;
+    if (b.cssTextColor === defaultbuttons.cssTextColor) delete b.cssTextColor;
+    if (b.cssTextSize === defaultbuttons.cssTextSize) delete b.cssTextSize;
+    if (b.cssTextBold === defaultbuttons.cssTextBold) delete b.cssTextBold;
+    if (b.cssTextItalic === defaultbuttons.cssTextItalic)
+      delete b.cssTextItalic;
+    if (b.cssTextOutline === defaultbuttons.cssTextOutline)
+      delete b.cssTextOutline;
+    if (b.cssTextOutlineColor === defaultbuttons.cssTextOutlineColor)
+      delete b.cssTextOutlineColor;
     return b;
   });
 
