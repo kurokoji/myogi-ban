@@ -1,4 +1,5 @@
 import {
+  Button,
   Group,
   NumberInput,
   Paper,
@@ -10,8 +11,10 @@ import {
 import type { ChangeEvent, RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  type AssigningTarget,
   type EditorLayoutUpdater,
   type ImageUploadTarget,
+  isStickAssignmentTarget,
   numericValue,
 } from "../../editor-helpers";
 import type { Layout } from "../../types";
@@ -29,6 +32,9 @@ interface StickSettingsPanelProps {
   updateLayout: EditorLayoutUpdater;
   aspectRatioLinked?: boolean;
   onAspectRatioLinkedChange?: (linked: boolean) => void;
+  assigningTarget?: AssigningTarget;
+  assignmentName?: string;
+  cancelAssignment?: () => void;
 }
 
 export function StickSettingsPanel({
@@ -36,6 +42,9 @@ export function StickSettingsPanel({
   updateLayout,
   aspectRatioLinked,
   onAspectRatioLinkedChange,
+  assigningTarget = null,
+  assignmentName = "",
+  cancelAssignment,
 }: StickSettingsPanelProps): React.ReactElement {
   const { t } = useTranslation();
 
@@ -105,6 +114,20 @@ export function StickSettingsPanel({
             }
           />
         </div>
+        {assigningTarget !== null &&
+          isStickAssignmentTarget(assigningTarget) && (
+            <div className="mapping-status">
+              <p>
+                {t("assigning")}: <span>{assignmentName}</span>
+              </p>
+              <Text size="xs" c="dimmed">
+                {t("pressButtonOrMoveAxis")}
+              </Text>
+              <Button size="xs" variant="light" onClick={cancelAssignment}>
+                {t("cancel")}
+              </Button>
+            </div>
+          )}
       </Stack>
     </Paper>
   );

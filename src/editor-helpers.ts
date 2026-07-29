@@ -111,6 +111,10 @@ export function assignmentNameForTarget(
   return `${stickLabel} ${["Up", "Down", "Left", "Right"][target - 1000]}`;
 }
 
+export function isStickAssignmentTarget(target: AssigningTarget): boolean {
+  return target !== null && target >= 1000;
+}
+
 export function layoutNameFromSelection(selectedLayout: string): string {
   return selectedLayout.replace(/:builtin$|:user$/, "");
 }

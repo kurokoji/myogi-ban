@@ -16,7 +16,10 @@ import { GamepadView } from "../src/components/GamepadView";
 import { GamepadBackgroundLayer } from "../src/components/gamepad/GamepadBackgroundLayer";
 import { SelectionOverlays } from "../src/components/gamepad/SelectionOverlays";
 import { createDefaultLayout } from "../src/layout";
-import { BackgroundSettingsPanel } from "../src/components/editor/SettingsPanels";
+import {
+  BackgroundSettingsPanel,
+  StickSettingsPanel,
+} from "../src/components/editor/SettingsPanels";
 import { ThemeControl } from "../src/components/editor/ThemeControl";
 import { EditorContextMenu } from "../src/components/editor/EditorContextMenu";
 import { ShortcutCheatSheet } from "../src/components/editor/ShortcutCheatSheet";
@@ -1719,4 +1722,85 @@ test("advanced button settings restore their open state after remounting", () =>
   const secondDetails = second.container.querySelector("details");
   assert.ok(secondDetails);
   assert.equal(secondDetails.open, true);
+});
+
+test("button settings show the assigning status only for a button target", () => {
+  const view = renderComponent(
+    <ButtonSettingsPanel
+      layout={createDefaultLayout()}
+      assigningTarget={0}
+      assignmentName="Button 1"
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      updateLayout={() => {}}
+      updateSelectedButtons={() => {}}
+      onSelectedButtonChange={() => {}}
+      onAddButton={() => {}}
+      onDeleteSelectedButtons={() => {}}
+      openImagePicker={() => {}}
+      cancelAssignment={() => {}}
+    />,
+  );
+  const details = view.container.querySelector("details");
+  assert.ok(details);
+  details.open = true;
+  fireEvent(details, new componentDocument.defaultView.Event("toggle"));
+
+  assert.ok(view.getByText("Button 1"));
+});
+
+test("button settings omit the assigning status for a stick target", () => {
+  const view = renderComponent(
+    <ButtonSettingsPanel
+      layout={createDefaultLayout()}
+      assigningTarget={1000}
+      assignmentName="Stick Up"
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      updateLayout={() => {}}
+      updateSelectedButtons={() => {}}
+      onSelectedButtonChange={() => {}}
+      onAddButton={() => {}}
+      onDeleteSelectedButtons={() => {}}
+      openImagePicker={() => {}}
+      cancelAssignment={() => {}}
+    />,
+  );
+  const details = view.container.querySelector("details");
+  assert.ok(details);
+  details.open = true;
+  fireEvent(details, new componentDocument.defaultView.Event("toggle"));
+
+  assert.equal(view.queryByText("Stick Up") === null, true);
+});
+
+test("stick settings show the assigning status only for a stick target", () => {
+  const cancels: number[] = [];
+  const view = renderComponent(
+    <StickSettingsPanel
+      layout={createDefaultLayout()}
+      updateLayout={() => {}}
+      assigningTarget={1000}
+      assignmentName="Stick Up"
+      cancelAssignment={() => cancels.push(1)}
+    />,
+  );
+
+  assert.ok(view.getByText("Stick Up"));
+  fireEvent.click(view.getByRole("button", { name: "cancel" }));
+  assert.deepEqual(cancels, [1]);
+});
+
+test("stick settings omit the assigning status for a button target", () => {
+  const view = renderComponent(
+    <StickSettingsPanel
+      layout={createDefaultLayout()}
+      updateLayout={() => {}}
+      assigningTarget={0}
+      assignmentName="Button 1"
+      cancelAssignment={() => {}}
+    />,
+  );
+
+  assert.equal(view.queryByText("Button 1") === null, true);
 });

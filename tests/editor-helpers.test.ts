@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   canReplaceCurrentLayout,
   cloneLayout,
+  isStickAssignmentTarget,
   updateSelectedButtonSettings,
 } from "../src/editor-helpers";
 import { createDefaultLayout } from "../src/layout";
@@ -11,6 +12,14 @@ import { createSignedRulerTicks } from "../src/ruler-ticks";
 test("createSignedRulerTicks creates symmetric ticks including zero", () => {
   assert.deepEqual(createSignedRulerTicks(25, 10), [-20, -10, 0, 10, 20]);
   assert.deepEqual(createSignedRulerTicks(0), [0]);
+});
+
+test("isStickAssignmentTarget distinguishes stick targets from button targets", () => {
+  assert.equal(isStickAssignmentTarget(null), false);
+  assert.equal(isStickAssignmentTarget(0), false);
+  assert.equal(isStickAssignmentTarget(999), false);
+  assert.equal(isStickAssignmentTarget(1000), true);
+  assert.equal(isStickAssignmentTarget(1003), true);
 });
 
 test("updateSelectedButtonSettings applies changed settings to every selected button", () => {

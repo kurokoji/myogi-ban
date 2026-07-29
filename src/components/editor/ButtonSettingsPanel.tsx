@@ -17,6 +17,7 @@ import {
   type AssigningTarget,
   type EditorLayoutUpdater,
   type ImageUploadTarget,
+  isStickAssignmentTarget,
   numericValue,
 } from "../../editor-helpers";
 import type { ButtonShape, Layout } from "../../types";
@@ -710,23 +711,24 @@ export function ButtonSettingsPanel(
           <Text size="xs" c="dimmed">
             {t("clickPreviewToAssign")}
           </Text>
-          {props.assigningTarget !== null && (
-            <div className="mapping-status">
-              <p>
-                {t("assigning")}: <span>{props.assignmentName}</span>
-              </p>
-              <Text size="xs" c="dimmed">
-                {t("pressButtonOrMoveAxis")}
-              </Text>
-              <Button
-                size="xs"
-                variant="light"
-                onClick={props.cancelAssignment}
-              >
-                {t("cancel")}
-              </Button>
-            </div>
-          )}
+          {props.assigningTarget !== null &&
+            !isStickAssignmentTarget(props.assigningTarget) && (
+              <div className="mapping-status">
+                <p>
+                  {t("assigning")}: <span>{props.assignmentName}</span>
+                </p>
+                <Text size="xs" c="dimmed">
+                  {t("pressButtonOrMoveAxis")}
+                </Text>
+                <Button
+                  size="xs"
+                  variant="light"
+                  onClick={props.cancelAssignment}
+                >
+                  {t("cancel")}
+                </Button>
+              </div>
+            )}
         </ButtonAdvancedSettings>
       </Stack>
     </Paper>

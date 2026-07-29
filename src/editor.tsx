@@ -911,6 +911,9 @@ function EditorApp(): React.ReactElement {
                   updateLayout={updateLayout}
                   aspectRatioLinked={stickAspectRatioLinked}
                   onAspectRatioLinkedChange={setStickAspectRatioLinked}
+                  assigningTarget={assigningTarget}
+                  assignmentName={assignmentName}
+                  cancelAssignment={cancelAssignment}
                 />
               ) : (
                 <ButtonSettingsPanel
