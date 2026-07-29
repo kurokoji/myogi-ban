@@ -30,7 +30,7 @@
     "rotation": 0,
     "useCss": true,
     "color": "#e03131",
-    "pressedColor": "#c2251c",
+    "pressedColor": "#ffffff",
     "transitionSeconds": 0,
     "easing": "linear",
     "shape": "circle"
@@ -127,14 +127,14 @@
   },
   "mappings": {
     "buttons": [
-      1,
       2,
       3,
-      6,
-      0,
-      4,
       5,
-      7
+      4,
+      0,
+      1,
+      7,
+      6
     ],
     "stick": [
       12,
