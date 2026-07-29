@@ -23,6 +23,28 @@ body {
   background: var(--mantine-color-body);
 }
 
+#inspector {
+  width: 320px;
+  padding: 10px;
+  overflow-y: auto;
+  border-left: 1px solid var(--mantine-color-default-border);
+  background: var(--mantine-color-body);
+}
+
+.inspector-tabs .mantine-Tabs-panel {
+  padding-top: 10px;
+}
+
+.inspector-tabs .panel {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.inspector-tabs .panel h2 {
+  display: none;
+}
+
 .sidebar-header {
   margin-bottom: 10px;
 }

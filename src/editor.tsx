@@ -19,6 +19,7 @@ import "@fontsource-variable/m-plus-code-latin/wght.css";
 import "./i18n";
 import { ApiClient } from "./api";
 import { resetButtonToDefaults } from "./button-settings";
+import { InspectorTabs } from "./components/editor/InspectorTabs";
 import { PreviewZoomControls } from "./components/editor/PreviewZoomControls";
 import {
   BackgroundSettingsPanel,
@@ -59,6 +60,7 @@ import {
   createButtonSelection,
   EMPTY_EDITOR_SELECTION,
   normalizeEditorSelection,
+  resolveInspectorTarget,
   toggleButtonInSelection,
   visibleInspectorTargets,
 } from "./editor-selection";
@@ -661,13 +663,6 @@ function EditorApp(): React.ReactElement {
         </div>
 
         <SidebarAccordion
-          revealSection={
-            selectedButtonIndexes.length > 0
-              ? "buttons"
-              : selectedStick
-                ? "stick"
-                : undefined
-          }
           fixedContent={
             <DisplaySettingsPanel
               language={language}
@@ -707,44 +702,6 @@ function EditorApp(): React.ReactElement {
                 />
               ),
             },
-            ...visibleInspectorTargets().map((target) => ({
-              value: target,
-              label: t(target),
-              content:
-                target === "background" ? (
-                  <BackgroundSettingsPanel
-                    layout={layout}
-                    fileInputRef={fileInputRef}
-                    updateLayout={updateLayout}
-                    uploadImage={uploadImage}
-                    openImagePicker={openImagePicker}
-                  />
-                ) : target === "stick" ? (
-                  <StickSettingsPanel
-                    layout={layout}
-                    updateLayout={updateLayout}
-                    aspectRatioLinked={stickAspectRatioLinked}
-                    onAspectRatioLinkedChange={setStickAspectRatioLinked}
-                  />
-                ) : (
-                  <ButtonSettingsPanel
-                    layout={layout}
-                    assigningTarget={assigningTarget}
-                    assignmentName={assignmentName}
-                    selectedButtonIndex={selectedButtonIndex}
-                    selectedButtonIndexes={selectedButtonIndexes}
-                    updateLayout={updateLayout}
-                    updateSelectedButtons={updateSelectedButtons}
-                    onAddButton={addButton}
-                    onDeleteSelectedButtons={deleteSelectedButtons}
-                    onSelectedButtonChange={selectButtonForSettings}
-                    openImagePicker={openImagePicker}
-                    cancelAssignment={cancelAssignment}
-                    aspectRatioLinked={buttonAspectRatioLinked}
-                    onAspectRatioLinkedChange={setButtonAspectRatioLinked}
-                  />
-                ),
-            })),
             {
               value: "gamepad",
               label: t("gamepad"),
@@ -927,6 +884,50 @@ function EditorApp(): React.ReactElement {
           </div>
         </div>
       </main>
+
+      <aside id="inspector">
+        <InspectorTabs
+          activeTab={resolveInspectorTarget(selection)}
+          tabs={visibleInspectorTargets().map((target) => ({
+            value: target,
+            label: t(target),
+            content:
+              target === "background" ? (
+                <BackgroundSettingsPanel
+                  layout={layout}
+                  fileInputRef={fileInputRef}
+                  updateLayout={updateLayout}
+                  uploadImage={uploadImage}
+                  openImagePicker={openImagePicker}
+                />
+              ) : target === "stick" ? (
+                <StickSettingsPanel
+                  layout={layout}
+                  updateLayout={updateLayout}
+                  aspectRatioLinked={stickAspectRatioLinked}
+                  onAspectRatioLinkedChange={setStickAspectRatioLinked}
+                />
+              ) : (
+                <ButtonSettingsPanel
+                  layout={layout}
+                  assigningTarget={assigningTarget}
+                  assignmentName={assignmentName}
+                  selectedButtonIndex={selectedButtonIndex}
+                  selectedButtonIndexes={selectedButtonIndexes}
+                  updateLayout={updateLayout}
+                  updateSelectedButtons={updateSelectedButtons}
+                  onAddButton={addButton}
+                  onDeleteSelectedButtons={deleteSelectedButtons}
+                  onSelectedButtonChange={selectButtonForSettings}
+                  openImagePicker={openImagePicker}
+                  cancelAssignment={cancelAssignment}
+                  aspectRatioLinked={buttonAspectRatioLinked}
+                  onAspectRatioLinkedChange={setButtonAspectRatioLinked}
+                />
+              ),
+          }))}
+        />
+      </aside>
     </MantineProvider>
   );
 }

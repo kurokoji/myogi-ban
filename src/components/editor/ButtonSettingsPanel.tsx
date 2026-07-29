@@ -33,6 +33,7 @@ import {
   InheritedTextInput,
 } from "./InheritedInputs";
 import { InheritedSizeInputs } from "./InheritedSizeInputs";
+import { InspectorTabs } from "./InspectorTabs";
 import { LinkedSizeInputs } from "./LinkedSizeInputs";
 import { PositionInputs } from "./PositionInputs";
 
@@ -109,266 +110,289 @@ export function ButtonSettingsPanel(
           })}
         </Button>
         <ButtonAdvancedSettings label={t("advancedSettings")}>
-          <DefaultButtonSettings
-            title={t("defaultButtonSettings")}
-            hint={t("defaultButtonSettingsHint")}
-          >
-            <Switch
-              size="sm"
-              label={t("useCssButton")}
-              checked={!(layout.defaultbuttons.useCss ?? false)}
-              onChange={(event) =>
-                updateLayout((next) => {
-                  next.defaultbuttons.useCss = !event.target.checked;
-                })
-              }
-            />
-            {layout.defaultbuttons.useCss && (
-              <div className="control row">
-                <ColorInput
-                  label={t("colorNormal")}
-                  value={layout.defaultbuttons.cssColor || "#cccccc"}
-                  onChange={(event) =>
-                    updateLayout((next) => {
-                      next.defaultbuttons.cssColor = event.target.value;
-                    })
-                  }
-                />
-                <ColorInput
-                  label={t("colorPressed")}
-                  value={layout.defaultbuttons.cssPressedColor || "#999999"}
-                  onChange={(event) =>
-                    updateLayout((next) => {
-                      next.defaultbuttons.cssPressedColor = event.target.value;
-                    })
-                  }
-                />
-              </div>
-            )}
-            {layout.defaultbuttons.useCss && (
-              <div className="control row">
-                <NativeSelect
-                  size="xs"
-                  label={t("buttonShape")}
-                  value={layout.defaultbuttons.cssShape || "circle"}
-                  onChange={(event) =>
-                    updateLayout((next) => {
-                      const previousShape =
-                        next.defaultbuttons.cssShape ?? "circle";
-                      next.defaultbuttons.cssShape = event.target
-                        .value as ButtonShape;
-                      for (const button of next.buttons) {
-                        if (
-                          (button.cssShape ?? previousShape) === previousShape
-                        ) {
-                          delete button.cssShape;
-                        }
+          <InspectorTabs
+            activeTab={selectedButtonIndex !== null ? "selected" : "default"}
+            tabs={[
+              {
+                value: "default",
+                label: t("defaultButtonSettings"),
+                content: (
+                  <DefaultButtonSettings
+                    title={t("defaultButtonSettings")}
+                    hint={t("defaultButtonSettingsHint")}
+                  >
+                    <Switch
+                      size="sm"
+                      label={t("useCssButton")}
+                      checked={!(layout.defaultbuttons.useCss ?? false)}
+                      onChange={(event) =>
+                        updateLayout((next) => {
+                          next.defaultbuttons.useCss = !event.target.checked;
+                        })
                       }
-                    })
-                  }
-                  data={[
-                    { value: "circle", label: t("shapeCircle") },
-                    { value: "pill", label: t("shapePill") },
-                    { value: "rounded", label: t("shapeRounded") },
-                    { value: "square", label: t("shapeSquare") },
-                  ]}
-                />
-                <NumberInput
-                  size="xs"
-                  label={t("transition")}
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={parseFloat(
-                    layout.defaultbuttons.cssTransition || "0.02",
-                  )}
-                  onChange={(value) =>
-                    updateLayout((next) => {
-                      next.defaultbuttons.cssTransition = String(value ?? 0.02);
-                    })
-                  }
-                />
-              </div>
-            )}
-            {layout.defaultbuttons.useCss && (
-              <NativeSelect
-                size="xs"
-                label={t("easing")}
-                value={layout.defaultbuttons.cssEasing || "ease"}
-                onChange={(event) =>
-                  updateLayout((next) => {
-                    next.defaultbuttons.cssEasing = event.target.value;
-                  })
-                }
-                data={[
-                  { value: "ease", label: "ease" },
-                  { value: "linear", label: "linear" },
-                  { value: "ease-in", label: "ease-in" },
-                  { value: "ease-out", label: "ease-out" },
-                  { value: "ease-in-out", label: "ease-in-out" },
-                ]}
-              />
-            )}
-            {!layout.defaultbuttons.useCss && (
-              <>
-                <Group gap="xs" align="end" wrap="nowrap">
-                  <TextInput
-                    size="xs"
-                    label={t("defaultReleasedImage")}
-                    value={layout.defaultbuttons.img}
-                    onChange={(event) =>
-                      updateLayout((next) => {
-                        next.defaultbuttons.img = event.target.value;
-                      })
+                    />
+                    {layout.defaultbuttons.useCss && (
+                      <div className="control row">
+                        <ColorInput
+                          label={t("colorNormal")}
+                          value={layout.defaultbuttons.cssColor || "#cccccc"}
+                          onChange={(event) =>
+                            updateLayout((next) => {
+                              next.defaultbuttons.cssColor = event.target.value;
+                            })
+                          }
+                        />
+                        <ColorInput
+                          label={t("colorPressed")}
+                          value={
+                            layout.defaultbuttons.cssPressedColor || "#999999"
+                          }
+                          onChange={(event) =>
+                            updateLayout((next) => {
+                              next.defaultbuttons.cssPressedColor =
+                                event.target.value;
+                            })
+                          }
+                        />
+                      </div>
+                    )}
+                    {layout.defaultbuttons.useCss && (
+                      <div className="control row">
+                        <NativeSelect
+                          size="xs"
+                          label={t("buttonShape")}
+                          value={layout.defaultbuttons.cssShape || "circle"}
+                          onChange={(event) =>
+                            updateLayout((next) => {
+                              const previousShape =
+                                next.defaultbuttons.cssShape ?? "circle";
+                              next.defaultbuttons.cssShape = event.target
+                                .value as ButtonShape;
+                              for (const button of next.buttons) {
+                                if (
+                                  (button.cssShape ?? previousShape) ===
+                                  previousShape
+                                ) {
+                                  delete button.cssShape;
+                                }
+                              }
+                            })
+                          }
+                          data={[
+                            { value: "circle", label: t("shapeCircle") },
+                            { value: "pill", label: t("shapePill") },
+                            { value: "rounded", label: t("shapeRounded") },
+                            { value: "square", label: t("shapeSquare") },
+                          ]}
+                        />
+                        <NumberInput
+                          size="xs"
+                          label={t("transition")}
+                          min={0}
+                          max={1}
+                          step={0.01}
+                          value={parseFloat(
+                            layout.defaultbuttons.cssTransition || "0.02",
+                          )}
+                          onChange={(value) =>
+                            updateLayout((next) => {
+                              next.defaultbuttons.cssTransition = String(
+                                value ?? 0.02,
+                              );
+                            })
+                          }
+                        />
+                      </div>
+                    )}
+                    {layout.defaultbuttons.useCss && (
+                      <NativeSelect
+                        size="xs"
+                        label={t("easing")}
+                        value={layout.defaultbuttons.cssEasing || "ease"}
+                        onChange={(event) =>
+                          updateLayout((next) => {
+                            next.defaultbuttons.cssEasing = event.target.value;
+                          })
+                        }
+                        data={[
+                          { value: "ease", label: "ease" },
+                          { value: "linear", label: "linear" },
+                          { value: "ease-in", label: "ease-in" },
+                          { value: "ease-out", label: "ease-out" },
+                          { value: "ease-in-out", label: "ease-in-out" },
+                        ]}
+                      />
+                    )}
+                    {!layout.defaultbuttons.useCss && (
+                      <>
+                        <Group gap="xs" align="end" wrap="nowrap">
+                          <TextInput
+                            size="xs"
+                            label={t("defaultReleasedImage")}
+                            value={layout.defaultbuttons.img}
+                            onChange={(event) =>
+                              updateLayout((next) => {
+                                next.defaultbuttons.img = event.target.value;
+                              })
+                            }
+                            placeholder="released.png"
+                            className="grow"
+                          />
+                          <ImageSelectButton
+                            onClick={() =>
+                              props.openImagePicker({
+                                type: "defaultButton",
+                                state: "released",
+                              })
+                            }
+                          />
+                        </Group>
+                        <Group gap="xs" align="end" wrap="nowrap">
+                          <TextInput
+                            size="xs"
+                            label={t("defaultPressedImage")}
+                            value={layout.defaultbuttons.imgp}
+                            onChange={(event) =>
+                              updateLayout((next) => {
+                                next.defaultbuttons.imgp = event.target.value;
+                              })
+                            }
+                            placeholder="pressed.png"
+                            className="grow"
+                          />
+                          <ImageSelectButton
+                            onClick={() =>
+                              props.openImagePicker({
+                                type: "defaultButton",
+                                state: "pressed",
+                              })
+                            }
+                          />
+                        </Group>
+                      </>
+                    )}
+                    <Text size="xs" fw={600}>
+                      {t("defaultButtonSize")}
+                    </Text>
+                    <LinkedSizeInputs
+                      width={layout.defaultbuttons.w}
+                      height={layout.defaultbuttons.h}
+                      widthLabel={t("width")}
+                      heightLabel={t("height")}
+                      fallbackWidth="60"
+                      fallbackHeight="60"
+                      onChange={(width, height) =>
+                        updateLayout((next) => {
+                          next.defaultbuttons.w = width;
+                          next.defaultbuttons.h = height;
+                        })
+                      }
+                    />
+                    <NumberInput
+                      size="xs"
+                      label={t("rotation")}
+                      min={-180}
+                      max={180}
+                      step={1}
+                      value={numericValue(
+                        layout.defaultbuttons.rotation || "0",
+                      )}
+                      onChange={(value) =>
+                        updateLayout((next) => {
+                          const previousRotation =
+                            next.defaultbuttons.rotation ?? "0";
+                          next.defaultbuttons.rotation = String(value ?? 0);
+                          for (const button of next.buttons) {
+                            if (
+                              (button.rotation ?? previousRotation) ===
+                              previousRotation
+                            ) {
+                              delete button.rotation;
+                            }
+                          }
+                        })
+                      }
+                    />
+                  </DefaultButtonSettings>
+                ),
+              },
+              {
+                value: "selected",
+                label: t("selectedButtonSettingsEmpty"),
+                content: (
+                  <SelectedButtonSettings
+                    title={
+                      props.selectedButtonIndexes.length > 1
+                        ? t("selectedButtonsSettings", {
+                            count: props.selectedButtonIndexes.length,
+                          })
+                        : selectedButtonIndex !== null
+                          ? t("selectedButtonSettings", {
+                              number: selectedButtonIndex + 1,
+                            })
+                          : t("selectedButtonSettingsEmpty")
                     }
-                    placeholder="released.png"
-                    className="grow"
-                  />
-                  <ImageSelectButton
-                    onClick={() =>
-                      props.openImagePicker({
-                        type: "defaultButton",
-                        state: "released",
-                      })
-                    }
-                  />
-                </Group>
-                <Group gap="xs" align="end" wrap="nowrap">
-                  <TextInput
-                    size="xs"
-                    label={t("defaultPressedImage")}
-                    value={layout.defaultbuttons.imgp}
-                    onChange={(event) =>
-                      updateLayout((next) => {
-                        next.defaultbuttons.imgp = event.target.value;
-                      })
-                    }
-                    placeholder="pressed.png"
-                    className="grow"
-                  />
-                  <ImageSelectButton
-                    onClick={() =>
-                      props.openImagePicker({
-                        type: "defaultButton",
-                        state: "pressed",
-                      })
-                    }
-                  />
-                </Group>
-              </>
-            )}
-            <Text size="xs" fw={600}>
-              {t("defaultButtonSize")}
-            </Text>
-            <LinkedSizeInputs
-              width={layout.defaultbuttons.w}
-              height={layout.defaultbuttons.h}
-              widthLabel={t("width")}
-              heightLabel={t("height")}
-              fallbackWidth="60"
-              fallbackHeight="60"
-              onChange={(width, height) =>
-                updateLayout((next) => {
-                  next.defaultbuttons.w = width;
-                  next.defaultbuttons.h = height;
-                })
-              }
-            />
-            <NumberInput
-              size="xs"
-              label={t("rotation")}
-              min={-180}
-              max={180}
-              step={1}
-              value={numericValue(layout.defaultbuttons.rotation || "0")}
-              onChange={(value) =>
-                updateLayout((next) => {
-                  const previousRotation = next.defaultbuttons.rotation ?? "0";
-                  next.defaultbuttons.rotation = String(value ?? 0);
-                  for (const button of next.buttons) {
-                    if (
-                      (button.rotation ?? previousRotation) === previousRotation
-                    ) {
-                      delete button.rotation;
-                    }
-                  }
-                })
-              }
-            />
-          </DefaultButtonSettings>
-          <SelectedButtonSettings
-            title={
-              props.selectedButtonIndexes.length > 1
-                ? t("selectedButtonsSettings", {
-                    count: props.selectedButtonIndexes.length,
-                  })
-                : selectedButtonIndex !== null
-                  ? t("selectedButtonSettings", {
-                      number: selectedButtonIndex + 1,
-                    })
-                  : t("selectedButtonSettingsEmpty")
-            }
-            hint={t(
-              selectedButtonIndex === null
-                ? "selectButtonForSettings"
-                : "useDefaultWhenBlank",
-            )}
-          >
-            {selectedButtonIndex !== null && (
-              <Stack gap="xs">
-                {props.selectedButtonIndexes.length === 1 && (
-                  <PositionInputs
-                    x={layout.buttons[selectedButtonIndex]?.x ?? ""}
-                    y={layout.buttons[selectedButtonIndex]?.y ?? ""}
-                    onXChange={(value) =>
-                      updateLayout((next) => {
-                        next.buttons[selectedButtonIndex].x = value;
-                      })
-                    }
-                    onYChange={(value) =>
-                      updateLayout((next) => {
-                        next.buttons[selectedButtonIndex].y = value;
-                      })
-                    }
-                  />
-                )}
-                <Group gap="xs">
-                  <Switch
-                    size="sm"
-                    label={t("useCssButton")}
-                    description={
-                      layout.buttons[selectedButtonIndex]?.useCss ===
-                        undefined ||
-                      layout.buttons[selectedButtonIndex]?.useCss ===
-                        layout.defaultbuttons.useCss
-                        ? t("inheritDefault")
-                        : undefined
-                    }
-                    checked={
-                      !(
-                        layout.buttons[selectedButtonIndex]?.useCss ??
-                        layout.defaultbuttons.useCss ??
-                        false
-                      )
-                    }
-                    onChange={(event) =>
-                      props.updateSelectedButtons((next) => {
-                        next.buttons[selectedButtonIndex].useCss =
-                          !event.target.checked;
-                      })
-                    }
-                  />
-                  <Button
-                    size="xs"
-                    variant="light"
-                    color="gray"
-                    onClick={() => {
-                      props.updateSelectedButtons((next) => {
-                        next.buttons[selectedButtonIndex] =
-                          resetButtonToDefaults(
-                            next.buttons[selectedButtonIndex],
-                            next.defaultbuttons,
-                          ); /* {
+                    hint={t(
+                      selectedButtonIndex === null
+                        ? "selectButtonForSettings"
+                        : "useDefaultWhenBlank",
+                    )}
+                  >
+                    {selectedButtonIndex !== null && (
+                      <Stack gap="xs">
+                        {props.selectedButtonIndexes.length === 1 && (
+                          <PositionInputs
+                            x={layout.buttons[selectedButtonIndex]?.x ?? ""}
+                            y={layout.buttons[selectedButtonIndex]?.y ?? ""}
+                            onXChange={(value) =>
+                              updateLayout((next) => {
+                                next.buttons[selectedButtonIndex].x = value;
+                              })
+                            }
+                            onYChange={(value) =>
+                              updateLayout((next) => {
+                                next.buttons[selectedButtonIndex].y = value;
+                              })
+                            }
+                          />
+                        )}
+                        <Group gap="xs">
+                          <Switch
+                            size="sm"
+                            label={t("useCssButton")}
+                            description={
+                              layout.buttons[selectedButtonIndex]?.useCss ===
+                                undefined ||
+                              layout.buttons[selectedButtonIndex]?.useCss ===
+                                layout.defaultbuttons.useCss
+                                ? t("inheritDefault")
+                                : undefined
+                            }
+                            checked={
+                              !(
+                                layout.buttons[selectedButtonIndex]?.useCss ??
+                                layout.defaultbuttons.useCss ??
+                                false
+                              )
+                            }
+                            onChange={(event) =>
+                              props.updateSelectedButtons((next) => {
+                                next.buttons[selectedButtonIndex].useCss =
+                                  !event.target.checked;
+                              })
+                            }
+                          />
+                          <Button
+                            size="xs"
+                            variant="light"
+                            color="gray"
+                            onClick={() => {
+                              props.updateSelectedButtons((next) => {
+                                next.buttons[selectedButtonIndex] =
+                                  resetButtonToDefaults(
+                                    next.buttons[selectedButtonIndex],
+                                    next.defaultbuttons,
+                                  ); /* {
                       x: next.buttons[selectedButtonIndex].x,
                       y: next.buttons[selectedButtonIndex].y,
                       w: next.defaultbuttons.w,
@@ -387,23 +411,23 @@ export function ButtonSettingsPanel(
                       cssEasing: next.defaultbuttons.cssEasing,
                       cssShape: next.defaultbuttons.cssShape,
                     }; */
-                      });
-                    }}
-                  >
-                    {t("resetToDefault")}
-                  </Button>
-                </Group>
-              </Stack>
-            )}
-            <Button
-              size="xs"
-              variant="light"
-              color="gray"
-              onClick={() =>
-                props.updateSelectedButtons((next) => {
-                  next.buttons = next.buttons.map((b) =>
-                    resetButtonToDefaults(b, next.defaultbuttons),
-                  ); /* ({
+                              });
+                            }}
+                          >
+                            {t("resetToDefault")}
+                          </Button>
+                        </Group>
+                      </Stack>
+                    )}
+                    <Button
+                      size="xs"
+                      variant="light"
+                      color="gray"
+                      onClick={() =>
+                        props.updateSelectedButtons((next) => {
+                          next.buttons = next.buttons.map((b) =>
+                            resetButtonToDefaults(b, next.defaultbuttons),
+                          ); /* ({
                 x: b.x,
                 y: b.y,
                 w: next.defaultbuttons.w,
@@ -422,244 +446,266 @@ export function ButtonSettingsPanel(
                 cssEasing: next.defaultbuttons.cssEasing,
                 cssShape: next.defaultbuttons.cssShape,
               })); */
-                })
-              }
-            >
-              {t("resetAllToDefault")}
-            </Button>
-            {selectedButtonIndex !== null &&
-              (layout.buttons[selectedButtonIndex]?.useCss ??
-                layout.defaultbuttons.useCss ??
-                false) && (
-                <div className="control row">
-                  <ColorInput
-                    label={t("colorNormal")}
-                    description={
-                      !layout.buttons[selectedButtonIndex]?.cssColor ||
-                      layout.buttons[selectedButtonIndex]?.cssColor ===
-                        layout.defaultbuttons.cssColor
-                        ? t("inheritDefault")
-                        : undefined
-                    }
-                    value={
-                      layout.buttons[selectedButtonIndex]?.cssColor ||
-                      layout.defaultbuttons.cssColor ||
-                      "#cccccc"
-                    }
-                    onChange={(event) =>
-                      props.updateSelectedButtons((next) => {
-                        next.buttons[selectedButtonIndex].cssColor =
-                          event.target.value;
-                      })
-                    }
-                  />
-                  <ColorInput
-                    label={t("colorPressed")}
-                    description={
-                      !layout.buttons[selectedButtonIndex]?.cssPressedColor ||
-                      layout.buttons[selectedButtonIndex]?.cssPressedColor ===
-                        layout.defaultbuttons.cssPressedColor
-                        ? t("inheritDefault")
-                        : undefined
-                    }
-                    value={
-                      layout.buttons[selectedButtonIndex]?.cssPressedColor ||
-                      layout.defaultbuttons.cssPressedColor ||
-                      "#999999"
-                    }
-                    onChange={(event) =>
-                      props.updateSelectedButtons((next) => {
-                        next.buttons[selectedButtonIndex].cssPressedColor =
-                          event.target.value;
-                      })
-                    }
-                  />
-                </div>
-              )}
-            {selectedButtonIndex !== null &&
-              (layout.buttons[selectedButtonIndex]?.useCss ??
-                layout.defaultbuttons.useCss ??
-                false) && (
-                <div className="control row">
-                  <InheritedSelect
-                    size="xs"
-                    label={t("buttonShape")}
-                    value={layout.buttons[selectedButtonIndex]?.cssShape}
-                    defaultValue={layout.defaultbuttons.cssShape}
-                    fallbackValue="circle"
-                    onChange={(event) =>
-                      props.updateSelectedButtons((next) => {
-                        if (event.target.value === "") {
-                          delete next.buttons[selectedButtonIndex].cssShape;
-                        } else {
-                          next.buttons[selectedButtonIndex].cssShape = event
-                            .target.value as ButtonShape;
-                        }
-                      })
-                    }
-                    data={[
-                      { value: "", label: t("inheritDefault") },
-                      { value: "circle", label: t("shapeCircle") },
-                      { value: "pill", label: t("shapePill") },
-                      { value: "rounded", label: t("shapeRounded") },
-                      { value: "square", label: t("shapeSquare") },
-                    ]}
-                  />
-                  <InheritedNumberInput
-                    size="xs"
-                    label={t("transition")}
-                    min={0}
-                    max={1}
-                    step={0.01}
-                    value={layout.buttons[selectedButtonIndex]?.cssTransition}
-                    defaultValue={layout.defaultbuttons.cssTransition}
-                    fallbackValue="0.02"
-                    onChange={(value) =>
-                      props.updateSelectedButtons((next) => {
-                        next.buttons[selectedButtonIndex].cssTransition =
-                          String(value ?? 0.02);
-                      })
-                    }
-                    placeholder={layout.defaultbuttons.cssTransition || "0.02"}
-                  />
-                </div>
-              )}
-            {selectedButtonIndex !== null &&
-              (layout.buttons[selectedButtonIndex]?.useCss ??
-                layout.defaultbuttons.useCss ??
-                false) && (
-                <InheritedSelect
-                  size="xs"
-                  label={t("easing")}
-                  value={layout.buttons[selectedButtonIndex]?.cssEasing}
-                  defaultValue={layout.defaultbuttons.cssEasing}
-                  fallbackValue="ease"
-                  onChange={(event) =>
-                    props.updateSelectedButtons((next) => {
-                      if (event.target.value === "") {
-                        delete next.buttons[selectedButtonIndex].cssEasing;
-                      } else {
-                        next.buttons[selectedButtonIndex].cssEasing =
-                          event.target.value;
-                      }
-                    })
-                  }
-                  data={[
-                    { value: "", label: t("inheritDefault") },
-                    { value: "ease", label: "ease" },
-                    { value: "linear", label: "linear" },
-                    { value: "ease-in", label: "ease-in" },
-                    { value: "ease-out", label: "ease-out" },
-                    { value: "ease-in-out", label: "ease-in-out" },
-                  ]}
-                />
-              )}
-            {selectedButtonIndex !== null &&
-              !(
-                layout.buttons[selectedButtonIndex]?.useCss ??
-                layout.defaultbuttons.useCss ??
-                false
-              ) && (
-                <>
-                  <Group gap="xs" align="end" wrap="nowrap">
-                    <InheritedTextInput
-                      size="xs"
-                      label={t("releasedImage")}
-                      value={layout.buttons[selectedButtonIndex]?.img}
-                      defaultValue={layout.defaultbuttons.img}
-                      onChange={(event) =>
-                        props.updateSelectedButtons((next) => {
-                          next.buttons[selectedButtonIndex].img =
-                            event.target.value;
                         })
                       }
-                      placeholder={layout.defaultbuttons.img || "released.png"}
-                      className="grow"
-                    />
-                    <ImageSelectButton
-                      onClick={() =>
-                        props.openImagePicker({
-                          type: "button",
-                          indexes: props.selectedButtonIndexes,
-                          state: "released",
-                        })
-                      }
-                    />
-                  </Group>
-                  <Group gap="xs" align="end" wrap="nowrap">
-                    <InheritedTextInput
-                      size="xs"
-                      label={t("pressedImage")}
-                      value={layout.buttons[selectedButtonIndex]?.imgp}
-                      defaultValue={layout.defaultbuttons.imgp}
-                      onChange={(event) =>
-                        props.updateSelectedButtons((next) => {
-                          next.buttons[selectedButtonIndex].imgp =
-                            event.target.value;
-                        })
-                      }
-                      placeholder={layout.defaultbuttons.imgp || "pressed.png"}
-                      className="grow"
-                    />
-                    <ImageSelectButton
-                      onClick={() =>
-                        props.openImagePicker({
-                          type: "button",
-                          indexes: props.selectedButtonIndexes,
-                          state: "pressed",
-                        })
-                      }
-                    />
-                  </Group>
-                </>
-              )}
-            {selectedButtonIndex !== null && (
-              <>
-                <Text size="xs" fw={600}>
-                  {t("releasedSize")}
-                </Text>
-                <InheritedSizeInputs
-                  width={layout.buttons[selectedButtonIndex]?.w}
-                  height={layout.buttons[selectedButtonIndex]?.h}
-                  defaultWidth={layout.defaultbuttons.w}
-                  defaultHeight={layout.defaultbuttons.h}
-                  effectiveWidth={layout.defaultbuttons.w || "60"}
-                  effectiveHeight={layout.defaultbuttons.h || "60"}
-                  widthLabel={t("width")}
-                  heightLabel={t("height")}
-                  linked={props.aspectRatioLinked}
-                  onLinkedChange={props.onAspectRatioLinkedChange}
-                  onChange={(width, height) =>
-                    props.updateSelectedButtons((next) => {
-                      next.buttons[selectedButtonIndex].w = width;
-                      next.buttons[selectedButtonIndex].h = height;
-                    })
-                  }
-                />
-                <InheritedNumberInput
-                  size="xs"
-                  label={t("rotation")}
-                  min={-180}
-                  max={180}
-                  step={1}
-                  value={layout.buttons[selectedButtonIndex]?.rotation}
-                  defaultValue={layout.defaultbuttons.rotation}
-                  fallbackValue="0"
-                  onChange={(value) =>
-                    props.updateSelectedButtons((next) => {
-                      if (value === "" || value === null) {
-                        delete next.buttons[selectedButtonIndex].rotation;
-                      } else {
-                        next.buttons[selectedButtonIndex].rotation =
-                          String(value);
-                      }
-                    })
-                  }
-                  placeholder={layout.defaultbuttons.rotation || "0"}
-                />
-              </>
-            )}
-          </SelectedButtonSettings>
+                    >
+                      {t("resetAllToDefault")}
+                    </Button>
+                    {selectedButtonIndex !== null &&
+                      (layout.buttons[selectedButtonIndex]?.useCss ??
+                        layout.defaultbuttons.useCss ??
+                        false) && (
+                        <div className="control row">
+                          <ColorInput
+                            label={t("colorNormal")}
+                            description={
+                              !layout.buttons[selectedButtonIndex]?.cssColor ||
+                              layout.buttons[selectedButtonIndex]?.cssColor ===
+                                layout.defaultbuttons.cssColor
+                                ? t("inheritDefault")
+                                : undefined
+                            }
+                            value={
+                              layout.buttons[selectedButtonIndex]?.cssColor ||
+                              layout.defaultbuttons.cssColor ||
+                              "#cccccc"
+                            }
+                            onChange={(event) =>
+                              props.updateSelectedButtons((next) => {
+                                next.buttons[selectedButtonIndex].cssColor =
+                                  event.target.value;
+                              })
+                            }
+                          />
+                          <ColorInput
+                            label={t("colorPressed")}
+                            description={
+                              !layout.buttons[selectedButtonIndex]
+                                ?.cssPressedColor ||
+                              layout.buttons[selectedButtonIndex]
+                                ?.cssPressedColor ===
+                                layout.defaultbuttons.cssPressedColor
+                                ? t("inheritDefault")
+                                : undefined
+                            }
+                            value={
+                              layout.buttons[selectedButtonIndex]
+                                ?.cssPressedColor ||
+                              layout.defaultbuttons.cssPressedColor ||
+                              "#999999"
+                            }
+                            onChange={(event) =>
+                              props.updateSelectedButtons((next) => {
+                                next.buttons[
+                                  selectedButtonIndex
+                                ].cssPressedColor = event.target.value;
+                              })
+                            }
+                          />
+                        </div>
+                      )}
+                    {selectedButtonIndex !== null &&
+                      (layout.buttons[selectedButtonIndex]?.useCss ??
+                        layout.defaultbuttons.useCss ??
+                        false) && (
+                        <div className="control row">
+                          <InheritedSelect
+                            size="xs"
+                            label={t("buttonShape")}
+                            value={
+                              layout.buttons[selectedButtonIndex]?.cssShape
+                            }
+                            defaultValue={layout.defaultbuttons.cssShape}
+                            fallbackValue="circle"
+                            onChange={(event) =>
+                              props.updateSelectedButtons((next) => {
+                                if (event.target.value === "") {
+                                  delete next.buttons[selectedButtonIndex]
+                                    .cssShape;
+                                } else {
+                                  next.buttons[selectedButtonIndex].cssShape =
+                                    event.target.value as ButtonShape;
+                                }
+                              })
+                            }
+                            data={[
+                              { value: "", label: t("inheritDefault") },
+                              { value: "circle", label: t("shapeCircle") },
+                              { value: "pill", label: t("shapePill") },
+                              { value: "rounded", label: t("shapeRounded") },
+                              { value: "square", label: t("shapeSquare") },
+                            ]}
+                          />
+                          <InheritedNumberInput
+                            size="xs"
+                            label={t("transition")}
+                            min={0}
+                            max={1}
+                            step={0.01}
+                            value={
+                              layout.buttons[selectedButtonIndex]?.cssTransition
+                            }
+                            defaultValue={layout.defaultbuttons.cssTransition}
+                            fallbackValue="0.02"
+                            onChange={(value) =>
+                              props.updateSelectedButtons((next) => {
+                                next.buttons[
+                                  selectedButtonIndex
+                                ].cssTransition = String(value ?? 0.02);
+                              })
+                            }
+                            placeholder={
+                              layout.defaultbuttons.cssTransition || "0.02"
+                            }
+                          />
+                        </div>
+                      )}
+                    {selectedButtonIndex !== null &&
+                      (layout.buttons[selectedButtonIndex]?.useCss ??
+                        layout.defaultbuttons.useCss ??
+                        false) && (
+                        <InheritedSelect
+                          size="xs"
+                          label={t("easing")}
+                          value={layout.buttons[selectedButtonIndex]?.cssEasing}
+                          defaultValue={layout.defaultbuttons.cssEasing}
+                          fallbackValue="ease"
+                          onChange={(event) =>
+                            props.updateSelectedButtons((next) => {
+                              if (event.target.value === "") {
+                                delete next.buttons[selectedButtonIndex]
+                                  .cssEasing;
+                              } else {
+                                next.buttons[selectedButtonIndex].cssEasing =
+                                  event.target.value;
+                              }
+                            })
+                          }
+                          data={[
+                            { value: "", label: t("inheritDefault") },
+                            { value: "ease", label: "ease" },
+                            { value: "linear", label: "linear" },
+                            { value: "ease-in", label: "ease-in" },
+                            { value: "ease-out", label: "ease-out" },
+                            { value: "ease-in-out", label: "ease-in-out" },
+                          ]}
+                        />
+                      )}
+                    {selectedButtonIndex !== null &&
+                      !(
+                        layout.buttons[selectedButtonIndex]?.useCss ??
+                        layout.defaultbuttons.useCss ??
+                        false
+                      ) && (
+                        <>
+                          <Group gap="xs" align="end" wrap="nowrap">
+                            <InheritedTextInput
+                              size="xs"
+                              label={t("releasedImage")}
+                              value={layout.buttons[selectedButtonIndex]?.img}
+                              defaultValue={layout.defaultbuttons.img}
+                              onChange={(event) =>
+                                props.updateSelectedButtons((next) => {
+                                  next.buttons[selectedButtonIndex].img =
+                                    event.target.value;
+                                })
+                              }
+                              placeholder={
+                                layout.defaultbuttons.img || "released.png"
+                              }
+                              className="grow"
+                            />
+                            <ImageSelectButton
+                              onClick={() =>
+                                props.openImagePicker({
+                                  type: "button",
+                                  indexes: props.selectedButtonIndexes,
+                                  state: "released",
+                                })
+                              }
+                            />
+                          </Group>
+                          <Group gap="xs" align="end" wrap="nowrap">
+                            <InheritedTextInput
+                              size="xs"
+                              label={t("pressedImage")}
+                              value={layout.buttons[selectedButtonIndex]?.imgp}
+                              defaultValue={layout.defaultbuttons.imgp}
+                              onChange={(event) =>
+                                props.updateSelectedButtons((next) => {
+                                  next.buttons[selectedButtonIndex].imgp =
+                                    event.target.value;
+                                })
+                              }
+                              placeholder={
+                                layout.defaultbuttons.imgp || "pressed.png"
+                              }
+                              className="grow"
+                            />
+                            <ImageSelectButton
+                              onClick={() =>
+                                props.openImagePicker({
+                                  type: "button",
+                                  indexes: props.selectedButtonIndexes,
+                                  state: "pressed",
+                                })
+                              }
+                            />
+                          </Group>
+                        </>
+                      )}
+                    {selectedButtonIndex !== null && (
+                      <>
+                        <Text size="xs" fw={600}>
+                          {t("releasedSize")}
+                        </Text>
+                        <InheritedSizeInputs
+                          width={layout.buttons[selectedButtonIndex]?.w}
+                          height={layout.buttons[selectedButtonIndex]?.h}
+                          defaultWidth={layout.defaultbuttons.w}
+                          defaultHeight={layout.defaultbuttons.h}
+                          effectiveWidth={layout.defaultbuttons.w || "60"}
+                          effectiveHeight={layout.defaultbuttons.h || "60"}
+                          widthLabel={t("width")}
+                          heightLabel={t("height")}
+                          linked={props.aspectRatioLinked}
+                          onLinkedChange={props.onAspectRatioLinkedChange}
+                          onChange={(width, height) =>
+                            props.updateSelectedButtons((next) => {
+                              next.buttons[selectedButtonIndex].w = width;
+                              next.buttons[selectedButtonIndex].h = height;
+                            })
+                          }
+                        />
+                        <InheritedNumberInput
+                          size="xs"
+                          label={t("rotation")}
+                          min={-180}
+                          max={180}
+                          step={1}
+                          value={layout.buttons[selectedButtonIndex]?.rotation}
+                          defaultValue={layout.defaultbuttons.rotation}
+                          fallbackValue="0"
+                          onChange={(value) =>
+                            props.updateSelectedButtons((next) => {
+                              if (value === "" || value === null) {
+                                delete next.buttons[selectedButtonIndex]
+                                  .rotation;
+                              } else {
+                                next.buttons[selectedButtonIndex].rotation =
+                                  String(value);
+                              }
+                            })
+                          }
+                          placeholder={layout.defaultbuttons.rotation || "0"}
+                        />
+                      </>
+                    )}
+                  </SelectedButtonSettings>
+                ),
+              },
+            ]}
+          />
           <Title order={2}>{t("buttonMapping")}</Title>
           <Text size="xs" c="dimmed">
             {t("clickPreviewToAssign")}

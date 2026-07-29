@@ -1171,7 +1171,7 @@ test("advanced button settings stay collapsed until requested", () => {
   assert.equal(details.open, true);
 });
 
-test("button settings distinguish default and selected scopes", () => {
+test("button settings default to the selected-button tab once a button is selected", () => {
   const layout = createDefaultLayout();
   layout.totalbuttonshow = 2;
   const view = renderComponent(
@@ -1195,11 +1195,22 @@ test("button settings distinguish default and selected scopes", () => {
   details.open = true;
   fireEvent(details, new componentDocument.defaultView.Event("toggle"));
 
+  assert.ok(view.getByRole("heading", { name: "selectedButtonSettings" }));
+  assert.ok(view.container.querySelector(".button-settings-card-selected"));
+  assert.equal(
+    view.queryByRole("heading", { name: "defaultButtonSettings" }) === null,
+    true,
+  );
+
+  fireEvent.click(view.getByRole("tab", { name: "defaultButtonSettings" }));
+
   assert.ok(view.getByRole("heading", { name: "defaultButtonSettings" }));
   assert.ok(view.getByText("defaultButtonSettingsHint"));
-  assert.ok(view.getByRole("heading", { name: "selectedButtonSettings" }));
   assert.ok(view.container.querySelector(".button-settings-card-default"));
-  assert.ok(view.container.querySelector(".button-settings-card-selected"));
+  assert.equal(
+    view.queryByRole("heading", { name: "selectedButtonSettings" }) === null,
+    true,
+  );
 });
 
 test("single-button settings show and update its coordinates", () => {
@@ -1480,7 +1491,11 @@ test("default and per-button shape controls offer the pill shape", () => {
   delete layout.buttons[0].useCss;
   const { view } = renderSelectedButtonSettings(layout);
 
-  assert.equal(view.getAllByRole("option", { name: "shapePill" }).length, 2);
+  assert.equal(view.getAllByRole("option", { name: "shapePill" }).length, 1);
+
+  fireEvent.click(view.getByRole("tab", { name: "defaultButtonSettings" }));
+
+  assert.equal(view.getAllByRole("option", { name: "shapePill" }).length, 1);
 });
 
 test("inherited per-button image fields show their effective default values", () => {
@@ -1564,6 +1579,10 @@ test("button settings explain how to open per-button settings when unselected", 
   assert.ok(details);
   details.open = true;
   fireEvent(details, new componentDocument.defaultView.Event("toggle"));
+
+  fireEvent.click(
+    view.getByRole("tab", { name: "selectedButtonSettingsEmpty" }),
+  );
 
   assert.ok(view.getByText("selectButtonForSettings"));
 });

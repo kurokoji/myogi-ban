@@ -23,8 +23,8 @@ let windowRequested = !launchOptions.serverOnly;
 
 function createWindow(): void {
   const window = new BrowserWindow({
-    width: 1200,
-    height: 850,
+    width: 1600,
+    height: 1000,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
