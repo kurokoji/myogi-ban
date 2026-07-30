@@ -9,6 +9,8 @@ interface UpdatePopupProps {
   onClose: () => void;
   onDownload: () => void;
   onInstall: () => void;
+  onDownloadObsPlugin: () => void;
+  onInstallObsPlugin: () => void;
 }
 
 export function UpdatePopup({
@@ -18,6 +20,8 @@ export function UpdatePopup({
   onClose,
   onDownload,
   onInstall,
+  onDownloadObsPlugin,
+  onInstallObsPlugin,
 }: UpdatePopupProps): React.ReactElement | null {
   const { t } = useTranslation();
 
@@ -69,6 +73,43 @@ export function UpdatePopup({
         <Text size="xs" c="red">
           {status.download.message}
         </Text>
+      )}
+      {status.installSupported && status.obsPluginAvailable && (
+        <>
+          <Text size="xs" mt="xs">
+            {t("obsPluginUpdateAvailable")}
+          </Text>
+          <Group gap="xs" wrap="nowrap">
+            {status.obsPluginDownload.state === "downloading" && (
+              <Group gap="xs" wrap="nowrap">
+                <Progress
+                  size="sm"
+                  w={80}
+                  value={status.obsPluginDownload.progress * 100}
+                />
+                <Text size="xs">
+                  {Math.round(status.obsPluginDownload.progress * 100)}%
+                </Text>
+              </Group>
+            )}
+            {(status.obsPluginDownload.state === "idle" ||
+              status.obsPluginDownload.state === "error") && (
+              <Button size="xs" variant="light" onClick={onDownloadObsPlugin}>
+                {t("downloadObsPluginUpdate")}
+              </Button>
+            )}
+            {status.obsPluginDownload.state === "downloaded" && (
+              <Button size="xs" onClick={onInstallObsPlugin}>
+                {t("installObsPluginUpdate")}
+              </Button>
+            )}
+          </Group>
+          {status.obsPluginDownload.state === "error" && (
+            <Text size="xs" c="red">
+              {status.obsPluginDownload.message}
+            </Text>
+          )}
+        </>
       )}
       {actionError && (
         <Text size="xs" c="red">

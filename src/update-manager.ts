@@ -29,11 +29,14 @@ export interface UpdateStatus {
   installSupported: boolean;
   releaseUrl: string | null;
   download: UpdateDownloadState;
+  obsPluginAvailable: boolean;
+  obsPluginDownload: UpdateDownloadState;
 }
 
 export interface UpdateInstallCapability {
   downloadDirectory: string;
   launchInstaller: (installerPath: string) => void;
+  launchObsPluginInstaller?: (installerPath: string) => void;
 }
 
 export interface UpdateManagerOptions {
@@ -63,6 +66,10 @@ export class UpdateManager {
   private assetName: string | null = null;
   private download: UpdateDownloadState = { state: "idle" };
   private downloading = false;
+  private obsPluginAssetUrl: string | null = null;
+  private obsPluginAssetName: string | null = null;
+  private obsPluginDownload: UpdateDownloadState = { state: "idle" };
+  private obsPluginDownloading = false;
 
   constructor(options: UpdateManagerOptions) {
     this.currentVersion = options.currentVersion;
@@ -86,15 +93,21 @@ export class UpdateManager {
   }
 
   private buildStatus(): UpdateStatus {
+    const updateAvailable =
+      this.latestVersion !== null &&
+      isNewerVersion(this.currentVersion, this.latestVersion);
     return {
       currentVersion: this.currentVersion,
       latestVersion: this.latestVersion,
-      updateAvailable:
-        this.latestVersion !== null &&
-        isNewerVersion(this.currentVersion, this.latestVersion),
+      updateAvailable,
       installSupported: this.installCapability !== undefined,
       releaseUrl: this.releaseUrl,
       download: this.download,
+      obsPluginAvailable:
+        updateAvailable &&
+        this.obsPluginAssetUrl !== null &&
+        this.obsPluginAssetName !== null,
+      obsPluginDownload: this.obsPluginDownload,
     };
   }
 
@@ -111,6 +124,8 @@ export class UpdateManager {
       this.releaseUrl = `https://github.com/${this.repo}/releases/tag/${release.tagName}`;
       this.assetUrl = release.assetUrl;
       this.assetName = release.assetName;
+      this.obsPluginAssetUrl = release.obsPluginAssetUrl;
+      this.obsPluginAssetName = release.obsPluginAssetName;
     } catch {
       // A failed check leaves the previously known status in place.
     }
@@ -131,7 +146,9 @@ export class UpdateManager {
     );
     this.download = { state: "downloading", progress: 0 };
     try {
-      await this.downloadTo(this.assetUrl, destination);
+      await this.downloadTo(this.assetUrl, destination, (state) => {
+        this.download = state;
+      });
       this.download = { state: "downloaded", installerPath: destination };
     } catch (error) {
       if (existsSync(destination)) unlinkSync(destination);
@@ -144,7 +161,11 @@ export class UpdateManager {
     }
   }
 
-  private async downloadTo(url: string, destination: string): Promise<void> {
+  private async downloadTo(
+    url: string,
+    destination: string,
+    onProgress: (state: UpdateDownloadState) => void,
+  ): Promise<void> {
     const response = await this.fetchImpl(url);
     if (!response.ok || !response.body) {
       throw new Error(
@@ -158,7 +179,7 @@ export class UpdateManager {
       for await (const chunk of response.body as unknown as AsyncIterable<Uint8Array>) {
         received += chunk.length;
         if (total > 0) {
-          this.download = { state: "downloading", progress: received / total };
+          onProgress({ state: "downloading", progress: received / total });
         }
         await new Promise<void>((resolve, reject) => {
           fileStream.write(chunk, (error) =>
@@ -179,5 +200,56 @@ export class UpdateManager {
       throw new InstallerNotReadyError();
     }
     this.installCapability.launchInstaller(this.download.installerPath);
+  }
+
+  async startObsPluginDownload(): Promise<void> {
+    if (!this.installCapability?.launchObsPluginInstaller) return;
+    if (this.obsPluginDownloading) return;
+    const updateAvailable =
+      this.latestVersion !== null &&
+      isNewerVersion(this.currentVersion, this.latestVersion);
+    if (
+      !updateAvailable ||
+      !this.obsPluginAssetUrl ||
+      !this.obsPluginAssetName
+    ) {
+      return;
+    }
+
+    this.obsPluginDownloading = true;
+    const destination = join(
+      this.installCapability.downloadDirectory,
+      this.obsPluginAssetName,
+    );
+    this.obsPluginDownload = { state: "downloading", progress: 0 };
+    try {
+      await this.downloadTo(this.obsPluginAssetUrl, destination, (state) => {
+        this.obsPluginDownload = state;
+      });
+      this.obsPluginDownload = {
+        state: "downloaded",
+        installerPath: destination,
+      };
+    } catch (error) {
+      if (existsSync(destination)) unlinkSync(destination);
+      this.obsPluginDownload = {
+        state: "error",
+        message: error instanceof Error ? error.message : String(error),
+      };
+    } finally {
+      this.obsPluginDownloading = false;
+    }
+  }
+
+  installObsPlugin(): void {
+    if (!this.installCapability?.launchObsPluginInstaller) {
+      throw new UpdateNotSupportedError();
+    }
+    if (this.obsPluginDownload.state !== "downloaded") {
+      throw new InstallerNotReadyError();
+    }
+    this.installCapability.launchObsPluginInstaller(
+      this.obsPluginDownload.installerPath,
+    );
   }
 }

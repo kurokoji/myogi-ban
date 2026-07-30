@@ -3,7 +3,10 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
-import { resolveInstallerAssetName } from "../src/update-check";
+import {
+  resolveInstallerAssetName,
+  resolveObsPluginAssetName,
+} from "../src/update-check";
 import { UpdateManager } from "../src/update-manager";
 
 function releaseResponse(tagName: string) {
@@ -15,6 +18,26 @@ function releaseResponse(tagName: string) {
         {
           name: resolveInstallerAssetName(version),
           browser_download_url: `https://example.com/${version}/installer.exe`,
+        },
+      ],
+    }),
+    { status: 200, headers: { "content-type": "application/json" } },
+  );
+}
+
+function releaseResponseWithObsPlugin(tagName: string) {
+  const version = tagName.replace(/^v/, "");
+  return new Response(
+    JSON.stringify({
+      tag_name: tagName,
+      assets: [
+        {
+          name: resolveInstallerAssetName(version),
+          browser_download_url: `https://example.com/${version}/installer.exe`,
+        },
+        {
+          name: resolveObsPluginAssetName(version),
+          browser_download_url: `https://example.com/${version}/obs-plugin-installer.exe`,
         },
       ],
     }),
@@ -183,6 +206,50 @@ test("getStatus reports idle download state before any download starts", async (
   assert.deepEqual(status.download, { state: "idle" });
 });
 
+test("getStatus reports obsPluginAvailable true when the latest release includes an OBS plugin asset", async () => {
+  const manager = new UpdateManager({
+    currentVersion: "1.0.17",
+    fetchImpl: async () => releaseResponseWithObsPlugin("v1.0.18"),
+  });
+
+  const status = await manager.getStatus();
+
+  assert.equal(status.obsPluginAvailable, true);
+});
+
+test("getStatus reports obsPluginAvailable false when the release has no OBS plugin asset", async () => {
+  const manager = new UpdateManager({
+    currentVersion: "1.0.17",
+    fetchImpl: async () => releaseResponse("v1.0.18"),
+  });
+
+  const status = await manager.getStatus();
+
+  assert.equal(status.obsPluginAvailable, false);
+});
+
+test("getStatus reports obsPluginAvailable false when already on the latest release", async () => {
+  const manager = new UpdateManager({
+    currentVersion: "1.0.18",
+    fetchImpl: async () => releaseResponseWithObsPlugin("v1.0.18"),
+  });
+
+  const status = await manager.getStatus();
+
+  assert.equal(status.obsPluginAvailable, false);
+});
+
+test("getStatus reports idle obsPluginDownload state before any download starts", async () => {
+  const manager = new UpdateManager({
+    currentVersion: "1.0.17",
+    fetchImpl: async () => releaseResponseWithObsPlugin("v1.0.18"),
+  });
+
+  const status = await manager.getStatus();
+
+  assert.deepEqual(status.obsPluginDownload, { state: "idle" });
+});
+
 function installerContent() {
   return "fake installer exe bytes";
 }
@@ -202,6 +269,18 @@ function withTempDir(t: import("node:test").TestContext) {
   const dir = mkdtempSync(join(tmpdir(), "myogi-ban-update-"));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   return dir;
+}
+
+function fetchGithubAndInstallerWithObsPlugin(tagName: string) {
+  return async (input: string | URL) => {
+    const url = String(input);
+    if (url.includes("api.github.com"))
+      return releaseResponseWithObsPlugin(tagName);
+    return new Response(installerContent(), {
+      status: 200,
+      headers: { "content-length": String(installerContent().length) },
+    });
+  };
 }
 
 test("startDownload downloads the installer to the configured directory", async (t) => {
@@ -323,4 +402,106 @@ test("install throws when the installer has not finished downloading", async () 
   await manager.getStatus();
 
   assert.throws(() => manager.install());
+});
+
+test("startObsPluginDownload downloads the OBS plugin installer to the configured directory", async (t) => {
+  const downloadDirectory = withTempDir(t);
+  const manager = new UpdateManager({
+    currentVersion: "1.0.17",
+    fetchImpl: fetchGithubAndInstallerWithObsPlugin("v1.0.18"),
+    install: {
+      downloadDirectory,
+      launchInstaller: () => {},
+      launchObsPluginInstaller: () => {},
+    },
+  });
+  await manager.getStatus();
+
+  await manager.startObsPluginDownload();
+
+  const status = await manager.getStatus();
+  assert.equal(status.obsPluginDownload.state, "downloaded");
+  const installerPath =
+    status.obsPluginDownload.state === "downloaded"
+      ? status.obsPluginDownload.installerPath
+      : "";
+  assert.equal(
+    installerPath,
+    join(downloadDirectory, resolveObsPluginAssetName("1.0.18")),
+  );
+  assert.equal(readFileSync(installerPath, "utf8"), installerContent());
+});
+
+test("startObsPluginDownload does nothing without install support", async () => {
+  const manager = new UpdateManager({
+    currentVersion: "1.0.17",
+    fetchImpl: fetchGithubAndInstallerWithObsPlugin("v1.0.18"),
+  });
+  await manager.getStatus();
+
+  await manager.startObsPluginDownload();
+
+  assert.deepEqual((await manager.getStatus()).obsPluginDownload, {
+    state: "idle",
+  });
+});
+
+test("startObsPluginDownload does nothing when there is no OBS plugin asset", async (t) => {
+  const downloadDirectory = withTempDir(t);
+  const manager = new UpdateManager({
+    currentVersion: "1.0.17",
+    fetchImpl: fetchGithubAndInstaller("v1.0.18"),
+    install: {
+      downloadDirectory,
+      launchInstaller: () => {},
+      launchObsPluginInstaller: () => {},
+    },
+  });
+  await manager.getStatus();
+
+  await manager.startObsPluginDownload();
+
+  assert.deepEqual((await manager.getStatus()).obsPluginDownload, {
+    state: "idle",
+  });
+});
+
+test("installObsPlugin launches the downloaded OBS plugin installer", async (t) => {
+  const downloadDirectory = withTempDir(t);
+  let launchedPath: string | undefined;
+  const manager = new UpdateManager({
+    currentVersion: "1.0.17",
+    fetchImpl: fetchGithubAndInstallerWithObsPlugin("v1.0.18"),
+    install: {
+      downloadDirectory,
+      launchInstaller: () => {},
+      launchObsPluginInstaller: (installerPath) => {
+        launchedPath = installerPath;
+      },
+    },
+  });
+  await manager.getStatus();
+  await manager.startObsPluginDownload();
+
+  manager.installObsPlugin();
+
+  assert.equal(
+    launchedPath,
+    join(downloadDirectory, resolveObsPluginAssetName("1.0.18")),
+  );
+});
+
+test("installObsPlugin throws when the installer has not finished downloading", async () => {
+  const manager = new UpdateManager({
+    currentVersion: "1.0.17",
+    fetchImpl: fetchGithubAndInstallerWithObsPlugin("v1.0.18"),
+    install: {
+      downloadDirectory: "/tmp/does-not-matter",
+      launchInstaller: () => {},
+      launchObsPluginInstaller: () => {},
+    },
+  });
+  await manager.getStatus();
+
+  assert.throws(() => manager.installObsPlugin());
 });

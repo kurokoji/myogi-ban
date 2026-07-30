@@ -14,6 +14,8 @@ function idleStatus(overrides: Partial<UpdateStatus> = {}): UpdateStatus {
     installSupported: true,
     releaseUrl: "https://github.com/kurokoji/myogi-ban/releases/tag/v1.0.18",
     download: { state: "idle" },
+    obsPluginAvailable: false,
+    obsPluginDownload: { state: "idle" },
     ...overrides,
   };
 }
@@ -29,6 +31,8 @@ function renderPopup(
       onClose={() => {}}
       onDownload={() => {}}
       onInstall={() => {}}
+      onDownloadObsPlugin={() => {}}
+      onInstallObsPlugin={() => {}}
       {...props}
     />,
   );
@@ -123,6 +127,84 @@ test("shows the download error message and still offers a retry download button"
 test("shows the action error text when provided", () => {
   const view = renderPopup({ actionError: "something broke" });
   assert.ok(view.getByText("something broke"));
+});
+
+test("does not show the OBS plugin section when no OBS plugin update is available", () => {
+  const view = renderPopup({
+    status: idleStatus({ obsPluginAvailable: false }),
+  });
+
+  assert.equal(
+    view.queryByRole("button", { name: "downloadObsPluginUpdate" }) === null,
+    true,
+  );
+});
+
+test("shows a download button for the OBS plugin when it is available", () => {
+  const view = renderPopup({
+    status: idleStatus({ obsPluginAvailable: true }),
+  });
+
+  assert.ok(view.getByRole("button", { name: "downloadObsPluginUpdate" }));
+});
+
+test("clicking the OBS plugin download button calls onDownloadObsPlugin", () => {
+  let calls = 0;
+  const view = renderPopup({
+    status: idleStatus({ obsPluginAvailable: true }),
+    onDownloadObsPlugin: () => {
+      calls += 1;
+    },
+  });
+
+  fireEvent.click(
+    view.getByRole("button", { name: "downloadObsPluginUpdate" }),
+  );
+
+  assert.equal(calls, 1);
+});
+
+test("shows OBS plugin download progress as a percentage", () => {
+  const view = renderPopup({
+    status: idleStatus({
+      obsPluginAvailable: true,
+      obsPluginDownload: { state: "downloading", progress: 0.42 },
+    }),
+  });
+
+  assert.ok(view.getByText("42%"));
+});
+
+test("shows an install button for the OBS plugin once downloaded and calls onInstallObsPlugin on click", () => {
+  let calls = 0;
+  const view = renderPopup({
+    status: idleStatus({
+      obsPluginAvailable: true,
+      obsPluginDownload: {
+        state: "downloaded",
+        installerPath: "C:/tmp/obs-setup.exe",
+      },
+    }),
+    onInstallObsPlugin: () => {
+      calls += 1;
+    },
+  });
+
+  fireEvent.click(view.getByRole("button", { name: "installObsPluginUpdate" }));
+
+  assert.equal(calls, 1);
+});
+
+test("shows the OBS plugin download error message and still offers a retry download button", () => {
+  const view = renderPopup({
+    status: idleStatus({
+      obsPluginAvailable: true,
+      obsPluginDownload: { state: "error", message: "obs network down" },
+    }),
+  });
+
+  assert.ok(view.getByText("obs network down"));
+  assert.ok(view.getByRole("button", { name: "downloadObsPluginUpdate" }));
 });
 
 test("clicking close calls onClose", () => {

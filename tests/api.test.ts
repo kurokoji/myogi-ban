@@ -246,3 +246,37 @@ test("ApiClient installs a downloaded update", async (t) => {
     "POST",
   );
 });
+
+test("ApiClient starts an OBS plugin update download", async (t) => {
+  const fetchMock = t.mock.method(globalThis, "fetch", async () =>
+    Response.json({ ok: true }),
+  );
+
+  await new ApiClient().startObsPluginDownload();
+
+  assert.equal(
+    fetchMock.mock.calls[0].arguments[0],
+    "/api/update/obs-plugin/download",
+  );
+  assert.equal(
+    (fetchMock.mock.calls[0].arguments[1] as RequestInit).method,
+    "POST",
+  );
+});
+
+test("ApiClient installs a downloaded OBS plugin update", async (t) => {
+  const fetchMock = t.mock.method(globalThis, "fetch", async () =>
+    Response.json({ ok: true }),
+  );
+
+  await new ApiClient().installObsPlugin();
+
+  assert.equal(
+    fetchMock.mock.calls[0].arguments[0],
+    "/api/update/obs-plugin/install",
+  );
+  assert.equal(
+    (fetchMock.mock.calls[0].arguments[1] as RequestInit).method,
+    "POST",
+  );
+});

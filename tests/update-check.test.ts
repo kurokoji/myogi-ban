@@ -4,6 +4,7 @@ import {
   isNewerVersion,
   parseLatestRelease,
   resolveInstallerAssetName,
+  resolveObsPluginAssetName,
 } from "../src/update-check";
 
 test("isNewerVersion reports a higher patch version as newer", () => {
@@ -36,7 +37,16 @@ test("resolveInstallerAssetName matches the asset name GitHub stores after uploa
   );
 });
 
-test("parseLatestRelease extracts the version, tag, and matching installer asset", () => {
+test("resolveObsPluginAssetName matches the OBS plugin installer's artifact name", () => {
+  // Unlike the app installer, this filename has no spaces to begin with, so
+  // GitHub's space-to-period substitution never changes it.
+  assert.equal(
+    resolveObsPluginAssetName("1.0.18"),
+    "Myogi-Ban-OBS-Plugin-Setup-1.0.18.exe",
+  );
+});
+
+test("parseLatestRelease extracts the version, tag, and matching installer assets", () => {
   const result = parseLatestRelease({
     tag_name: "v1.0.18",
     assets: [
@@ -56,6 +66,29 @@ test("parseLatestRelease extracts the version, tag, and matching installer asset
     tagName: "v1.0.18",
     assetName: "Myogi.Ban.Setup.1.0.18.exe",
     assetUrl: "https://example.com/app-installer.exe",
+    obsPluginAssetName: "Myogi-Ban-OBS-Plugin-Setup-1.0.18.exe",
+    obsPluginAssetUrl: "https://example.com/obs-installer.exe",
+  });
+});
+
+test("parseLatestRelease still succeeds when the release has no OBS plugin asset", () => {
+  const result = parseLatestRelease({
+    tag_name: "v1.0.18",
+    assets: [
+      {
+        name: "Myogi.Ban.Setup.1.0.18.exe",
+        browser_download_url: "https://example.com/app-installer.exe",
+      },
+    ],
+  });
+
+  assert.deepEqual(result, {
+    version: "1.0.18",
+    tagName: "v1.0.18",
+    assetName: "Myogi.Ban.Setup.1.0.18.exe",
+    assetUrl: "https://example.com/app-installer.exe",
+    obsPluginAssetName: null,
+    obsPluginAssetUrl: null,
   });
 });
 

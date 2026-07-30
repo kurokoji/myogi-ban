@@ -21,6 +21,8 @@ function idleStatus(overrides: Partial<UpdateStatus> = {}): UpdateStatus {
     installSupported: true,
     releaseUrl: "https://github.com/kurokoji/myogi-ban/releases/tag/v1.0.18",
     download: { state: "idle" },
+    obsPluginAvailable: false,
+    obsPluginDownload: { state: "idle" },
     ...overrides,
   };
 }
@@ -36,6 +38,8 @@ function fakeApi(
     checkForUpdate: async () => responses[responses.length - 1],
     startUpdateDownload: async () => {},
     installUpdate: async () => {},
+    startObsPluginDownload: async () => {},
+    installObsPlugin: async () => {},
     ...overrides,
   } as unknown as ApiClient;
 }
@@ -131,6 +135,101 @@ test("install calls the API and reports a failure", async () => {
   });
 
   assert.equal(result.current.actionError !== null, true);
+  unmount();
+});
+
+test("downloadObsPlugin starts the OBS plugin download and refreshes status", async () => {
+  let downloadCalls = 0;
+  const api = fakeApi(
+    [
+      idleStatus({ obsPluginAvailable: true }),
+      idleStatus({
+        obsPluginAvailable: true,
+        obsPluginDownload: { state: "downloading", progress: 0 },
+      }),
+    ],
+    {
+      startObsPluginDownload: async () => {
+        downloadCalls += 1;
+      },
+    },
+  );
+  const { result, unmount } = renderHook(() => useUpdateStatus(api, 999999), {
+    wrapper,
+  });
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+
+  await act(async () => {
+    await result.current.downloadObsPlugin();
+  });
+
+  assert.equal(downloadCalls, 1);
+  assert.equal(result.current.status?.obsPluginDownload.state, "downloading");
+  unmount();
+});
+
+test("installObsPlugin calls the API and reports a failure", async () => {
+  const api = fakeApi([idleStatus({ obsPluginAvailable: true })], {
+    installObsPlugin: async () => {
+      throw new Error("boom");
+    },
+  });
+  const { result, unmount } = renderHook(() => useUpdateStatus(api, 999999), {
+    wrapper,
+  });
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+
+  await act(async () => {
+    await result.current.installObsPlugin();
+  });
+
+  assert.equal(result.current.actionError !== null, true);
+  unmount();
+});
+
+test("polls for progress while the OBS plugin download is in progress", async () => {
+  let statusCalls = 0;
+  const api = fakeApi(
+    [
+      idleStatus({
+        obsPluginAvailable: true,
+        obsPluginDownload: { state: "downloading", progress: 0 },
+      }),
+    ],
+    {
+      getUpdateStatus: async () => {
+        statusCalls += 1;
+        if (statusCalls < 3)
+          return idleStatus({
+            obsPluginAvailable: true,
+            obsPluginDownload: { state: "downloading", progress: 0 },
+          });
+        return idleStatus({
+          obsPluginAvailable: true,
+          obsPluginDownload: { state: "downloaded", installerPath: "x" },
+        });
+      },
+    },
+  );
+  const { result, unmount } = renderHook(() => useUpdateStatus(api, 5), {
+    wrapper,
+  });
+
+  for (
+    let i = 0;
+    i < 50 && result.current.status?.obsPluginDownload.state !== "downloaded";
+    i++
+  ) {
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    });
+  }
+
+  assert.equal(result.current.status?.obsPluginDownload.state, "downloaded");
   unmount();
 });
 

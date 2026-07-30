@@ -24,6 +24,8 @@ test("server route modules own their public paths", () => {
     "/api/update/check",
     "/api/update/download",
     "/api/update/install",
+    "/api/update/obs-plugin/download",
+    "/api/update/obs-plugin/install",
   ]);
   assert.deepEqual(WHATS_NEW_ROUTE_PATHS, [
     "/api/whats-new",

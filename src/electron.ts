@@ -59,6 +59,10 @@ function launchInstaller(installerPath: string): void {
   app.quit();
 }
 
+function launchObsPluginInstaller(installerPath: string): void {
+  spawn(installerPath, [], { detached: true, stdio: "ignore" }).unref();
+}
+
 function startServer(): void {
   dataDir = resolveElectronDataDir(
     launchOptions.development,
@@ -82,6 +86,7 @@ function startServer(): void {
       install: {
         downloadDirectory: app.getPath("temp"),
         launchInstaller,
+        launchObsPluginInstaller,
       },
     }),
     whatsNewManager: new WhatsNewManager({

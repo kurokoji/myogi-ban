@@ -13,6 +13,8 @@ export interface UseUpdateStatusResult {
   checkNow: () => Promise<void>;
   download: () => Promise<void>;
   install: () => Promise<void>;
+  downloadObsPlugin: () => Promise<void>;
+  installObsPlugin: () => Promise<void>;
 }
 
 export function useUpdateStatus(
@@ -41,7 +43,10 @@ export function useUpdateStatus(
   }, [api]);
 
   useEffect(() => {
-    if (status?.download.state !== "downloading") return;
+    const downloading =
+      status?.download.state === "downloading" ||
+      status?.obsPluginDownload.state === "downloading";
+    if (!downloading) return;
     const interval = setInterval(async () => {
       try {
         setStatus(await api.getUpdateStatus());
@@ -50,7 +55,12 @@ export function useUpdateStatus(
       }
     }, downloadPollIntervalMs);
     return () => clearInterval(interval);
-  }, [api, status?.download.state, downloadPollIntervalMs]);
+  }, [
+    api,
+    status?.download.state,
+    status?.obsPluginDownload.state,
+    downloadPollIntervalMs,
+  ]);
 
   const checkNow = async () => {
     setChecking(true);
@@ -82,6 +92,25 @@ export function useUpdateStatus(
     }
   };
 
+  const downloadObsPlugin = async () => {
+    setActionError(null);
+    try {
+      await api.startObsPluginDownload();
+      setStatus(await api.getUpdateStatus());
+    } catch {
+      setActionError(t("updateActionFailed"));
+    }
+  };
+
+  const installObsPlugin = async () => {
+    setActionError(null);
+    try {
+      await api.installObsPlugin();
+    } catch {
+      setActionError(t("updateActionFailed"));
+    }
+  };
+
   return {
     status,
     dismissed,
@@ -91,5 +120,7 @@ export function useUpdateStatus(
     checkNow,
     download,
     install,
+    downloadObsPlugin,
+    installObsPlugin,
   };
 }

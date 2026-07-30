@@ -21,6 +21,11 @@ test("the editor renders the update popup driven by useUpdateStatus", async () =
   assert.match(source, /onInstall=\{updateStatus\.install\}/);
   assert.match(
     source,
+    /onDownloadObsPlugin=\{updateStatus\.downloadObsPlugin\}/,
+  );
+  assert.match(source, /onInstallObsPlugin=\{updateStatus\.installObsPlugin\}/);
+  assert.match(
+    source,
     /import \{ UpdateCheckButton \} from "\.\/components\/editor\/UpdateCheckButton";/,
   );
   assert.match(source, /checking=\{updateStatus\.checking\}/);

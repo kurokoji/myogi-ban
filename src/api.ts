@@ -137,6 +137,14 @@ export class ApiClient {
     await request("/api/update/install", jsonRequest({}));
   }
 
+  async startObsPluginDownload(): Promise<void> {
+    await request("/api/update/obs-plugin/download", jsonRequest({}));
+  }
+
+  async installObsPlugin(): Promise<void> {
+    await request("/api/update/obs-plugin/install", jsonRequest({}));
+  }
+
   async getWhatsNew(): Promise<WhatsNewStatus> {
     return requestJson<WhatsNewStatus>("/api/whats-new");
   }

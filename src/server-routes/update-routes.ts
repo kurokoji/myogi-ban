@@ -11,6 +11,8 @@ export const UPDATE_ROUTE_PATHS = [
   "/api/update/check",
   "/api/update/download",
   "/api/update/install",
+  "/api/update/obs-plugin/download",
+  "/api/update/obs-plugin/install",
 ] as const;
 
 export function registerUpdateRoutes(
@@ -42,6 +44,37 @@ export function registerUpdateRoutes(
   app.post("/api/update/install", (_req, res) => {
     try {
       updateManager.install();
+      res.json(apiSuccess());
+    } catch (error) {
+      if (error instanceof UpdateNotSupportedError) {
+        res.status(400).json(apiFailure("update_not_supported"));
+        return;
+      }
+      if (error instanceof InstallerNotReadyError) {
+        res.status(400).json(apiFailure("installer_not_ready"));
+        return;
+      }
+      throw error;
+    }
+  });
+
+  app.post("/api/update/obs-plugin/download", async (_req, res) => {
+    const status = await updateManager.getStatus();
+    if (!status.installSupported) {
+      res.status(400).json(apiFailure("update_not_supported"));
+      return;
+    }
+    if (!status.obsPluginAvailable) {
+      res.status(400).json(apiFailure("obs_plugin_not_available"));
+      return;
+    }
+    void updateManager.startObsPluginDownload();
+    res.json(apiSuccess());
+  });
+
+  app.post("/api/update/obs-plugin/install", (_req, res) => {
+    try {
+      updateManager.installObsPlugin();
       res.json(apiSuccess());
     } catch (error) {
       if (error instanceof UpdateNotSupportedError) {

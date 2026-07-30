@@ -3,6 +3,8 @@ export interface LatestReleaseInfo {
   tagName: string;
   assetName: string;
   assetUrl: string;
+  obsPluginAssetName: string | null;
+  obsPluginAssetUrl: string | null;
 }
 
 export function isNewerVersion(current: string, latest: string): boolean {
@@ -24,6 +26,10 @@ export function resolveInstallerAssetName(version: string): string {
   return `Myogi.Ban.Setup.${version}.exe`;
 }
 
+export function resolveObsPluginAssetName(version: string): string {
+  return `Myogi-Ban-OBS-Plugin-Setup-${version}.exe`;
+}
+
 const record = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
@@ -41,5 +47,22 @@ export function parseLatestRelease(payload: unknown): LatestReleaseInfo | null {
   );
   if (!asset || typeof asset.browser_download_url !== "string") return null;
 
-  return { version, tagName, assetName, assetUrl: asset.browser_download_url };
+  const obsPluginAssetName = resolveObsPluginAssetName(version);
+  const obsPluginAsset = payload.assets.find(
+    (candidate): candidate is Record<string, unknown> =>
+      record(candidate) && candidate.name === obsPluginAssetName,
+  );
+  const obsPluginAssetUrl =
+    obsPluginAsset && typeof obsPluginAsset.browser_download_url === "string"
+      ? obsPluginAsset.browser_download_url
+      : null;
+
+  return {
+    version,
+    tagName,
+    assetName,
+    assetUrl: asset.browser_download_url,
+    obsPluginAssetName: obsPluginAssetUrl ? obsPluginAssetName : null,
+    obsPluginAssetUrl,
+  };
 }

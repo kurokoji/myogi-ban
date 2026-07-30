@@ -675,6 +675,8 @@ function EditorApp(): React.ReactElement {
         onClose={updateStatus.dismiss}
         onDownload={updateStatus.download}
         onInstall={updateStatus.install}
+        onDownloadObsPlugin={updateStatus.downloadObsPlugin}
+        onInstallObsPlugin={updateStatus.installObsPlugin}
       />
       <WhatsNewPopup notes={whatsNew.popup} onClose={whatsNew.dismiss} />
       <aside id="sidebar">
