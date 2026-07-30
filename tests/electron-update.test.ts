@@ -38,6 +38,15 @@ test("Electron wires a launchObsPluginInstaller that opens the installer via the
   assert.doesNotMatch(obsFnBody as string, /app\.quit\(\)/);
 });
 
+test("Electron wires getInstalledObsPluginVersion into the update manager's install capability", async () => {
+  const source = await readFile("src/electron.ts", "utf8");
+  assert.match(
+    source,
+    /import \{ getInstalledObsPluginVersion \} from "\.\/obs-plugin-install-status";/,
+  );
+  assert.match(source, /getInstalledObsPluginVersion,/);
+});
+
 test("Electron wires a WhatsNewManager with app-provided version and a data-dir state file", async () => {
   const source = await readFile("src/electron.ts", "utf8");
   assert.match(source, /new WhatsNewManager\(\{/);

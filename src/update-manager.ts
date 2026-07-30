@@ -37,6 +37,7 @@ export interface UpdateInstallCapability {
   downloadDirectory: string;
   launchInstaller: (installerPath: string) => void;
   launchObsPluginInstaller?: (installerPath: string) => void;
+  getInstalledObsPluginVersion?: () => Promise<string | null>;
 }
 
 export interface UpdateManagerOptions {
@@ -68,6 +69,7 @@ export class UpdateManager {
   private downloading = false;
   private obsPluginAssetUrl: string | null = null;
   private obsPluginAssetName: string | null = null;
+  private obsPluginInstalledVersion: string | null = null;
   private obsPluginDownload: UpdateDownloadState = { state: "idle" };
   private obsPluginDownloading = false;
 
@@ -103,8 +105,7 @@ export class UpdateManager {
       installSupported: this.installCapability !== undefined,
       releaseUrl: this.releaseUrl,
       download: this.download,
-      obsPluginAvailable:
-        this.obsPluginAssetUrl !== null && this.obsPluginAssetName !== null,
+      obsPluginAvailable: this.isObsPluginUpdateAvailable(),
       obsPluginDownload: this.obsPluginDownload,
     };
   }
@@ -127,6 +128,29 @@ export class UpdateManager {
     } catch {
       // A failed check leaves the previously known status in place.
     }
+
+    if (this.installCapability?.getInstalledObsPluginVersion) {
+      this.obsPluginInstalledVersion =
+        await this.installCapability.getInstalledObsPluginVersion();
+    }
+  }
+
+  private isObsPluginUpdateAvailable(): boolean {
+    if (this.obsPluginAssetUrl === null || this.obsPluginAssetName === null) {
+      return false;
+    }
+    if (!this.installCapability?.getInstalledObsPluginVersion) {
+      // Without a way to detect the installed version, fall back to
+      // offering the plugin whenever the latest release ships one.
+      return true;
+    }
+    if (
+      this.obsPluginInstalledVersion === null ||
+      this.latestVersion === null
+    ) {
+      return true;
+    }
+    return isNewerVersion(this.obsPluginInstalledVersion, this.latestVersion);
   }
 
   async startDownload(): Promise<void> {

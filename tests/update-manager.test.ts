@@ -243,6 +243,73 @@ test("getStatus reports obsPluginAvailable true even when already on the latest 
   assert.equal(status.obsPluginAvailable, true);
 });
 
+test("getStatus reports obsPluginAvailable true when the plugin is not installed", async () => {
+  const manager = new UpdateManager({
+    currentVersion: "1.0.18",
+    fetchImpl: async () => releaseResponseWithObsPlugin("v1.0.18"),
+    install: {
+      downloadDirectory: "/tmp/does-not-matter",
+      launchInstaller: () => {},
+      launchObsPluginInstaller: () => {},
+      getInstalledObsPluginVersion: async () => null,
+    },
+  });
+
+  const status = await manager.getStatus();
+
+  assert.equal(status.obsPluginAvailable, true);
+});
+
+test("getStatus reports obsPluginAvailable false when the installed plugin already matches the latest version", async () => {
+  const manager = new UpdateManager({
+    currentVersion: "1.0.18",
+    fetchImpl: async () => releaseResponseWithObsPlugin("v1.0.18"),
+    install: {
+      downloadDirectory: "/tmp/does-not-matter",
+      launchInstaller: () => {},
+      launchObsPluginInstaller: () => {},
+      getInstalledObsPluginVersion: async () => "1.0.18",
+    },
+  });
+
+  const status = await manager.getStatus();
+
+  assert.equal(status.obsPluginAvailable, false);
+});
+
+test("getStatus reports obsPluginAvailable true when the installed plugin is older than the latest version", async () => {
+  const manager = new UpdateManager({
+    currentVersion: "1.0.18",
+    fetchImpl: async () => releaseResponseWithObsPlugin("v1.0.18"),
+    install: {
+      downloadDirectory: "/tmp/does-not-matter",
+      launchInstaller: () => {},
+      launchObsPluginInstaller: () => {},
+      getInstalledObsPluginVersion: async () => "1.0.17",
+    },
+  });
+
+  const status = await manager.getStatus();
+
+  assert.equal(status.obsPluginAvailable, true);
+});
+
+test("getStatus falls back to asset-presence-only obsPluginAvailable when getInstalledObsPluginVersion is not provided", async () => {
+  const manager = new UpdateManager({
+    currentVersion: "1.0.18",
+    fetchImpl: async () => releaseResponseWithObsPlugin("v1.0.18"),
+    install: {
+      downloadDirectory: "/tmp/does-not-matter",
+      launchInstaller: () => {},
+      launchObsPluginInstaller: () => {},
+    },
+  });
+
+  const status = await manager.getStatus();
+
+  assert.equal(status.obsPluginAvailable, true);
+});
+
 test("getStatus reports idle obsPluginDownload state before any download starts", async () => {
   const manager = new UpdateManager({
     currentVersion: "1.0.17",

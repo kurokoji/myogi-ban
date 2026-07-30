@@ -8,6 +8,7 @@ import { resolveElectronRendererUrl } from "./electron-renderer";
 import { shouldOpenWindowForSecondInstance } from "./electron-single-instance";
 import { requestRunningWindow } from "./electron-window-request";
 import { createLocalServer } from "./local-server";
+import { getInstalledObsPluginVersion } from "./obs-plugin-install-status";
 import { cleanupLocalServer } from "./server-cleanup";
 import { PORT } from "./types";
 import { UpdateManager } from "./update-manager";
@@ -96,6 +97,7 @@ function startServer(): void {
         downloadDirectory: app.getPath("temp"),
         launchInstaller,
         launchObsPluginInstaller,
+        getInstalledObsPluginVersion,
       },
     }),
     whatsNewManager: new WhatsNewManager({
