@@ -129,7 +129,6 @@ export const jaTranslation = {
   obsPluginUpdateAvailable: "OBSプラグインの更新も利用可能です",
   downloadObsPluginUpdate: "OBSプラグインをダウンロード",
   installObsPluginUpdate: "OBSプラグインをインストール",
-  githubRepository: "GitHubで見る",
   checkForUpdates: "更新を確認",
   upToDate: "最新の状態です",
   whatsNewTitle: "v{{version}} の変更点",

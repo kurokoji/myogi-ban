@@ -57,10 +57,11 @@ body {
   margin-bottom: 10px;
 }
 
-.sidebar-title-actions {
-  display: flex;
+.github-link {
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  margin: 0 0 6px;
 }
 
 .theme-option-icon {

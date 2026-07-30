@@ -7,4 +7,5 @@ export const VIEWER_RECONNECT_DELAY_MS = 1000;
 export const NUMBER_INPUT_STEP_HOLD_DELAY_MS = 500;
 export const NUMBER_INPUT_STEP_HOLD_INTERVAL_MS = 100;
 export const UPDATE_DOWNLOAD_POLL_INTERVAL_MS = 3000;
-export const REPO_URL = "https://github.com/kurokoji/myogi-ban";
+export const REPO_NAME = "kurokoji/myogi-ban";
+export const REPO_URL = `https://github.com/${REPO_NAME}`;

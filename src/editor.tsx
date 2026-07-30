@@ -1,5 +1,6 @@
 import {
   ActionIcon,
+  Anchor,
   Button,
   MantineProvider,
   Text,
@@ -20,7 +21,7 @@ import "@fontsource-variable/m-plus-2/wght.css";
 import "@fontsource-variable/m-plus-code-latin/wght.css";
 import "./i18n";
 import { ApiClient } from "./api";
-import { REPO_URL } from "./app-constants";
+import { REPO_NAME, REPO_URL } from "./app-constants";
 import { resetButtonToDefaults } from "./button-settings";
 import { ConfirmationModal } from "./components/editor/ConfirmationModal";
 import { DragCoordinateTooltip } from "./components/editor/DragCoordinateTooltip";
@@ -688,21 +689,19 @@ function EditorApp(): React.ReactElement {
               {t("appTitle")}{" "}
               <span className="app-version">v{APP_VERSION}</span>
             </Title>
-            <div className="sidebar-title-actions">
-              <ActionIcon
-                size="sm"
-                variant="subtle"
-                component="a"
-                href={REPO_URL}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={t("githubRepository")}
-              >
-                <IconBrandGithub size={16} />
-              </ActionIcon>
-              <ThemeControl />
-            </div>
+            <ThemeControl />
           </div>
+          <Anchor
+            href={REPO_URL}
+            target="_blank"
+            rel="noreferrer"
+            size="xs"
+            c="dimmed"
+            className="github-link"
+          >
+            <IconBrandGithub size={14} />
+            {REPO_NAME}
+          </Anchor>
           <div className="update-check-row">
             <UpdateCheckButton
               checking={updateStatus.checking}
