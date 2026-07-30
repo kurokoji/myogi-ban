@@ -3,7 +3,6 @@ import {
   Anchor,
   Button,
   MantineProvider,
-  Text,
   Title,
   Tooltip,
 } from "@mantine/core";
@@ -11,7 +10,6 @@ import {
   IconArrowBackUp,
   IconArrowForwardUp,
   IconBrandGithub,
-  IconCopy,
 } from "@tabler/icons-react";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -26,6 +24,7 @@ import { resetButtonToDefaults } from "./button-settings";
 import { ConfirmationModal } from "./components/editor/ConfirmationModal";
 import { DragCoordinateTooltip } from "./components/editor/DragCoordinateTooltip";
 import { InspectorTabs } from "./components/editor/InspectorTabs";
+import { ObsSetupPanel } from "./components/editor/ObsSetupPanel";
 import { PreviewZoomControls } from "./components/editor/PreviewZoomControls";
 import {
   BackgroundSettingsPanel,
@@ -678,8 +677,6 @@ function EditorApp(): React.ReactElement {
         onClose={updateStatus.dismiss}
         onDownload={updateStatus.download}
         onInstall={updateStatus.install}
-        onDownloadObsPlugin={updateStatus.downloadObsPlugin}
-        onInstallObsPlugin={updateStatus.installObsPlugin}
       />
       <WhatsNewPopup notes={whatsNew.popup} onClose={whatsNew.dismiss} />
       <aside id="sidebar">
@@ -717,24 +714,23 @@ function EditorApp(): React.ReactElement {
               {t("viewReleaseNotes")}
             </Button>
           </div>
-          <p className="server-url">
-            {t("obs")}: <span className="server-url-value">{obsUrl}</span>
-            <ActionIcon
-              size="sm"
-              variant="light"
-              aria-label={t("copy")}
-              onClick={copyObsUrl}
-            >
-              <IconCopy size={16} />
-            </ActionIcon>
-            {copiedObsUrl && (
-              <span className="copy-feedback">{t("copied")}</span>
-            )}
-          </p>
-          <Text size="xs" c="dimmed">
-            {t("obsTip")}
-          </Text>
         </div>
+
+        <ObsSetupPanel
+          obsUrl={obsUrl}
+          copiedObsUrl={copiedObsUrl}
+          onCopyObsUrl={copyObsUrl}
+          obsPluginAvailable={
+            (updateStatus.status?.installSupported &&
+              updateStatus.status?.obsPluginAvailable) ??
+            false
+          }
+          obsPluginDownload={
+            updateStatus.status?.obsPluginDownload ?? { state: "idle" }
+          }
+          onDownloadObsPlugin={updateStatus.downloadObsPlugin}
+          onInstallObsPlugin={updateStatus.installObsPlugin}
+        />
 
         <SidebarAccordion
           fixedContent={

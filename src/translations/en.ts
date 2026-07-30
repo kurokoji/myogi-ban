@@ -2,6 +2,7 @@ import type { TranslationKey } from "./keys";
 
 export const enTranslation = {
   appTitle: "Myogi Ban",
+  obsSetupTitle: "OBS",
   obs: "Viewer",
   obsTip:
     'Add the "Myogi Ban" source from the OBS plugin, or set the above URL in an OBS Browser Source (matching the width/height from the Background section in OBS).',

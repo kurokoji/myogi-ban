@@ -228,7 +228,10 @@ test("getStatus reports obsPluginAvailable false when the release has no OBS plu
   assert.equal(status.obsPluginAvailable, false);
 });
 
-test("getStatus reports obsPluginAvailable false when already on the latest release", async () => {
+test("getStatus reports obsPluginAvailable true even when already on the latest app release", async () => {
+  // The OBS plugin installer stays reachable even after the app itself has
+  // been updated, so a user who skips it during an app update can still
+  // grab it later instead of the entry point vanishing.
   const manager = new UpdateManager({
     currentVersion: "1.0.18",
     fetchImpl: async () => releaseResponseWithObsPlugin("v1.0.18"),
@@ -236,7 +239,8 @@ test("getStatus reports obsPluginAvailable false when already on the latest rele
 
   const status = await manager.getStatus();
 
-  assert.equal(status.obsPluginAvailable, false);
+  assert.equal(status.updateAvailable, false);
+  assert.equal(status.obsPluginAvailable, true);
 });
 
 test("getStatus reports idle obsPluginDownload state before any download starts", async () => {
@@ -464,6 +468,26 @@ test("startObsPluginDownload does nothing when there is no OBS plugin asset", as
   assert.deepEqual((await manager.getStatus()).obsPluginDownload, {
     state: "idle",
   });
+});
+
+test("startObsPluginDownload downloads the OBS plugin installer even when the app itself is already up to date", async (t) => {
+  const downloadDirectory = withTempDir(t);
+  const manager = new UpdateManager({
+    currentVersion: "1.0.18",
+    fetchImpl: fetchGithubAndInstallerWithObsPlugin("v1.0.18"),
+    install: {
+      downloadDirectory,
+      launchInstaller: () => {},
+      launchObsPluginInstaller: () => {},
+    },
+  });
+  const initialStatus = await manager.getStatus();
+  assert.equal(initialStatus.updateAvailable, false);
+
+  await manager.startObsPluginDownload();
+
+  const status = await manager.getStatus();
+  assert.equal(status.obsPluginDownload.state, "downloaded");
 });
 
 test("installObsPlugin launches the downloaded OBS plugin installer", async (t) => {

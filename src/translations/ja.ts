@@ -1,5 +1,6 @@
 export const jaTranslation = {
   appTitle: "Myogi Ban",
+  obsSetupTitle: "OBS",
   obs: "ビューワー",
   obsTip:
     "OBSプラグインの「Myogi Ban」ソースを追加するか、ブラウザソースで上記URLを設定してください。ブラウザソースの場合は背景セクションの幅・高さをOBS側でも設定してください。",

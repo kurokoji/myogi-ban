@@ -104,9 +104,7 @@ export class UpdateManager {
       releaseUrl: this.releaseUrl,
       download: this.download,
       obsPluginAvailable:
-        updateAvailable &&
-        this.obsPluginAssetUrl !== null &&
-        this.obsPluginAssetName !== null,
+        this.obsPluginAssetUrl !== null && this.obsPluginAssetName !== null,
       obsPluginDownload: this.obsPluginDownload,
     };
   }
@@ -205,16 +203,7 @@ export class UpdateManager {
   async startObsPluginDownload(): Promise<void> {
     if (!this.installCapability?.launchObsPluginInstaller) return;
     if (this.obsPluginDownloading) return;
-    const updateAvailable =
-      this.latestVersion !== null &&
-      isNewerVersion(this.currentVersion, this.latestVersion);
-    if (
-      !updateAvailable ||
-      !this.obsPluginAssetUrl ||
-      !this.obsPluginAssetName
-    ) {
-      return;
-    }
+    if (!this.obsPluginAssetUrl || !this.obsPluginAssetName) return;
 
     this.obsPluginDownloading = true;
     const destination = join(

@@ -20,10 +20,14 @@ test("number inputs keep incrementing while their up/down control is held", () =
 
 test("editor provides the app font theme to Mantine", () => {
   const editorSource = readFileSync("src/editor.tsx", "utf8");
+  const obsSetupPanelSource = readFileSync(
+    "src/components/editor/ObsSetupPanel.tsx",
+    "utf8",
+  );
 
   assert.match(
     editorSource,
     /<MantineProvider[^>]*theme=\{editorTheme\}[^>]*>/,
   );
-  assert.match(editorSource, /className="server-url-value"/);
+  assert.match(obsSetupPanelSource, /className="server-url-value"/);
 });
