@@ -19,22 +19,22 @@ test("Electron wires an UpdateManager with app-provided version and install capa
   assert.match(source, /updateManager: new UpdateManager/);
 });
 
-test("Electron wires a launchObsPluginInstaller that spawns without quitting the app", async () => {
+test("Electron wires a launchObsPluginInstaller that opens the installer via the shell, without quitting the app", async () => {
   const source = await readFile("src/electron.ts", "utf8");
   assert.match(source, /launchObsPluginInstaller,/);
-  assert.match(
-    source,
-    /function launchObsPluginInstaller\(installerPath: string\): void \{[\s\S]*?\}/,
-  );
   const [, obsFnBody] =
     source.match(
       /function launchObsPluginInstaller\(installerPath: string\): void \{([\s\S]*?)\n\}/,
     ) ?? [];
   assert.ok(obsFnBody, "launchObsPluginInstaller body not found");
-  assert.match(
-    obsFnBody as string,
-    /spawn\(installerPath, \[\], \{ detached: true, stdio: "ignore" \}\)\.unref\(\)/,
-  );
+  // The OBS plugin installer requires admin (RequestExecutionLevel admin in
+  // obs-plugin/installer.nsi). child_process.spawn() launches it directly via
+  // CreateProcess, which Windows rejects with ERROR_ELEVATION_REQUIRED
+  // (surfaced by Node as EACCES) for executables that need elevation.
+  // shell.openPath() goes through ShellExecute instead, which triggers the
+  // UAC prompt correctly.
+  assert.match(obsFnBody as string, /shell\.openPath\(installerPath\)/);
+  assert.doesNotMatch(obsFnBody as string, /spawn\(/);
   assert.doesNotMatch(obsFnBody as string, /app\.quit\(\)/);
 });
 

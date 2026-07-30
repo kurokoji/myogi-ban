@@ -65,7 +65,11 @@ function launchInstaller(installerPath: string): void {
 }
 
 function launchObsPluginInstaller(installerPath: string): void {
-  spawn(installerPath, [], { detached: true, stdio: "ignore" }).unref();
+  // The OBS plugin installer requires admin (RequestExecutionLevel admin in
+  // obs-plugin/installer.nsi), which needs ShellExecute to trigger the UAC
+  // prompt; launching it via CreateProcess directly gets rejected with
+  // ERROR_ELEVATION_REQUIRED (surfaced by Node as EACCES).
+  void shell.openPath(installerPath);
 }
 
 function startServer(): void {
