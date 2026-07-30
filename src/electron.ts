@@ -11,6 +11,7 @@ import { createLocalServer } from "./local-server";
 import { cleanupLocalServer } from "./server-cleanup";
 import { PORT } from "./types";
 import { UpdateManager } from "./update-manager";
+import { WhatsNewManager } from "./whats-new-manager";
 
 let mainWindow: BrowserWindow | null = null;
 let server: http.Server | null = null;
@@ -82,6 +83,10 @@ function startServer(): void {
         downloadDirectory: app.getPath("temp"),
         launchInstaller,
       },
+    }),
+    whatsNewManager: new WhatsNewManager({
+      currentVersion: app.getVersion(),
+      stateFile: path.join(dataDir, "last-seen-version.json"),
     }),
   });
 }

@@ -1,5 +1,6 @@
 import {
   ActionIcon,
+  Button,
   MantineProvider,
   Text,
   Title,
@@ -36,6 +37,7 @@ import { SidebarAccordion } from "./components/editor/SidebarAccordion";
 import { ThemeControl } from "./components/editor/ThemeControl";
 import { UpdateCheckButton } from "./components/editor/UpdateCheckButton";
 import { UpdatePopup } from "./components/editor/UpdatePopup";
+import { WhatsNewPopup } from "./components/editor/WhatsNewPopup";
 import { GamepadView } from "./components/GamepadView";
 import {
   addEditorButton,
@@ -81,6 +83,7 @@ import { useLayoutHistory } from "./hooks/useLayoutHistory";
 import { usePreviewViewport } from "./hooks/usePreviewViewport";
 import { useUnsavedChangesWarning } from "./hooks/useUnsavedChangesWarning";
 import { useUpdateStatus } from "./hooks/useUpdateStatus";
+import { useWhatsNew } from "./hooks/useWhatsNew";
 import i18n from "./i18n";
 import { createDefaultLayout } from "./layout";
 import { previewWheelZoomDelta } from "./preview-viewport";
@@ -250,6 +253,7 @@ function EditorApp(): React.ReactElement {
   const { confirmingClose, confirmClose, cancelClose } =
     useUnsavedChangesWarning(isDirty);
   const updateStatus = useUpdateStatus(apiRef.current);
+  const whatsNew = useWhatsNew(apiRef.current);
 
   const obsUrl = `${SERVER_URL}/view`;
 
@@ -672,6 +676,7 @@ function EditorApp(): React.ReactElement {
         onDownload={updateStatus.download}
         onInstall={updateStatus.install}
       />
+      <WhatsNewPopup notes={whatsNew.popup} onClose={whatsNew.dismiss} />
       <aside id="sidebar">
         <div className="sidebar-header">
           <div className="sidebar-title-row">
@@ -687,6 +692,14 @@ function EditorApp(): React.ReactElement {
               updateAvailable={updateStatus.status?.updateAvailable ?? false}
               onCheckNow={updateStatus.checkNow}
             />
+            <Button
+              size="xs"
+              variant="subtle"
+              loading={whatsNew.viewing}
+              onClick={whatsNew.viewNotes}
+            >
+              {t("viewReleaseNotes")}
+            </Button>
           </div>
           <p className="server-url">
             {t("obs")}: <span className="server-url-value">{obsUrl}</span>

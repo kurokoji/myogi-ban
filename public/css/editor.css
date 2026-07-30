@@ -77,6 +77,7 @@ body {
 
 .update-check-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
   margin: 0 0 6px;

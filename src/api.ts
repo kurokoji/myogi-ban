@@ -1,6 +1,7 @@
 import type { ApiFailure, ApiSuccess } from "./api-response";
 import type { GamepadState, Layout, LayoutEntry } from "./types";
 import type { UpdateStatus } from "./update-manager";
+import type { ReleaseNotes, WhatsNewStatus } from "./whats-new-manager";
 
 interface UploadImageOptions {
   data: string;
@@ -134,5 +135,13 @@ export class ApiClient {
 
   async installUpdate(): Promise<void> {
     await request("/api/update/install", jsonRequest({}));
+  }
+
+  async getWhatsNew(): Promise<WhatsNewStatus> {
+    return requestJson<WhatsNewStatus>("/api/whats-new");
+  }
+
+  async getCurrentReleaseNotes(): Promise<ReleaseNotes> {
+    return requestJson<ReleaseNotes>("/api/whats-new/current");
   }
 }

@@ -4,6 +4,7 @@ import { IMAGE_ROUTE_PATHS } from "../src/server-routes/image-routes";
 import { LAYOUT_ROUTE_PATHS } from "../src/server-routes/layout-routes";
 import { STATE_ROUTE_PATHS } from "../src/server-routes/state-routes";
 import { UPDATE_ROUTE_PATHS } from "../src/server-routes/update-routes";
+import { WHATS_NEW_ROUTE_PATHS } from "../src/server-routes/whats-new-routes";
 import { WINDOW_ROUTE_PATHS } from "../src/server-routes/window-routes";
 
 test("server route modules own their public paths", () => {
@@ -23,5 +24,9 @@ test("server route modules own their public paths", () => {
     "/api/update/check",
     "/api/update/download",
     "/api/update/install",
+  ]);
+  assert.deepEqual(WHATS_NEW_ROUTE_PATHS, [
+    "/api/whats-new",
+    "/api/whats-new/current",
   ]);
 });

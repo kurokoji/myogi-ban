@@ -2,12 +2,14 @@ import * as path from "path";
 import { createLocalServer } from "./local-server";
 import { PORT } from "./types";
 import { UpdateManager } from "./update-manager";
+import { WhatsNewManager } from "./whats-new-manager";
 
 const ROOT_DIR = path.join(__dirname, "..");
 const dataDir = process.env.MYOGI_BAN_DATA_DIR
   ? path.resolve(process.env.MYOGI_BAN_DATA_DIR)
   : path.join(ROOT_DIR, "public");
 const pidFile = path.join(dataDir, "server.pid");
+const currentVersion = process.env.npm_package_version ?? "0.0.0";
 
 const server = createLocalServer({
   port: PORT,
@@ -16,8 +18,10 @@ const server = createLocalServer({
   userLayoutDir: path.join(dataDir, "user-layouts"),
   defaultLayoutFile: path.join(dataDir, "default-layout.json"),
   pidFile,
-  updateManager: new UpdateManager({
-    currentVersion: process.env.npm_package_version ?? "0.0.0",
+  updateManager: new UpdateManager({ currentVersion }),
+  whatsNewManager: new WhatsNewManager({
+    currentVersion,
+    stateFile: path.join(dataDir, "last-seen-version.json"),
   }),
   onListening: () => {
     console.log(`Server running at http://localhost:${PORT}`);

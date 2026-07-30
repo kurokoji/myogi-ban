@@ -190,6 +190,35 @@ test("ApiClient forces a manual update check", async (t) => {
   );
 });
 
+test("ApiClient fetches the what's new status", async (t) => {
+  const status = {
+    show: true,
+    version: "1.0.18",
+    notes: "- new stuff",
+    releaseUrl: "https://github.com/kurokoji/myogi-ban/releases/tag/v1.0.18",
+  };
+  const fetchMock = t.mock.method(globalThis, "fetch", async () =>
+    Response.json({ ok: true, data: status }),
+  );
+
+  assert.deepEqual(await new ApiClient().getWhatsNew(), status);
+  assert.equal(fetchMock.mock.calls[0].arguments[0], "/api/whats-new");
+});
+
+test("ApiClient fetches release notes for the current version on demand", async (t) => {
+  const notes = {
+    version: "1.0.18",
+    notes: "- current notes",
+    releaseUrl: "https://github.com/kurokoji/myogi-ban/releases/tag/v1.0.18",
+  };
+  const fetchMock = t.mock.method(globalThis, "fetch", async () =>
+    Response.json({ ok: true, data: notes }),
+  );
+
+  assert.deepEqual(await new ApiClient().getCurrentReleaseNotes(), notes);
+  assert.equal(fetchMock.mock.calls[0].arguments[0], "/api/whats-new/current");
+});
+
 test("ApiClient starts an update download", async (t) => {
   const fetchMock = t.mock.method(globalThis, "fetch", async () =>
     Response.json({ ok: true }),

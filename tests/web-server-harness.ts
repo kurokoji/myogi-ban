@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { createLocalServer } from "../src/local-server";
 import type { Layout } from "../src/types";
 import type { UpdateManager } from "../src/update-manager";
+import type { WhatsNewManager } from "../src/whats-new-manager";
 
 interface ApiSuccess<T> {
   ok: true;
@@ -26,6 +27,7 @@ export async function startTestWebServer(
   builtins: Record<string, Layout>,
   onShowWindow?: () => void,
   updateManager?: UpdateManager,
+  whatsNewManager?: WhatsNewManager,
 ): Promise<TestWebServer> {
   const root = mkdtempSync(join(tmpdir(), "myogi-ban-web-e2e-"));
   const publicDir = join(root, "public");
@@ -53,6 +55,7 @@ export async function startTestWebServer(
         defaultLayoutFile: join(root, "default-layout.json"),
         onShowWindow,
         updateManager,
+        whatsNewManager,
         onListening: () => resolve(instance),
       });
     },

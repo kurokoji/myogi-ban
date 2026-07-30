@@ -8,9 +8,11 @@ import { registerImageRoutes } from "./server-routes/image-routes";
 import { registerLayoutRoutes } from "./server-routes/layout-routes";
 import { registerStateRoutes } from "./server-routes/state-routes";
 import { registerUpdateRoutes } from "./server-routes/update-routes";
+import { registerWhatsNewRoutes } from "./server-routes/whats-new-routes";
 import { registerWindowRoutes } from "./server-routes/window-routes";
 import type { GamepadState } from "./types";
 import { UpdateManager } from "./update-manager";
+import type { WhatsNewManager } from "./whats-new-manager";
 
 export interface LocalServerOptions {
   port: number;
@@ -22,6 +24,7 @@ export interface LocalServerOptions {
   onListening?: (server: http.Server) => void;
   onShowWindow?: () => void;
   updateManager?: UpdateManager;
+  whatsNewManager?: WhatsNewManager;
 }
 
 function ensureDir(dir: string): void {
@@ -67,6 +70,9 @@ export function createLocalServer(options: LocalServerOptions): http.Server {
     expressApp,
     options.updateManager ?? new UpdateManager({ currentVersion: "0.0.0" }),
   );
+  if (options.whatsNewManager) {
+    registerWhatsNewRoutes(expressApp, options.whatsNewManager);
+  }
 
   wss.on("connection", (ws) => {
     if (stateStore.latest) {
