@@ -87,6 +87,13 @@ export class ApiClient {
     });
   }
 
+  async renameLayout(name: string, newName: string): Promise<void> {
+    await request(
+      `/api/layouts/${encodeURIComponent(name)}/rename`,
+      jsonRequest({ newName }, "POST"),
+    );
+  }
+
   async sendState(state: GamepadState): Promise<void> {
     try {
       await request("/api/state", jsonRequest(state, "PUT"));

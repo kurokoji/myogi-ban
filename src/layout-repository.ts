@@ -234,6 +234,27 @@ export class LayoutRepository {
     return true;
   }
 
+  rename(oldName: string, newName: string): boolean {
+    assertValidLayoutName(oldName);
+    assertValidLayoutName(newName);
+    const oldDir = path.join(this.options.userLayoutDir, oldName);
+    if (!fs.existsSync(oldDir)) return false;
+    const newDir = path.join(this.options.userLayoutDir, newName);
+    fs.renameSync(oldDir, newDir);
+
+    const jsonPath = path.join(newDir, "layout.json");
+    if (fs.existsSync(jsonPath)) {
+      const layout = deserializeLayoutDocument(readJson(jsonPath));
+      writeJsonAtomically(
+        jsonPath,
+        serializeLayoutDocument({ ...layout, name: newName }),
+      );
+    }
+
+    if (this.getDefault().name === oldName) this.setDefault(newName);
+    return true;
+  }
+
   uploadImage(data: string, layoutName: string, fileName: string): string {
     assertValidLayoutName(layoutName);
     validateImageUpload({ data, fileName });

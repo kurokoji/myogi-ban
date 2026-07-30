@@ -12,6 +12,7 @@ test("server route modules own their public paths", () => {
   assert.deepEqual(LAYOUT_ROUTE_PATHS, [
     "/api/layouts",
     "/api/layouts/:name",
+    "/api/layouts/:name/rename",
     "/api/layouts/:name/dimensions",
     "/api/layout-imports",
     "/api/default-layout",

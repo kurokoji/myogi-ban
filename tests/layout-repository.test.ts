@@ -87,6 +87,98 @@ test("LayoutRepository deletes user layouts only", (t) => {
   assert.throws(() => repository.delete("../builtin"), /Invalid layout name/);
 });
 
+test("LayoutRepository renames a user layout, moving its directory and updating the stored name", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const userLayoutDir = join(root, "user");
+  const repository = new LayoutRepository({
+    builtinLayoutDir: join(root, "builtin"),
+    userLayoutDir,
+    defaultLayoutFile: join(root, "default.json"),
+  });
+  repository.save("custom", createDefaultLayout());
+
+  assert.equal(repository.rename("custom", "renamed"), true);
+
+  assert.equal(existsSync(join(userLayoutDir, "custom")), false);
+  assert.equal(existsSync(join(userLayoutDir, "renamed")), true);
+  const stored = JSON.parse(
+    readFileSync(join(userLayoutDir, "renamed", "layout.json"), "utf8"),
+  );
+  assert.equal(stored.name, "renamed");
+  assert.equal(repository.read("renamed").name, "renamed");
+});
+
+test("LayoutRepository rename repoints the default layout pointer when renaming the default layout", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const repository = new LayoutRepository({
+    builtinLayoutDir: join(root, "builtin"),
+    userLayoutDir: join(root, "user"),
+    defaultLayoutFile: join(root, "default.json"),
+  });
+  repository.save("custom", createDefaultLayout());
+  repository.setDefault("custom");
+
+  repository.rename("custom", "renamed");
+
+  assert.equal(repository.getDefault().name, "renamed");
+});
+
+test("LayoutRepository rename leaves the default layout pointer alone for a non-default layout", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const repository = new LayoutRepository({
+    builtinLayoutDir: join(root, "builtin"),
+    userLayoutDir: join(root, "user"),
+    defaultLayoutFile: join(root, "default.json"),
+  });
+  repository.save("custom", createDefaultLayout());
+  repository.save("other", createDefaultLayout());
+  repository.setDefault("other");
+
+  repository.rename("custom", "renamed");
+
+  assert.equal(repository.getDefault().name, "other");
+});
+
+test("LayoutRepository rename returns false for built-in or missing layouts", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const builtinLayoutDir = join(root, "builtin");
+  const userLayoutDir = join(root, "user");
+  mkdirSync(join(builtinLayoutDir, "preset"), { recursive: true });
+  const repository = new LayoutRepository({
+    builtinLayoutDir,
+    userLayoutDir,
+    defaultLayoutFile: join(root, "default.json"),
+  });
+
+  assert.equal(repository.rename("preset", "renamed-preset"), false);
+  assert.equal(existsSync(join(builtinLayoutDir, "preset")), true);
+  assert.equal(repository.rename("missing", "renamed-missing"), false);
+});
+
+test("LayoutRepository rename rejects invalid layout names", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const repository = new LayoutRepository({
+    builtinLayoutDir: join(root, "builtin"),
+    userLayoutDir: join(root, "user"),
+    defaultLayoutFile: join(root, "default.json"),
+  });
+  repository.save("custom", createDefaultLayout());
+
+  assert.throws(
+    () => repository.rename("custom", "../escaped"),
+    /Invalid layout name/,
+  );
+  assert.throws(
+    () => repository.rename("../escaped", "custom"),
+    /Invalid layout name/,
+  );
+});
+
 test("LayoutRepository detects existing user and built-in names", (t) => {
   const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));

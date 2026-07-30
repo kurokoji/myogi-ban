@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { componentDocument, renderComponent } from "./component-render";
-import { fireEvent, within } from "@testing-library/react";
+import { act, fireEvent, within } from "@testing-library/react";
 import { createRef, type ComponentProps, useState } from "react";
 import { ConfirmationModal } from "../src/components/editor/ConfirmationModal";
 import { LayoutSettingsPanel } from "../src/components/editor/LayoutSettingsPanel";
@@ -363,6 +363,7 @@ test("duplicate layout names disable save-as before submitting", () => {
         saveCalls += 1;
         return true;
       }}
+      renameLayout={async () => true}
       deleteLayout={() => {}}
       setDefaultLayout={() => {}}
       exportLayout={() => {}}
@@ -382,6 +383,113 @@ test("duplicate layout names disable save-as before submitting", () => {
   assert.equal(saveCalls, 0);
 });
 
+test("the rename control is hidden for built-in layouts", () => {
+  const view = renderComponent(
+    <LayoutSettingsPanel
+      layoutNames={[{ name: "existing", builtin: true }]}
+      selectedLayout="existing:builtin"
+      layoutName="existing"
+      currentBuiltin={true}
+      isDefaultLayout={false}
+      isDirty={false}
+      status={null}
+      openLayout={() => {}}
+      saveLayout={() => {}}
+      saveLayoutAs={async () => true}
+      renameLayout={async () => true}
+      deleteLayout={() => {}}
+      setDefaultLayout={() => {}}
+      exportLayout={() => {}}
+      importLayout={() => {}}
+    />,
+  );
+
+  assert.equal(
+    view.queryByRole("button", { name: "renameLayout" }) === null,
+    true,
+  );
+});
+
+test("renaming a layout calls renameLayout with the new name and closes the form", async () => {
+  const renameCalls: string[] = [];
+  const view = renderComponent(
+    <LayoutSettingsPanel
+      layoutNames={[{ name: "custom", builtin: false }]}
+      selectedLayout="custom:user"
+      layoutName="custom"
+      currentBuiltin={false}
+      isDefaultLayout={false}
+      isDirty={false}
+      status={null}
+      openLayout={() => {}}
+      saveLayout={() => {}}
+      saveLayoutAs={async () => true}
+      renameLayout={async (name) => {
+        renameCalls.push(name);
+        return true;
+      }}
+      deleteLayout={() => {}}
+      setDefaultLayout={() => {}}
+      exportLayout={() => {}}
+      importLayout={() => {}}
+    />,
+  );
+
+  fireEvent.click(view.getByRole("button", { name: "renameLayout" }));
+  const input = view.getByRole("textbox", { name: "layoutName" });
+  fireEvent.change(input, { target: { value: "renamed" } });
+  await act(async () => {
+    fireEvent.click(view.getByRole("button", { name: "save", exact: true }));
+  });
+
+  assert.deepEqual(renameCalls, ["renamed"]);
+  assert.equal(
+    view.queryByRole("textbox", { name: "layoutName" }) === null,
+    true,
+  );
+});
+
+test("duplicate layout names disable rename before submitting", () => {
+  let renameCalls = 0;
+  const view = renderComponent(
+    <LayoutSettingsPanel
+      layoutNames={[
+        { name: "custom", builtin: false },
+        { name: "existing", builtin: false },
+      ]}
+      selectedLayout="custom:user"
+      layoutName="custom"
+      currentBuiltin={false}
+      isDefaultLayout={false}
+      isDirty={false}
+      status={null}
+      openLayout={() => {}}
+      saveLayout={() => {}}
+      saveLayoutAs={async () => true}
+      renameLayout={async () => {
+        renameCalls += 1;
+        return true;
+      }}
+      deleteLayout={() => {}}
+      setDefaultLayout={() => {}}
+      exportLayout={() => {}}
+      importLayout={() => {}}
+    />,
+  );
+
+  fireEvent.click(view.getByRole("button", { name: "renameLayout" }));
+  const input = view.getByRole("textbox", { name: "layoutName" });
+  fireEvent.change(input, { target: { value: "existing" } });
+
+  assert.equal(
+    view
+      .getByRole("button", { name: "save", exact: true })
+      .hasAttribute("disabled"),
+    true,
+  );
+  assert.equal(renameCalls, 0);
+});
+
 test("layout save action exposes its shortcut on hover", () => {
   const view = renderComponent(
     <LayoutSettingsPanel
@@ -395,6 +503,7 @@ test("layout save action exposes its shortcut on hover", () => {
       openLayout={() => {}}
       saveLayout={() => {}}
       saveLayoutAs={async () => true}
+      renameLayout={async () => true}
       deleteLayout={() => {}}
       setDefaultLayout={() => {}}
       exportLayout={() => {}}
@@ -421,6 +530,7 @@ test("layout panel keeps secondary actions in a more menu", () => {
       openLayout={() => {}}
       saveLayout={() => {}}
       saveLayoutAs={async () => true}
+      renameLayout={async () => true}
       deleteLayout={() => {}}
       setDefaultLayout={() => {}}
       exportLayout={() => {}}
@@ -458,6 +568,7 @@ test("layout panel shows the current file format version", () => {
       openLayout={() => {}}
       saveLayout={() => {}}
       saveLayoutAs={async () => true}
+      renameLayout={async () => true}
       deleteLayout={() => {}}
       setDefaultLayout={() => {}}
       exportLayout={() => {}}
@@ -482,6 +593,7 @@ test("layout panel wraps a long layout name within the panel", () => {
       openLayout={() => {}}
       saveLayout={() => {}}
       saveLayoutAs={async () => true}
+      renameLayout={async () => true}
       deleteLayout={() => {}}
       setDefaultLayout={() => {}}
       exportLayout={() => {}}
@@ -507,6 +619,7 @@ test("layout panel confirms a package preview before importing", () => {
       openLayout={() => {}}
       saveLayout={() => {}}
       saveLayoutAs={async () => true}
+      renameLayout={async () => true}
       deleteLayout={() => {}}
       setDefaultLayout={() => {}}
       exportLayout={() => {}}
@@ -549,6 +662,7 @@ test("layout panel disables import confirmation and cancellation while importing
       openLayout={() => {}}
       saveLayout={() => {}}
       saveLayoutAs={async () => true}
+      renameLayout={async () => true}
       deleteLayout={() => {}}
       setDefaultLayout={() => {}}
       exportLayout={() => {}}
@@ -585,6 +699,7 @@ test("layout panel warns before an import discards unsaved changes", () => {
       openLayout={() => {}}
       saveLayout={() => {}}
       saveLayoutAs={async () => true}
+      renameLayout={async () => true}
       deleteLayout={() => {}}
       setDefaultLayout={() => {}}
       exportLayout={() => {}}

@@ -27,7 +27,11 @@ import {
 } from "../gamepad";
 import { ensureLayoutDefaults } from "../layout";
 import { withUploadedImage } from "../layout-image";
-import { isLayoutNameTaken, resolveAvailableLayoutName } from "../layout-name";
+import {
+  isLayoutNameTaken,
+  normalizeLayoutName,
+  resolveAvailableLayoutName,
+} from "../layout-name";
 import {
   createLayoutPackage,
   InvalidLayoutPackageError,
@@ -69,6 +73,7 @@ interface UseEditorLayoutsOptions {
     deleteLayout: string;
     deleted: string;
     layoutNameExists: string;
+    renamed: string;
   };
 }
 
@@ -292,6 +297,50 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     return saveToName(trimmedName, false);
   };
 
+  const renameLayout = async (name: string) => {
+    if (currentBuiltin || !layoutName) return false;
+    const trimmedName = name.trim();
+    if (!trimmedName) return false;
+    const isSameName =
+      normalizeLayoutName(trimmedName) === normalizeLayoutName(layoutName);
+    if (!isSameName && isLayoutNameTaken(trimmedName, layoutNames)) {
+      setStatus({ kind: "error", message: messages.layoutNameExists });
+      return false;
+    }
+    if (isSameName) return true;
+
+    const wasClean =
+      cleanSignature ===
+      createEditorSnapshotSignature(layout, buttonMappings, stickMappings);
+    try {
+      await api.renameLayout(layoutName, trimmedName);
+      const wasDefault = defaultLayoutName === layoutName;
+      await refreshLayouts();
+      const renamed = { ...layout, name: trimmedName };
+      restoreLayout(renamed);
+      setLayoutName(trimmedName);
+      setSelectedLayout(layoutSelectionValue(trimmedName, false));
+      if (wasClean) {
+        setCleanSignature(
+          createEditorSnapshotSignature(renamed, buttonMappings, stickMappings),
+        );
+      }
+      if (wasDefault) setDefaultLayoutName(trimmedName);
+      setStatus({ kind: "success", message: messages.renamed });
+      return true;
+    } catch (error) {
+      console.error("Failed to rename layout:", error);
+      setStatus({
+        kind: "error",
+        message:
+          error instanceof ApiError && error.status === 409
+            ? messages.layoutNameExists
+            : messages.operationFailed,
+      });
+      return false;
+    }
+  };
+
   const setDefaultLayout = async () => {
     const name = layoutName || layout.name || "custom";
     try {
@@ -495,6 +544,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     openLayout,
     openImagePicker,
     pendingImport: pendingLayoutImport?.preview ?? null,
+    renameLayout,
     saveLayout,
     saveLayoutAs,
     selectedLayout,

@@ -76,6 +76,24 @@ test("ApiClient saves a layout by replacing its named resource", async (t) => {
   });
 });
 
+test("ApiClient renames a layout", async (t) => {
+  const fetchMock = t.mock.method(globalThis, "fetch", async () =>
+    Response.json({ ok: true }),
+  );
+
+  await new ApiClient().renameLayout("player one", "player two");
+
+  assert.equal(
+    fetchMock.mock.calls[0].arguments[0],
+    "/api/layouts/player%20one/rename",
+  );
+  const init = fetchMock.mock.calls[0].arguments[1] as RequestInit;
+  assert.equal(init.method, "POST");
+  assert.deepEqual(JSON.parse(String(init.body)), {
+    newName: "player two",
+  });
+});
+
 test("ApiClient replaces state and the default layout with PUT", async (t) => {
   const fetchMock = t.mock.method(globalThis, "fetch", async () =>
     Response.json({ ok: true }),

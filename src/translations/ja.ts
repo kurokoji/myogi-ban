@@ -169,4 +169,6 @@ export const jaTranslation = {
   height: "高さ(px)",
   layoutNamePlaceholder: "レイアウト名",
   layoutNameExists: "同じ名前のレイアウトがすでに存在します",
+  renameLayout: "名前を変更",
+  renamed: "レイアウト名を変更しました",
 } as const;

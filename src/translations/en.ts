@@ -170,4 +170,6 @@ export const enTranslation = {
   height: "Height (px)",
   layoutNamePlaceholder: "name",
   layoutNameExists: "A layout with this name already exists",
+  renameLayout: "Rename",
+  renamed: "Layout renamed",
 } as const satisfies Record<TranslationKey, string>;

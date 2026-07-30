@@ -26,6 +26,7 @@ import {
   LayoutImportPreviewModal,
 } from "./LayoutImportPreviewModal";
 import { LayoutNameText } from "./LayoutNameText";
+import { LayoutRenameControls } from "./LayoutRenameControls";
 import { LayoutSaveControls } from "./LayoutSaveControls";
 
 interface LayoutSettingsPanelProps {
@@ -40,6 +41,7 @@ interface LayoutSettingsPanelProps {
   openLayout: (value: string) => void;
   saveLayout: () => void;
   saveLayoutAs: (name: string) => Promise<boolean>;
+  renameLayout: (name: string) => Promise<boolean>;
   deleteLayout: () => void;
   setDefaultLayout: () => void;
   exportLayout: () => void;
@@ -102,6 +104,12 @@ export function LayoutSettingsPanel(
                 </Text>
               )}
             </Group>
+            <LayoutRenameControls
+              layoutNames={props.layoutNames}
+              layoutName={props.layoutName}
+              currentBuiltin={props.currentBuiltin}
+              renameLayout={props.renameLayout}
+            />
           </div>
           <Text size="xs" fw={600}>
             {t("openLayout")}

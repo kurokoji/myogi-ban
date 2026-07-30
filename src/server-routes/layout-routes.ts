@@ -1,6 +1,7 @@
 import express, { type Express } from "express";
 import { apiFailure, apiSuccess } from "../api-response";
 import { resolveLayoutDimensions } from "../layout-dimensions";
+import { normalizeLayoutName } from "../layout-name";
 import { InvalidLayoutPackageError } from "../layout-package";
 import {
   CorruptLayoutError,
@@ -11,6 +12,7 @@ import type { Layout } from "../types";
 export const LAYOUT_ROUTE_PATHS = [
   "/api/layouts",
   "/api/layouts/:name",
+  "/api/layouts/:name/rename",
   "/api/layouts/:name/dimensions",
   "/api/layout-imports",
   "/api/default-layout",
@@ -75,6 +77,22 @@ export function registerLayoutRoutes(
       }
       throw error;
     }
+  });
+  app.post("/api/layouts/:name/rename", (req, res) => {
+    const oldName = req.params.name;
+    const newName = req.body.newName as string;
+    if (
+      normalizeLayoutName(newName) !== normalizeLayoutName(oldName) &&
+      layouts.has(newName)
+    ) {
+      res.status(409).json(apiFailure("layout_name_exists"));
+      return;
+    }
+    if (!layouts.rename(oldName, newName)) {
+      res.status(404).json(apiFailure("layout_not_found"));
+      return;
+    }
+    res.json(apiSuccess());
   });
   app.delete("/api/layouts/:name", (req, res) => {
     if (!layouts.delete(req.params.name)) {

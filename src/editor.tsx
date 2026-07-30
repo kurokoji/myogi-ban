@@ -216,6 +216,7 @@ function EditorApp(): React.ReactElement {
     openImagePicker,
     pendingConfirmation,
     pendingImport,
+    renameLayout,
     saveLayout,
     saveLayoutAs,
     selectedLayout,
@@ -250,6 +251,7 @@ function EditorApp(): React.ReactElement {
       deleteLayout: t("deleteLayout"),
       deleted: t("deleted"),
       layoutNameExists: t("layoutNameExists"),
+      renamed: t("renamed"),
     },
   });
   const { confirmingClose, confirmClose, cancelClose } =
@@ -760,6 +762,7 @@ function EditorApp(): React.ReactElement {
                   openLayout={openLayout}
                   saveLayout={saveLayout}
                   saveLayoutAs={saveLayoutAs}
+                  renameLayout={renameLayout}
                   deleteLayout={deleteLayout}
                   setDefaultLayout={setDefaultLayout}
                   exportLayout={exportLayout}
