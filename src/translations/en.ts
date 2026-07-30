@@ -4,7 +4,7 @@ export const enTranslation = {
   appTitle: "Myogi Ban",
   obs: "Viewer",
   obsTip:
-    "Set the above URL in OBS Browser Source, and match the width/height from the Background section in OBS.",
+    'Add the "Myogi Ban" source from the OBS plugin, or set the above URL in an OBS Browser Source (matching the width/height from the Background section in OBS).',
   copy: "Copy",
   copied: "Copied!",
   display: "Display",

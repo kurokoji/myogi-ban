@@ -126,6 +126,11 @@ npm run build:obs-plugin-installer
 
 ## OBS設定
 
+OBSプラグインを導入済みの場合は、OBSのソース一覧から「Myogi Ban」を追加するだけで
+Myogi Banの起動・URL設定・幅/高さの同期まで自動で行われます（詳細は上記「OBSプラグイン」参照）。
+
+プラグインを使わない場合は、ブラウザソースで手動設定します。
+
 1. OBSで「ブラウザソース」を追加
 2. URLに `http://localhost:33770/view` を入力
 3. 編集画面の「背景」セクションに表示される幅/高さをOBS側にも設定
