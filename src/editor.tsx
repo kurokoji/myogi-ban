@@ -9,6 +9,7 @@ import {
 import {
   IconArrowBackUp,
   IconArrowForwardUp,
+  IconBrandGithub,
   IconCopy,
 } from "@tabler/icons-react";
 import type React from "react";
@@ -19,6 +20,7 @@ import "@fontsource-variable/m-plus-2/wght.css";
 import "@fontsource-variable/m-plus-code-latin/wght.css";
 import "./i18n";
 import { ApiClient } from "./api";
+import { REPO_URL } from "./app-constants";
 import { resetButtonToDefaults } from "./button-settings";
 import { ConfirmationModal } from "./components/editor/ConfirmationModal";
 import { DragCoordinateTooltip } from "./components/editor/DragCoordinateTooltip";
@@ -686,7 +688,20 @@ function EditorApp(): React.ReactElement {
               {t("appTitle")}{" "}
               <span className="app-version">v{APP_VERSION}</span>
             </Title>
-            <ThemeControl />
+            <div className="sidebar-title-actions">
+              <ActionIcon
+                size="sm"
+                variant="subtle"
+                component="a"
+                href={REPO_URL}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={t("githubRepository")}
+              >
+                <IconBrandGithub size={16} />
+              </ActionIcon>
+              <ThemeControl />
+            </div>
           </div>
           <div className="update-check-row">
             <UpdateCheckButton

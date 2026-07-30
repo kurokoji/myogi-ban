@@ -131,6 +131,7 @@ export const enTranslation = {
   obsPluginUpdateAvailable: "An OBS plugin update is also available",
   downloadObsPluginUpdate: "Download OBS plugin",
   installObsPluginUpdate: "Install OBS plugin",
+  githubRepository: "View on GitHub",
   checkForUpdates: "Check for updates",
   upToDate: "Up to date",
   whatsNewTitle: "What's new in {{version}}",

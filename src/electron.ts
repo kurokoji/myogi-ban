@@ -1,5 +1,5 @@
 import { spawn } from "child_process";
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, shell } from "electron";
 import type * as http from "http";
 import * as path from "path";
 import { resolveElectronDataDir } from "./data-paths";
@@ -31,6 +31,11 @@ function createWindow(): void {
     autoHideMenuBar: true,
   });
   mainWindow = window;
+
+  window.webContents.setWindowOpenHandler(({ url }) => {
+    shell.openExternal(url);
+    return { action: "deny" };
+  });
 
   window.loadURL(
     resolveElectronRendererUrl({

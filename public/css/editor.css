@@ -57,6 +57,12 @@ body {
   margin-bottom: 10px;
 }
 
+.sidebar-title-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .theme-option-icon {
   display: flex;
   align-items: center;
