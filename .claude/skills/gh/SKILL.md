@@ -6,9 +6,11 @@ description: Common GitHub CLI (gh) operations for this repository — pull requ
 # GitHub CLI (gh) for myogi-ban
 
 Repo: `kurokoji/myogi-ban` (remote `origin`), default branch `main`.
-`gh` is already authenticated as `kurokoji`. There are no GitHub Actions
-workflows in this repo (`.github/workflows` does not exist), so there is
-no CI to poll — `gh pr checks` will report nothing.
+`gh` is already authenticated as `kurokoji`. `.github/workflows/release.yml`
+is the only workflow — it builds and uploads release assets on tag push, and
+does not run on PRs, so `gh pr checks` will still report nothing for a PR.
+Check its progress with `gh run list --workflow release.yml` /
+`gh run view <run-id>` after pushing a tag.
 
 Always run these from the repository root. Prefer `gh` over raw
 `curl`/`gh api` for anything it has a first-class command for; fall back
@@ -44,11 +46,17 @@ to `gh api` only when no subcommand covers the need.
 
 ## Releases
 
-This project has no release automation (no workflow files); releases
-are cut manually with `npm version` (bumps `package.json` +
-`package-lock.json`, commits, tags) followed by a manual
-`gh release create`/`gh release upload` step once the Windows
-installers are built.
+Version bumps are still manual: `npm version` (bumps `package.json` +
+`package-lock.json`, commits, tags). Pushing a `vX.Y.Z` tag then
+triggers `.github/workflows/release.yml`, which lints, typechecks,
+tests, builds both Windows installers (`Myogi Ban Setup <version>.exe`
+and `Myogi-Ban-OBS-Plugin-Setup-<version>.exe`), and uploads them to a
+**draft** release for that tag (creating it if it doesn't exist yet).
+The workflow deliberately leaves the release notes empty — this
+project writes bilingual (Japanese + English) notes by hand, so notes
+still need a manual `gh release edit <tag> --notes-file <path>` before
+publishing. Publishing the draft itself (`gh release edit <tag>
+--draft=false`) is also a manual, explicit step.
 
 - List: `gh release list`.
 - Inspect one (including assets): `gh release view <tag>`.
@@ -56,10 +64,10 @@ installers are built.
   hasn't started: `gh api repos/kurokoji/myogi-ban/releases --jq '.[] | select(.draft==true)'`.
   A draft can exist with an empty `tag_name` if assets were uploaded
   before the tag was finalized.
-- Creating/publishing a release, uploading assets, or editing a
-  published release are visible, shared-state actions — confirm the
-  exact tag, title, and asset list with the user before running
-  `gh release create`, `gh release upload`, or `gh release edit`.
+- Publishing a release or editing a published release's notes/assets
+  are visible, shared-state actions — confirm the exact tag, notes,
+  and asset list with the user before running `gh release edit
+  --draft=false` or re-uploading assets by hand.
 
 ## General
 

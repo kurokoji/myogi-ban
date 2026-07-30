@@ -168,6 +168,15 @@ npm run typecheck
 npm run build:dist
 ```
 
+### リリース
+
+`package.json`のバージョンと一致する`vX.Y.Z`タグをpushすると、
+`.github/workflows/release.yml`がlint/型チェック/テストを実行したのち、
+Windows版インストーラーとOBSプラグインインストーラーの両方をビルドし、
+そのタグのドラフトリリースにアップロードします（リリースが無ければ作成します）。
+リリースノートは自動生成されないため、公開前に`gh release edit <tag> --notes-file <path>`
+で日本語・英語併記の説明文を追記し、`gh release edit <tag> --draft=false`で公開してください。
+
 ## データ保存場所
 
 レイアウトJSONの現行形式は `formatVersion: 2` です。旧v1形式も読み込めます。共有時はv2の `layout.json` と参照画像をZIPへ格納した `.myogi` ファイルとしてエクスポートします。インポートは全内容の検証後に一括反映され、同名レイアウトは連番名で保存されます。従来の `.json` ファイルも引き続きインポートできます。
