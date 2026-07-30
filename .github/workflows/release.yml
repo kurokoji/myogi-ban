@@ -58,7 +58,10 @@ jobs:
           echo "OBS_SDK_DIR=$PWD\.obs-sdk" >> $env:GITHUB_ENV
 
       - name: Build the Windows installer
-        run: npm run build:dist
+        # electron-builder auto-detects a CI run on a vX.Y.Z tag and tries to
+        # publish to GitHub Releases itself unless told not to; this project
+        # uploads assets in its own step below instead, so disable that.
+        run: npm run build:dist -- --publish=never
 
       - name: Build the OBS plugin installer
         run: npm run build:obs-plugin-installer
