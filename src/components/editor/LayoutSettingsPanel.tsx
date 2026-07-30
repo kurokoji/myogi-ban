@@ -103,13 +103,13 @@ export function LayoutSettingsPanel(
                   {t("unsavedChanges")}
                 </Text>
               )}
+              <LayoutRenameControls
+                layoutNames={props.layoutNames}
+                layoutName={props.layoutName}
+                currentBuiltin={props.currentBuiltin}
+                renameLayout={props.renameLayout}
+              />
             </Group>
-            <LayoutRenameControls
-              layoutNames={props.layoutNames}
-              layoutName={props.layoutName}
-              currentBuiltin={props.currentBuiltin}
-              renameLayout={props.renameLayout}
-            />
           </div>
           <Text size="xs" fw={600}>
             {t("openLayout")}
