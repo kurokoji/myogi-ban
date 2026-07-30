@@ -1,5 +1,7 @@
 # Myogi Ban
 
+[![CI](https://github.com/kurokoji/myogi-ban/actions/workflows/ci.yml/badge.svg)](https://github.com/kurokoji/myogi-ban/actions/workflows/ci.yml)
+
 格闘ゲーム向けコントローラー入力を可視化するOBS用ビューアです。編集画面でレイアウトを作り、OBSのブラウザソースには `/view` を指定して使います。
 
 <img width="1586" height="993" alt="image" src="https://github.com/user-attachments/assets/2ab2c88d-99b8-4676-9a71-e998e8d45511" />
@@ -167,6 +169,13 @@ npm run typecheck
 ```bash
 npm run build:dist
 ```
+
+### CI
+
+`.github/workflows/ci.yml`が`main`へのpushとすべてのプルリクエストで
+lint・型チェック・テスト・ビルドを実行します（OBSプラグイン関連のテストは
+Windows専用のため、この一般CIでは実行されず、リリース時のワークフローで
+別途確認されます）。
 
 ### リリース
 

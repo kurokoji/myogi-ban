@@ -6,11 +6,14 @@ description: Common GitHub CLI (gh) operations for this repository — pull requ
 # GitHub CLI (gh) for myogi-ban
 
 Repo: `kurokoji/myogi-ban` (remote `origin`), default branch `main`.
-`gh` is already authenticated as `kurokoji`. `.github/workflows/release.yml`
-is the only workflow — it builds and uploads release assets on tag push, and
-does not run on PRs, so `gh pr checks` will still report nothing for a PR.
-Check its progress with `gh run list --workflow release.yml` /
-`gh run view <run-id>` after pushing a tag.
+`gh` is already authenticated as `kurokoji`. Two workflows exist:
+- `.github/workflows/ci.yml` — lint/typecheck/test/build on every push to
+  `main` and every pull request. This is what `gh pr checks` reports.
+- `.github/workflows/release.yml` — builds and uploads release assets on
+  tag push (see Releases below); does not run on PRs.
+
+Check run status with `gh run list --workflow <file>` /
+`gh run view <run-id>`.
 
 Always run these from the repository root. Prefer `gh` over raw
 `curl`/`gh api` for anything it has a first-class command for; fall back
