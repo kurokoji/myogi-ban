@@ -104,6 +104,10 @@ body {
   font-weight: 700;
 }
 
+.update-check-row .copy-feedback {
+  order: 1;
+}
+
 .panel {
   margin-bottom: 8px;
   padding: 10px;
