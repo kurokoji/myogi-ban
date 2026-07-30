@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createLocalServer } from "../src/local-server";
 import type { Layout } from "../src/types";
+import type { UpdateManager } from "../src/update-manager";
 
 interface ApiSuccess<T> {
   ok: true;
@@ -11,6 +12,7 @@ interface ApiSuccess<T> {
 }
 
 export interface TestWebServer {
+  baseUrl: string;
   webSocketUrl: string;
   getJson<T>(path: string): Promise<T>;
   getText(path: string): Promise<string>;
@@ -23,6 +25,7 @@ export interface TestWebServer {
 export async function startTestWebServer(
   builtins: Record<string, Layout>,
   onShowWindow?: () => void,
+  updateManager?: UpdateManager,
 ): Promise<TestWebServer> {
   const root = mkdtempSync(join(tmpdir(), "myogi-ban-web-e2e-"));
   const publicDir = join(root, "public");
@@ -49,6 +52,7 @@ export async function startTestWebServer(
         userLayoutDir,
         defaultLayoutFile: join(root, "default-layout.json"),
         onShowWindow,
+        updateManager,
         onListening: () => resolve(instance),
       });
     },
@@ -63,6 +67,7 @@ export async function startTestWebServer(
   };
 
   return {
+    baseUrl,
     webSocketUrl: `ws://127.0.0.1:${port}/ws`,
     async getJson<T>(path) {
       const response = await successfulResponse(path);

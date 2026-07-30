@@ -34,6 +34,8 @@ import {
 import { ShortcutCheatSheet } from "./components/editor/ShortcutCheatSheet";
 import { SidebarAccordion } from "./components/editor/SidebarAccordion";
 import { ThemeControl } from "./components/editor/ThemeControl";
+import { UpdateCheckButton } from "./components/editor/UpdateCheckButton";
+import { UpdatePopup } from "./components/editor/UpdatePopup";
 import { GamepadView } from "./components/GamepadView";
 import {
   addEditorButton,
@@ -78,6 +80,7 @@ import { useEditorLayouts } from "./hooks/useEditorLayouts";
 import { useLayoutHistory } from "./hooks/useLayoutHistory";
 import { usePreviewViewport } from "./hooks/usePreviewViewport";
 import { useUnsavedChangesWarning } from "./hooks/useUnsavedChangesWarning";
+import { useUpdateStatus } from "./hooks/useUpdateStatus";
 import i18n from "./i18n";
 import { createDefaultLayout } from "./layout";
 import { previewWheelZoomDelta } from "./preview-viewport";
@@ -246,6 +249,7 @@ function EditorApp(): React.ReactElement {
   });
   const { confirmingClose, confirmClose, cancelClose } =
     useUnsavedChangesWarning(isDirty);
+  const updateStatus = useUpdateStatus(apiRef.current);
 
   const obsUrl = `${SERVER_URL}/view`;
 
@@ -660,6 +664,14 @@ function EditorApp(): React.ReactElement {
         onConfirm={confirmClose}
         onCancel={cancelClose}
       />
+      <UpdatePopup
+        status={updateStatus.status}
+        dismissed={updateStatus.dismissed}
+        actionError={updateStatus.actionError}
+        onClose={updateStatus.dismiss}
+        onDownload={updateStatus.download}
+        onInstall={updateStatus.install}
+      />
       <aside id="sidebar">
         <div className="sidebar-header">
           <div className="sidebar-title-row">
@@ -668,6 +680,13 @@ function EditorApp(): React.ReactElement {
               <span className="app-version">v{APP_VERSION}</span>
             </Title>
             <ThemeControl />
+          </div>
+          <div className="update-check-row">
+            <UpdateCheckButton
+              checking={updateStatus.checking}
+              updateAvailable={updateStatus.status?.updateAvailable ?? false}
+              onCheckNow={updateStatus.checkNow}
+            />
           </div>
           <p className="server-url">
             {t("obs")}: <span className="server-url-value">{obsUrl}</span>

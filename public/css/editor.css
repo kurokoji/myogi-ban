@@ -75,6 +75,14 @@ body {
   font-weight: 600;
 }
 
+.update-check-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 6px;
+  font-size: 11px;
+}
+
 .server-url {
   display: flex;
   align-items: center;

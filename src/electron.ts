@@ -1,3 +1,4 @@
+import { spawn } from "child_process";
 import { app, BrowserWindow } from "electron";
 import type * as http from "http";
 import * as path from "path";
@@ -9,6 +10,7 @@ import { requestRunningWindow } from "./electron-window-request";
 import { createLocalServer } from "./local-server";
 import { cleanupLocalServer } from "./server-cleanup";
 import { PORT } from "./types";
+import { UpdateManager } from "./update-manager";
 
 let mainWindow: BrowserWindow | null = null;
 let server: http.Server | null = null;
@@ -51,6 +53,11 @@ function showMainWindow(): void {
   mainWindow.focus();
 }
 
+function launchInstaller(installerPath: string): void {
+  spawn(installerPath, [], { detached: true, stdio: "ignore" }).unref();
+  app.quit();
+}
+
 function startServer(): void {
   dataDir = resolveElectronDataDir(
     launchOptions.development,
@@ -69,6 +76,13 @@ function startServer(): void {
       if (windowRequested) showMainWindow();
     },
     onShowWindow: showMainWindow,
+    updateManager: new UpdateManager({
+      currentVersion: app.getVersion(),
+      install: {
+        downloadDirectory: app.getPath("temp"),
+        launchInstaller,
+      },
+    }),
   });
 }
 

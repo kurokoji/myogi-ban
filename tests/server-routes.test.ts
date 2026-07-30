@@ -3,6 +3,7 @@ import test from "node:test";
 import { IMAGE_ROUTE_PATHS } from "../src/server-routes/image-routes";
 import { LAYOUT_ROUTE_PATHS } from "../src/server-routes/layout-routes";
 import { STATE_ROUTE_PATHS } from "../src/server-routes/state-routes";
+import { UPDATE_ROUTE_PATHS } from "../src/server-routes/update-routes";
 import { WINDOW_ROUTE_PATHS } from "../src/server-routes/window-routes";
 
 test("server route modules own their public paths", () => {
@@ -17,4 +18,10 @@ test("server route modules own their public paths", () => {
   ]);
   assert.deepEqual(IMAGE_ROUTE_PATHS, ["/api/layouts/:name/assets"]);
   assert.deepEqual(WINDOW_ROUTE_PATHS, ["/api/window/show"]);
+  assert.deepEqual(UPDATE_ROUTE_PATHS, [
+    "/api/update/status",
+    "/api/update/check",
+    "/api/update/download",
+    "/api/update/install",
+  ]);
 });

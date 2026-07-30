@@ -151,3 +151,69 @@ test("ApiClient exposes layout package validation codes", async (t) => {
     (error) => error instanceof ApiError && error.code === "unsafe_path",
   );
 });
+
+test("ApiClient fetches the update status", async (t) => {
+  const status = {
+    currentVersion: "1.0.17",
+    latestVersion: "1.0.18",
+    updateAvailable: true,
+    installSupported: true,
+    releaseUrl: "https://github.com/kurokoji/myogi-ban/releases/tag/v1.0.18",
+    download: { state: "idle" },
+  };
+  const fetchMock = t.mock.method(globalThis, "fetch", async () =>
+    Response.json({ ok: true, data: status }),
+  );
+
+  assert.deepEqual(await new ApiClient().getUpdateStatus(), status);
+  assert.equal(fetchMock.mock.calls[0].arguments[0], "/api/update/status");
+});
+
+test("ApiClient forces a manual update check", async (t) => {
+  const status = {
+    currentVersion: "1.0.17",
+    latestVersion: null,
+    updateAvailable: false,
+    installSupported: true,
+    releaseUrl: null,
+    download: { state: "idle" },
+  };
+  const fetchMock = t.mock.method(globalThis, "fetch", async () =>
+    Response.json({ ok: true, data: status }),
+  );
+
+  assert.deepEqual(await new ApiClient().checkForUpdate(), status);
+  assert.equal(fetchMock.mock.calls[0].arguments[0], "/api/update/check");
+  assert.equal(
+    (fetchMock.mock.calls[0].arguments[1] as RequestInit).method,
+    "POST",
+  );
+});
+
+test("ApiClient starts an update download", async (t) => {
+  const fetchMock = t.mock.method(globalThis, "fetch", async () =>
+    Response.json({ ok: true }),
+  );
+
+  await new ApiClient().startUpdateDownload();
+
+  assert.equal(fetchMock.mock.calls[0].arguments[0], "/api/update/download");
+  assert.equal(
+    (fetchMock.mock.calls[0].arguments[1] as RequestInit).method,
+    "POST",
+  );
+});
+
+test("ApiClient installs a downloaded update", async (t) => {
+  const fetchMock = t.mock.method(globalThis, "fetch", async () =>
+    Response.json({ ok: true }),
+  );
+
+  await new ApiClient().installUpdate();
+
+  assert.equal(fetchMock.mock.calls[0].arguments[0], "/api/update/install");
+  assert.equal(
+    (fetchMock.mock.calls[0].arguments[1] as RequestInit).method,
+    "POST",
+  );
+});

@@ -1,6 +1,7 @@
 import * as path from "path";
 import { createLocalServer } from "./local-server";
 import { PORT } from "./types";
+import { UpdateManager } from "./update-manager";
 
 const ROOT_DIR = path.join(__dirname, "..");
 const dataDir = process.env.MYOGI_BAN_DATA_DIR
@@ -15,6 +16,9 @@ const server = createLocalServer({
   userLayoutDir: path.join(dataDir, "user-layouts"),
   defaultLayoutFile: path.join(dataDir, "default-layout.json"),
   pidFile,
+  updateManager: new UpdateManager({
+    currentVersion: process.env.npm_package_version ?? "0.0.0",
+  }),
   onListening: () => {
     console.log(`Server running at http://localhost:${PORT}`);
     console.log(`OBS browser source URL: http://localhost:${PORT}/view`);

@@ -7,8 +7,10 @@ import { LayoutRepository } from "./layout-repository";
 import { registerImageRoutes } from "./server-routes/image-routes";
 import { registerLayoutRoutes } from "./server-routes/layout-routes";
 import { registerStateRoutes } from "./server-routes/state-routes";
+import { registerUpdateRoutes } from "./server-routes/update-routes";
 import { registerWindowRoutes } from "./server-routes/window-routes";
 import type { GamepadState } from "./types";
+import { UpdateManager } from "./update-manager";
 
 export interface LocalServerOptions {
   port: number;
@@ -19,6 +21,7 @@ export interface LocalServerOptions {
   pidFile?: string;
   onListening?: (server: http.Server) => void;
   onShowWindow?: () => void;
+  updateManager?: UpdateManager;
 }
 
 function ensureDir(dir: string): void {
@@ -60,6 +63,10 @@ export function createLocalServer(options: LocalServerOptions): http.Server {
   registerLayoutRoutes(expressApp, layouts);
   registerImageRoutes(expressApp, layouts);
   registerWindowRoutes(expressApp, options.onShowWindow ?? (() => {}));
+  registerUpdateRoutes(
+    expressApp,
+    options.updateManager ?? new UpdateManager({ currentVersion: "0.0.0" }),
+  );
 
   wss.on("connection", (ws) => {
     if (stateStore.latest) {

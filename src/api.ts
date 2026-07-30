@@ -1,5 +1,6 @@
 import type { ApiFailure, ApiSuccess } from "./api-response";
 import type { GamepadState, Layout, LayoutEntry } from "./types";
+import type { UpdateStatus } from "./update-manager";
 
 interface UploadImageOptions {
   data: string;
@@ -117,5 +118,21 @@ export class ApiClient {
       headers: { "Content-Type": "application/octet-stream" },
       body: new Uint8Array(data).buffer,
     });
+  }
+
+  async getUpdateStatus(): Promise<UpdateStatus> {
+    return requestJson<UpdateStatus>("/api/update/status");
+  }
+
+  async checkForUpdate(): Promise<UpdateStatus> {
+    return requestJson<UpdateStatus>("/api/update/check", jsonRequest({}));
+  }
+
+  async startUpdateDownload(): Promise<void> {
+    await request("/api/update/download", jsonRequest({}));
+  }
+
+  async installUpdate(): Promise<void> {
+    await request("/api/update/install", jsonRequest({}));
   }
 }

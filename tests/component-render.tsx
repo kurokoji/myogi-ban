@@ -26,3 +26,4 @@ export function renderComponent(component: React.ReactNode): RenderResult {
 }
 
 export const componentDocument = componentDom.window.document;
+export { testI18n };
