@@ -3,6 +3,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
+import { resolveInstallerAssetName } from "../src/update-check";
 import { UpdateManager } from "../src/update-manager";
 import { startTestWebServer } from "./web-server-harness";
 
@@ -13,7 +14,7 @@ function releaseResponse(tagName: string) {
       tag_name: tagName,
       assets: [
         {
-          name: `Myogi Ban Setup ${version}.exe`,
+          name: resolveInstallerAssetName(version),
           browser_download_url: `https://example.com/${version}/installer.exe`,
         },
       ],
@@ -221,7 +222,7 @@ test("POST /api/update/install launches the downloaded installer", async () => {
 
     assert.equal(
       launched,
-      join(downloadDirectory, "Myogi Ban Setup 1.0.18.exe"),
+      join(downloadDirectory, resolveInstallerAssetName("1.0.18")),
     );
   } finally {
     await server.close();

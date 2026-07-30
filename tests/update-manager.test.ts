@@ -3,19 +3,17 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
+import { resolveInstallerAssetName } from "../src/update-check";
 import { UpdateManager } from "../src/update-manager";
 
-function releaseResponse(
-  tagName: string,
-  currentAppExeName = "Myogi Ban Setup",
-) {
+function releaseResponse(tagName: string) {
   const version = tagName.replace(/^v/, "");
   return new Response(
     JSON.stringify({
       tag_name: tagName,
       assets: [
         {
-          name: `${currentAppExeName} ${version}.exe`,
+          name: resolveInstallerAssetName(version),
           browser_download_url: `https://example.com/${version}/installer.exe`,
         },
       ],
@@ -223,7 +221,7 @@ test("startDownload downloads the installer to the configured directory", async 
     status.download.state === "downloaded" ? status.download.installerPath : "";
   assert.equal(
     installerPath,
-    join(downloadDirectory, "Myogi Ban Setup 1.0.18.exe"),
+    join(downloadDirectory, resolveInstallerAssetName("1.0.18")),
   );
   assert.equal(readFileSync(installerPath, "utf8"), installerContent());
 });
@@ -309,7 +307,7 @@ test("install launches the downloaded installer", async (t) => {
 
   assert.equal(
     launchedPath,
-    join(downloadDirectory, "Myogi Ban Setup 1.0.18.exe"),
+    join(downloadDirectory, resolveInstallerAssetName("1.0.18")),
   );
 });
 

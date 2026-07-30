@@ -26,10 +26,13 @@ test("isNewerVersion reports an older version as not newer", () => {
   assert.equal(isNewerVersion("1.0.18", "1.0.17"), false);
 });
 
-test("resolveInstallerAssetName matches electron-builder's default NSIS artifact name", () => {
+test("resolveInstallerAssetName matches the asset name GitHub stores after upload", () => {
+  // electron-builder's local artifact is "Myogi Ban Setup <version>.exe", but
+  // GitHub replaces spaces with periods in release asset filenames on
+  // upload, so the name we must match against the API is the dotted form.
   assert.equal(
     resolveInstallerAssetName("1.0.18"),
-    "Myogi Ban Setup 1.0.18.exe",
+    "Myogi.Ban.Setup.1.0.18.exe",
   );
 });
 
@@ -38,7 +41,7 @@ test("parseLatestRelease extracts the version, tag, and matching installer asset
     tag_name: "v1.0.18",
     assets: [
       {
-        name: "Myogi Ban Setup 1.0.18.exe",
+        name: "Myogi.Ban.Setup.1.0.18.exe",
         browser_download_url: "https://example.com/app-installer.exe",
       },
       {
@@ -51,7 +54,7 @@ test("parseLatestRelease extracts the version, tag, and matching installer asset
   assert.deepEqual(result, {
     version: "1.0.18",
     tagName: "v1.0.18",
-    assetName: "Myogi Ban Setup 1.0.18.exe",
+    assetName: "Myogi.Ban.Setup.1.0.18.exe",
     assetUrl: "https://example.com/app-installer.exe",
   });
 });

@@ -18,7 +18,10 @@ export function isNewerVersion(current: string, latest: string): boolean {
 }
 
 export function resolveInstallerAssetName(version: string): string {
-  return `Myogi Ban Setup ${version}.exe`;
+  // electron-builder's local artifact is "Myogi Ban Setup <version>.exe",
+  // but GitHub replaces spaces with periods in release asset filenames on
+  // upload, so this must match the dotted name it actually stores.
+  return `Myogi.Ban.Setup.${version}.exe`;
 }
 
 const record = (value: unknown): value is Record<string, unknown> =>
