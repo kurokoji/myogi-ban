@@ -4,12 +4,14 @@ import type { UpdateDownloadState } from "../../update-manager";
 
 interface ObsPluginUpdateControlsProps {
   download: UpdateDownloadState;
+  installing: boolean;
   onDownload: () => void;
   onInstall: () => void;
 }
 
 export function ObsPluginUpdateControls({
   download,
+  installing,
   onDownload,
   onInstall,
 }: ObsPluginUpdateControlsProps): React.ReactElement {
@@ -33,7 +35,7 @@ export function ObsPluginUpdateControls({
           </Button>
         )}
         {download.state === "downloaded" && (
-          <Button size="xs" onClick={onInstall}>
+          <Button size="xs" loading={installing} onClick={onInstall}>
             {t("installObsPluginUpdate")}
           </Button>
         )}

@@ -9,6 +9,8 @@ export interface UseUpdateStatusResult {
   dismissed: boolean;
   checking: boolean;
   actionError: string | null;
+  installing: boolean;
+  installingObsPlugin: boolean;
   dismiss: () => void;
   checkNow: () => Promise<void>;
   download: () => Promise<void>;
@@ -26,6 +28,8 @@ export function useUpdateStatus(
   const [dismissed, setDismissed] = useState(false);
   const [checking, setChecking] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [installing, setInstalling] = useState(false);
+  const [installingObsPlugin, setInstallingObsPlugin] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -85,10 +89,15 @@ export function useUpdateStatus(
 
   const install = async () => {
     setActionError(null);
+    setInstalling(true);
     try {
       await api.installUpdate();
+      // Stay in the loading state: a successful call means the app is
+      // already quitting to hand off to the installer, so there is no
+      // "done" state to return to.
     } catch {
       setActionError(t("updateActionFailed"));
+      setInstalling(false);
     }
   };
 
@@ -104,10 +113,13 @@ export function useUpdateStatus(
 
   const installObsPlugin = async () => {
     setActionError(null);
+    setInstallingObsPlugin(true);
     try {
       await api.installObsPlugin();
     } catch {
       setActionError(t("updateActionFailed"));
+    } finally {
+      setInstallingObsPlugin(false);
     }
   };
 
@@ -116,6 +128,8 @@ export function useUpdateStatus(
     dismissed,
     checking,
     actionError,
+    installing,
+    installingObsPlugin,
     dismiss: () => setDismissed(true),
     checkNow,
     download,

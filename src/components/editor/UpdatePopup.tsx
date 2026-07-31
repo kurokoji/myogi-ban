@@ -6,6 +6,7 @@ interface UpdatePopupProps {
   status: UpdateStatus | null;
   dismissed: boolean;
   actionError: string | null;
+  installing: boolean;
   onClose: () => void;
   onDownload: () => void;
   onInstall: () => void;
@@ -15,6 +16,7 @@ export function UpdatePopup({
   status,
   dismissed,
   actionError,
+  installing,
   onClose,
   onDownload,
   onInstall,
@@ -60,7 +62,7 @@ export function UpdatePopup({
             </Button>
           )}
         {status.installSupported && status.download.state === "downloaded" && (
-          <Button size="xs" onClick={onInstall}>
+          <Button size="xs" loading={installing} onClick={onInstall}>
             {t("installUpdate")}
           </Button>
         )}

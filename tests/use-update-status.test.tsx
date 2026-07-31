@@ -135,6 +135,56 @@ test("install calls the API and reports a failure", async () => {
   });
 
   assert.equal(result.current.actionError !== null, true);
+  assert.equal(result.current.installing, false);
+  unmount();
+});
+
+test("installing turns true as soon as install starts", async () => {
+  let resolveInstall: () => void = () => {};
+  const api = fakeApi([idleStatus()], {
+    installUpdate: () =>
+      new Promise<void>((resolve) => {
+        resolveInstall = resolve;
+      }),
+  });
+  const { result, unmount } = renderHook(() => useUpdateStatus(api, 999999), {
+    wrapper,
+  });
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+
+  assert.equal(result.current.installing, false);
+
+  let installPromise: Promise<void> = Promise.resolve();
+  act(() => {
+    installPromise = result.current.install();
+  });
+  assert.equal(result.current.installing, true);
+
+  await act(async () => {
+    resolveInstall();
+    await installPromise;
+  });
+  unmount();
+});
+
+test("installing stays true after a successful install, since the app is expected to quit and hand off to the installer", async () => {
+  const api = fakeApi([idleStatus()], {
+    installUpdate: async () => {},
+  });
+  const { result, unmount } = renderHook(() => useUpdateStatus(api, 999999), {
+    wrapper,
+  });
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+
+  await act(async () => {
+    await result.current.install();
+  });
+
+  assert.equal(result.current.installing, true);
   unmount();
 });
 
@@ -188,6 +238,38 @@ test("installObsPlugin calls the API and reports a failure", async () => {
   });
 
   assert.equal(result.current.actionError !== null, true);
+  assert.equal(result.current.installingObsPlugin, false);
+  unmount();
+});
+
+test("installingObsPlugin is true while installObsPlugin is in flight and false once it settles", async () => {
+  let resolveInstall: () => void = () => {};
+  const api = fakeApi([idleStatus({ obsPluginAvailable: true })], {
+    installObsPlugin: () =>
+      new Promise<void>((resolve) => {
+        resolveInstall = resolve;
+      }),
+  });
+  const { result, unmount } = renderHook(() => useUpdateStatus(api, 999999), {
+    wrapper,
+  });
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+
+  assert.equal(result.current.installingObsPlugin, false);
+
+  let installPromise: Promise<void> = Promise.resolve();
+  act(() => {
+    installPromise = result.current.installObsPlugin();
+  });
+  assert.equal(result.current.installingObsPlugin, true);
+
+  await act(async () => {
+    resolveInstall();
+    await installPromise;
+  });
+  assert.equal(result.current.installingObsPlugin, false);
   unmount();
 });
 

@@ -17,6 +17,7 @@ function renderPanel(
       obsPluginDownload={{ state: "idle" }}
       onDownloadObsPlugin={() => {}}
       onInstallObsPlugin={() => {}}
+      installingObsPlugin={false}
       {...props}
     />,
   );
@@ -57,4 +58,20 @@ test("does not show OBS plugin controls when no plugin installer is available", 
 test("shows OBS plugin controls when a plugin installer is available", () => {
   const view = renderPanel({ obsPluginAvailable: true });
   assert.ok(view.getByRole("button", { name: "downloadObsPluginUpdate" }));
+});
+
+test("forwards installingObsPlugin to the OBS plugin install button", () => {
+  const view = renderPanel({
+    obsPluginAvailable: true,
+    obsPluginDownload: {
+      state: "downloaded",
+      installerPath: "C:/tmp/obs-setup.exe",
+    },
+    installingObsPlugin: true,
+  });
+
+  const button = view.getByRole("button", {
+    name: "installObsPluginUpdate",
+  }) as HTMLButtonElement;
+  assert.equal(button.disabled, true);
 });

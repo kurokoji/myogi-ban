@@ -10,6 +10,7 @@ interface ObsSetupPanelProps {
   onCopyObsUrl: () => void;
   obsPluginAvailable: boolean;
   obsPluginDownload: UpdateDownloadState;
+  installingObsPlugin: boolean;
   onDownloadObsPlugin: () => void;
   onInstallObsPlugin: () => void;
 }
@@ -20,6 +21,7 @@ export function ObsSetupPanel({
   onCopyObsUrl,
   obsPluginAvailable,
   obsPluginDownload,
+  installingObsPlugin,
   onDownloadObsPlugin,
   onInstallObsPlugin,
 }: ObsSetupPanelProps): React.ReactElement {
@@ -46,6 +48,7 @@ export function ObsSetupPanel({
       {obsPluginAvailable && (
         <ObsPluginUpdateControls
           download={obsPluginDownload}
+          installing={installingObsPlugin}
           onDownload={onDownloadObsPlugin}
           onInstall={onInstallObsPlugin}
         />

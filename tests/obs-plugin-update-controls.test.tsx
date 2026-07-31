@@ -14,6 +14,7 @@ function renderControls(
       download={{ state: "idle" }}
       onDownload={() => {}}
       onInstall={() => {}}
+      installing={false}
       {...props}
     />,
   );
@@ -59,6 +60,18 @@ test("shows an install button once downloaded and calls onInstall on click", () 
   fireEvent.click(view.getByRole("button", { name: "installObsPluginUpdate" }));
 
   assert.equal(calls, 1);
+});
+
+test("shows the install button as loading and disabled while installing", () => {
+  const view = renderControls({
+    download: { state: "downloaded", installerPath: "C:/tmp/obs-setup.exe" },
+    installing: true,
+  });
+
+  const button = view.getByRole("button", {
+    name: "installObsPluginUpdate",
+  }) as HTMLButtonElement;
+  assert.equal(button.disabled, true);
 });
 
 test("shows the download error message and still offers a retry download button", () => {

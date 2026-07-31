@@ -676,6 +676,7 @@ function EditorApp(): React.ReactElement {
         status={updateStatus.status}
         dismissed={updateStatus.dismissed}
         actionError={updateStatus.actionError}
+        installing={updateStatus.installing}
         onClose={updateStatus.dismiss}
         onDownload={updateStatus.download}
         onInstall={updateStatus.install}
@@ -730,6 +731,7 @@ function EditorApp(): React.ReactElement {
           obsPluginDownload={
             updateStatus.status?.obsPluginDownload ?? { state: "idle" }
           }
+          installingObsPlugin={updateStatus.installingObsPlugin}
           onDownloadObsPlugin={updateStatus.downloadObsPlugin}
           onInstallObsPlugin={updateStatus.installObsPlugin}
         />

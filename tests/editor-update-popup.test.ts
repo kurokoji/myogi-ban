@@ -17,6 +17,7 @@ test("the editor renders the update popup driven by useUpdateStatus", async () =
     /const updateStatus = useUpdateStatus\(apiRef\.current\);/,
   );
   assert.match(source, /status=\{updateStatus\.status\}/);
+  assert.match(source, /installing=\{updateStatus\.installing\}/);
   assert.match(source, /onDownload=\{updateStatus\.download\}/);
   assert.match(source, /onInstall=\{updateStatus\.install\}/);
   assert.match(
@@ -58,6 +59,10 @@ test("the editor renders a persistent ObsSetupPanel, independent of the app upda
   assert.match(
     block as string,
     /onInstallObsPlugin=\{updateStatus\.installObsPlugin\}/,
+  );
+  assert.match(
+    block as string,
+    /installingObsPlugin=\{updateStatus\.installingObsPlugin\}/,
   );
 });
 
