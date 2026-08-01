@@ -311,6 +311,38 @@ test("right-clicking three selected buttons offers distribution", () => {
   ]);
 });
 
+test("left-clicking another button closes an open context menu", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 2;
+  const view = renderComponent(
+    <GamepadView
+      layout={layout}
+      stickClass="stick"
+      pressedButtons={[]}
+      editorMode={true}
+      selectedButtonIndex={0}
+      selectedButtonIndexes={[0]}
+    />,
+  );
+
+  const target = view.container.querySelector("#button0");
+  assert.ok(target);
+  fireEvent.contextMenu(target, { clientX: 140, clientY: 90 });
+  assert.equal(
+    componentDocument.body.querySelector(".editor-context-menu") === null,
+    false,
+  );
+
+  const other = view.container.querySelector("#button1");
+  assert.ok(other);
+  fireEvent.mouseDown(other, { button: 0 });
+
+  assert.equal(
+    componentDocument.body.querySelector(".editor-context-menu") === null,
+    true,
+  );
+});
+
 test("component tests clean up rendered DOM after each test", () => {
   renderComponent(<p data-testid="cleanup-marker">Rendered</p>);
   assert.ok(componentDocument.querySelector('[data-testid="cleanup-marker"]'));

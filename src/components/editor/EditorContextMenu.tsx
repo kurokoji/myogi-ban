@@ -8,7 +8,7 @@ import {
   IconSpacingVertical,
   IconTrash,
 } from "@tabler/icons-react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { editorShortcutHint } from "../../editor-keyboard";
@@ -47,29 +47,38 @@ export function EditorContextMenu({
   onClose,
 }: EditorContextMenuProps): React.ReactElement {
   const { t } = useTranslation();
+  const menuRef = useRef<HTMLDivElement>(null);
   const runAndClose = (action: () => void) => {
     action();
     onClose();
   };
 
   useEffect(() => {
-    const closeOnPointerDown = () => onClose();
+    // Capture phase: handlers on the preview stop propagation of their own
+    // mousedown events, so a bubbling listener would never see clicks that
+    // land on another button while the menu is open.
+    const closeOnPointerDown = (event: MouseEvent) => {
+      const target = event.target;
+      if (target instanceof Node && menuRef.current?.contains(target)) return;
+      onClose();
+    };
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
       event.preventDefault();
       event.stopPropagation();
       onClose();
     };
-    document.addEventListener("mousedown", closeOnPointerDown);
+    document.addEventListener("mousedown", closeOnPointerDown, true);
     document.addEventListener("keydown", closeOnEscape);
     return () => {
-      document.removeEventListener("mousedown", closeOnPointerDown);
+      document.removeEventListener("mousedown", closeOnPointerDown, true);
       document.removeEventListener("keydown", closeOnEscape);
     };
   }, [onClose]);
 
   return createPortal(
     <div
+      ref={menuRef}
       className="editor-context-menu"
       role="menu"
       style={{ left: x, top: y }}
