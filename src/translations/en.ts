@@ -39,6 +39,7 @@ export const enTranslation = {
   selectedButtonsSettings: "Settings for {{count}} selected buttons",
   selectedButtonSettingsEmpty: "Per-button settings",
   buttonLayoutAndSize: "Layout and size",
+  buttonSizeAndRotation: "Size and rotation",
   buttonAppearance: "Button appearance",
   selectButtonForSettings: "Select a button in the preview to edit it.",
   editButton: "Per-button settings",

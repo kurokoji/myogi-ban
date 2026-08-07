@@ -181,35 +181,47 @@ body {
   display: contents;
 }
 
-.selected-button-layout-title {
+.selected-button-layout-title,
+.default-button-layout-title {
   order: 10;
 }
 
-.selected-button-layout-control {
+.selected-button-layout-control,
+.default-button-layout-control {
   order: 11;
 }
 
-.selected-button-appearance-title {
+.selected-button-appearance-title,
+.default-button-appearance-title {
   order: 20;
 }
 
 .selected-button-appearance-title,
-.selected-button-text-title {
+.selected-button-text-title,
+.default-button-appearance-title,
+.default-button-text-title {
   margin-top: 6px;
   padding-top: 10px;
   border-top: 1px solid var(--mantine-color-default-border);
 }
 
-.selected-button-appearance-control {
+.selected-button-appearance-control,
+.default-button-appearance-control {
   order: 21;
 }
 
-.selected-button-text-title {
+.selected-button-text-title,
+.default-button-text-title {
   order: 30;
 }
 
-.selected-button-text-control {
+.selected-button-text-control,
+.default-button-text-control {
   order: 31;
+}
+
+.default-button-reset-action {
+  order: 40;
 }
 
 .control {

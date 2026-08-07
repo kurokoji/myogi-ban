@@ -1876,6 +1876,45 @@ test("resetting all buttons to default lives in the default settings tab", () =>
   assert.ok(view.getByRole("button", { name: "resetAllToDefault" }));
 });
 
+test("default button settings group controls in task order", () => {
+  const layout = createDefaultLayout();
+  const view = renderComponent(
+    <ButtonSettingsPanel
+      layout={layout}
+      assigningTarget={null}
+      assignmentName=""
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      updateLayout={() => {}}
+      updateSelectedButtons={() => {}}
+      onSelectedButtonChange={() => {}}
+      onAddButton={() => {}}
+      onDeleteSelectedButtons={() => {}}
+      openImagePicker={() => {}}
+      cancelAssignment={() => {}}
+    />,
+  );
+  const details = view.container.querySelector("details");
+  assert.ok(details);
+  details.open = true;
+  fireEvent(details, new componentDocument.defaultView.Event("toggle"));
+
+  const defaultCard = view.container.querySelector(
+    ".button-settings-card-default",
+  );
+  assert.ok(defaultCard);
+  const sectionTitles = Array.from(
+    defaultCard.querySelectorAll(".button-settings-group-title"),
+    (element) => element.textContent,
+  );
+
+  assert.deepEqual(sectionTitles, [
+    "buttonSizeAndRotation",
+    "buttonAppearance",
+    "buttonText",
+  ]);
+});
+
 test("default text styling controls update the layout defaults", () => {
   const layout = createDefaultLayout();
   let updatedLayout: typeof layout | undefined;

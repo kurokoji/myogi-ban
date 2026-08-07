@@ -37,6 +37,7 @@ export const jaTranslation = {
   selectedButtonsSettings: "選択中の{{count}}個のボタンの個別設定",
   selectedButtonSettingsEmpty: "個別設定",
   buttonLayoutAndSize: "配置とサイズ",
+  buttonSizeAndRotation: "サイズと角度",
   buttonAppearance: "ボタンの見た目",
   selectButtonForSettings: "プレビューから編集するボタンを選択してください。",
   editButton: "各ボタンの設定",

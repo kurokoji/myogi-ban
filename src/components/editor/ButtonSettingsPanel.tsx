@@ -134,9 +134,31 @@ export function ButtonSettingsPanel(
                     title={t("defaultButtonSettings")}
                     hint={t("defaultButtonSettingsHint")}
                   >
+                    <Title
+                      order={5}
+                      size="xs"
+                      className="button-settings-group-title default-button-layout-title"
+                    >
+                      {t("buttonSizeAndRotation")}
+                    </Title>
+                    <Title
+                      order={5}
+                      size="xs"
+                      className="button-settings-group-title default-button-appearance-title"
+                    >
+                      {t("buttonAppearance")}
+                    </Title>
+                    <Title
+                      order={5}
+                      size="xs"
+                      className="button-settings-group-title default-button-text-title"
+                    >
+                      {t("buttonText")}
+                    </Title>
                     <Switch
                       size="sm"
                       label={t("useCssButton")}
+                      className="default-button-appearance-control"
                       checked={!(layout.defaultbuttons.useCss ?? false)}
                       onChange={(event) =>
                         updateLayout((next) => {
@@ -145,7 +167,7 @@ export function ButtonSettingsPanel(
                       }
                     />
                     {layout.defaultbuttons.useCss && (
-                      <div className="control row">
+                      <div className="control row default-button-appearance-control">
                         <ColorInput
                           label={t("colorNormal")}
                           value={layout.defaultbuttons.cssColor || "#cccccc"}
@@ -170,7 +192,10 @@ export function ButtonSettingsPanel(
                       </div>
                     )}
                     {layout.defaultbuttons.useCss && (
-                      <Stack gap="xs" className="button-border-color-controls">
+                      <Stack
+                        gap="xs"
+                        className="button-border-color-controls default-button-appearance-control"
+                      >
                         <Switch
                           size="sm"
                           label={t("borderMatchesColor")}
@@ -201,7 +226,7 @@ export function ButtonSettingsPanel(
                       </Stack>
                     )}
                     {layout.defaultbuttons.useCss && (
-                      <div className="control row">
+                      <div className="control row default-button-appearance-control">
                         <NativeSelect
                           size="xs"
                           label={t("buttonShape")}
@@ -252,6 +277,7 @@ export function ButtonSettingsPanel(
                       <NativeSelect
                         size="xs"
                         label={t("easing")}
+                        className="default-button-appearance-control"
                         value={layout.defaultbuttons.cssEasing || "ease"}
                         onChange={(event) =>
                           updateLayout((next) => {
@@ -269,7 +295,12 @@ export function ButtonSettingsPanel(
                     )}
                     {!layout.defaultbuttons.useCss && (
                       <>
-                        <Group gap="xs" align="end" wrap="nowrap">
+                        <Group
+                          gap="xs"
+                          align="end"
+                          wrap="nowrap"
+                          className="default-button-appearance-control"
+                        >
                           <TextInput
                             size="xs"
                             label={t("defaultReleasedImage")}
@@ -291,7 +322,12 @@ export function ButtonSettingsPanel(
                             }
                           />
                         </Group>
-                        <Group gap="xs" align="end" wrap="nowrap">
+                        <Group
+                          gap="xs"
+                          align="end"
+                          wrap="nowrap"
+                          className="default-button-appearance-control"
+                        >
                           <TextInput
                             size="xs"
                             label={t("defaultPressedImage")}
@@ -315,52 +351,48 @@ export function ButtonSettingsPanel(
                         </Group>
                       </>
                     )}
-                    <Text size="xs" fw={600}>
-                      {t("defaultButtonSize")}
-                    </Text>
-                    <LinkedSizeInputs
-                      width={layout.defaultbuttons.w}
-                      height={layout.defaultbuttons.h}
-                      widthLabel={t("width")}
-                      heightLabel={t("height")}
-                      fallbackWidth="60"
-                      fallbackHeight="60"
-                      onChange={(width, height) =>
-                        updateLayout((next) => {
-                          next.defaultbuttons.w = width;
-                          next.defaultbuttons.h = height;
-                        })
-                      }
-                    />
-                    <NumberInput
-                      size="xs"
-                      label={t("rotation")}
-                      min={-180}
-                      max={180}
-                      step={1}
-                      value={numericValue(
-                        layout.defaultbuttons.rotation || "0",
-                      )}
-                      onChange={(value) =>
-                        updateLayout((next) => {
-                          const previousRotation =
-                            next.defaultbuttons.rotation ?? "0";
-                          next.defaultbuttons.rotation = String(value ?? 0);
-                          for (const button of next.buttons) {
-                            if (
-                              (button.rotation ?? previousRotation) ===
-                              previousRotation
-                            ) {
-                              delete button.rotation;
+                    <Stack gap="xs" className="default-button-layout-control">
+                      <LinkedSizeInputs
+                        width={layout.defaultbuttons.w}
+                        height={layout.defaultbuttons.h}
+                        widthLabel={t("width")}
+                        heightLabel={t("height")}
+                        fallbackWidth="60"
+                        fallbackHeight="60"
+                        onChange={(width, height) =>
+                          updateLayout((next) => {
+                            next.defaultbuttons.w = width;
+                            next.defaultbuttons.h = height;
+                          })
+                        }
+                      />
+                      <NumberInput
+                        size="xs"
+                        label={t("rotation")}
+                        min={-180}
+                        max={180}
+                        step={1}
+                        value={numericValue(
+                          layout.defaultbuttons.rotation || "0",
+                        )}
+                        onChange={(value) =>
+                          updateLayout((next) => {
+                            const previousRotation =
+                              next.defaultbuttons.rotation ?? "0";
+                            next.defaultbuttons.rotation = String(value ?? 0);
+                            for (const button of next.buttons) {
+                              if (
+                                (button.rotation ?? previousRotation) ===
+                                previousRotation
+                              ) {
+                                delete button.rotation;
+                              }
                             }
-                          }
-                        })
-                      }
-                    />
-                    <Text size="xs" fw={600}>
-                      {t("buttonText")}
-                    </Text>
-                    <div className="control row">
+                          })
+                        }
+                      />
+                    </Stack>
+                    <div className="control row default-button-text-control">
                       <ColorInput
                         label={t("textColor")}
                         value={layout.defaultbuttons.cssTextColor || "#ffffff"}
@@ -389,7 +421,7 @@ export function ButtonSettingsPanel(
                         }
                       />
                     </div>
-                    <Group gap="xs">
+                    <Group gap="xs" className="default-button-text-control">
                       <Switch
                         size="sm"
                         label={t("textBold")}
@@ -413,7 +445,11 @@ export function ButtonSettingsPanel(
                         }
                       />
                     </Group>
-                    <Group gap="xs" align="end">
+                    <Group
+                      gap="xs"
+                      align="end"
+                      className="default-button-text-control"
+                    >
                       <Switch
                         size="sm"
                         label={t("textOutline")}
@@ -445,6 +481,7 @@ export function ButtonSettingsPanel(
                       size="xs"
                       variant="light"
                       color="gray"
+                      className="default-button-reset-action"
                       onClick={() =>
                         updateLayout((next) => {
                           next.buttons = next.buttons.map((b) =>
