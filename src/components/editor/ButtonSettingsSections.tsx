@@ -1,4 +1,4 @@
-import { Paper, Stack, Text, Title } from "@mantine/core";
+import { Group, Paper, Stack, Text, Title } from "@mantine/core";
 import { type ReactNode, useState } from "react";
 
 const BUTTON_ADVANCED_SETTINGS_STORAGE_KEY = "button-advanced-settings-open";
@@ -15,6 +15,7 @@ interface ChildrenProps {
 interface SectionProps extends ChildrenProps {
   title: ReactNode;
   hint: ReactNode;
+  action?: ReactNode;
 }
 
 interface AdvancedSectionProps extends ChildrenProps {
@@ -26,19 +27,30 @@ function ButtonSettingsScope({
   children,
   title,
   hint,
+  action,
   className,
 }: SectionProps & { className: string }) {
   return (
     <Paper withBorder p="xs" className={`button-settings-card ${className}`}>
       <Stack gap="xs">
-        <div>
-          <Title order={4} size="sm">
-            {title}
-          </Title>
-          <Text size="xs" c="dimmed">
-            {hint}
-          </Text>
-        </div>
+        <Group
+          justify="space-between"
+          align="start"
+          wrap="wrap"
+          className="button-settings-card-header"
+        >
+          <div className="button-settings-card-heading">
+            <Title order={4} size="sm">
+              {title}
+            </Title>
+            <Text size="xs" c="dimmed">
+              {hint}
+            </Text>
+          </div>
+          {action && (
+            <div className="button-settings-card-action">{action}</div>
+          )}
+        </Group>
         {children}
       </Stack>
     </Paper>

@@ -1788,6 +1788,60 @@ test("button settings default to the selected-button tab once a button is select
   );
 });
 
+test("selected button settings group controls in task order", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 1;
+  const view = renderComponent(
+    <ButtonSettingsPanel
+      layout={layout}
+      assigningTarget={null}
+      assignmentName=""
+      selectedButtonIndex={0}
+      selectedButtonIndexes={[0]}
+      updateLayout={() => {}}
+      updateSelectedButtons={() => {}}
+      onSelectedButtonChange={() => {}}
+      onAddButton={() => {}}
+      onDeleteSelectedButtons={() => {}}
+      openImagePicker={() => {}}
+      cancelAssignment={() => {}}
+    />,
+  );
+  const details = view.container.querySelector("details");
+  assert.ok(details);
+  details.open = true;
+  fireEvent(details, new componentDocument.defaultView.Event("toggle"));
+
+  const selectedCard = view.container.querySelector(
+    ".button-settings-card-selected",
+  );
+  assert.ok(selectedCard);
+  const sectionTitles = Array.from(
+    selectedCard.querySelectorAll(".button-settings-group-title"),
+    (element) => element.textContent,
+  );
+
+  assert.deepEqual(sectionTitles, [
+    "buttonLayoutAndSize",
+    "buttonAppearance",
+    "buttonText",
+  ]);
+
+  const resetButton = view.getByRole("button", { name: "resetToDefault" });
+  assert.ok(resetButton.closest(".button-settings-card-action"));
+  const firstSectionTitle = selectedCard.querySelector(
+    ".button-settings-group-title",
+  );
+  assert.ok(firstSectionTitle);
+  assert.equal(
+    Boolean(
+      resetButton.compareDocumentPosition(firstSectionTitle) &
+        componentDocument.defaultView.Node.DOCUMENT_POSITION_FOLLOWING,
+    ),
+    true,
+  );
+});
+
 test("resetting all buttons to default lives in the default settings tab", () => {
   const layout = createDefaultLayout();
   layout.totalbuttonshow = 2;

@@ -479,12 +479,58 @@ export function ButtonSettingsPanel(
                         ? "selectButtonForSettings"
                         : "useDefaultWhenBlank",
                     )}
+                    action={
+                      selectedButtonIndex === null ? null : (
+                        <Button
+                          size="compact-xs"
+                          variant="light"
+                          color="gray"
+                          onClick={() => {
+                            props.updateSelectedButtons((next) => {
+                              next.buttons[selectedButtonIndex] =
+                                resetButtonToDefaults(
+                                  next.buttons[selectedButtonIndex],
+                                  next.defaultbuttons,
+                                );
+                            });
+                          }}
+                        >
+                          {t("resetToDefault")}
+                        </Button>
+                      )
+                    }
                   >
                     {selectedButtonIndex !== null && (
-                      <Stack gap="xs">
+                      <>
+                        <Title
+                          order={5}
+                          size="xs"
+                          className="button-settings-group-title selected-button-layout-title"
+                        >
+                          {t("buttonLayoutAndSize")}
+                        </Title>
+                        <Title
+                          order={5}
+                          size="xs"
+                          className="button-settings-group-title selected-button-appearance-title"
+                        >
+                          {t("buttonAppearance")}
+                        </Title>
+                        <Title
+                          order={5}
+                          size="xs"
+                          className="button-settings-group-title selected-button-text-title"
+                        >
+                          {t("buttonText")}
+                        </Title>
+                      </>
+                    )}
+                    {selectedButtonIndex !== null && (
+                      <Stack gap="xs" className="selected-button-fields">
                         <TextInput
                           size="xs"
                           label={t("buttonText")}
+                          className="selected-button-text-control"
                           value={
                             layout.buttons[selectedButtonIndex]?.text ?? ""
                           }
@@ -495,7 +541,7 @@ export function ButtonSettingsPanel(
                             })
                           }
                         />
-                        <div className="control row">
+                        <div className="control row selected-button-text-control">
                           <ColorInput
                             label={t("textColor")}
                             description={
@@ -542,7 +588,10 @@ export function ButtonSettingsPanel(
                             }
                           />
                         </div>
-                        <Group gap="xs">
+                        <Group
+                          gap="xs"
+                          className="selected-button-text-control"
+                        >
                           <Switch
                             size="sm"
                             label={t("textBold")}
@@ -589,7 +638,11 @@ export function ButtonSettingsPanel(
                             }
                           />
                         </Group>
-                        <Group gap="xs" align="end">
+                        <Group
+                          gap="xs"
+                          align="end"
+                          className="selected-button-text-control"
+                        >
                           <Switch
                             size="sm"
                             label={t("textOutline")}
@@ -645,22 +698,27 @@ export function ButtonSettingsPanel(
                           )}
                         </Group>
                         {props.selectedButtonIndexes.length === 1 && (
-                          <PositionInputs
-                            x={layout.buttons[selectedButtonIndex]?.x ?? ""}
-                            y={layout.buttons[selectedButtonIndex]?.y ?? ""}
-                            onXChange={(value) =>
-                              updateLayout((next) => {
-                                next.buttons[selectedButtonIndex].x = value;
-                              })
-                            }
-                            onYChange={(value) =>
-                              updateLayout((next) => {
-                                next.buttons[selectedButtonIndex].y = value;
-                              })
-                            }
-                          />
+                          <div className="selected-button-layout-control">
+                            <PositionInputs
+                              x={layout.buttons[selectedButtonIndex]?.x ?? ""}
+                              y={layout.buttons[selectedButtonIndex]?.y ?? ""}
+                              onXChange={(value) =>
+                                updateLayout((next) => {
+                                  next.buttons[selectedButtonIndex].x = value;
+                                })
+                              }
+                              onYChange={(value) =>
+                                updateLayout((next) => {
+                                  next.buttons[selectedButtonIndex].y = value;
+                                })
+                              }
+                            />
+                          </div>
                         )}
-                        <Group gap="xs">
+                        <Group
+                          gap="xs"
+                          className="selected-button-appearance-control"
+                        >
                           <Switch
                             size="sm"
                             label={t("useCssButton")}
@@ -686,40 +744,6 @@ export function ButtonSettingsPanel(
                               })
                             }
                           />
-                          <Button
-                            size="xs"
-                            variant="light"
-                            color="gray"
-                            onClick={() => {
-                              props.updateSelectedButtons((next) => {
-                                next.buttons[selectedButtonIndex] =
-                                  resetButtonToDefaults(
-                                    next.buttons[selectedButtonIndex],
-                                    next.defaultbuttons,
-                                  ); /* {
-                      x: next.buttons[selectedButtonIndex].x,
-                      y: next.buttons[selectedButtonIndex].y,
-                      w: next.defaultbuttons.w,
-                      h: next.defaultbuttons.h,
-                      img: next.defaultbuttons.img,
-                      xp: next.defaultbuttons.xp,
-                      yp: next.defaultbuttons.yp,
-                      wp: next.defaultbuttons.wp,
-                      hp: next.defaultbuttons.hp,
-                      imgp: next.defaultbuttons.imgp,
-                      rotation: next.defaultbuttons.rotation,
-                      useCss: next.defaultbuttons.useCss,
-                      cssColor: next.defaultbuttons.cssColor,
-                      cssPressedColor: next.defaultbuttons.cssPressedColor,
-                      cssTransition: next.defaultbuttons.cssTransition,
-                      cssEasing: next.defaultbuttons.cssEasing,
-                      cssShape: next.defaultbuttons.cssShape,
-                    }; */
-                              });
-                            }}
-                          >
-                            {t("resetToDefault")}
-                          </Button>
                         </Group>
                       </Stack>
                     )}
@@ -727,7 +751,7 @@ export function ButtonSettingsPanel(
                       (layout.buttons[selectedButtonIndex]?.useCss ??
                         layout.defaultbuttons.useCss ??
                         false) && (
-                        <div className="control row">
+                        <div className="control row selected-button-appearance-control">
                           <ColorInput
                             label={t("colorNormal")}
                             description={
@@ -782,7 +806,7 @@ export function ButtonSettingsPanel(
                         false) && (
                         <Stack
                           gap="xs"
-                          className="button-border-color-controls"
+                          className="button-border-color-controls selected-button-appearance-control"
                         >
                           <Switch
                             size="sm"
@@ -837,7 +861,7 @@ export function ButtonSettingsPanel(
                       (layout.buttons[selectedButtonIndex]?.useCss ??
                         layout.defaultbuttons.useCss ??
                         false) && (
-                        <div className="control row">
+                        <div className="control row selected-button-appearance-control">
                           <InheritedSelect
                             size="xs"
                             label={t("buttonShape")}
@@ -896,6 +920,7 @@ export function ButtonSettingsPanel(
                         <InheritedSelect
                           size="xs"
                           label={t("easing")}
+                          className="selected-button-appearance-control"
                           value={layout.buttons[selectedButtonIndex]?.cssEasing}
                           defaultValue={layout.defaultbuttons.cssEasing}
                           fallbackValue="ease"
@@ -927,7 +952,12 @@ export function ButtonSettingsPanel(
                         false
                       ) && (
                         <>
-                          <Group gap="xs" align="end" wrap="nowrap">
+                          <Group
+                            gap="xs"
+                            align="end"
+                            wrap="nowrap"
+                            className="selected-button-appearance-control"
+                          >
                             <InheritedTextInput
                               size="xs"
                               label={t("releasedImage")}
@@ -954,7 +984,12 @@ export function ButtonSettingsPanel(
                               }
                             />
                           </Group>
-                          <Group gap="xs" align="end" wrap="nowrap">
+                          <Group
+                            gap="xs"
+                            align="end"
+                            wrap="nowrap"
+                            className="selected-button-appearance-control"
+                          >
                             <InheritedTextInput
                               size="xs"
                               label={t("pressedImage")}
@@ -984,7 +1019,10 @@ export function ButtonSettingsPanel(
                         </>
                       )}
                     {selectedButtonIndex !== null && (
-                      <>
+                      <Stack
+                        gap="xs"
+                        className="selected-button-layout-control"
+                      >
                         <Text size="xs" fw={600}>
                           {t("releasedSize")}
                         </Text>
@@ -1028,7 +1066,7 @@ export function ButtonSettingsPanel(
                           }
                           placeholder={layout.defaultbuttons.rotation || "0"}
                         />
-                      </>
+                      </Stack>
                     )}
                   </SelectedButtonSettings>
                 ),
