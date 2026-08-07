@@ -999,6 +999,61 @@ test("button text color and size fall back to the defaults, then to a button's o
   );
 });
 
+test("button border color falls back to the default, then to a button's own value", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 2;
+  layout.defaultbuttons.cssBorderColor = "#112233";
+  layout.buttons[1].cssBorderColor = "#aabbcc";
+  const view = renderComponent(
+    <ButtonLayer
+      layout={layout}
+      pressedButtons={[]}
+      editorMode={false}
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      onButtonClick={() => {}}
+      onButtonMouseDown={() => {}}
+    />,
+  );
+
+  const inherited = view.container.querySelector<HTMLElement>("#button0");
+  assert.equal(
+    inherited?.style.getPropertyValue("--button-border-color"),
+    "#112233",
+  );
+  const overridden = view.container.querySelector<HTMLElement>("#button1");
+  assert.equal(
+    overridden?.style.getPropertyValue("--button-border-color"),
+    "#aabbcc",
+  );
+});
+
+test("a matching border follows the button's effective normal color", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 1;
+  layout.defaultbuttons.cssBorderColor = "#112233";
+  layout.buttons[0].cssColor = "#abcdef";
+  layout.buttons[0].cssBorderColor = "#445566";
+  layout.buttons[0].cssBorderMatchesColor = true;
+  const view = renderComponent(
+    <ButtonLayer
+      layout={layout}
+      pressedButtons={[]}
+      editorMode={false}
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      onButtonClick={() => {}}
+      onButtonMouseDown={() => {}}
+    />,
+  );
+
+  const button = view.container.querySelector<HTMLElement>("#button0");
+  assert.equal(
+    button?.style.getPropertyValue("--button-border-color"),
+    "#abcdef",
+  );
+});
+
 test("button text renders bold, italic, and outline styling", () => {
   const layout = createDefaultLayout();
   layout.totalbuttonshow = 1;
@@ -1807,6 +1862,68 @@ test("default text styling controls update the layout defaults", () => {
   assert.equal(updatedLayout?.defaultbuttons.cssTextOutline, true);
 });
 
+test("default button settings toggle matching the normal color", async () => {
+  const layout = createDefaultLayout();
+  layout.defaultbuttons.cssColor = "#123456";
+  delete layout.defaultbuttons.cssBorderColor;
+  let updatedLayout: typeof layout | undefined;
+  const panel = () => (
+    <ButtonSettingsPanel
+      layout={layout}
+      assigningTarget={null}
+      assignmentName=""
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      updateLayout={(update) => {
+        const next = structuredClone(layout);
+        update(next);
+        updatedLayout = next;
+      }}
+      updateSelectedButtons={() => {}}
+      onSelectedButtonChange={() => {}}
+      onAddButton={() => {}}
+      onDeleteSelectedButtons={() => {}}
+      openImagePicker={() => {}}
+      cancelAssignment={() => {}}
+    />
+  );
+  const view = renderComponent(panel());
+  const details = view.container.querySelector("details");
+  assert.ok(details);
+  details.open = true;
+  fireEvent(details, new componentDocument.defaultView.Event("toggle"));
+
+  const matchColor = view.getByRole("switch", {
+    name: "borderMatchesColor",
+  }) as HTMLInputElement;
+  assert.equal(matchColor.checked, true);
+  assert.equal(view.queryByLabelText("borderColor") === null, true);
+
+  fireEvent.click(matchColor);
+  assert.equal(updatedLayout?.defaultbuttons.cssBorderMatchesColor, false);
+  view.unmount();
+  layout.defaultbuttons.cssBorderMatchesColor = false;
+  const customView = renderComponent(panel());
+  const customDetails = customView.container.querySelector("details");
+  assert.ok(customDetails);
+  customDetails.open = true;
+  fireEvent(customDetails, new componentDocument.defaultView.Event("toggle"));
+  const borderColor = customView.getByLabelText(
+    "borderColor",
+  ) as HTMLInputElement;
+  assert.equal(
+    borderColor.parentElement?.parentElement?.classList.contains(
+      "button-border-color-controls",
+    ),
+    true,
+  );
+  assert.equal(borderColor.value, "#123456");
+  fireEvent.change(borderColor, { target: { value: "#abcdef" } });
+  await act(() => new Promise((resolve) => setTimeout(resolve, 250)));
+
+  assert.equal(updatedLayout?.defaultbuttons.cssBorderColor, "#abcdef");
+});
+
 test("single-button settings show and update its coordinates", () => {
   const layout = createDefaultLayout();
   let updatedLayout: typeof layout | undefined;
@@ -2202,9 +2319,11 @@ test("inherited per-button color and mode controls show their effective defaults
   layout.defaultbuttons.useCss = true;
   layout.defaultbuttons.cssColor = "#123456";
   layout.defaultbuttons.cssPressedColor = "#654321";
+  layout.defaultbuttons.cssBorderColor = "#112233";
   delete layout.buttons[0].useCss;
   delete layout.buttons[0].cssColor;
   delete layout.buttons[0].cssPressedColor;
+  delete layout.buttons[0].cssBorderColor;
   const { selectedSettings } = renderSelectedButtonSettings(layout);
 
   const mode = within(selectedSettings).getByRole("switch", {
@@ -2216,6 +2335,7 @@ test("inherited per-button color and mode controls show their effective defaults
   for (const [name, value] of [
     ["colorNormal", "#123456"],
     ["colorPressed", "#654321"],
+    ["borderColor", "#112233"],
   ]) {
     const input = within(selectedSettings).getByLabelText(name);
     assert.equal((input as HTMLInputElement).value, value);
@@ -2225,6 +2345,34 @@ test("inherited per-button color and mode controls show their effective defaults
     assert.equal(description?.textContent, "inheritDefault");
     assert.equal(description?.style.color, "var(--mantine-color-dimmed)");
   }
+});
+
+test("selected button settings can match the border to its normal color", () => {
+  const layout = createDefaultLayout();
+  layout.defaultbuttons.cssBorderMatchesColor = false;
+  delete layout.buttons[0].useCss;
+  layout.buttons[0].cssBorderMatchesColor = true;
+  let updatedLayout: typeof layout | undefined;
+  const { selectedSettings } = renderSelectedButtonSettings(
+    layout,
+    (update) => {
+      const next = structuredClone(layout);
+      update(next);
+      updatedLayout = next;
+    },
+  );
+
+  const matchColor = within(selectedSettings).getByRole("switch", {
+    name: "borderMatchesColor",
+  }) as HTMLInputElement;
+  assert.equal(matchColor.checked, true);
+  assert.equal(
+    within(selectedSettings).queryByLabelText("borderColor") === null,
+    true,
+  );
+
+  fireEvent.click(matchColor);
+  assert.equal(updatedLayout?.buttons[0].cssBorderMatchesColor, false);
 });
 
 test("button settings explain how to open per-button settings when unselected", () => {

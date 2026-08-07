@@ -40,6 +40,15 @@ function buttonStyle(
   const cssColor = button.cssColor ?? defaultButton.cssColor ?? "#cccccc";
   const cssPressedColor =
     button.cssPressedColor ?? defaultButton.cssPressedColor ?? "#999999";
+  const defaultBorderMatchesColor =
+    defaultButton.cssBorderMatchesColor ??
+    defaultButton.cssBorderColor === undefined;
+  const borderMatchesColor =
+    button.cssBorderMatchesColor ??
+    (button.cssBorderColor === undefined ? defaultBorderMatchesColor : false);
+  const cssBorderColor = borderMatchesColor
+    ? cssColor
+    : (button.cssBorderColor ?? defaultButton.cssBorderColor ?? cssColor);
   const cssTransition =
     button.cssTransition ?? defaultButton.cssTransition ?? "0.02";
   const cssEasing = button.cssEasing ?? defaultButton.cssEasing ?? "ease";
@@ -66,6 +75,7 @@ function buttonStyle(
     width: `${releasedWidth || defaultButton.w || "60"}px`,
     height: `${releasedHeight || defaultButton.h || "60"}px`,
     "--button-color": pressed ? cssPressedColor : cssColor,
+    "--button-border-color": cssBorderColor,
     "--button-shadow-color": pressed
       ? "rgba(0, 0, 0, 0.4)"
       : "rgba(0, 0, 0, 0.2)",

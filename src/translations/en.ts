@@ -66,6 +66,8 @@ export const enTranslation = {
   stickKnobShaft: "Lever Ball",
   colorNormal: "Normal",
   colorPressed: "Pressed",
+  borderColor: "Border color",
+  borderMatchesColor: "Match border color to normal color",
   buttonShape: "Shape",
   shapeCircle: "Circle",
   shapePill: "Pill",

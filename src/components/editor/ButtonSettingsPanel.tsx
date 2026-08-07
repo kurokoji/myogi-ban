@@ -60,6 +60,18 @@ export function ButtonSettingsPanel(
 ): React.ReactElement {
   const { t } = useTranslation();
   const { layout, selectedButtonIndex, updateLayout } = props;
+  const defaultBorderMatchesColor =
+    layout.defaultbuttons.cssBorderMatchesColor ??
+    layout.defaultbuttons.cssBorderColor === undefined;
+  const selectedButton =
+    selectedButtonIndex === null
+      ? undefined
+      : layout.buttons[selectedButtonIndex];
+  const selectedBorderMatchesColor =
+    selectedButton?.cssBorderMatchesColor ??
+    (selectedButton?.cssBorderColor === undefined
+      ? defaultBorderMatchesColor
+      : false);
 
   return (
     <Paper className="panel" withBorder>
@@ -156,6 +168,37 @@ export function ButtonSettingsPanel(
                           }
                         />
                       </div>
+                    )}
+                    {layout.defaultbuttons.useCss && (
+                      <Stack gap="xs" className="button-border-color-controls">
+                        <Switch
+                          size="sm"
+                          label={t("borderMatchesColor")}
+                          checked={defaultBorderMatchesColor}
+                          onChange={(event) =>
+                            updateLayout((next) => {
+                              next.defaultbuttons.cssBorderMatchesColor =
+                                event.target.checked;
+                            })
+                          }
+                        />
+                        {!defaultBorderMatchesColor && (
+                          <ColorInput
+                            label={t("borderColor")}
+                            value={
+                              layout.defaultbuttons.cssBorderColor ||
+                              layout.defaultbuttons.cssColor ||
+                              "#cccccc"
+                            }
+                            onChange={(event) =>
+                              updateLayout((next) => {
+                                next.defaultbuttons.cssBorderColor =
+                                  event.target.value;
+                              })
+                            }
+                          />
+                        )}
+                      </Stack>
                     )}
                     {layout.defaultbuttons.useCss && (
                       <div className="control row">
@@ -732,6 +775,63 @@ export function ButtonSettingsPanel(
                             }
                           />
                         </div>
+                      )}
+                    {selectedButtonIndex !== null &&
+                      (layout.buttons[selectedButtonIndex]?.useCss ??
+                        layout.defaultbuttons.useCss ??
+                        false) && (
+                        <Stack
+                          gap="xs"
+                          className="button-border-color-controls"
+                        >
+                          <Switch
+                            size="sm"
+                            label={t("borderMatchesColor")}
+                            description={
+                              layout.buttons[selectedButtonIndex]
+                                ?.cssBorderMatchesColor === undefined
+                                ? t("inheritDefault")
+                                : undefined
+                            }
+                            checked={selectedBorderMatchesColor}
+                            onChange={(event) =>
+                              props.updateSelectedButtons((next) => {
+                                next.buttons[
+                                  selectedButtonIndex
+                                ].cssBorderMatchesColor = event.target.checked;
+                              })
+                            }
+                          />
+                          {!selectedBorderMatchesColor && (
+                            <ColorInput
+                              label={t("borderColor")}
+                              description={
+                                !layout.buttons[selectedButtonIndex]
+                                  ?.cssBorderColor ||
+                                layout.buttons[selectedButtonIndex]
+                                  ?.cssBorderColor ===
+                                  layout.defaultbuttons.cssBorderColor
+                                  ? t("inheritDefault")
+                                  : undefined
+                              }
+                              value={
+                                layout.buttons[selectedButtonIndex]
+                                  ?.cssBorderColor ||
+                                layout.defaultbuttons.cssBorderColor ||
+                                layout.buttons[selectedButtonIndex]?.cssColor ||
+                                layout.defaultbuttons.cssColor ||
+                                "#cccccc"
+                              }
+                              onChange={(event) =>
+                                props.updateSelectedButtons((next) => {
+                                  next.buttons[
+                                    selectedButtonIndex
+                                  ].cssBorderColor = event.target.value;
+                                })
+                              }
+                            />
+                          )}
+                        </Stack>
                       )}
                     {selectedButtonIndex !== null &&
                       (layout.buttons[selectedButtonIndex]?.useCss ??

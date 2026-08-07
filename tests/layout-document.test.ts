@@ -81,6 +81,34 @@ test("layout documents round trip button text, color, and size", () => {
   assert.equal(restored.buttons[0].cssTextSize, "32");
 });
 
+test("layout documents round trip default and per-button border colors", () => {
+  const source = createDefaultLayout();
+  source.defaultbuttons.cssBorderColor = "#112233";
+  source.buttons[0].cssBorderColor = "#aabbcc";
+
+  const document = serializeLayoutDocument(source);
+  assert.equal(document.buttonDefaults.borderColor, "#112233");
+  assert.equal(document.buttons[0]?.borderColor, "#aabbcc");
+
+  const restored = deserializeLayoutDocument(document);
+  assert.equal(restored.defaultbuttons.cssBorderColor, "#112233");
+  assert.equal(restored.buttons[0].cssBorderColor, "#aabbcc");
+});
+
+test("layout documents round trip whether borders match normal colors", () => {
+  const source = createDefaultLayout();
+  source.defaultbuttons.cssBorderMatchesColor = false;
+  source.buttons[0].cssBorderMatchesColor = true;
+
+  const document = serializeLayoutDocument(source);
+  assert.equal(document.buttonDefaults.borderMatchesColor, false);
+  assert.equal(document.buttons[0]?.borderMatchesColor, true);
+
+  const restored = deserializeLayoutDocument(document);
+  assert.equal(restored.defaultbuttons.cssBorderMatchesColor, false);
+  assert.equal(restored.buttons[0].cssBorderMatchesColor, true);
+});
+
 test("layout documents round trip bold, italic, and outline text styling", () => {
   const source = createDefaultLayout();
   source.buttons[0].text = "P1";

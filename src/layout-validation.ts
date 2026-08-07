@@ -26,6 +26,7 @@ const buttonStrings = [
   "rotation",
   "cssColor",
   "cssPressedColor",
+  "cssBorderColor",
   "cssTransition",
   "cssEasing",
   "text",
@@ -35,6 +36,7 @@ const buttonStrings = [
 ];
 const buttonBooleans = [
   "useCss",
+  "cssBorderMatchesColor",
   "cssTextBold",
   "cssTextItalic",
   "cssTextOutline",

@@ -32,6 +32,8 @@ interface ButtonDocument {
   useCss?: boolean;
   color?: string;
   pressedColor?: string;
+  borderColor?: string;
+  borderMatchesColor?: boolean;
   transitionSeconds?: number;
   easing?: string;
   shape?: ButtonShape;
@@ -121,6 +123,7 @@ function validButton(value: unknown): boolean {
       "pressedImage",
       "color",
       "pressedColor",
+      "borderColor",
       "easing",
       "text",
       "textColor",
@@ -130,6 +133,7 @@ function validButton(value: unknown): boolean {
       hasOptionalType(value, key, "number"),
     ) &&
     hasOptionalType(value, "useCss", "boolean") &&
+    hasOptionalType(value, "borderMatchesColor", "boolean") &&
     hasOptionalType(value, "bold", "boolean") &&
     hasOptionalType(value, "italic", "boolean") &&
     hasOptionalType(value, "outline", "boolean") &&
@@ -201,6 +205,8 @@ function buttonDocument(button: ButtonLayout): ButtonDocument {
     useCss: button.useCss,
     color: button.cssColor,
     pressedColor: button.cssPressedColor,
+    borderColor: button.cssBorderColor,
+    borderMatchesColor: button.cssBorderMatchesColor,
     transitionSeconds: numeric(button.cssTransition),
     easing: button.cssEasing,
     shape: button.cssShape,
@@ -227,6 +233,8 @@ function buttonOverrideDocument(
     "useCss",
     "color",
     "pressedColor",
+    "borderColor",
+    "borderMatchesColor",
     "transitionSeconds",
     "easing",
     "shape",
@@ -306,6 +314,8 @@ function runtimeButton(button: ButtonDocument): ButtonLayout {
     useCss: button.useCss,
     cssColor: button.color,
     cssPressedColor: button.pressedColor,
+    cssBorderColor: button.borderColor,
+    cssBorderMatchesColor: button.borderMatchesColor,
     cssTransition:
       button.transitionSeconds === undefined
         ? undefined

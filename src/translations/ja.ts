@@ -64,6 +64,8 @@ export const jaTranslation = {
   stickKnobShaft: "レバーボール",
   colorNormal: "通常色",
   colorPressed: "押下時色",
+  borderColor: "枠の色",
+  borderMatchesColor: "枠の色を通常色と同じにする",
   buttonShape: "形状",
   shapeCircle: "丸",
   shapePill: "カプセル",
