@@ -1,0 +1,4 @@
+interface:
+  display_name: "GitHub CLI"
+  short_description: "Handle repository PRs, issues, and CI checks"
+  default_prompt: "Use $gh to inspect this repository on GitHub."
