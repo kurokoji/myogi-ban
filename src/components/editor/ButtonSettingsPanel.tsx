@@ -5,9 +5,7 @@ import {
   NumberInput,
   Paper,
   Stack,
-  Switch,
   Text,
-  TextInput,
   Title,
 } from "@mantine/core";
 import { useTranslation } from "react-i18next";
@@ -20,24 +18,21 @@ import {
   isStickAssignmentTarget,
   numericValue,
 } from "../../editor-helpers";
-import type { ButtonShape, Layout } from "../../types";
-import { ButtonBorderColorControls } from "./ButtonBorderColorControls";
+import type { Layout } from "../../types";
 import {
   ButtonAdvancedSettings,
   DefaultButtonSettings,
   SelectedButtonSettings,
 } from "./ButtonSettingsSections";
-import { ColorInput } from "./EditorInputs";
-import { ImageSelectButton } from "./ImageSelectButton";
-import {
-  InheritedNumberInput,
-  InheritedSelect,
-  InheritedTextInput,
-} from "./InheritedInputs";
+import { DefaultButtonAppearanceSettings } from "./DefaultButtonAppearanceSettings";
+import { DefaultButtonTextSettings } from "./DefaultButtonTextSettings";
+import { InheritedNumberInput } from "./InheritedInputs";
 import { InheritedSizeInputs } from "./InheritedSizeInputs";
 import { InspectorTabs } from "./InspectorTabs";
 import { LinkedSizeInputs } from "./LinkedSizeInputs";
 import { PositionInputs } from "./PositionInputs";
+import { SelectedButtonAppearanceSettings } from "./SelectedButtonAppearanceSettings";
+import { SelectedButtonTextSettings } from "./SelectedButtonTextSettings";
 
 interface ButtonSettingsPanelProps {
   layout: Layout;
@@ -61,18 +56,6 @@ export function ButtonSettingsPanel(
 ): React.ReactElement {
   const { t } = useTranslation();
   const { layout, selectedButtonIndex, updateLayout } = props;
-  const defaultBorderMatchesColor =
-    layout.defaultbuttons.cssBorderMatchesColor ??
-    layout.defaultbuttons.cssBorderColor === undefined;
-  const selectedButton =
-    selectedButtonIndex === null
-      ? undefined
-      : layout.buttons[selectedButtonIndex];
-  const selectedBorderMatchesColor =
-    selectedButton?.cssBorderMatchesColor ??
-    (selectedButton?.cssBorderColor === undefined
-      ? defaultBorderMatchesColor
-      : false);
 
   return (
     <Paper className="panel" withBorder>
@@ -156,199 +139,11 @@ export function ButtonSettingsPanel(
                     >
                       {t("buttonText")}
                     </Title>
-                    <Switch
-                      size="sm"
-                      label={t("useCssButton")}
-                      className="default-button-appearance-control"
-                      checked={!(layout.defaultbuttons.useCss ?? false)}
-                      onChange={(event) =>
-                        updateLayout((next) => {
-                          next.defaultbuttons.useCss = !event.target.checked;
-                        })
-                      }
+                    <DefaultButtonAppearanceSettings
+                      layout={layout}
+                      updateLayout={updateLayout}
+                      openImagePicker={props.openImagePicker}
                     />
-                    {layout.defaultbuttons.useCss && (
-                      <div className="control row default-button-appearance-control">
-                        <ColorInput
-                          label={t("colorNormal")}
-                          value={layout.defaultbuttons.cssColor || "#cccccc"}
-                          onChange={(event) =>
-                            updateLayout((next) => {
-                              next.defaultbuttons.cssColor = event.target.value;
-                            })
-                          }
-                        />
-                        <ColorInput
-                          label={t("colorPressed")}
-                          value={
-                            layout.defaultbuttons.cssPressedColor || "#999999"
-                          }
-                          onChange={(event) =>
-                            updateLayout((next) => {
-                              next.defaultbuttons.cssPressedColor =
-                                event.target.value;
-                            })
-                          }
-                        />
-                      </div>
-                    )}
-                    {layout.defaultbuttons.useCss && (
-                      <ButtonBorderColorControls
-                        className="default-button-appearance-control"
-                        matchesColor={defaultBorderMatchesColor}
-                        borderColor={
-                          layout.defaultbuttons.cssBorderColor ||
-                          layout.defaultbuttons.cssColor ||
-                          "#cccccc"
-                        }
-                        pressedBorderColor={
-                          layout.defaultbuttons.cssPressedBorderColor ||
-                          layout.defaultbuttons.cssPressedColor ||
-                          "#999999"
-                        }
-                        onMatchesColorChange={(matches) =>
-                          updateLayout((next) => {
-                            next.defaultbuttons.cssBorderMatchesColor = matches;
-                          })
-                        }
-                        onBorderColorChange={(color) =>
-                          updateLayout((next) => {
-                            next.defaultbuttons.cssBorderColor = color;
-                          })
-                        }
-                        onPressedBorderColorChange={(color) =>
-                          updateLayout((next) => {
-                            next.defaultbuttons.cssPressedBorderColor = color;
-                          })
-                        }
-                      />
-                    )}
-                    {layout.defaultbuttons.useCss && (
-                      <div className="control row default-button-appearance-control">
-                        <NativeSelect
-                          size="xs"
-                          label={t("buttonShape")}
-                          value={layout.defaultbuttons.cssShape || "circle"}
-                          onChange={(event) =>
-                            updateLayout((next) => {
-                              const previousShape =
-                                next.defaultbuttons.cssShape ?? "circle";
-                              next.defaultbuttons.cssShape = event.target
-                                .value as ButtonShape;
-                              for (const button of next.buttons) {
-                                if (
-                                  (button.cssShape ?? previousShape) ===
-                                  previousShape
-                                ) {
-                                  delete button.cssShape;
-                                }
-                              }
-                            })
-                          }
-                          data={[
-                            { value: "circle", label: t("shapeCircle") },
-                            { value: "pill", label: t("shapePill") },
-                            { value: "rounded", label: t("shapeRounded") },
-                            { value: "square", label: t("shapeSquare") },
-                          ]}
-                        />
-                        <NumberInput
-                          size="xs"
-                          label={t("transition")}
-                          min={0}
-                          max={1}
-                          step={0.01}
-                          value={parseFloat(
-                            layout.defaultbuttons.cssTransition || "0.02",
-                          )}
-                          onChange={(value) =>
-                            updateLayout((next) => {
-                              next.defaultbuttons.cssTransition = String(
-                                value ?? 0.02,
-                              );
-                            })
-                          }
-                        />
-                      </div>
-                    )}
-                    {layout.defaultbuttons.useCss && (
-                      <NativeSelect
-                        size="xs"
-                        label={t("easing")}
-                        className="default-button-appearance-control"
-                        value={layout.defaultbuttons.cssEasing || "ease"}
-                        onChange={(event) =>
-                          updateLayout((next) => {
-                            next.defaultbuttons.cssEasing = event.target.value;
-                          })
-                        }
-                        data={[
-                          { value: "ease", label: "ease" },
-                          { value: "linear", label: "linear" },
-                          { value: "ease-in", label: "ease-in" },
-                          { value: "ease-out", label: "ease-out" },
-                          { value: "ease-in-out", label: "ease-in-out" },
-                        ]}
-                      />
-                    )}
-                    {!layout.defaultbuttons.useCss && (
-                      <>
-                        <Group
-                          gap="xs"
-                          align="end"
-                          wrap="nowrap"
-                          className="default-button-appearance-control"
-                        >
-                          <TextInput
-                            size="xs"
-                            label={t("defaultReleasedImage")}
-                            value={layout.defaultbuttons.img}
-                            onChange={(event) =>
-                              updateLayout((next) => {
-                                next.defaultbuttons.img = event.target.value;
-                              })
-                            }
-                            placeholder="released.png"
-                            className="grow"
-                          />
-                          <ImageSelectButton
-                            onClick={() =>
-                              props.openImagePicker({
-                                type: "defaultButton",
-                                state: "released",
-                              })
-                            }
-                          />
-                        </Group>
-                        <Group
-                          gap="xs"
-                          align="end"
-                          wrap="nowrap"
-                          className="default-button-appearance-control"
-                        >
-                          <TextInput
-                            size="xs"
-                            label={t("defaultPressedImage")}
-                            value={layout.defaultbuttons.imgp}
-                            onChange={(event) =>
-                              updateLayout((next) => {
-                                next.defaultbuttons.imgp = event.target.value;
-                              })
-                            }
-                            placeholder="pressed.png"
-                            className="grow"
-                          />
-                          <ImageSelectButton
-                            onClick={() =>
-                              props.openImagePicker({
-                                type: "defaultButton",
-                                state: "pressed",
-                              })
-                            }
-                          />
-                        </Group>
-                      </>
-                    )}
                     <Stack gap="xs" className="default-button-layout-control">
                       <LinkedSizeInputs
                         width={layout.defaultbuttons.w}
@@ -390,91 +185,10 @@ export function ButtonSettingsPanel(
                         }
                       />
                     </Stack>
-                    <div className="control row default-button-text-control">
-                      <ColorInput
-                        label={t("textColor")}
-                        value={layout.defaultbuttons.cssTextColor || "#ffffff"}
-                        onChange={(event) =>
-                          updateLayout((next) => {
-                            next.defaultbuttons.cssTextColor =
-                              event.target.value;
-                          })
-                        }
-                      />
-                      <NumberInput
-                        size="xs"
-                        label={t("textSize")}
-                        min={1}
-                        max={200}
-                        step={1}
-                        value={numericValue(
-                          layout.defaultbuttons.cssTextSize || "14",
-                        )}
-                        onChange={(value) =>
-                          updateLayout((next) => {
-                            next.defaultbuttons.cssTextSize = String(
-                              value ?? 14,
-                            );
-                          })
-                        }
-                      />
-                    </div>
-                    <Group gap="xs" className="default-button-text-control">
-                      <Switch
-                        size="sm"
-                        label={t("textBold")}
-                        checked={layout.defaultbuttons.cssTextBold ?? false}
-                        onChange={(event) =>
-                          updateLayout((next) => {
-                            next.defaultbuttons.cssTextBold =
-                              event.target.checked;
-                          })
-                        }
-                      />
-                      <Switch
-                        size="sm"
-                        label={t("textItalic")}
-                        checked={layout.defaultbuttons.cssTextItalic ?? false}
-                        onChange={(event) =>
-                          updateLayout((next) => {
-                            next.defaultbuttons.cssTextItalic =
-                              event.target.checked;
-                          })
-                        }
-                      />
-                    </Group>
-                    <Group
-                      gap="xs"
-                      align="end"
-                      className="default-button-text-control"
-                    >
-                      <Switch
-                        size="sm"
-                        label={t("textOutline")}
-                        checked={layout.defaultbuttons.cssTextOutline ?? false}
-                        onChange={(event) =>
-                          updateLayout((next) => {
-                            next.defaultbuttons.cssTextOutline =
-                              event.target.checked;
-                          })
-                        }
-                      />
-                      {layout.defaultbuttons.cssTextOutline && (
-                        <ColorInput
-                          label={t("textOutlineColor")}
-                          value={
-                            layout.defaultbuttons.cssTextOutlineColor ||
-                            "#000000"
-                          }
-                          onChange={(event) =>
-                            updateLayout((next) => {
-                              next.defaultbuttons.cssTextOutlineColor =
-                                event.target.value;
-                            })
-                          }
-                        />
-                      )}
-                    </Group>
+                    <DefaultButtonTextSettings
+                      layout={layout}
+                      updateLayout={updateLayout}
+                    />
                     <Button
                       size="xs"
                       variant="light"
@@ -562,176 +276,11 @@ export function ButtonSettingsPanel(
                     )}
                     {selectedButtonIndex !== null && (
                       <Stack gap="xs" className="selected-button-fields">
-                        <TextInput
-                          size="xs"
-                          label={t("buttonText")}
-                          className="selected-button-text-control"
-                          value={
-                            layout.buttons[selectedButtonIndex]?.text ?? ""
-                          }
-                          onChange={(event) =>
-                            props.updateSelectedButtons((next) => {
-                              next.buttons[selectedButtonIndex].text =
-                                event.target.value;
-                            })
-                          }
+                        <SelectedButtonTextSettings
+                          layout={layout}
+                          index={selectedButtonIndex}
+                          updateSelectedButtons={props.updateSelectedButtons}
                         />
-                        <div className="control row selected-button-text-control">
-                          <ColorInput
-                            label={t("textColor")}
-                            description={
-                              !layout.buttons[selectedButtonIndex]
-                                ?.cssTextColor ||
-                              layout.buttons[selectedButtonIndex]
-                                ?.cssTextColor ===
-                                layout.defaultbuttons.cssTextColor
-                                ? t("inheritDefault")
-                                : undefined
-                            }
-                            value={
-                              layout.buttons[selectedButtonIndex]
-                                ?.cssTextColor ||
-                              layout.defaultbuttons.cssTextColor ||
-                              "#ffffff"
-                            }
-                            onChange={(event) =>
-                              props.updateSelectedButtons((next) => {
-                                next.buttons[selectedButtonIndex].cssTextColor =
-                                  event.target.value;
-                              })
-                            }
-                          />
-                          <InheritedNumberInput
-                            size="xs"
-                            label={t("textSize")}
-                            min={1}
-                            max={200}
-                            step={1}
-                            value={
-                              layout.buttons[selectedButtonIndex]?.cssTextSize
-                            }
-                            defaultValue={layout.defaultbuttons.cssTextSize}
-                            fallbackValue="14"
-                            onChange={(value) =>
-                              props.updateSelectedButtons((next) => {
-                                next.buttons[selectedButtonIndex].cssTextSize =
-                                  String(value ?? 14);
-                              })
-                            }
-                            placeholder={
-                              layout.defaultbuttons.cssTextSize || "14"
-                            }
-                          />
-                        </div>
-                        <Group
-                          gap="xs"
-                          className="selected-button-text-control"
-                        >
-                          <Switch
-                            size="sm"
-                            label={t("textBold")}
-                            description={
-                              layout.buttons[selectedButtonIndex]
-                                ?.cssTextBold === undefined
-                                ? t("inheritDefault")
-                                : undefined
-                            }
-                            checked={
-                              layout.buttons[selectedButtonIndex]
-                                ?.cssTextBold ??
-                              layout.defaultbuttons.cssTextBold ??
-                              false
-                            }
-                            onChange={(event) =>
-                              props.updateSelectedButtons((next) => {
-                                next.buttons[selectedButtonIndex].cssTextBold =
-                                  event.target.checked;
-                              })
-                            }
-                          />
-                          <Switch
-                            size="sm"
-                            label={t("textItalic")}
-                            description={
-                              layout.buttons[selectedButtonIndex]
-                                ?.cssTextItalic === undefined
-                                ? t("inheritDefault")
-                                : undefined
-                            }
-                            checked={
-                              layout.buttons[selectedButtonIndex]
-                                ?.cssTextItalic ??
-                              layout.defaultbuttons.cssTextItalic ??
-                              false
-                            }
-                            onChange={(event) =>
-                              props.updateSelectedButtons((next) => {
-                                next.buttons[
-                                  selectedButtonIndex
-                                ].cssTextItalic = event.target.checked;
-                              })
-                            }
-                          />
-                        </Group>
-                        <Group
-                          gap="xs"
-                          align="end"
-                          className="selected-button-text-control"
-                        >
-                          <Switch
-                            size="sm"
-                            label={t("textOutline")}
-                            description={
-                              layout.buttons[selectedButtonIndex]
-                                ?.cssTextOutline === undefined
-                                ? t("inheritDefault")
-                                : undefined
-                            }
-                            checked={
-                              layout.buttons[selectedButtonIndex]
-                                ?.cssTextOutline ??
-                              layout.defaultbuttons.cssTextOutline ??
-                              false
-                            }
-                            onChange={(event) =>
-                              props.updateSelectedButtons((next) => {
-                                next.buttons[
-                                  selectedButtonIndex
-                                ].cssTextOutline = event.target.checked;
-                              })
-                            }
-                          />
-                          {(layout.buttons[selectedButtonIndex]
-                            ?.cssTextOutline ??
-                            layout.defaultbuttons.cssTextOutline ??
-                            false) && (
-                            <ColorInput
-                              label={t("textOutlineColor")}
-                              description={
-                                !layout.buttons[selectedButtonIndex]
-                                  ?.cssTextOutlineColor ||
-                                layout.buttons[selectedButtonIndex]
-                                  ?.cssTextOutlineColor ===
-                                  layout.defaultbuttons.cssTextOutlineColor
-                                  ? t("inheritDefault")
-                                  : undefined
-                              }
-                              value={
-                                layout.buttons[selectedButtonIndex]
-                                  ?.cssTextOutlineColor ||
-                                layout.defaultbuttons.cssTextOutlineColor ||
-                                "#000000"
-                              }
-                              onChange={(event) =>
-                                props.updateSelectedButtons((next) => {
-                                  next.buttons[
-                                    selectedButtonIndex
-                                  ].cssTextOutlineColor = event.target.value;
-                                })
-                              }
-                            />
-                          )}
-                        </Group>
                         {props.selectedButtonIndexes.length === 1 && (
                           <div className="selected-button-layout-control">
                             <PositionInputs
@@ -750,322 +299,17 @@ export function ButtonSettingsPanel(
                             />
                           </div>
                         )}
-                        <Group
-                          gap="xs"
-                          className="selected-button-appearance-control"
-                        >
-                          <Switch
-                            size="sm"
-                            label={t("useCssButton")}
-                            description={
-                              layout.buttons[selectedButtonIndex]?.useCss ===
-                                undefined ||
-                              layout.buttons[selectedButtonIndex]?.useCss ===
-                                layout.defaultbuttons.useCss
-                                ? t("inheritDefault")
-                                : undefined
-                            }
-                            checked={
-                              !(
-                                layout.buttons[selectedButtonIndex]?.useCss ??
-                                layout.defaultbuttons.useCss ??
-                                false
-                              )
-                            }
-                            onChange={(event) =>
-                              props.updateSelectedButtons((next) => {
-                                next.buttons[selectedButtonIndex].useCss =
-                                  !event.target.checked;
-                              })
-                            }
-                          />
-                        </Group>
                       </Stack>
                     )}
-                    {selectedButtonIndex !== null &&
-                      (layout.buttons[selectedButtonIndex]?.useCss ??
-                        layout.defaultbuttons.useCss ??
-                        false) && (
-                        <div className="control row selected-button-appearance-control">
-                          <ColorInput
-                            label={t("colorNormal")}
-                            description={
-                              !layout.buttons[selectedButtonIndex]?.cssColor ||
-                              layout.buttons[selectedButtonIndex]?.cssColor ===
-                                layout.defaultbuttons.cssColor
-                                ? t("inheritDefault")
-                                : undefined
-                            }
-                            value={
-                              layout.buttons[selectedButtonIndex]?.cssColor ||
-                              layout.defaultbuttons.cssColor ||
-                              "#cccccc"
-                            }
-                            onChange={(event) =>
-                              props.updateSelectedButtons((next) => {
-                                next.buttons[selectedButtonIndex].cssColor =
-                                  event.target.value;
-                              })
-                            }
-                          />
-                          <ColorInput
-                            label={t("colorPressed")}
-                            description={
-                              !layout.buttons[selectedButtonIndex]
-                                ?.cssPressedColor ||
-                              layout.buttons[selectedButtonIndex]
-                                ?.cssPressedColor ===
-                                layout.defaultbuttons.cssPressedColor
-                                ? t("inheritDefault")
-                                : undefined
-                            }
-                            value={
-                              layout.buttons[selectedButtonIndex]
-                                ?.cssPressedColor ||
-                              layout.defaultbuttons.cssPressedColor ||
-                              "#999999"
-                            }
-                            onChange={(event) =>
-                              props.updateSelectedButtons((next) => {
-                                next.buttons[
-                                  selectedButtonIndex
-                                ].cssPressedColor = event.target.value;
-                              })
-                            }
-                          />
-                        </div>
-                      )}
-                    {selectedButtonIndex !== null &&
-                      (layout.buttons[selectedButtonIndex]?.useCss ??
-                        layout.defaultbuttons.useCss ??
-                        false) && (
-                        <ButtonBorderColorControls
-                          className="selected-button-appearance-control"
-                          matchesColor={selectedBorderMatchesColor}
-                          matchesColorDescription={
-                            layout.buttons[selectedButtonIndex]
-                              ?.cssBorderMatchesColor === undefined
-                              ? t("inheritDefault")
-                              : undefined
-                          }
-                          borderColor={
-                            layout.buttons[selectedButtonIndex]
-                              ?.cssBorderColor ||
-                            layout.defaultbuttons.cssBorderColor ||
-                            layout.buttons[selectedButtonIndex]?.cssColor ||
-                            layout.defaultbuttons.cssColor ||
-                            "#cccccc"
-                          }
-                          borderColorDescription={
-                            !layout.buttons[selectedButtonIndex]
-                              ?.cssBorderColor ||
-                            layout.buttons[selectedButtonIndex]
-                              ?.cssBorderColor ===
-                              layout.defaultbuttons.cssBorderColor
-                              ? t("inheritDefault")
-                              : undefined
-                          }
-                          pressedBorderColor={
-                            layout.buttons[selectedButtonIndex]
-                              ?.cssPressedBorderColor ||
-                            layout.defaultbuttons.cssPressedBorderColor ||
-                            layout.buttons[selectedButtonIndex]
-                              ?.cssPressedColor ||
-                            layout.defaultbuttons.cssPressedColor ||
-                            "#999999"
-                          }
-                          pressedBorderColorDescription={
-                            !layout.buttons[selectedButtonIndex]
-                              ?.cssPressedBorderColor ||
-                            layout.buttons[selectedButtonIndex]
-                              ?.cssPressedBorderColor ===
-                              layout.defaultbuttons.cssPressedBorderColor
-                              ? t("inheritDefault")
-                              : undefined
-                          }
-                          onMatchesColorChange={(matches) =>
-                            props.updateSelectedButtons((next) => {
-                              next.buttons[
-                                selectedButtonIndex
-                              ].cssBorderMatchesColor = matches;
-                            })
-                          }
-                          onBorderColorChange={(color) =>
-                            props.updateSelectedButtons((next) => {
-                              next.buttons[selectedButtonIndex].cssBorderColor =
-                                color;
-                            })
-                          }
-                          onPressedBorderColorChange={(color) =>
-                            props.updateSelectedButtons((next) => {
-                              next.buttons[
-                                selectedButtonIndex
-                              ].cssPressedBorderColor = color;
-                            })
-                          }
-                        />
-                      )}
-                    {selectedButtonIndex !== null &&
-                      (layout.buttons[selectedButtonIndex]?.useCss ??
-                        layout.defaultbuttons.useCss ??
-                        false) && (
-                        <div className="control row selected-button-appearance-control">
-                          <InheritedSelect
-                            size="xs"
-                            label={t("buttonShape")}
-                            value={
-                              layout.buttons[selectedButtonIndex]?.cssShape
-                            }
-                            defaultValue={layout.defaultbuttons.cssShape}
-                            fallbackValue="circle"
-                            onChange={(event) =>
-                              props.updateSelectedButtons((next) => {
-                                if (event.target.value === "") {
-                                  delete next.buttons[selectedButtonIndex]
-                                    .cssShape;
-                                } else {
-                                  next.buttons[selectedButtonIndex].cssShape =
-                                    event.target.value as ButtonShape;
-                                }
-                              })
-                            }
-                            data={[
-                              { value: "", label: t("inheritDefault") },
-                              { value: "circle", label: t("shapeCircle") },
-                              { value: "pill", label: t("shapePill") },
-                              { value: "rounded", label: t("shapeRounded") },
-                              { value: "square", label: t("shapeSquare") },
-                            ]}
-                          />
-                          <InheritedNumberInput
-                            size="xs"
-                            label={t("transition")}
-                            min={0}
-                            max={1}
-                            step={0.01}
-                            value={
-                              layout.buttons[selectedButtonIndex]?.cssTransition
-                            }
-                            defaultValue={layout.defaultbuttons.cssTransition}
-                            fallbackValue="0.02"
-                            onChange={(value) =>
-                              props.updateSelectedButtons((next) => {
-                                next.buttons[
-                                  selectedButtonIndex
-                                ].cssTransition = String(value ?? 0.02);
-                              })
-                            }
-                            placeholder={
-                              layout.defaultbuttons.cssTransition || "0.02"
-                            }
-                          />
-                        </div>
-                      )}
-                    {selectedButtonIndex !== null &&
-                      (layout.buttons[selectedButtonIndex]?.useCss ??
-                        layout.defaultbuttons.useCss ??
-                        false) && (
-                        <InheritedSelect
-                          size="xs"
-                          label={t("easing")}
-                          className="selected-button-appearance-control"
-                          value={layout.buttons[selectedButtonIndex]?.cssEasing}
-                          defaultValue={layout.defaultbuttons.cssEasing}
-                          fallbackValue="ease"
-                          onChange={(event) =>
-                            props.updateSelectedButtons((next) => {
-                              if (event.target.value === "") {
-                                delete next.buttons[selectedButtonIndex]
-                                  .cssEasing;
-                              } else {
-                                next.buttons[selectedButtonIndex].cssEasing =
-                                  event.target.value;
-                              }
-                            })
-                          }
-                          data={[
-                            { value: "", label: t("inheritDefault") },
-                            { value: "ease", label: "ease" },
-                            { value: "linear", label: "linear" },
-                            { value: "ease-in", label: "ease-in" },
-                            { value: "ease-out", label: "ease-out" },
-                            { value: "ease-in-out", label: "ease-in-out" },
-                          ]}
-                        />
-                      )}
-                    {selectedButtonIndex !== null &&
-                      !(
-                        layout.buttons[selectedButtonIndex]?.useCss ??
-                        layout.defaultbuttons.useCss ??
-                        false
-                      ) && (
-                        <>
-                          <Group
-                            gap="xs"
-                            align="end"
-                            wrap="nowrap"
-                            className="selected-button-appearance-control"
-                          >
-                            <InheritedTextInput
-                              size="xs"
-                              label={t("releasedImage")}
-                              value={layout.buttons[selectedButtonIndex]?.img}
-                              defaultValue={layout.defaultbuttons.img}
-                              onChange={(event) =>
-                                props.updateSelectedButtons((next) => {
-                                  next.buttons[selectedButtonIndex].img =
-                                    event.target.value;
-                                })
-                              }
-                              placeholder={
-                                layout.defaultbuttons.img || "released.png"
-                              }
-                              className="grow"
-                            />
-                            <ImageSelectButton
-                              onClick={() =>
-                                props.openImagePicker({
-                                  type: "button",
-                                  indexes: props.selectedButtonIndexes,
-                                  state: "released",
-                                })
-                              }
-                            />
-                          </Group>
-                          <Group
-                            gap="xs"
-                            align="end"
-                            wrap="nowrap"
-                            className="selected-button-appearance-control"
-                          >
-                            <InheritedTextInput
-                              size="xs"
-                              label={t("pressedImage")}
-                              value={layout.buttons[selectedButtonIndex]?.imgp}
-                              defaultValue={layout.defaultbuttons.imgp}
-                              onChange={(event) =>
-                                props.updateSelectedButtons((next) => {
-                                  next.buttons[selectedButtonIndex].imgp =
-                                    event.target.value;
-                                })
-                              }
-                              placeholder={
-                                layout.defaultbuttons.imgp || "pressed.png"
-                              }
-                              className="grow"
-                            />
-                            <ImageSelectButton
-                              onClick={() =>
-                                props.openImagePicker({
-                                  type: "button",
-                                  indexes: props.selectedButtonIndexes,
-                                  state: "pressed",
-                                })
-                              }
-                            />
-                          </Group>
-                        </>
-                      )}
+                    {selectedButtonIndex !== null && (
+                      <SelectedButtonAppearanceSettings
+                        layout={layout}
+                        index={selectedButtonIndex}
+                        selectedButtonIndexes={props.selectedButtonIndexes}
+                        updateSelectedButtons={props.updateSelectedButtons}
+                        openImagePicker={props.openImagePicker}
+                      />
+                    )}
                     {selectedButtonIndex !== null && (
                       <Stack
                         gap="xs"

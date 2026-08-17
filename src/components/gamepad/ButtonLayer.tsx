@@ -1,4 +1,5 @@
 import type React from "react";
+import { resolveButtonAppearance } from "../../button-appearance";
 import { type CSSVariableStyle, cssVariables } from "../../style-types";
 import type { ButtonLayout, ButtonShape, Layout } from "../../types";
 
@@ -35,68 +36,35 @@ function buttonStyle(
   const pressedImage = button.imgp === defaultButton.imgp ? "" : button.imgp;
   const releasedWidth = button.w === defaultButton.w ? "" : button.w;
   const releasedHeight = button.h === defaultButton.h ? "" : button.h;
-  const useCss = button.useCss ?? defaultButton.useCss ?? false;
+  const appearance = resolveButtonAppearance(button, defaultButton);
   const useImage = pressed ? pressedImage : releasedImage;
-  const cssColor = button.cssColor ?? defaultButton.cssColor ?? "#cccccc";
-  const cssPressedColor =
-    button.cssPressedColor ?? defaultButton.cssPressedColor ?? "#999999";
-  const defaultBorderMatchesColor =
-    defaultButton.cssBorderMatchesColor ??
-    defaultButton.cssBorderColor === undefined;
-  const borderMatchesColor =
-    button.cssBorderMatchesColor ??
-    (button.cssBorderColor === undefined ? defaultBorderMatchesColor : false);
-  const cssNormalBorderColor = borderMatchesColor
-    ? cssColor
-    : (button.cssBorderColor ?? defaultButton.cssBorderColor ?? cssColor);
-  const cssPressedBorderColor = borderMatchesColor
-    ? cssPressedColor
-    : (button.cssPressedBorderColor ??
-      defaultButton.cssPressedBorderColor ??
-      cssPressedColor);
-  const cssBorderColor = pressed ? cssPressedBorderColor : cssNormalBorderColor;
-  const cssTransition =
-    button.cssTransition ?? defaultButton.cssTransition ?? "0.02";
-  const cssEasing = button.cssEasing ?? defaultButton.cssEasing ?? "ease";
-  const cssShape = button.cssShape ?? defaultButton.cssShape ?? "circle";
-  const rotation = button.rotation ?? defaultButton.rotation ?? "0";
-  const textColor =
-    button.cssTextColor ?? defaultButton.cssTextColor ?? "#ffffff";
-  const textSize = button.cssTextSize ?? defaultButton.cssTextSize ?? "14";
-  const textBold = button.cssTextBold ?? defaultButton.cssTextBold ?? false;
-  const textItalic =
-    button.cssTextItalic ?? defaultButton.cssTextItalic ?? false;
-  const textOutline =
-    button.cssTextOutline ?? defaultButton.cssTextOutline ?? false;
-  const textOutlineColor =
-    button.cssTextOutlineColor ??
-    defaultButton.cssTextOutlineColor ??
-    "#000000";
-  const textStrokeWidth = textOutline
-    ? `${Math.max(1, Math.round(Number.parseFloat(textSize) * 0.12))}px`
+  const textStrokeWidth = appearance.textOutline
+    ? `${Math.max(1, Math.round(Number.parseFloat(appearance.textSize) * 0.12))}px`
     : "0px";
   const style: CSSVariableStyle = cssVariables({
     left: `${button.x || defaultButton.x || 0}px`,
     top: `${button.y || defaultButton.y || 0}px`,
     width: `${releasedWidth || defaultButton.w || "60"}px`,
     height: `${releasedHeight || defaultButton.h || "60"}px`,
-    "--button-color": pressed ? cssPressedColor : cssColor,
-    "--button-border-color": cssBorderColor,
+    "--button-color": pressed ? appearance.pressedColor : appearance.color,
+    "--button-border-color": pressed
+      ? appearance.pressedBorderColor
+      : appearance.borderColor,
     "--button-shadow-color": pressed
       ? "rgba(0, 0, 0, 0.4)"
       : "rgba(0, 0, 0, 0.2)",
-    "--button-rotation": `${rotation}deg`,
-    "--button-radius": buttonRadiusForShape(cssShape),
-    "--button-transition": `${cssTransition}s`,
-    "--button-easing": cssEasing,
-    "--button-text-color": textColor,
-    "--button-text-size": `${textSize}px`,
-    "--button-text-weight": textBold ? "bold" : "normal",
-    "--button-text-style": textItalic ? "italic" : "normal",
+    "--button-rotation": `${appearance.rotation}deg`,
+    "--button-radius": buttonRadiusForShape(appearance.shape),
+    "--button-transition": `${appearance.transition}s`,
+    "--button-easing": appearance.easing,
+    "--button-text-color": appearance.textColor,
+    "--button-text-size": `${appearance.textSize}px`,
+    "--button-text-weight": appearance.textBold ? "bold" : "normal",
+    "--button-text-style": appearance.textItalic ? "italic" : "normal",
     "--button-text-stroke-width": textStrokeWidth,
-    "--button-text-stroke-color": textOutlineColor,
+    "--button-text-stroke-color": appearance.textOutlineColor,
   });
-  if (!useCss && useImage) {
+  if (!appearance.useCss && useImage) {
     style.backgroundImage = `url("layout/${layout.name}/${useImage}")`;
   }
   if (pressed) {
@@ -125,11 +93,9 @@ export function ButtonLayer({
       {Array.from({ length: layout.totalbuttonshow }, (_, index) => {
         const button = layout.buttons[index] || defaultButton;
         const pressed = pressedButtons[index] || false;
-        const useCss = button.useCss ?? defaultButton.useCss ?? false;
+        const appearance = resolveButtonAppearance(button, defaultButton);
         const label = button.text ?? defaultButton.text ?? "";
-        const textOutline =
-          button.cssTextOutline ?? defaultButton.cssTextOutline ?? false;
-        const className = `gamepad-button button${index} ${pressed ? "button-pressed" : "button-released"} ${useCss ? "button-css" : ""} ${editorMode && (selectedButtonIndex === index || selected.has(index)) ? "button-selected" : ""}`;
+        const className = `gamepad-button button${index} ${pressed ? "button-pressed" : "button-released"} ${appearance.useCss ? "button-css" : ""} ${editorMode && (selectedButtonIndex === index || selected.has(index)) ? "button-selected" : ""}`;
         return (
           <div
             id={`button${index}`}
@@ -161,7 +127,7 @@ export function ButtonLayer({
           >
             {label && (
               <span
-                className={`gamepad-button-label ${textOutline ? "gamepad-button-label-outline" : ""}`}
+                className={`gamepad-button-label ${appearance.textOutline ? "gamepad-button-label-outline" : ""}`}
               >
                 {label}
               </span>

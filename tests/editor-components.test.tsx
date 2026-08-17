@@ -2216,6 +2216,35 @@ function renderSelectedButtonSettings(
   return { selectedSettings, view };
 }
 
+test("selected button controls keep the classes that order their groups", () => {
+  const layout = createDefaultLayout();
+  layout.defaultbuttons.useCss = true;
+  delete layout.buttons[0].useCss;
+  const { selectedSettings } = renderSelectedButtonSettings(layout);
+
+  const useCss = within(selectedSettings).getByRole("switch", {
+    name: /useCssButton/,
+  });
+  const grouped = (element: Element | null, groupClass: string) =>
+    element?.closest(`.${groupClass}`) !== null;
+
+  assert.equal(grouped(useCss, "selected-button-appearance-control"), true);
+  assert.equal(
+    grouped(
+      within(selectedSettings).getByLabelText("colorNormal"),
+      "selected-button-appearance-control",
+    ),
+    true,
+  );
+  assert.equal(
+    grouped(
+      within(selectedSettings).getByRole("switch", { name: /textBold/ }),
+      "selected-button-text-control",
+    ),
+    true,
+  );
+});
+
 test("button settings omit pressed size controls", () => {
   const { view } = renderSelectedButtonSettings(createDefaultLayout());
 
