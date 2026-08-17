@@ -312,7 +312,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
       const renamed = { ...layout, name: trimmedName, id: trimmedName };
       restoreLayout(renamed);
       setLayoutName(trimmedName);
-      setSelectedLayout(layoutSelectionValue(trimmedName, false));
+      setSelectedLayout(layoutSelectionValue(layoutId, false));
       if (wasClean) {
         setCleanSignature(
           createEditorSnapshotSignature(renamed, buttonMappings, stickMappings),
@@ -495,7 +495,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
         setPendingLayoutImport(null);
         await refreshLayouts();
         applyLayout(result.layout, result.name, false);
-        setSelectedLayout(layoutSelectionValue(result.name, false));
+        setSelectedLayout(layoutSelectionValue(result.layout.id, false));
         setStatus({ kind: "success", message: messages.saved });
       } catch (error) {
         console.error("Failed to import layout package:", error);

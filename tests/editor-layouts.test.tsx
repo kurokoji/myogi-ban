@@ -313,6 +313,42 @@ test("renaming to a name another layout already uses is allowed", async () => {
   assert.equal(result.current.layoutName, "taken");
 });
 
+test("renaming keeps the renamed layout selected in the layout list", async () => {
+  const api = {
+    getDefaultLayout: async () => {
+      throw new Error("no default layout");
+    },
+    getLayouts: async () => [],
+    renameLayout: async () => {},
+  } as unknown as ApiClient;
+  const layout = createDefaultLayout();
+  layout.id = "8f14e45f-ceea-467a-9575-0e02b2c3d479";
+  layout.name = "before";
+  const ignoreUpdate = () => {};
+  const options = {
+    api,
+    layout,
+    buttonMappings: [],
+    stickMappings: [],
+    setButtonMappings: ignoreUpdate,
+    setStickMappings: ignoreUpdate,
+    setSelection: ignoreUpdate,
+    restoreLayout: ignoreUpdate,
+    clearLayoutHistory: () => {},
+    updateLayout: ignoreUpdate,
+    messages: baseMessages,
+  };
+  const { result } = renderHook(() => useEditorLayouts(options));
+  await act(async () => {});
+
+  await act(async () => result.current.renameLayout("after"));
+
+  assert.equal(
+    result.current.selectedLayout,
+    "8f14e45f-ceea-467a-9575-0e02b2c3d479:user",
+  );
+});
+
 test("renaming the default layout keeps it marked as default under its new name", async () => {
   const api = {
     getDefaultLayout: async () => ({ id: "mypreset" }),
