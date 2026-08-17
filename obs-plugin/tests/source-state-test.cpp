@@ -46,11 +46,18 @@ int main()
 	const BrowserSettings built_in = state.browser_settings();
 	expect(built_in.url == "http://127.0.0.1:33770/view?layout=arcade%20stick&builtin=true",
 	       "uses the selected built-in layout in the viewer URL");
-	expect(state.selected_layout().name == "arcade stick" && state.selected_layout().builtin,
-	       "exposes the selected built-in layout");
+	expect(state.selected_layout().id == "arcade stick" && state.selected_layout().builtin,
+	       "exposes the selected built-in layout id");
 	expect(state.dimensions_api_path() == "/api/layouts/arcade%20stick/dimensions?builtin=true",
 	       "uses the selected layout dimensions endpoint");
 
+	expect(state.select_layout("user:8f14e45f-ceea-467a-9575-0e02b2c3d479"),
+	       "reports a changed layout selection for a generated id");
+	expect(state.browser_settings().url ==
+		       "http://127.0.0.1:33770/view?layout=8f14e45f-ceea-467a-9575-0e02b2c3d479&builtin=false",
+	       "uses a generated layout id verbatim in the viewer URL");
+
+	state.select_layout("builtin:arcade stick");
 	expect(!state.select_layout("builtin:arcade stick"), "does not report an unchanged layout selection");
 	state.select_layout("user:\xE6\x97\xA5\xE6\x9C\xAC\xE8\xAA\x9E");
 	const BrowserSettings user = state.browser_settings();

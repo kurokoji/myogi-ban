@@ -239,12 +239,14 @@ obs_properties_t *source_properties(void *data)
 		const size_t count = items ? obs_data_array_count(items) : 0;
 		for (size_t index = 0; index < count; ++index) {
 			obs_data_t *item = obs_data_array_item(items, index);
+			const char *id = obs_data_get_string(item, "id");
 			const char *name = obs_data_get_string(item, "name");
 			const bool builtin = obs_data_get_bool(item, "builtin");
+			// The name is shown; the id is stored, so renaming keeps the source.
 			const std::string label = std::string(name) +
 						  (builtin ? obs_module_text("BuiltInLayoutSuffix")
 							   : obs_module_text("UserLayoutSuffix"));
-			const std::string value = std::string(builtin ? "builtin:" : "user:") + name;
+			const std::string value = std::string(builtin ? "builtin:" : "user:") + id;
 			obs_property_list_add_string(layouts, label.c_str(), value.c_str());
 			obs_data_release(item);
 		}

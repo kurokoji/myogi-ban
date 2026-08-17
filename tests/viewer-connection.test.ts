@@ -11,7 +11,7 @@ import {
 test("viewer layout request parses an optional layout and built-in flag", () => {
   assert.deepEqual(
     viewerLayoutRequestFromSearch("?layout=arcade%20stick&builtin=true"),
-    { name: "arcade stick", builtin: true },
+    { id: "arcade stick", builtin: true },
   );
   assert.equal(viewerLayoutRequestFromSearch(""), null);
 });

@@ -57,7 +57,7 @@ function ViewerApp(): React.ReactElement {
           ? entries.find(
               (entry) =>
                 // Sources saved before ids existed refer to layouts by name.
-                (entry.id === request.name || entry.name === request.name) &&
+                (entry.id === request.id || entry.name === request.id) &&
                 (!request.builtin || entry.builtin),
             )
           : undefined;

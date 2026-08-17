@@ -42,7 +42,7 @@ bool SourceState::select_layout(std::string selection)
 		else if (selection.starts_with(user_prefix))
 			next = {selection.substr(user_prefix.size()), false, false};
 	}
-	const bool changed = next.name != layout.name || next.builtin != layout.builtin ||
+	const bool changed = next.id != layout.id || next.builtin != layout.builtin ||
 			     next.is_default != layout.is_default;
 	layout = std::move(next);
 	return changed;
@@ -57,7 +57,7 @@ std::string SourceState::dimensions_api_path() const
 {
 	if (layout.is_default)
 		return "/api/default-layout/dimensions";
-	return "/api/layouts/" + percent_encode(layout.name) + "/dimensions?builtin=" +
+	return "/api/layouts/" + percent_encode(layout.id) + "/dimensions?builtin=" +
 	       (layout.builtin ? "true" : "false");
 }
 
@@ -74,7 +74,7 @@ BrowserSettings SourceState::browser_settings() const
 {
 	std::string url(kViewerUrl);
 	if (!layout.is_default)
-		url += "?layout=" + percent_encode(layout.name) + "&builtin=" +
+		url += "?layout=" + percent_encode(layout.id) + "&builtin=" +
 		       (layout.builtin ? "true" : "false");
 	return {std::move(url), width, height, false};
 }

@@ -13,8 +13,9 @@ interface ViewerLocation {
   host: string;
 }
 
+/** A viewer URL names a layout by id; older sources named it by name. */
 export interface ViewerLayoutRequest {
-  name: string;
+  id: string;
   builtin: boolean;
 }
 
@@ -22,9 +23,9 @@ export function viewerLayoutRequestFromSearch(
   search: string,
 ): ViewerLayoutRequest | null {
   const params = new URLSearchParams(search);
-  const name = params.get("layout")?.trim();
-  if (!name) return null;
-  return { name, builtin: params.get("builtin") === "true" };
+  const id = params.get("layout")?.trim();
+  if (!id) return null;
+  return { id, builtin: params.get("builtin") === "true" };
 }
 
 export function layoutForViewerState(

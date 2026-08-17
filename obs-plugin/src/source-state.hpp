@@ -16,7 +16,8 @@ struct BrowserSettings {
 };
 
 struct SelectedLayout {
-	std::string name;
+	// The layout id, which survives renaming the layout.
+	std::string id;
 	bool builtin = false;
 	bool is_default = true;
 };
