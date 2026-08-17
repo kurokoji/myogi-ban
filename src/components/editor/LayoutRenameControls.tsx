@@ -2,11 +2,9 @@ import { ActionIcon, Button, Group, Stack, TextInput } from "@mantine/core";
 import { IconPencil } from "@tabler/icons-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { isLayoutNameTaken, normalizeLayoutName } from "../../layout-name";
-import type { LayoutEntry } from "../../types";
+import { normalizeLayoutName } from "../../layout-name";
 
 interface LayoutRenameControlsProps {
-  layoutNames: LayoutEntry[];
   layoutName: string;
   currentBuiltin: boolean;
   renameLayout: (name: string) => Promise<boolean>;
@@ -19,10 +17,6 @@ export function LayoutRenameControls(
   const [showRename, setShowRename] = useState(false);
   const [renameValue, setRenameValue] = useState("");
   const normalizedRenameValue = normalizeLayoutName(renameValue);
-  const isSameName =
-    normalizedRenameValue === normalizeLayoutName(props.layoutName);
-  const renameNameExists =
-    !isSameName && isLayoutNameTaken(renameValue, props.layoutNames);
 
   if (props.currentBuiltin) return null;
 
@@ -32,7 +26,7 @@ export function LayoutRenameControls(
   };
 
   const confirmRename = async () => {
-    if (!normalizedRenameValue || renameNameExists) return;
+    if (!normalizedRenameValue) return;
     if (await props.renameLayout(renameValue)) setShowRename(false);
   };
 
@@ -57,7 +51,6 @@ export function LayoutRenameControls(
         value={renameValue}
         onChange={(event) => setRenameValue(event.target.value)}
         placeholder={t("layoutNamePlaceholder")}
-        error={renameNameExists ? t("layoutNameExists") : undefined}
         autoFocus
       />
       <Group gap="xs" grow>
@@ -71,7 +64,7 @@ export function LayoutRenameControls(
         <Button
           size="xs"
           onClick={confirmRename}
-          disabled={!normalizedRenameValue || renameNameExists}
+          disabled={!normalizedRenameValue}
         >
           {t("save")}
         </Button>

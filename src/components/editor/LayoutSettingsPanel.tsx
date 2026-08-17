@@ -104,7 +104,6 @@ export function LayoutSettingsPanel(
                 </Text>
               )}
               <LayoutRenameControls
-                layoutNames={props.layoutNames}
                 layoutName={props.layoutName}
                 currentBuiltin={props.currentBuiltin}
                 renameLayout={props.renameLayout}
@@ -126,7 +125,6 @@ export function LayoutSettingsPanel(
             }))}
           />
           <LayoutSaveControls
-            layoutNames={props.layoutNames}
             layoutName={props.layoutName}
             currentBuiltin={props.currentBuiltin}
             saveLayout={props.saveLayout}

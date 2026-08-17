@@ -277,13 +277,13 @@ test("renaming a layout calls the API and updates the current layout name", asyn
   assert.equal(result.current.status?.message, "renamed");
 });
 
-test("renaming to a name already in use reports an error without calling the API", async () => {
+test("renaming to a name another layout already uses is allowed", async () => {
   let renameCalls = 0;
   const api = {
     getDefaultLayout: async () => {
       throw new Error("no default layout");
     },
-    getLayouts: async () => [{ name: "taken", builtin: false }],
+    getLayouts: async () => [{ id: "other", name: "taken", builtin: false }],
     renameLayout: async () => {
       renameCalls += 1;
     },
@@ -308,10 +308,9 @@ test("renaming to a name already in use reports an error without calling the API
 
   const renamed = await act(async () => result.current.renameLayout("taken"));
 
-  assert.equal(renamed, false);
-  assert.equal(renameCalls, 0);
-  assert.equal(result.current.status?.kind, "error");
-  assert.equal(result.current.status?.message, "exists");
+  assert.equal(renamed, true);
+  assert.equal(renameCalls, 1);
+  assert.equal(result.current.layoutName, "taken");
 });
 
 test("renaming the default layout keeps it marked as default under its new name", async () => {

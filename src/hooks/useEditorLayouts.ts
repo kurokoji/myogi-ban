@@ -28,11 +28,7 @@ import {
 import { ensureLayoutDefaults } from "../layout";
 import { createLayoutId } from "../layout-id";
 import { withUploadedImage } from "../layout-image";
-import {
-  isLayoutNameTaken,
-  normalizeLayoutName,
-  resolveAvailableLayoutName,
-} from "../layout-name";
+import { normalizeLayoutName } from "../layout-name";
 import {
   createLayoutPackage,
   InvalidLayoutPackageError,
@@ -294,10 +290,6 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
   const saveLayoutAs = async (name: string) => {
     const trimmedName = name.trim();
     if (!trimmedName) return false;
-    if (isLayoutNameTaken(trimmedName, layoutNames)) {
-      setStatus({ kind: "error", message: messages.layoutNameExists });
-      return false;
-    }
     // Saving under a new name creates a layout, which gets its own id.
     return saveToName(trimmedName, false, createLayoutId());
   };
@@ -308,10 +300,6 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     if (!trimmedName) return false;
     const isSameName =
       normalizeLayoutName(trimmedName) === normalizeLayoutName(layoutName);
-    if (!isSameName && isLayoutNameTaken(trimmedName, layoutNames)) {
-      setStatus({ kind: "error", message: messages.layoutNameExists });
-      return false;
-    }
     if (isSameName) return true;
 
     const wasClean =
@@ -464,7 +452,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
           data,
           preview: {
             ...summary,
-            savedName: resolveAvailableLayoutName(summary.name, layoutNames),
+            savedName: summary.name,
           },
         });
       } catch (error) {

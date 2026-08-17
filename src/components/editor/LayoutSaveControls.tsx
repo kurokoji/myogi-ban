@@ -2,11 +2,9 @@ import { Button, Group, Stack, Text, TextInput } from "@mantine/core";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { editorShortcutHint } from "../../editor-keyboard";
-import { isLayoutNameTaken, normalizeLayoutName } from "../../layout-name";
-import type { LayoutEntry } from "../../types";
+import { normalizeLayoutName } from "../../layout-name";
 
 interface LayoutSaveControlsProps {
-  layoutNames: LayoutEntry[];
   layoutName: string;
   currentBuiltin: boolean;
   saveLayout: () => void;
@@ -20,7 +18,6 @@ export function LayoutSaveControls(
   const [showSaveAs, setShowSaveAs] = useState(false);
   const [saveAsName, setSaveAsName] = useState("");
   const normalizedSaveAsName = normalizeLayoutName(saveAsName);
-  const saveAsNameExists = isLayoutNameTaken(saveAsName, props.layoutNames);
 
   const openSaveAs = () => {
     setSaveAsName(
@@ -30,7 +27,7 @@ export function LayoutSaveControls(
   };
 
   const confirmSaveAs = async () => {
-    if (!normalizedSaveAsName || saveAsNameExists) return;
+    if (!normalizedSaveAsName) return;
     if (await props.saveLayoutAs(saveAsName)) setShowSaveAs(false);
   };
 
@@ -61,7 +58,6 @@ export function LayoutSaveControls(
             value={saveAsName}
             onChange={(event) => setSaveAsName(event.target.value)}
             placeholder={t("layoutNamePlaceholder")}
-            error={saveAsNameExists ? t("layoutNameExists") : undefined}
             autoFocus
           />
           <Group gap="xs" grow>
@@ -75,7 +71,7 @@ export function LayoutSaveControls(
             <Button
               size="xs"
               onClick={confirmSaveAs}
-              disabled={!normalizedSaveAsName || saveAsNameExists}
+              disabled={!normalizedSaveAsName}
             >
               {t("save")}
             </Button>

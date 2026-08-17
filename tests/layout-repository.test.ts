@@ -172,7 +172,7 @@ test("LayoutRepository rename returns false for built-in or missing layouts", (t
   assert.equal(repository.rename("missing", "renamed-missing"), false);
 });
 
-test("LayoutRepository rename rejects invalid layout names", (t) => {
+test("LayoutRepository rename accepts any displayable name", (t) => {
   const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const repository = new LayoutRepository({
@@ -182,35 +182,15 @@ test("LayoutRepository rename rejects invalid layout names", (t) => {
   });
   repository.save("custom", createDefaultLayout());
 
-  assert.throws(
-    () => repository.rename("custom", "../escaped"),
-    /Invalid layout name/,
-  );
+  assert.equal(repository.rename("custom", "../not a path"), true);
+  assert.equal(repository.read("custom").name, "../not a path");
   assert.throws(
     () => repository.rename("../escaped", "custom"),
     /Invalid layout name/,
   );
 });
 
-test("LayoutRepository detects existing user and built-in names", (t) => {
-  const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
-  t.after(() => rmSync(root, { recursive: true, force: true }));
-  const builtinLayoutDir = join(root, "builtin");
-  const userLayoutDir = join(root, "user");
-  mkdirSync(join(builtinLayoutDir, "Preset"), { recursive: true });
-  mkdirSync(join(userLayoutDir, "Custom"), { recursive: true });
-  const repository = new LayoutRepository({
-    builtinLayoutDir,
-    userLayoutDir,
-    defaultLayoutFile: join(root, "default.json"),
-  });
-
-  assert.equal(repository.has("preset"), true);
-  assert.equal(repository.has(" CUSTOM "), true);
-  assert.equal(repository.has("new-layout"), false);
-});
-
-test("LayoutRepository rejects invalid layout names at every entry point", (t) => {
+test("LayoutRepository allows two layouts to share a name", (t) => {
   const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const repository = new LayoutRepository({
@@ -218,24 +198,61 @@ test("LayoutRepository rejects invalid layout names at every entry point", (t) =
     userLayoutDir: join(root, "user"),
     defaultLayoutFile: join(root, "default.json"),
   });
-  const invalidName = "../escape";
+  const layout = createDefaultLayout();
+  layout.name = "Shared";
 
-  assert.throws(() => repository.has(invalidName), /Invalid layout name/);
-  assert.throws(() => repository.read(invalidName), /Invalid layout name/);
+  repository.save("first", layout);
+  repository.save("second", layout);
+
+  assert.deepEqual(
+    repository.list().map((entry) => [entry.id, entry.name]),
+    [
+      ["first", "Shared"],
+      ["second", "Shared"],
+    ],
+  );
+});
+
+test("LayoutRepository detects ids already in use", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const builtinLayoutDir = join(root, "builtin");
+  const userLayoutDir = join(root, "user");
+  mkdirSync(join(builtinLayoutDir, "preset"), { recursive: true });
+  mkdirSync(join(userLayoutDir, "custom"), { recursive: true });
+  const repository = new LayoutRepository({
+    builtinLayoutDir,
+    userLayoutDir,
+    defaultLayoutFile: join(root, "default.json"),
+  });
+
+  assert.equal(repository.has("preset"), true);
+  assert.equal(repository.has("custom"), true);
+  assert.equal(repository.has("new-layout"), false);
+});
+
+test("LayoutRepository rejects invalid layout ids at every entry point", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const repository = new LayoutRepository({
+    builtinLayoutDir: join(root, "builtin"),
+    userLayoutDir: join(root, "user"),
+    defaultLayoutFile: join(root, "default.json"),
+  });
+  const invalidId = "../escape";
+
+  assert.throws(() => repository.has(invalidId), /Invalid layout name/);
+  assert.throws(() => repository.read(invalidId), /Invalid layout name/);
   assert.throws(
-    () => repository.save(invalidName, createDefaultLayout()),
+    () => repository.save(invalidId, createDefaultLayout()),
     /Invalid layout name/,
   );
-  assert.throws(() => repository.delete(invalidName), /Invalid layout name/);
+  assert.throws(() => repository.delete(invalidId), /Invalid layout name/);
   assert.throws(
-    () =>
-      repository.uploadImage("data:image/png;base64,", invalidName, "a.png"),
+    () => repository.uploadImage("data:image/png;base64,", invalidId, "a.png"),
     /Invalid layout name/,
   );
-  assert.throws(
-    () => repository.setDefault(invalidName),
-    /Invalid layout name/,
-  );
+  assert.throws(() => repository.setDefault(invalidId), /Invalid layout name/);
   assert.equal(existsSync(join(root, "escape")), false);
 });
 
@@ -449,7 +466,7 @@ test("LayoutRepository imports packages under a new name without overwriting", a
 
   const result = await repository.importPackage(archive);
 
-  assert.equal(result.name, "imported-2");
+  assert.equal(result.name, "imported");
   assert.equal(
     readFileSync(join(user, "imported", "keep.txt"), "utf8"),
     "keep",

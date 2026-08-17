@@ -1,32 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  isLayoutNameTaken,
+  isValidLayoutId,
   isValidLayoutName,
   normalizeLayoutName,
-  resolveAvailableLayoutName,
 } from "../src/layout-name";
 
 test("normalizeLayoutName trims whitespace and ignores letter case", () => {
   assert.equal(normalizeLayoutName("  Hit-Box-Ultra  "), "hit-box-ultra");
-});
-
-test("isLayoutNameTaken detects an existing user layout", () => {
-  assert.equal(
-    isLayoutNameTaken(" custom ", [{ name: "Custom", builtin: false }]),
-    true,
-  );
-});
-
-test("isLayoutNameTaken detects an existing built-in layout", () => {
-  assert.equal(
-    isLayoutNameTaken("PRESET", [{ name: "preset", builtin: true }]),
-    true,
-  );
-});
-
-test("isLayoutNameTaken does not treat a blank name as taken", () => {
-  assert.equal(isLayoutNameTaken("   ", [{ name: "", builtin: false }]), false);
 });
 
 test("isValidLayoutName rejects blank names", () => {
@@ -34,8 +15,29 @@ test("isValidLayoutName rejects blank names", () => {
   assert.equal(isValidLayoutName("   "), false);
 });
 
-test("isValidLayoutName rejects path-like and control-character names", () => {
+test("isValidLayoutName accepts anything a user might type", () => {
   for (const name of [
+    "PWS FS-24",
+    "レバーレス / 2P",
+    "..",
+    "back\\slash",
+    "emoji 🎮 layout",
+    "a".repeat(120),
+  ]) {
+    assert.equal(isValidLayoutName(name), true, name);
+  }
+});
+
+test("isValidLayoutName rejects names that cannot be shown on one line", () => {
+  assert.equal(isValidLayoutName("two\nlines"), false);
+  assert.equal(isValidLayoutName("null\0byte"), false);
+  assert.equal(isValidLayoutName("a".repeat(201)), false);
+});
+
+test("isValidLayoutId rejects ids that would escape the layout directory", () => {
+  for (const id of [
+    "",
+    "   ",
     ".",
     "..",
     "../escape",
@@ -44,18 +46,12 @@ test("isValidLayoutName rejects path-like and control-character names", () => {
     "bad\0name",
     "bad\nname",
   ]) {
-    assert.equal(isValidLayoutName(name), false, name);
+    assert.equal(isValidLayoutId(id), false, id);
   }
-  assert.equal(isValidLayoutName("PWS FS-24"), true);
-  assert.equal(isValidLayoutName("hit-box-ultra-copy"), true);
 });
 
-test("resolveAvailableLayoutName previews the suffix used for duplicate names", () => {
-  const layouts = [
-    { name: "sample", builtin: true },
-    { name: "sample-2", builtin: false },
-  ];
-
-  assert.equal(resolveAvailableLayoutName("new-layout", layouts), "new-layout");
-  assert.equal(resolveAvailableLayoutName("sample", layouts), "sample-3");
+test("isValidLayoutId accepts generated ids and legacy directory names", () => {
+  assert.equal(isValidLayoutId("8f14e45f-ceea-467a-9575-0e02b2c3d479"), true);
+  assert.equal(isValidLayoutId("hit-box-ultra"), true);
+  assert.equal(isValidLayoutId("PWS FS-24"), true);
 });

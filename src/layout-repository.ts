@@ -8,11 +8,7 @@ import {
   serializeLayoutDocument,
 } from "./layout-document";
 import { createLayoutId } from "./layout-id";
-import {
-  assertValidLayoutName,
-  isLayoutNameTaken,
-  resolveAvailableLayoutName,
-} from "./layout-name";
+import { assertValidLayoutId, assertValidLayoutName } from "./layout-name";
 import { imageMimeType, readLayoutPackage } from "./layout-package";
 import type { Layout, LayoutEntry } from "./types";
 
@@ -100,17 +96,18 @@ export function findAssetSources(
 export class LayoutRepository {
   constructor(private readonly options: LayoutRepositoryOptions) {}
 
-  private findLayoutPath(name: string): string | null {
-    assertValidLayoutName(name);
-    const userPath = path.join(this.options.userLayoutDir, name);
+  private findLayoutPath(id: string): string | null {
+    assertValidLayoutId(id);
+    const userPath = path.join(this.options.userLayoutDir, id);
     if (fs.existsSync(userPath)) return userPath;
-    const builtinPath = path.join(this.options.builtinLayoutDir, name);
+    const builtinPath = path.join(this.options.builtinLayoutDir, id);
     return fs.existsSync(builtinPath) ? builtinPath : null;
   }
 
-  has(name: string): boolean {
-    assertValidLayoutName(name);
-    return isLayoutNameTaken(name, this.list());
+  /** Whether a layout already occupies this id. */
+  has(id: string): boolean {
+    assertValidLayoutId(id);
+    return this.list().some((entry) => entry.id === id);
   }
 
   private copyAssets(
@@ -181,7 +178,7 @@ export class LayoutRepository {
   }
 
   read(name: string, builtin = false): Layout {
-    assertValidLayoutName(name);
+    assertValidLayoutId(name);
     const layoutPath = builtin
       ? path.join(this.options.builtinLayoutDir, name)
       : this.findLayoutPath(name);
@@ -200,7 +197,7 @@ export class LayoutRepository {
   }
 
   save(id: string, layout: Layout): void {
-    assertValidLayoutName(id);
+    assertValidLayoutId(id);
     const layoutDir = path.join(this.options.userLayoutDir, id);
     ensureDir(layoutDir);
     this.copyAssets(layout, layout.id || layout.name || id, id);
@@ -216,9 +213,9 @@ export class LayoutRepository {
     data: Uint8Array | ArrayBuffer,
   ): Promise<{ name: string; layout: Layout }> {
     const contents = await readLayoutPackage(data);
-    const requestedName = contents.layout.name || "imported";
-    assertValidLayoutName(requestedName);
-    const name = resolveAvailableLayoutName(requestedName, this.list());
+    // Names may repeat, so an import keeps the name it was packaged with.
+    const name = contents.layout.name || "imported";
+    assertValidLayoutName(name);
 
     for (const [fileName, bytes] of contents.assets) {
       validateImageUpload({
@@ -253,9 +250,9 @@ export class LayoutRepository {
     }
   }
 
-  delete(name: string): boolean {
-    assertValidLayoutName(name);
-    const layoutDir = path.join(this.options.userLayoutDir, name);
+  delete(id: string): boolean {
+    assertValidLayoutId(id);
+    const layoutDir = path.join(this.options.userLayoutDir, id);
     if (!fs.existsSync(layoutDir)) return false;
     fs.rmSync(layoutDir, { recursive: true });
     return true;
@@ -266,7 +263,7 @@ export class LayoutRepository {
    * and anything pointing at the layout stay where they are.
    */
   rename(id: string, newName: string): boolean {
-    assertValidLayoutName(id);
+    assertValidLayoutId(id);
     assertValidLayoutName(newName);
     const layoutDir = path.join(this.options.userLayoutDir, id);
     const jsonPath = path.join(layoutDir, "layout.json");
@@ -280,10 +277,10 @@ export class LayoutRepository {
     return true;
   }
 
-  uploadImage(data: string, layoutName: string, fileName: string): string {
-    assertValidLayoutName(layoutName);
+  uploadImage(data: string, layoutId: string, fileName: string): string {
+    assertValidLayoutId(layoutId);
     validateImageUpload({ data, fileName });
-    const layoutDir = path.join(this.options.userLayoutDir, layoutName);
+    const layoutDir = path.join(this.options.userLayoutDir, layoutId);
     ensureDir(layoutDir);
     const safeFileName = resolveAvailableAssetName(
       path.basename(fileName),
@@ -322,7 +319,7 @@ export class LayoutRepository {
   }
 
   setDefault(id: string): void {
-    assertValidLayoutName(id);
+    assertValidLayoutId(id);
     writeJsonAtomically(this.options.defaultLayoutFile, { id });
   }
 }

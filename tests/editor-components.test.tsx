@@ -415,8 +415,7 @@ test("the layout list shows each layout's name and opens it by id", () => {
   assert.equal(opened, "hit-box-ultra:builtin");
 });
 
-test("duplicate layout names disable save-as before submitting", () => {
-  let saveCalls = 0;
+test("saving under a name another layout uses is allowed", () => {
   const view = renderComponent(
     <LayoutSettingsPanel
       layoutNames={[{ name: "existing", builtin: true }]}
@@ -447,9 +446,9 @@ test("duplicate layout names disable save-as before submitting", () => {
     view
       .getByRole("button", { name: "save", exact: true })
       .hasAttribute("disabled"),
-    true,
+    false,
   );
-  assert.equal(saveCalls, 0);
+  assert.equal(view.queryByText("layoutNameExists") === null, true);
 });
 
 test("the rename control is hidden for built-in layouts", () => {
@@ -518,8 +517,7 @@ test("renaming a layout calls renameLayout with the new name and closes the form
   );
 });
 
-test("duplicate layout names disable rename before submitting", () => {
-  let renameCalls = 0;
+test("renaming to a name another layout uses is allowed", () => {
   const view = renderComponent(
     <LayoutSettingsPanel
       layoutNames={[
@@ -554,9 +552,9 @@ test("duplicate layout names disable rename before submitting", () => {
     view
       .getByRole("button", { name: "save", exact: true })
       .hasAttribute("disabled"),
-    true,
+    false,
   );
-  assert.equal(renameCalls, 0);
+  assert.equal(view.queryByText("layoutNameExists") === null, true);
 });
 
 test("layout save action exposes its shortcut on hover", () => {
