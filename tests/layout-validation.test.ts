@@ -73,6 +73,21 @@ test("parseImportedLayoutJson rejects invalid known field types", () => {
 test("parseImportedLayoutJson converts v2 documents to runtime layouts", () => {
   const source = createDefaultLayout();
   source.totalbuttonshow = 1;
+  const document = {
+    ...serializeLayoutDocument(source),
+    formatVersion: 2 as const,
+  };
+  delete (document as { id?: string }).id;
+
+  const parsed = parseImportedLayoutJson(JSON.stringify(document));
+
+  assert.equal(parsed.totalbuttonshow, 1);
+  assert.equal(parsed.buttons?.[0]?.x, "225");
+});
+
+test("parseImportedLayoutJson converts v3 documents to runtime layouts", () => {
+  const source = createDefaultLayout();
+  source.totalbuttonshow = 1;
 
   const parsed = parseImportedLayoutJson(
     JSON.stringify(serializeLayoutDocument(source)),

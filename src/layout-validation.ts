@@ -9,6 +9,9 @@ export class InvalidLayoutError extends Error {
   }
 }
 
+/** Documents older than the current format stay importable. */
+const SUPPORTED_LAYOUT_FORMAT_VERSIONS = new Set([2, 3]);
+
 const object = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 const strings = ["version", "name"];
@@ -101,7 +104,8 @@ export function parseImportedLayoutJson(text: string): Partial<Layout> {
     throw new InvalidLayoutError();
   }
   if (object(value) && "formatVersion" in value) {
-    if (value.formatVersion !== 2) throw new InvalidLayoutError();
+    if (!SUPPORTED_LAYOUT_FORMAT_VERSIONS.has(value.formatVersion as number))
+      throw new InvalidLayoutError();
     try {
       return deserializeLayoutDocument(value);
     } catch {

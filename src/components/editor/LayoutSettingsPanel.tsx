@@ -33,7 +33,7 @@ interface LayoutSettingsPanelProps {
   layoutNames: LayoutEntry[];
   selectedLayout: string;
   layoutName: string;
-  layoutFormatVersion?: 1 | 2;
+  layoutFormatVersion?: 1 | 2 | 3;
   currentBuiltin: boolean;
   isDefaultLayout: boolean;
   isDirty: boolean;

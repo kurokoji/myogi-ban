@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createDefaultLayout } from "../src/layout";
+import { CURRENT_LAYOUT_FORMAT_VERSION } from "../src/layout-document";
 import { CURRENT_LAYOUT_VERSION } from "../src/layout-migration";
 import {
   buildLayoutForSave,
@@ -55,7 +56,7 @@ test("buildLayoutForSave uses the current layout format version", () => {
   const saved = buildLayoutForSave(layout, "custom", [], []);
 
   assert.equal(saved.version, CURRENT_LAYOUT_VERSION);
-  assert.equal(saved.sourceFormatVersion, 2);
+  assert.equal(saved.sourceFormatVersion, CURRENT_LAYOUT_FORMAT_VERSION);
   assert.equal(layout.sourceFormatVersion, 1);
   assert.equal(layout.version, "v1.0.5");
 });

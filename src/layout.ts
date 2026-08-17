@@ -3,6 +3,7 @@ import {
   DEFAULT_BUTTON_SIZE,
   DEFAULT_STICK_SIZE,
 } from "./app-constants";
+import { CURRENT_LAYOUT_FORMAT_VERSION } from "./layout-document";
 import { CURRENT_LAYOUT_VERSION, migrateLayout } from "./layout-migration";
 import {
   type BackgroundConfig,
@@ -85,7 +86,8 @@ export function createDefaultLayout(): Layout {
   }
 
   return {
-    sourceFormatVersion: 2,
+    sourceFormatVersion: CURRENT_LAYOUT_FORMAT_VERSION,
+    id: "",
     version: CURRENT_LAYOUT_VERSION,
     name: "default",
     totalbuttonshow: 8,

@@ -9,8 +9,6 @@ import type {
 } from "../types";
 import { TOTAL_BUTTONS } from "../types";
 
-export const CURRENT_LAYOUT_FORMAT_VERSION = 2;
-
 interface PositionDocument {
   x?: number;
   y?: number;
@@ -280,9 +278,9 @@ function backgroundDocument(background: BackgroundConfig): BackgroundDocument {
   };
 }
 
-export function serializeLayoutDocument(layout: Layout): LayoutDocumentV2 {
+export function serializeLayoutDocumentV2(layout: Layout): LayoutDocumentV2 {
   return {
-    formatVersion: CURRENT_LAYOUT_FORMAT_VERSION,
+    formatVersion: 2,
     name: layout.name,
     stick: stickDocument(layout.stick, layout.showstick),
     buttonDefaults: buttonDocument(layout.defaultbuttons),

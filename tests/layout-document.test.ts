@@ -29,7 +29,7 @@ test("serializeLayoutDocument writes numeric v2 data for visible buttons only", 
   });
 });
 
-test("deserializeLayoutDocument restores v2 data to the runtime layout", () => {
+test("deserializeLayoutDocument restores current-format data to the runtime layout", () => {
   const source = createDefaultLayout();
   source.totalbuttonshow = 2;
   source.buttons[1].rotation = "15";
@@ -44,7 +44,7 @@ test("deserializeLayoutDocument restores v2 data to the runtime layout", () => {
   assert.equal(restored.buttons[1].rotation, "15");
   assert.equal(restored.buttons[2].w, "");
   assert.deepEqual(restored.buttonMappings, [3, 4]);
-  assert.equal(restored.sourceFormatVersion, 2);
+  assert.equal(restored.sourceFormatVersion, CURRENT_LAYOUT_FORMAT_VERSION);
 });
 
 test("layout documents round trip pill button shapes", () => {
@@ -159,6 +159,65 @@ test("deserializeLayoutDocument keeps v1 documents readable", () => {
   assert.equal(restored.sourceFormatVersion, 1);
 });
 
+test("serializeLayoutDocument writes the layout id as v3", () => {
+  const layout = createDefaultLayout();
+  layout.id = "hit-box-ultra";
+
+  const document = serializeLayoutDocument(layout);
+
+  assert.equal(document.formatVersion, 3);
+  assert.equal(document.id, "hit-box-ultra");
+});
+
+test("layout documents round trip the id", () => {
+  const source = createDefaultLayout();
+  source.id = "6f1d0a2e-3c4b-4a5d-8e9f-0a1b2c3d4e5f";
+
+  const restored = deserializeLayoutDocument(serializeLayoutDocument(source));
+
+  assert.equal(restored.id, "6f1d0a2e-3c4b-4a5d-8e9f-0a1b2c3d4e5f");
+  assert.equal(restored.sourceFormatVersion, 3);
+});
+
+test("deserializeLayoutDocument leaves the id empty for v2 documents", () => {
+  const source = createDefaultLayout();
+  source.id = "ignored-by-v2";
+  const document = {
+    ...serializeLayoutDocument(source),
+    formatVersion: 2 as const,
+  };
+  delete (document as { id?: string }).id;
+
+  const restored = deserializeLayoutDocument(document);
+
+  assert.equal(restored.id, "");
+  assert.equal(restored.sourceFormatVersion, 2);
+});
+
+test("deserializeLayoutDocument leaves the id empty for v1 documents", () => {
+  const restored = deserializeLayoutDocument({
+    version: "v1.0.5",
+    name: "legacy",
+    totalbuttonshow: 1,
+    buttons: [{ x: "42", y: "24" }],
+  });
+
+  assert.equal(restored.id, "");
+  assert.equal(restored.sourceFormatVersion, 1);
+});
+
+test("deserializeLayoutDocument rejects a newer format version", () => {
+  const document = {
+    ...serializeLayoutDocument(createDefaultLayout()),
+    formatVersion: 4,
+  };
+
+  assert.throws(
+    () => deserializeLayoutDocument(document),
+    /Unsupported layout format/,
+  );
+});
+
 test("legacy numeric fields can be saved as a v2 document", () => {
   const restored = deserializeLayoutDocument({
     version: "210124",
@@ -194,7 +253,7 @@ test("legacy numeric fields can be saved as a v2 document", () => {
 
 test("deserializeLayoutDocument rejects unknown format versions", () => {
   assert.throws(
-    () => deserializeLayoutDocument({ formatVersion: 3 }),
+    () => deserializeLayoutDocument({ formatVersion: 9 }),
     /Unsupported layout format/,
   );
 });

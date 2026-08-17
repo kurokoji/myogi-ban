@@ -166,9 +166,11 @@ export class LayoutRepository {
     if (!layoutPath) return deserializeLayoutDocument({});
     const jsonPath = path.join(layoutPath, "layout.json");
     try {
-      return deserializeLayoutDocument(
+      const layout = deserializeLayoutDocument(
         fs.existsSync(jsonPath) ? readJson(jsonPath) : {},
       );
+      // Layouts written before v3 have no id; their directory name is it.
+      return layout.id ? layout : { ...layout, id: path.basename(layoutPath) };
     } catch (error) {
       if (error instanceof CorruptLayoutError) throw error;
       throw new CorruptLayoutError(jsonPath, error);
@@ -180,9 +182,10 @@ export class LayoutRepository {
     const layoutDir = path.join(this.options.userLayoutDir, name);
     ensureDir(layoutDir);
     this.copyAssets(layout, layout.name || name, name);
+    // The directory is the identity, so a copy never carries the source id.
     writeJsonAtomically(
       path.join(layoutDir, "layout.json"),
-      serializeLayoutDocument({ ...layout, name }),
+      serializeLayoutDocument({ ...layout, name, id: name }),
     );
     removeUnreferencedAssets(layoutDir, layout);
   }
@@ -208,7 +211,8 @@ export class LayoutRepository {
       this.options.userLayoutDir,
       `.${name}.import-${process.pid}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
     );
-    const layout = { ...contents.layout, name };
+    // An imported copy is a new layout, so it never reuses the packaged id.
+    const layout = { ...contents.layout, name, id: name };
     try {
       ensureDir(stagingDir);
       for (const [fileName, bytes] of contents.assets) {
@@ -247,7 +251,7 @@ export class LayoutRepository {
       const layout = deserializeLayoutDocument(readJson(jsonPath));
       writeJsonAtomically(
         jsonPath,
-        serializeLayoutDocument({ ...layout, name: newName }),
+        serializeLayoutDocument({ ...layout, name: newName, id: newName }),
       );
     }
 

@@ -1,5 +1,6 @@
 import { cloneLayout } from "./editor-helpers";
 import type { ButtonMapping, StickMapping } from "./gamepad";
+import { CURRENT_LAYOUT_FORMAT_VERSION } from "./layout-document";
 import { CURRENT_LAYOUT_VERSION } from "./layout-migration";
 import { createLayoutSnapshotSignature } from "./layout-snapshot";
 import type { Layout } from "./types";
@@ -21,7 +22,7 @@ export function buildLayoutForSave(
   const saved = cloneLayout(layout);
   return {
     ...saved,
-    sourceFormatVersion: 2,
+    sourceFormatVersion: CURRENT_LAYOUT_FORMAT_VERSION,
     version: CURRENT_LAYOUT_VERSION,
     name,
     buttonMappings: [...buttonMappings],

@@ -59,7 +59,9 @@ export interface LayoutGuides {
 }
 
 export interface Layout {
-  sourceFormatVersion: 1 | 2;
+  sourceFormatVersion: 1 | 2 | 3;
+  /** Stable identity: directory name, asset path, and API key. */
+  id: string;
   version: string;
   name: string;
   totalbuttonshow: number;

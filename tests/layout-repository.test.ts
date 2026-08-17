@@ -11,6 +11,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { createDefaultLayout } from "../src/layout";
+import {
+  CURRENT_LAYOUT_FORMAT_VERSION,
+  serializeLayoutDocument,
+} from "../src/layout-document";
 import { createLayoutPackage } from "../src/layout-package";
 import {
   CorruptLayoutError,
@@ -107,6 +111,7 @@ test("LayoutRepository renames a user layout, moving its directory and updating 
   );
   assert.equal(stored.name, "renamed");
   assert.equal(repository.read("renamed").name, "renamed");
+  assert.equal(repository.read("renamed").id, "renamed");
 });
 
 test("LayoutRepository rename repoints the default layout pointer when renaming the default layout", (t) => {
@@ -240,6 +245,47 @@ test("LayoutRepository reports corrupted JSON without replacing it", (t) => {
   assert.throws(() => repository.read("broken"), CorruptLayoutError);
 });
 
+test("LayoutRepository gives a legacy layout its directory name as its id", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const user = join(root, "user");
+  const repository = new LayoutRepository({
+    builtinLayoutDir: join(root, "builtin"),
+    userLayoutDir: user,
+    defaultLayoutFile: join(root, "default.json"),
+  });
+  const legacy = {
+    ...serializeLayoutDocument(createDefaultLayout()),
+    formatVersion: 2,
+  };
+  delete (legacy as { id?: string }).id;
+  mkdirSync(join(user, "legacy-layout"), { recursive: true });
+  writeFileSync(
+    join(user, "legacy-layout", "layout.json"),
+    JSON.stringify(legacy),
+  );
+
+  assert.equal(repository.read("legacy-layout").id, "legacy-layout");
+});
+
+test("LayoutRepository saves a copy under its own id, not the source id", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const user = join(root, "user");
+  const repository = new LayoutRepository({
+    builtinLayoutDir: join(root, "builtin"),
+    userLayoutDir: user,
+    defaultLayoutFile: join(root, "default.json"),
+  });
+  repository.save("original", createDefaultLayout());
+  const source = repository.read("original");
+
+  repository.save("copy", source);
+
+  assert.equal(repository.read("original").id, "original");
+  assert.equal(repository.read("copy").id, "copy");
+});
+
 test("LayoutRepository stores v2 documents and returns runtime layouts", (t) => {
   const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
@@ -257,7 +303,7 @@ test("LayoutRepository stores v2 documents and returns runtime layouts", (t) => 
   const stored = JSON.parse(
     readFileSync(join(user, "custom", "layout.json"), "utf8"),
   );
-  assert.equal(stored.formatVersion, 2);
+  assert.equal(stored.formatVersion, CURRENT_LAYOUT_FORMAT_VERSION);
   assert.equal(stored.buttons.length, 1);
   assert.equal(stored.buttons[0].position.x, 225);
   const restored = repository.read("custom") as ReturnType<
@@ -292,8 +338,30 @@ test("LayoutRepository atomically imports a layout package with its assets", asy
   assert.equal(
     JSON.parse(readFileSync(join(user, "imported", "layout.json"), "utf8"))
       .formatVersion,
-    2,
+    CURRENT_LAYOUT_FORMAT_VERSION,
   );
+});
+
+test("LayoutRepository gives an imported package its own id", async (t) => {
+  const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const user = join(root, "user");
+  const repository = new LayoutRepository({
+    builtinLayoutDir: join(root, "builtin"),
+    userLayoutDir: user,
+    defaultLayoutFile: join(root, "default.json"),
+  });
+  const source = createDefaultLayout();
+  source.name = "shared";
+  source.id = "8f14e45f-ceea-467a-9575-0e02b2c3d479";
+  repository.save("shared", source);
+  const archive = await createLayoutPackage(source, async () => undefined);
+
+  const result = await repository.importPackage(archive);
+
+  assert.equal(result.name, "shared-2");
+  assert.equal(result.layout.id, "shared-2");
+  assert.notEqual(repository.read("shared-2").id, repository.read("shared").id);
 });
 
 test("LayoutRepository imports packages under a new name without overwriting", async (t) => {

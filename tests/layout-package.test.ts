@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import JSZip from "jszip";
 import { createDefaultLayout } from "../src/layout";
-import { serializeLayoutDocument } from "../src/layout-document";
+import {
+  CURRENT_LAYOUT_FORMAT_VERSION,
+  serializeLayoutDocument,
+} from "../src/layout-document";
 import {
   createLayoutPackage,
   InvalidLayoutPackageError,
@@ -60,7 +63,7 @@ test("summarizeLayoutPackage reports the layout and referenced image metadata", 
 
   assert.deepEqual(summarizeLayoutPackage(contents), {
     name: "previewed",
-    formatVersion: 2,
+    formatVersion: CURRENT_LAYOUT_FORMAT_VERSION,
     imageCount: 1,
     imageBytes: image.byteLength,
   });
