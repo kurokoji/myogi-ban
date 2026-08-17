@@ -143,7 +143,7 @@ test("ApiClient creates assets under their layout resource", async (t) => {
 
   await new ApiClient().uploadImage({
     data: "data:image/png;base64,test",
-    layoutName: "player one",
+    layoutId: "player one",
     fileName: "button.png",
   });
 

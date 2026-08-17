@@ -59,7 +59,7 @@ test("web layout flow reaches the viewer websocket", async () => {
     assert.match(await app.getText("/view"), /<title>Viewer<\/title>/);
     const list =
       await app.getJson<{ name: string; builtin: boolean }[]>("/api/layouts");
-    assert.deepEqual(list, [{ name: "default", builtin: true }]);
+    assert.deepEqual(list, [{ id: "default", name: "default", builtin: true }]);
 
     const loaded = await app.getJson<typeof source>(
       "/api/layouts/default?builtin=true",

@@ -5,7 +5,7 @@ import type { ReleaseNotes, WhatsNewStatus } from "./whats-new-manager";
 
 interface UploadImageOptions {
   data: string;
-  layoutName: string;
+  layoutId: string;
   fileName: string;
 }
 
@@ -111,9 +111,9 @@ export class ApiClient {
   }
 
   async uploadImage(options: UploadImageOptions): Promise<UploadImageResult> {
-    const { layoutName, ...body } = options;
+    const { layoutId, ...body } = options;
     return requestJson<UploadImageResult>(
-      `/api/layouts/${encodeURIComponent(layoutName)}/assets`,
+      `/api/layouts/${encodeURIComponent(layoutId)}/assets`,
       jsonRequest(body),
     );
   }

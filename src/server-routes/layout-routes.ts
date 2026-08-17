@@ -11,9 +11,9 @@ import type { Layout } from "../types";
 
 export const LAYOUT_ROUTE_PATHS = [
   "/api/layouts",
-  "/api/layouts/:name",
-  "/api/layouts/:name/rename",
-  "/api/layouts/:name/dimensions",
+  "/api/layouts/:id",
+  "/api/layouts/:id/rename",
+  "/api/layouts/:id/dimensions",
   "/api/layout-imports",
   "/api/default-layout",
   "/api/default-layout/dimensions",
@@ -23,8 +23,8 @@ export function registerLayoutRoutes(
   app: Express,
   layouts: LayoutRepository,
 ): void {
-  app.put("/api/layouts/:name", (req, res) => {
-    const name = req.params.name;
+  app.put("/api/layouts/:id", (req, res) => {
+    const name = req.params.id;
     if (req.body.overwrite === false && layouts.has(name)) {
       res.status(409).json(apiFailure("layout_name_exists"));
       return;
@@ -56,19 +56,19 @@ export function registerLayoutRoutes(
     },
   );
   app.get("/api/layouts", (_req, res) => res.json(apiSuccess(layouts.list())));
-  app.get("/api/layouts/:name/dimensions", (req, res) =>
+  app.get("/api/layouts/:id/dimensions", (req, res) =>
     res.json(
       apiSuccess(
         resolveLayoutDimensions(
-          layouts.read(req.params.name, req.query.builtin === "true"),
+          layouts.read(req.params.id, req.query.builtin === "true"),
         ),
       ),
     ),
   );
-  app.get("/api/layouts/:name", (req, res) => {
+  app.get("/api/layouts/:id", (req, res) => {
     try {
       res.json(
-        apiSuccess(layouts.read(req.params.name, req.query.builtin === "true")),
+        apiSuccess(layouts.read(req.params.id, req.query.builtin === "true")),
       );
     } catch (error) {
       if (error instanceof CorruptLayoutError) {
@@ -78,8 +78,8 @@ export function registerLayoutRoutes(
       throw error;
     }
   });
-  app.post("/api/layouts/:name/rename", (req, res) => {
-    const oldName = req.params.name;
+  app.post("/api/layouts/:id/rename", (req, res) => {
+    const oldName = req.params.id;
     const newName = req.body.newName as string;
     if (
       normalizeLayoutName(newName) !== normalizeLayoutName(oldName) &&
@@ -94,8 +94,8 @@ export function registerLayoutRoutes(
     }
     res.json(apiSuccess());
   });
-  app.delete("/api/layouts/:name", (req, res) => {
-    if (!layouts.delete(req.params.name)) {
+  app.delete("/api/layouts/:id", (req, res) => {
+    if (!layouts.delete(req.params.id)) {
       res.status(404).json(apiFailure("layout_not_found"));
       return;
     }

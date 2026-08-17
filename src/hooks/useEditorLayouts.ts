@@ -201,7 +201,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
           setDefaultLayoutName(name);
           const entry = selectDefaultLayoutEntry(entries, name);
           if (!entry) return;
-          const data = await api.getLayout(entry.name, entry.builtin);
+          const data = await api.getLayout(entry.id, entry.builtin);
           if (data) applyLayout(data, entry.name, entry.builtin);
           setSelectedLayout(layoutSelectionValue(entry.name, entry.builtin));
         }
@@ -362,7 +362,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
       if (fallback) {
         const selection = layoutSelectionValue(fallback.name, fallback.builtin);
         applyLayout(
-          await api.getLayout(fallback.name, fallback.builtin),
+          await api.getLayout(fallback.id, fallback.builtin),
           fallback.name,
           fallback.builtin,
         );
@@ -402,11 +402,11 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
   const uploadImage = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    const uploadLayoutName = layout.name || "custom";
+    const uploadLayoutId = layout.id || layout.name || "custom";
     try {
       const result = await api.uploadImage({
         data: await readFileAsDataUrl(file),
-        layoutName: uploadLayoutName,
+        layoutId: uploadLayoutId,
         fileName: file.name,
       });
       const fileName = result.fileName || file.name;
@@ -414,7 +414,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
       updateLayout((next) => {
         Object.assign(
           next,
-          withUploadedImage(next, target, uploadLayoutName, fileName),
+          withUploadedImage(next, target, uploadLayoutId, fileName),
         );
       });
     } catch (error) {

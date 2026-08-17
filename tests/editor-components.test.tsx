@@ -835,7 +835,7 @@ test("background image layer applies the configured border radius", () => {
   const view = renderComponent(
     <GamepadBackgroundLayer
       background={background}
-      layoutName="sample"
+      layoutId="sample"
       width={500}
       height={250}
       opacity={1}
@@ -850,6 +850,55 @@ test("background image layer applies the configured border radius", () => {
     'url("layout/sample/background.png")',
   );
   assert.equal(layer?.style.borderRadius, "18px");
+});
+
+test("background image layer addresses assets by the layout id", () => {
+  const background = createDefaultLayout().background;
+  background.useCss = false;
+  background.image = "background.png";
+
+  const view = renderComponent(
+    <GamepadBackgroundLayer
+      background={background}
+      layoutId="8f14e45f-ceea-467a-9575-0e02b2c3d479"
+      width={500}
+      height={250}
+      opacity={1}
+    />,
+  );
+
+  assert.equal(
+    view.container.querySelector<HTMLElement>("#gamepad-area-background")?.style
+      .backgroundImage,
+    'url("layout/8f14e45f-ceea-467a-9575-0e02b2c3d479/background.png")',
+  );
+});
+
+test("button layer addresses images by the layout id", () => {
+  const layout = createDefaultLayout();
+  layout.id = "8f14e45f-ceea-467a-9575-0e02b2c3d479";
+  layout.name = "My Layout";
+  layout.totalbuttonshow = 1;
+  layout.defaultbuttons.useCss = false;
+  layout.buttons[0].img = "released.png";
+
+  const view = renderComponent(
+    <ButtonLayer
+      layout={layout}
+      pressedButtons={[]}
+      editorMode={false}
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      onButtonClick={() => {}}
+      onButtonMouseDown={() => {}}
+    />,
+  );
+
+  assert.equal(
+    view.container.querySelector<HTMLElement>("#button0")?.style
+      .backgroundImage,
+    'url("layout/8f14e45f-ceea-467a-9575-0e02b2c3d479/released.png")',
+  );
 });
 
 test("button layer renders every member of a multiple selection", () => {

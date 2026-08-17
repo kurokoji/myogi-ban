@@ -97,6 +97,8 @@ export interface UserSpecificConfig {
 }
 
 export interface LayoutEntry {
+  /** Directory name, asset path segment, and API key. */
+  id: string;
   name: string;
   builtin: boolean;
 }

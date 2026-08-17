@@ -245,6 +245,25 @@ test("LayoutRepository reports corrupted JSON without replacing it", (t) => {
   assert.throws(() => repository.read("broken"), CorruptLayoutError);
 });
 
+test("LayoutRepository lists the id of every layout", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const builtin = join(root, "builtin");
+  const user = join(root, "user");
+  mkdirSync(join(builtin, "preset"), { recursive: true });
+  const repository = new LayoutRepository({
+    builtinLayoutDir: builtin,
+    userLayoutDir: user,
+    defaultLayoutFile: join(root, "default.json"),
+  });
+  repository.save("custom", createDefaultLayout());
+
+  assert.deepEqual(repository.list(), [
+    { id: "preset", name: "preset", builtin: true },
+    { id: "custom", name: "custom", builtin: false },
+  ]);
+});
+
 test("LayoutRepository gives a legacy layout its directory name as its id", (t) => {
   const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));

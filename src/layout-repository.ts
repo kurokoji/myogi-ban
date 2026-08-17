@@ -148,10 +148,12 @@ export class LayoutRepository {
   list(): LayoutEntry[] {
     return [
       ...getLayoutDirs(this.options.builtinLayoutDir).map((name) => ({
+        id: name,
         name,
         builtin: true,
       })),
       ...getLayoutDirs(this.options.userLayoutDir).map((name) => ({
+        id: name,
         name,
         builtin: false,
       })),

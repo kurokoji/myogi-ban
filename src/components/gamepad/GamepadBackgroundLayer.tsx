@@ -4,7 +4,7 @@ import type { BackgroundConfig } from "../../types";
 
 interface GamepadBackgroundLayerProps {
   background: BackgroundConfig;
-  layoutName: string;
+  layoutId: string;
   width: number;
   height: number;
   opacity: number;
@@ -12,13 +12,13 @@ interface GamepadBackgroundLayerProps {
 
 export function GamepadBackgroundLayer({
   background,
-  layoutName,
+  layoutId,
   width,
   height,
   opacity,
 }: GamepadBackgroundLayerProps): React.ReactElement {
   const imageStyle = background.image
-    ? { backgroundImage: `url("layout/${layoutName}/${background.image}")` }
+    ? { backgroundImage: `url("layout/${layoutId}/${background.image}")` }
     : {};
   return (
     <div

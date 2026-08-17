@@ -12,7 +12,8 @@ test("withUploadedImage updates the background without mutating the input", () =
     "background.png",
   );
 
-  assert.equal(updated.name, "custom");
+  assert.equal(updated.id, "custom");
+  assert.equal(updated.name, layout.name);
   assert.equal(updated.background.image, "background.png");
   assert.equal(layout.background.image, "");
 });

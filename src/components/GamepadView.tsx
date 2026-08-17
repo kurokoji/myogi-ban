@@ -953,7 +953,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
       >
         <GamepadBackgroundLayer
           background={layout.background}
-          layoutName={layout.name}
+          layoutId={layout.id || layout.name}
           width={backgroundSize.width}
           height={backgroundSize.height}
           opacity={backgroundOpacity}

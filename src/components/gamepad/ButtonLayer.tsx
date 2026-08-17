@@ -65,7 +65,7 @@ function buttonStyle(
     "--button-text-stroke-color": appearance.textOutlineColor,
   });
   if (!appearance.useCss && useImage) {
-    style.backgroundImage = `url("layout/${layout.name}/${useImage}")`;
+    style.backgroundImage = `url("layout/${layout.id || layout.name}/${useImage}")`;
   }
   if (pressed) {
     if (button.xp || defaultButton.xp)

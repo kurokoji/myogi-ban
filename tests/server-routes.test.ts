@@ -11,14 +11,14 @@ test("server route modules own their public paths", () => {
   assert.deepEqual(STATE_ROUTE_PATHS, ["/api/state"]);
   assert.deepEqual(LAYOUT_ROUTE_PATHS, [
     "/api/layouts",
-    "/api/layouts/:name",
-    "/api/layouts/:name/rename",
-    "/api/layouts/:name/dimensions",
+    "/api/layouts/:id",
+    "/api/layouts/:id/rename",
+    "/api/layouts/:id/dimensions",
     "/api/layout-imports",
     "/api/default-layout",
     "/api/default-layout/dimensions",
   ]);
-  assert.deepEqual(IMAGE_ROUTE_PATHS, ["/api/layouts/:name/assets"]);
+  assert.deepEqual(IMAGE_ROUTE_PATHS, ["/api/layouts/:id/assets"]);
   assert.deepEqual(WINDOW_ROUTE_PATHS, ["/api/window/show"]);
   assert.deepEqual(UPDATE_ROUTE_PATHS, [
     "/api/update/status",

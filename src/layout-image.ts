@@ -4,11 +4,12 @@ import type { Layout } from "./types";
 export function withUploadedImage(
   layout: Layout,
   target: ImageUploadTarget,
-  layoutName: string,
+  layoutId: string,
   fileName: string,
 ): Layout {
   const updated = cloneLayout(layout);
-  updated.name = layoutName;
+  // Assets live in the layout's directory, which the id names.
+  updated.id = layoutId;
   if (target.type === "background") {
     updated.background.image = fileName;
   } else if (target.type === "defaultButton") {
