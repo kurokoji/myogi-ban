@@ -33,6 +33,7 @@ interface ButtonDocument {
   color?: string;
   pressedColor?: string;
   borderColor?: string;
+  pressedBorderColor?: string;
   borderMatchesColor?: boolean;
   transitionSeconds?: number;
   easing?: string;
@@ -124,6 +125,7 @@ function validButton(value: unknown): boolean {
       "color",
       "pressedColor",
       "borderColor",
+      "pressedBorderColor",
       "easing",
       "text",
       "textColor",
@@ -206,6 +208,7 @@ function buttonDocument(button: ButtonLayout): ButtonDocument {
     color: button.cssColor,
     pressedColor: button.cssPressedColor,
     borderColor: button.cssBorderColor,
+    pressedBorderColor: button.cssPressedBorderColor,
     borderMatchesColor: button.cssBorderMatchesColor,
     transitionSeconds: numeric(button.cssTransition),
     easing: button.cssEasing,
@@ -234,6 +237,7 @@ function buttonOverrideDocument(
     "color",
     "pressedColor",
     "borderColor",
+    "pressedBorderColor",
     "borderMatchesColor",
     "transitionSeconds",
     "easing",
@@ -315,6 +319,7 @@ function runtimeButton(button: ButtonDocument): ButtonLayout {
     cssColor: button.color,
     cssPressedColor: button.pressedColor,
     cssBorderColor: button.borderColor,
+    cssPressedBorderColor: button.pressedBorderColor,
     cssBorderMatchesColor: button.borderMatchesColor,
     cssTransition:
       button.transitionSeconds === undefined

@@ -95,6 +95,20 @@ test("layout documents round trip default and per-button border colors", () => {
   assert.equal(restored.buttons[0].cssBorderColor, "#aabbcc");
 });
 
+test("layout documents round trip default and per-button pressed border colors", () => {
+  const source = createDefaultLayout();
+  source.defaultbuttons.cssPressedBorderColor = "#112233";
+  source.buttons[0].cssPressedBorderColor = "#aabbcc";
+
+  const document = serializeLayoutDocument(source);
+  assert.equal(document.buttonDefaults.pressedBorderColor, "#112233");
+  assert.equal(document.buttons[0]?.pressedBorderColor, "#aabbcc");
+
+  const restored = deserializeLayoutDocument(document);
+  assert.equal(restored.defaultbuttons.cssPressedBorderColor, "#112233");
+  assert.equal(restored.buttons[0].cssPressedBorderColor, "#aabbcc");
+});
+
 test("layout documents round trip whether borders match normal colors", () => {
   const source = createDefaultLayout();
   source.defaultbuttons.cssBorderMatchesColor = false;

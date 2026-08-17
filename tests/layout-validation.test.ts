@@ -48,6 +48,13 @@ test("parseImportedLayoutJson accepts bold, italic, and outline text styling", (
   assert.equal(parsed.buttons?.[0]?.cssTextOutlineColor, "#00ff00");
 });
 
+test("parseImportedLayoutJson rejects a non-string pressed border color", () => {
+  assert.throws(
+    () => parseImportedLayoutJson('{"buttons":[{"cssPressedBorderColor":16}]}'),
+    /Invalid layout/,
+  );
+});
+
 test("parseImportedLayoutJson rejects a non-boolean outline flag", () => {
   assert.throws(
     () => parseImportedLayoutJson('{"buttons":[{"cssTextOutline":"yes"}]}'),

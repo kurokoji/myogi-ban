@@ -1054,6 +1054,87 @@ test("a matching border follows the button's effective normal color", () => {
   );
 });
 
+test("a matching border follows the pressed color while pressed", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 1;
+  layout.buttons[0].cssColor = "#abcdef";
+  layout.buttons[0].cssPressedColor = "#123456";
+  layout.buttons[0].cssBorderMatchesColor = true;
+  const view = renderComponent(
+    <ButtonLayer
+      layout={layout}
+      pressedButtons={[true]}
+      editorMode={false}
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      onButtonClick={() => {}}
+      onButtonMouseDown={() => {}}
+    />,
+  );
+
+  const button = view.container.querySelector<HTMLElement>("#button0");
+  assert.equal(
+    button?.style.getPropertyValue("--button-border-color"),
+    "#123456",
+  );
+});
+
+test("a custom border uses the pressed border color while pressed", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 2;
+  layout.defaultbuttons.cssBorderMatchesColor = false;
+  layout.defaultbuttons.cssBorderColor = "#112233";
+  layout.defaultbuttons.cssPressedBorderColor = "#445566";
+  layout.buttons[1].cssPressedBorderColor = "#ff8800";
+  const view = renderComponent(
+    <ButtonLayer
+      layout={layout}
+      pressedButtons={[true, true]}
+      editorMode={false}
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      onButtonClick={() => {}}
+      onButtonMouseDown={() => {}}
+    />,
+  );
+
+  const inherited = view.container.querySelector<HTMLElement>("#button0");
+  assert.equal(
+    inherited?.style.getPropertyValue("--button-border-color"),
+    "#445566",
+  );
+  const overridden = view.container.querySelector<HTMLElement>("#button1");
+  assert.equal(
+    overridden?.style.getPropertyValue("--button-border-color"),
+    "#ff8800",
+  );
+});
+
+test("a custom border falls back to the pressed color while pressed", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 1;
+  layout.buttons[0].cssBorderMatchesColor = false;
+  layout.buttons[0].cssBorderColor = "#112233";
+  layout.buttons[0].cssPressedColor = "#654321";
+  const view = renderComponent(
+    <ButtonLayer
+      layout={layout}
+      pressedButtons={[true]}
+      editorMode={false}
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      onButtonClick={() => {}}
+      onButtonMouseDown={() => {}}
+    />,
+  );
+
+  const button = view.container.querySelector<HTMLElement>("#button0");
+  assert.equal(
+    button?.style.getPropertyValue("--button-border-color"),
+    "#654321",
+  );
+});
+
 test("button text renders bold, italic, and outline styling", () => {
   const layout = createDefaultLayout();
   layout.totalbuttonshow = 1;
@@ -2466,6 +2547,101 @@ test("selected button settings can match the border to its normal color", () => 
 
   fireEvent.click(matchColor);
   assert.equal(updatedLayout?.buttons[0].cssBorderMatchesColor, false);
+});
+
+test("selected button settings update the pressed border color", async () => {
+  const layout = createDefaultLayout();
+  layout.defaultbuttons.cssBorderColor = "#112233";
+  layout.defaultbuttons.cssPressedBorderColor = "#445566";
+  delete layout.buttons[0].useCss;
+  layout.buttons[0].cssBorderMatchesColor = false;
+  let updatedLayout: typeof layout | undefined;
+  const { selectedSettings } = renderSelectedButtonSettings(
+    layout,
+    (update) => {
+      const next = structuredClone(layout);
+      update(next);
+      updatedLayout = next;
+    },
+  );
+
+  const pressedBorderColor = within(selectedSettings).getByLabelText(
+    "borderColorPressed",
+  ) as HTMLInputElement;
+  assert.equal(pressedBorderColor.value, "#445566");
+
+  fireEvent.change(pressedBorderColor, { target: { value: "#ff8800" } });
+  await act(() => new Promise((resolve) => setTimeout(resolve, 250)));
+
+  assert.equal(updatedLayout?.buttons[0].cssPressedBorderColor, "#ff8800");
+});
+
+test("default button settings update the pressed border color", async () => {
+  const layout = createDefaultLayout();
+  layout.defaultbuttons.cssBorderMatchesColor = false;
+  layout.defaultbuttons.cssBorderColor = "#112233";
+  let updatedLayout: typeof layout | undefined;
+  const view = renderComponent(
+    <ButtonSettingsPanel
+      layout={layout}
+      assigningTarget={null}
+      assignmentName=""
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      updateLayout={(update) => {
+        const next = structuredClone(layout);
+        update(next);
+        updatedLayout = next;
+      }}
+      updateSelectedButtons={() => {}}
+      onSelectedButtonChange={() => {}}
+      onAddButton={() => {}}
+      onDeleteSelectedButtons={() => {}}
+      openImagePicker={() => {}}
+      cancelAssignment={() => {}}
+    />,
+  );
+  const details = view.container.querySelector("details");
+  assert.ok(details);
+  details.open = true;
+  fireEvent(details, new componentDocument.defaultView.Event("toggle"));
+
+  const pressedBorderColor = view.getByLabelText(
+    "borderColorPressed",
+  ) as HTMLInputElement;
+  assert.equal(pressedBorderColor.value, layout.defaultbuttons.cssPressedColor);
+
+  fireEvent.change(pressedBorderColor, { target: { value: "#ff8800" } });
+  await act(() => new Promise((resolve) => setTimeout(resolve, 250)));
+
+  assert.equal(updatedLayout?.defaultbuttons.cssPressedBorderColor, "#ff8800");
+});
+
+test("button settings hide the pressed border color while the border matches the normal color", () => {
+  const layout = createDefaultLayout();
+  layout.defaultbuttons.cssBorderMatchesColor = true;
+  const view = renderComponent(
+    <ButtonSettingsPanel
+      layout={layout}
+      assigningTarget={null}
+      assignmentName=""
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      updateLayout={() => {}}
+      updateSelectedButtons={() => {}}
+      onSelectedButtonChange={() => {}}
+      onAddButton={() => {}}
+      onDeleteSelectedButtons={() => {}}
+      openImagePicker={() => {}}
+      cancelAssignment={() => {}}
+    />,
+  );
+  const details = view.container.querySelector("details");
+  assert.ok(details);
+  details.open = true;
+  fireEvent(details, new componentDocument.defaultView.Event("toggle"));
+
+  assert.equal(view.queryByLabelText("borderColorPressed") === null, true);
 });
 
 test("button settings explain how to open per-button settings when unselected", () => {

@@ -16,6 +16,7 @@ export interface ButtonLayout {
   cssColor?: string;
   cssPressedColor?: string;
   cssBorderColor?: string;
+  cssPressedBorderColor?: string;
   cssBorderMatchesColor?: boolean;
   cssTransition?: string;
   cssEasing?: string;

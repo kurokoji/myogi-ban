@@ -27,6 +27,7 @@ const buttonStrings = [
   "cssColor",
   "cssPressedColor",
   "cssBorderColor",
+  "cssPressedBorderColor",
   "cssTransition",
   "cssEasing",
   "text",

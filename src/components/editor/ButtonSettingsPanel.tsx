@@ -21,6 +21,7 @@ import {
   numericValue,
 } from "../../editor-helpers";
 import type { ButtonShape, Layout } from "../../types";
+import { ButtonBorderColorControls } from "./ButtonBorderColorControls";
 import {
   ButtonAdvancedSettings,
   DefaultButtonSettings,
@@ -192,38 +193,35 @@ export function ButtonSettingsPanel(
                       </div>
                     )}
                     {layout.defaultbuttons.useCss && (
-                      <Stack
-                        gap="xs"
-                        className="button-border-color-controls default-button-appearance-control"
-                      >
-                        <Switch
-                          size="sm"
-                          label={t("borderMatchesColor")}
-                          checked={defaultBorderMatchesColor}
-                          onChange={(event) =>
-                            updateLayout((next) => {
-                              next.defaultbuttons.cssBorderMatchesColor =
-                                event.target.checked;
-                            })
-                          }
-                        />
-                        {!defaultBorderMatchesColor && (
-                          <ColorInput
-                            label={t("borderColor")}
-                            value={
-                              layout.defaultbuttons.cssBorderColor ||
-                              layout.defaultbuttons.cssColor ||
-                              "#cccccc"
-                            }
-                            onChange={(event) =>
-                              updateLayout((next) => {
-                                next.defaultbuttons.cssBorderColor =
-                                  event.target.value;
-                              })
-                            }
-                          />
-                        )}
-                      </Stack>
+                      <ButtonBorderColorControls
+                        className="default-button-appearance-control"
+                        matchesColor={defaultBorderMatchesColor}
+                        borderColor={
+                          layout.defaultbuttons.cssBorderColor ||
+                          layout.defaultbuttons.cssColor ||
+                          "#cccccc"
+                        }
+                        pressedBorderColor={
+                          layout.defaultbuttons.cssPressedBorderColor ||
+                          layout.defaultbuttons.cssPressedColor ||
+                          "#999999"
+                        }
+                        onMatchesColorChange={(matches) =>
+                          updateLayout((next) => {
+                            next.defaultbuttons.cssBorderMatchesColor = matches;
+                          })
+                        }
+                        onBorderColorChange={(color) =>
+                          updateLayout((next) => {
+                            next.defaultbuttons.cssBorderColor = color;
+                          })
+                        }
+                        onPressedBorderColorChange={(color) =>
+                          updateLayout((next) => {
+                            next.defaultbuttons.cssPressedBorderColor = color;
+                          })
+                        }
+                      />
                     )}
                     {layout.defaultbuttons.useCss && (
                       <div className="control row default-button-appearance-control">
@@ -841,58 +839,71 @@ export function ButtonSettingsPanel(
                       (layout.buttons[selectedButtonIndex]?.useCss ??
                         layout.defaultbuttons.useCss ??
                         false) && (
-                        <Stack
-                          gap="xs"
-                          className="button-border-color-controls selected-button-appearance-control"
-                        >
-                          <Switch
-                            size="sm"
-                            label={t("borderMatchesColor")}
-                            description={
-                              layout.buttons[selectedButtonIndex]
-                                ?.cssBorderMatchesColor === undefined
-                                ? t("inheritDefault")
-                                : undefined
-                            }
-                            checked={selectedBorderMatchesColor}
-                            onChange={(event) =>
-                              props.updateSelectedButtons((next) => {
-                                next.buttons[
-                                  selectedButtonIndex
-                                ].cssBorderMatchesColor = event.target.checked;
-                              })
-                            }
-                          />
-                          {!selectedBorderMatchesColor && (
-                            <ColorInput
-                              label={t("borderColor")}
-                              description={
-                                !layout.buttons[selectedButtonIndex]
-                                  ?.cssBorderColor ||
-                                layout.buttons[selectedButtonIndex]
-                                  ?.cssBorderColor ===
-                                  layout.defaultbuttons.cssBorderColor
-                                  ? t("inheritDefault")
-                                  : undefined
-                              }
-                              value={
-                                layout.buttons[selectedButtonIndex]
-                                  ?.cssBorderColor ||
-                                layout.defaultbuttons.cssBorderColor ||
-                                layout.buttons[selectedButtonIndex]?.cssColor ||
-                                layout.defaultbuttons.cssColor ||
-                                "#cccccc"
-                              }
-                              onChange={(event) =>
-                                props.updateSelectedButtons((next) => {
-                                  next.buttons[
-                                    selectedButtonIndex
-                                  ].cssBorderColor = event.target.value;
-                                })
-                              }
-                            />
-                          )}
-                        </Stack>
+                        <ButtonBorderColorControls
+                          className="selected-button-appearance-control"
+                          matchesColor={selectedBorderMatchesColor}
+                          matchesColorDescription={
+                            layout.buttons[selectedButtonIndex]
+                              ?.cssBorderMatchesColor === undefined
+                              ? t("inheritDefault")
+                              : undefined
+                          }
+                          borderColor={
+                            layout.buttons[selectedButtonIndex]
+                              ?.cssBorderColor ||
+                            layout.defaultbuttons.cssBorderColor ||
+                            layout.buttons[selectedButtonIndex]?.cssColor ||
+                            layout.defaultbuttons.cssColor ||
+                            "#cccccc"
+                          }
+                          borderColorDescription={
+                            !layout.buttons[selectedButtonIndex]
+                              ?.cssBorderColor ||
+                            layout.buttons[selectedButtonIndex]
+                              ?.cssBorderColor ===
+                              layout.defaultbuttons.cssBorderColor
+                              ? t("inheritDefault")
+                              : undefined
+                          }
+                          pressedBorderColor={
+                            layout.buttons[selectedButtonIndex]
+                              ?.cssPressedBorderColor ||
+                            layout.defaultbuttons.cssPressedBorderColor ||
+                            layout.buttons[selectedButtonIndex]
+                              ?.cssPressedColor ||
+                            layout.defaultbuttons.cssPressedColor ||
+                            "#999999"
+                          }
+                          pressedBorderColorDescription={
+                            !layout.buttons[selectedButtonIndex]
+                              ?.cssPressedBorderColor ||
+                            layout.buttons[selectedButtonIndex]
+                              ?.cssPressedBorderColor ===
+                              layout.defaultbuttons.cssPressedBorderColor
+                              ? t("inheritDefault")
+                              : undefined
+                          }
+                          onMatchesColorChange={(matches) =>
+                            props.updateSelectedButtons((next) => {
+                              next.buttons[
+                                selectedButtonIndex
+                              ].cssBorderMatchesColor = matches;
+                            })
+                          }
+                          onBorderColorChange={(color) =>
+                            props.updateSelectedButtons((next) => {
+                              next.buttons[selectedButtonIndex].cssBorderColor =
+                                color;
+                            })
+                          }
+                          onPressedBorderColorChange={(color) =>
+                            props.updateSelectedButtons((next) => {
+                              next.buttons[
+                                selectedButtonIndex
+                              ].cssPressedBorderColor = color;
+                            })
+                          }
+                        />
                       )}
                     {selectedButtonIndex !== null &&
                       (layout.buttons[selectedButtonIndex]?.useCss ??

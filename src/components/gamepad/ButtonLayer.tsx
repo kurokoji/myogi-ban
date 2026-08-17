@@ -46,9 +46,15 @@ function buttonStyle(
   const borderMatchesColor =
     button.cssBorderMatchesColor ??
     (button.cssBorderColor === undefined ? defaultBorderMatchesColor : false);
-  const cssBorderColor = borderMatchesColor
+  const cssNormalBorderColor = borderMatchesColor
     ? cssColor
     : (button.cssBorderColor ?? defaultButton.cssBorderColor ?? cssColor);
+  const cssPressedBorderColor = borderMatchesColor
+    ? cssPressedColor
+    : (button.cssPressedBorderColor ??
+      defaultButton.cssPressedBorderColor ??
+      cssPressedColor);
+  const cssBorderColor = pressed ? cssPressedBorderColor : cssNormalBorderColor;
   const cssTransition =
     button.cssTransition ?? defaultButton.cssTransition ?? "0.02";
   const cssEasing = button.cssEasing ?? defaultButton.cssEasing ?? "ease";
