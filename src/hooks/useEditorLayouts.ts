@@ -26,6 +26,7 @@ import {
   type StickMapping,
 } from "../gamepad";
 import { ensureLayoutDefaults } from "../layout";
+import { createLayoutId } from "../layout-id";
 import { withUploadedImage } from "../layout-image";
 import {
   isLayoutNameTaken,
@@ -252,20 +253,21 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     });
   };
 
-  const saveToName = async (name: string, overwrite = true) => {
+  const saveToName = async (name: string, overwrite = true, id = layoutId) => {
     const data = buildLayoutForSave(
       layout,
       name,
       buttonMappings,
       stickMappings,
+      id,
     );
     try {
-      await api.saveLayout(name, data, overwrite);
+      await api.saveLayout(id, data, overwrite);
       await refreshLayouts();
       restoreLayout(data);
       setLayoutName(name);
       setCurrentBuiltin(false);
-      setSelectedLayout(layoutSelectionValue(name, false));
+      setSelectedLayout(layoutSelectionValue(id, false));
       setCleanSignature(
         createEditorSnapshotSignature(data, buttonMappings, stickMappings),
       );
@@ -296,7 +298,8 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
       setStatus({ kind: "error", message: messages.layoutNameExists });
       return false;
     }
-    return saveToName(trimmedName, false);
+    // Saving under a new name creates a layout, which gets its own id.
+    return saveToName(trimmedName, false, createLayoutId());
   };
 
   const renameLayout = async (name: string) => {

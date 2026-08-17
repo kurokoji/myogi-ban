@@ -5,6 +5,7 @@ import "./component-render";
 import { act, renderHook } from "@testing-library/react";
 import { type ApiClient, ApiError } from "../src/api";
 import { useEditorLayouts } from "../src/hooks/useEditorLayouts";
+import { isGeneratedLayoutId } from "../src/layout-id";
 import { createDefaultLayout } from "../src/layout";
 
 const baseMessages = {
@@ -60,6 +61,51 @@ test("saving a layout preserves editor undo history", async () => {
 
   assert.equal(saveCalls, 1);
   assert.equal(clearHistoryCalls, 0);
+});
+
+test("saving under a new name creates a layout with a generated id", async () => {
+  const saved: Array<{ id: string; name: string }> = [];
+  const api = {
+    getDefaultLayout: async () => {
+      throw new Error("no default layout");
+    },
+    getLayouts: async () => [],
+    saveLayout: async (
+      id: string,
+      data: ReturnType<typeof createDefaultLayout>,
+    ) => {
+      saved.push({ id, name: data.name });
+    },
+  } as unknown as ApiClient;
+  const layout = createDefaultLayout();
+  const ignoreUpdate = () => {};
+  const options = {
+    api,
+    layout,
+    buttonMappings: [],
+    stickMappings: [],
+    setButtonMappings: ignoreUpdate,
+    setStickMappings: ignoreUpdate,
+    setSelection: ignoreUpdate,
+    restoreLayout: ignoreUpdate,
+    clearLayoutHistory: () => {},
+    updateLayout: ignoreUpdate,
+    messages: baseMessages,
+  };
+  const { result } = renderHook(() => useEditorLayouts(options));
+
+  await act(async () => {
+    await result.current.saveLayoutAs("My Layout");
+  });
+  await act(async () => {
+    await result.current.saveLayoutAs("My Other Layout");
+  });
+
+  assert.equal(saved.length, 2);
+  assert.equal(saved[0].name, "My Layout");
+  assert.equal(isGeneratedLayoutId(saved[0].id), true);
+  assert.equal(isGeneratedLayoutId(saved[1].id), true);
+  assert.notEqual(saved[0].id, saved[1].id);
 });
 
 test("opening a layout with unsaved changes defers to a confirmation instead of a blocking dialog", async () => {

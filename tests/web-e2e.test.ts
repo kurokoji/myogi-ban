@@ -139,7 +139,8 @@ test("web server atomically imports a binary layout package", async () => {
     assert.equal(imported.name, "package-import");
     assert.equal(imported.layout.background.image, "background.png");
     assert.equal(
-      (await app.getJson<typeof layout>("/api/layouts/package-import")).name,
+      (await app.getJson<typeof layout>(`/api/layouts/${imported.layout.id}`))
+        .name,
       "package-import",
     );
   } finally {

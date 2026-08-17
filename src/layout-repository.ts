@@ -7,6 +7,7 @@ import {
   deserializeLayoutDocument,
   serializeLayoutDocument,
 } from "./layout-document";
+import { createLayoutId } from "./layout-id";
 import {
   assertValidLayoutName,
   isLayoutNameTaken,
@@ -227,13 +228,14 @@ export class LayoutRepository {
     }
 
     ensureDir(this.options.userLayoutDir);
-    const targetDir = path.join(this.options.userLayoutDir, name);
+    // An imported copy is a new layout, so it is given its own id.
+    const id = createLayoutId();
+    const targetDir = path.join(this.options.userLayoutDir, id);
     const stagingDir = path.join(
       this.options.userLayoutDir,
-      `.${name}.import-${process.pid}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      `.${id}.import-${process.pid}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
     );
-    // An imported copy is a new layout, so it never reuses the packaged id.
-    const layout = { ...contents.layout, name, id: name };
+    const layout = { ...contents.layout, name, id };
     try {
       ensureDir(stagingDir);
       for (const [fileName, bytes] of contents.assets) {
@@ -259,24 +261,22 @@ export class LayoutRepository {
     return true;
   }
 
-  rename(oldName: string, newName: string): boolean {
-    assertValidLayoutName(oldName);
+  /**
+   * Renaming edits the stored name only. The directory, the id, the assets,
+   * and anything pointing at the layout stay where they are.
+   */
+  rename(id: string, newName: string): boolean {
+    assertValidLayoutName(id);
     assertValidLayoutName(newName);
-    const oldDir = path.join(this.options.userLayoutDir, oldName);
-    if (!fs.existsSync(oldDir)) return false;
-    const newDir = path.join(this.options.userLayoutDir, newName);
-    fs.renameSync(oldDir, newDir);
+    const layoutDir = path.join(this.options.userLayoutDir, id);
+    const jsonPath = path.join(layoutDir, "layout.json");
+    if (!fs.existsSync(jsonPath)) return false;
 
-    const jsonPath = path.join(newDir, "layout.json");
-    if (fs.existsSync(jsonPath)) {
-      const layout = deserializeLayoutDocument(readJson(jsonPath));
-      writeJsonAtomically(
-        jsonPath,
-        serializeLayoutDocument({ ...layout, name: newName, id: newName }),
-      );
-    }
-
-    if (this.getDefault().id === oldName) this.setDefault(newName);
+    const layout = deserializeLayoutDocument(readJson(jsonPath));
+    writeJsonAtomically(
+      jsonPath,
+      serializeLayoutDocument({ ...layout, name: newName, id }),
+    );
     return true;
   }
 

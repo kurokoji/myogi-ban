@@ -15,6 +15,7 @@ import {
   CURRENT_LAYOUT_FORMAT_VERSION,
   serializeLayoutDocument,
 } from "../src/layout-document";
+import { isGeneratedLayoutId } from "../src/layout-id";
 import { createLayoutPackage } from "../src/layout-package";
 import {
   CorruptLayoutError,
@@ -91,7 +92,7 @@ test("LayoutRepository deletes user layouts only", (t) => {
   assert.throws(() => repository.delete("../builtin"), /Invalid layout name/);
 });
 
-test("LayoutRepository renames a user layout, moving its directory and updating the stored name", (t) => {
+test("LayoutRepository renames a layout in place, keeping its directory and id", (t) => {
   const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const userLayoutDir = join(root, "user");
@@ -104,17 +105,18 @@ test("LayoutRepository renames a user layout, moving its directory and updating 
 
   assert.equal(repository.rename("custom", "renamed"), true);
 
-  assert.equal(existsSync(join(userLayoutDir, "custom")), false);
-  assert.equal(existsSync(join(userLayoutDir, "renamed")), true);
+  assert.equal(existsSync(join(userLayoutDir, "custom")), true);
+  assert.equal(existsSync(join(userLayoutDir, "renamed")), false);
   const stored = JSON.parse(
-    readFileSync(join(userLayoutDir, "renamed", "layout.json"), "utf8"),
+    readFileSync(join(userLayoutDir, "custom", "layout.json"), "utf8"),
   );
   assert.equal(stored.name, "renamed");
-  assert.equal(repository.read("renamed").name, "renamed");
-  assert.equal(repository.read("renamed").id, "renamed");
+  assert.equal(stored.id, "custom");
+  assert.equal(repository.read("custom").name, "renamed");
+  assert.equal(repository.read("custom").id, "custom");
 });
 
-test("LayoutRepository rename repoints the default layout pointer when renaming the default layout", (t) => {
+test("LayoutRepository rename keeps a renamed layout as the default", (t) => {
   const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const repository = new LayoutRepository({
@@ -127,24 +129,30 @@ test("LayoutRepository rename repoints the default layout pointer when renaming 
 
   repository.rename("custom", "renamed");
 
-  assert.equal(repository.getDefault().id, "renamed");
+  assert.equal(repository.getDefault().id, "custom");
+  assert.equal(repository.readDefault().name, "renamed");
 });
 
-test("LayoutRepository rename leaves the default layout pointer alone for a non-default layout", (t) => {
+test("LayoutRepository rename keeps a layout's assets reachable", (t) => {
   const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
+  const userLayoutDir = join(root, "user");
   const repository = new LayoutRepository({
     builtinLayoutDir: join(root, "builtin"),
-    userLayoutDir: join(root, "user"),
+    userLayoutDir,
     defaultLayoutFile: join(root, "default.json"),
   });
-  repository.save("custom", createDefaultLayout());
-  repository.save("other", createDefaultLayout());
-  repository.setDefault("other");
+  const layout = createDefaultLayout();
+  layout.background.image = "background.png";
+  repository.save("custom", layout);
+  writeFileSync(join(userLayoutDir, "custom", "background.png"), PNG_BYTES);
 
   repository.rename("custom", "renamed");
 
-  assert.equal(repository.getDefault().id, "other");
+  assert.equal(
+    existsSync(join(userLayoutDir, "custom", "background.png")),
+    true,
+  );
 });
 
 test("LayoutRepository rename returns false for built-in or missing layouts", (t) => {
@@ -389,12 +397,13 @@ test("LayoutRepository atomically imports a layout package with its assets", asy
 
   assert.equal(result.name, "imported");
   assert.equal(result.layout.background.image, "background.png");
+  const importedDir = join(user, result.layout.id);
   assert.deepEqual(
-    readFileSync(join(user, "imported", "background.png")),
+    readFileSync(join(importedDir, "background.png")),
     Buffer.from(PNG_BYTES),
   );
   assert.equal(
-    JSON.parse(readFileSync(join(user, "imported", "layout.json"), "utf8"))
+    JSON.parse(readFileSync(join(importedDir, "layout.json"), "utf8"))
       .formatVersion,
     CURRENT_LAYOUT_FORMAT_VERSION,
   );
@@ -417,9 +426,10 @@ test("LayoutRepository gives an imported package its own id", async (t) => {
 
   const result = await repository.importPackage(archive);
 
-  assert.equal(result.name, "shared-2");
-  assert.equal(result.layout.id, "shared-2");
-  assert.notEqual(repository.read("shared-2").id, repository.read("shared").id);
+  assert.equal(isGeneratedLayoutId(result.layout.id), true);
+  assert.notEqual(result.layout.id, source.id);
+  assert.equal(existsSync(join(user, result.layout.id, "layout.json")), true);
+  assert.equal(repository.read(result.layout.id).name, result.name);
 });
 
 test("LayoutRepository imports packages under a new name without overwriting", async (t) => {
@@ -444,7 +454,7 @@ test("LayoutRepository imports packages under a new name without overwriting", a
     readFileSync(join(user, "imported", "keep.txt"), "utf8"),
     "keep",
   );
-  assert.equal(existsSync(join(user, "imported-2", "layout.json")), true);
+  assert.equal(existsSync(join(user, result.layout.id, "layout.json")), true);
 });
 
 test("LayoutRepository leaves no staging data for an invalid package", async (t) => {

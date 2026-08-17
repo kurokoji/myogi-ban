@@ -18,14 +18,15 @@ export function buildLayoutForSave(
   name: string,
   buttonMappings: ButtonMapping[],
   stickMappings: StickMapping[],
+  id = name,
 ): Layout {
   const saved = cloneLayout(layout);
   return {
     ...saved,
     sourceFormatVersion: CURRENT_LAYOUT_FORMAT_VERSION,
     version: CURRENT_LAYOUT_VERSION,
-    // Saving under a name writes to that directory, which is the layout's id.
-    id: name,
+    // The id names the directory this layout is written to.
+    id,
     name,
     buttonMappings: [...buttonMappings],
     stickMappings: [...stickMappings],
