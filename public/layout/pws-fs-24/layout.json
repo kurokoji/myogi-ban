@@ -1,5 +1,6 @@
 {
-  "formatVersion": 2,
+  "formatVersion": 3,
+  "id": "pws-fs-24",
   "name": "PWS FS-24",
   "stick": {
     "visible": true,

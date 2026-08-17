@@ -1,5 +1,6 @@
 {
-  "formatVersion": 2,
+  "formatVersion": 3,
+  "id": "hit-box-ultra",
   "name": "HIT BOX ULTRA",
   "stick": {
     "visible": false,

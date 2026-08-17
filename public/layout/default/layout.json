@@ -1,5 +1,6 @@
 {
-  "formatVersion": 2,
+  "formatVersion": 3,
+  "id": "default",
   "name": "default",
   "stick": {
     "visible": true,

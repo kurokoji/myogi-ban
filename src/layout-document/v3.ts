@@ -32,10 +32,12 @@ export function isLayoutDocumentV3(value: unknown): value is LayoutDocumentV3 {
 }
 
 export function serializeLayoutDocument(layout: Layout): LayoutDocumentV3 {
+  const { formatVersion, ...rest } = serializeLayoutDocumentV2(layout);
+  void formatVersion;
   return {
-    ...serializeLayoutDocumentV2(layout),
     formatVersion: CURRENT_LAYOUT_FORMAT_VERSION,
     id: layout.id ?? "",
+    ...rest,
   };
 }
 
