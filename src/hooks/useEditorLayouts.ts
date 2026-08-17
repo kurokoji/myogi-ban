@@ -106,7 +106,9 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
   const [selectedLayout, setSelectedLayout] = useState("");
   const [layoutName, setLayoutName] = useState("mypreset");
   const [currentBuiltin, setCurrentBuiltin] = useState(false);
-  const [defaultLayoutName, setDefaultLayoutName] = useState("");
+  // The name is what the user reads; the id is what the server is keyed on.
+  const layoutId = layout.id || layoutName;
+  const [defaultLayoutId, setDefaultLayoutId] = useState("");
   const [cleanSignature, setCleanSignature] = useState("");
   const [status, setStatus] = useState<OperationStatus>(null);
   const [importInProgress, setImportInProgress] = useState(false);
@@ -195,15 +197,15 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     const loadDefaultLayout = async () => {
       try {
         const defaultLayout = await api.getDefaultLayout();
-        const name = defaultLayout.name || "preset";
+        const id = defaultLayout.id || "preset";
         const entries = await refreshLayouts();
         if (!cancelled) {
-          setDefaultLayoutName(name);
-          const entry = selectDefaultLayoutEntry(entries, name);
+          setDefaultLayoutId(id);
+          const entry = selectDefaultLayoutEntry(entries, id);
           if (!entry) return;
           const data = await api.getLayout(entry.id, entry.builtin);
           if (data) applyLayout(data, entry.name, entry.builtin);
-          setSelectedLayout(layoutSelectionValue(entry.name, entry.builtin));
+          setSelectedLayout(layoutSelectionValue(entry.id, entry.builtin));
         }
       } catch {
         console.log("No default layout found, using built-in default");
@@ -217,14 +219,14 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
   }, [api, applyLayout, refreshLayouts]);
 
   const performOpenLayout = async (selection: string) => {
-    const name = layoutNameFromSelection(selection);
+    const id = layoutNameFromSelection(selection);
     try {
       const entry = layoutNames.find(
-        (item) => layoutSelectionValue(item.name, item.builtin) === selection,
+        (item) => layoutSelectionValue(item.id, item.builtin) === selection,
       );
       applyLayout(
-        await api.getLayout(name, entry?.builtin ?? false),
-        name,
+        await api.getLayout(id, entry?.builtin ?? false),
+        entry?.name ?? id,
         entry?.builtin ?? false,
       );
       setSelectedLayout(selection);
@@ -313,10 +315,10 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
       cleanSignature ===
       createEditorSnapshotSignature(layout, buttonMappings, stickMappings);
     try {
-      await api.renameLayout(layoutName, trimmedName);
-      const wasDefault = defaultLayoutName === layoutName;
+      await api.renameLayout(layoutId, trimmedName);
+      const wasDefault = defaultLayoutId === layoutId;
       await refreshLayouts();
-      const renamed = { ...layout, name: trimmedName };
+      const renamed = { ...layout, name: trimmedName, id: trimmedName };
       restoreLayout(renamed);
       setLayoutName(trimmedName);
       setSelectedLayout(layoutSelectionValue(trimmedName, false));
@@ -325,7 +327,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
           createEditorSnapshotSignature(renamed, buttonMappings, stickMappings),
         );
       }
-      if (wasDefault) setDefaultLayoutName(trimmedName);
+      if (wasDefault) setDefaultLayoutId(trimmedName);
       setStatus({ kind: "success", message: messages.renamed });
       return true;
     } catch (error) {
@@ -342,10 +344,10 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
   };
 
   const setDefaultLayout = async () => {
-    const name = layoutName || layout.name || "custom";
+    const id = layoutId;
     try {
-      await api.setDefaultLayout(name);
-      setDefaultLayoutName(name);
+      await api.setDefaultLayout(id);
+      setDefaultLayoutId(id);
       setStatus({ kind: "success", message: messages.defaultSaved });
     } catch (error) {
       console.error("Failed to set default layout:", error);
@@ -356,24 +358,24 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
   const performDeleteLayout = async () => {
     try {
       const defaultLayout = await api.getDefaultLayout();
-      await api.deleteLayout(layoutName);
+      await api.deleteLayout(layoutId);
       const entries = await refreshLayouts();
-      const fallback = selectLayoutAfterDelete(entries, layoutName);
+      const fallback = selectLayoutAfterDelete(entries, layoutId);
       if (fallback) {
-        const selection = layoutSelectionValue(fallback.name, fallback.builtin);
+        const selection = layoutSelectionValue(fallback.id, fallback.builtin);
         applyLayout(
           await api.getLayout(fallback.id, fallback.builtin),
           fallback.name,
           fallback.builtin,
         );
         setSelectedLayout(selection);
-        if (defaultLayout.name === layoutName) {
-          await api.setDefaultLayout(fallback.name);
-          setDefaultLayoutName(fallback.name);
+        if (defaultLayout.id === layoutId) {
+          await api.setDefaultLayout(fallback.id);
+          setDefaultLayoutId(fallback.id);
         }
       } else {
         setSelectedLayout("");
-        if (defaultLayout.name === layoutName) setDefaultLayoutName("");
+        if (defaultLayout.id === layoutId) setDefaultLayoutId("");
       }
       setStatus({ kind: "success", message: messages.deleted });
     } catch (error) {
@@ -554,7 +556,6 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     isDirty:
       cleanSignature !==
       createEditorSnapshotSignature(layout, buttonMappings, stickMappings),
-    isDefaultLayout:
-      defaultLayoutName !== "" && defaultLayoutName === layoutName,
+    isDefaultLayout: defaultLayoutId !== "" && defaultLayoutId === layoutId,
   };
 }

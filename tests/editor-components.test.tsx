@@ -378,6 +378,43 @@ test("theme control selects automatic, light, and dark schemes with icons", () =
   );
 });
 
+test("the layout list shows each layout's name and opens it by id", () => {
+  let opened = "";
+  const view = renderComponent(
+    <LayoutSettingsPanel
+      layoutNames={[
+        { id: "hit-box-ultra", name: "HIT BOX ULTRA", builtin: true },
+        { id: "mine", name: "My Layout", builtin: false },
+      ]}
+      selectedLayout="mine:user"
+      layoutName="My Layout"
+      currentBuiltin={false}
+      isDefaultLayout={false}
+      isDirty={false}
+      status={null}
+      openLayout={(value) => {
+        opened = value;
+      }}
+      saveLayout={() => {}}
+      saveLayoutAs={async () => true}
+      renameLayout={async () => true}
+      deleteLayout={() => {}}
+      setDefaultLayout={() => {}}
+      exportLayout={() => {}}
+      importLayout={() => {}}
+    />,
+  );
+
+  const select = view.getByRole("combobox", { name: "" }) as HTMLSelectElement;
+  assert.deepEqual(
+    Array.from(select.options).map((option) => option.textContent),
+    ["HIT BOX ULTRA (builtIn)", "My Layout"],
+  );
+
+  fireEvent.change(select, { target: { value: "hit-box-ultra:builtin" } });
+  assert.equal(opened, "hit-box-ultra:builtin");
+});
+
 test("duplicate layout names disable save-as before submitting", () => {
   let saveCalls = 0;
   const view = renderComponent(

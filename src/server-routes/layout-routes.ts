@@ -108,7 +108,7 @@ export function registerLayoutRoutes(
     res.json(apiSuccess(resolveLayoutDimensions(layouts.readDefault()))),
   );
   app.put("/api/default-layout", (req, res) => {
-    layouts.setDefault(req.body.name);
+    layouts.setDefault(req.body.id ?? req.body.name);
     res.json(apiSuccess());
   });
 }

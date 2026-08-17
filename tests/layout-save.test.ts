@@ -55,6 +55,7 @@ test("buildLayoutForSave uses the current layout format version", () => {
 
   const saved = buildLayoutForSave(layout, "custom", [], []);
 
+  assert.equal(saved.id, "custom");
   assert.equal(saved.version, CURRENT_LAYOUT_VERSION);
   assert.equal(saved.sourceFormatVersion, CURRENT_LAYOUT_FORMAT_VERSION);
   assert.equal(layout.sourceFormatVersion, 1);

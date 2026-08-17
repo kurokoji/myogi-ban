@@ -102,12 +102,12 @@ export class ApiClient {
     }
   }
 
-  async getDefaultLayout(): Promise<{ name: string }> {
-    return requestJson<{ name: string }>("/api/default-layout");
+  async getDefaultLayout(): Promise<{ id: string }> {
+    return requestJson<{ id: string }>("/api/default-layout");
   }
 
-  async setDefaultLayout(name: string): Promise<void> {
-    await request("/api/default-layout", jsonRequest({ name }, "PUT"));
+  async setDefaultLayout(id: string): Promise<void> {
+    await request("/api/default-layout", jsonRequest({ id }, "PUT"));
   }
 
   async uploadImage(options: UploadImageOptions): Promise<UploadImageResult> {

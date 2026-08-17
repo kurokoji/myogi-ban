@@ -119,7 +119,7 @@ export function LayoutSettingsPanel(
             value={props.selectedLayout}
             onChange={(event) => props.openLayout(event.target.value)}
             data={props.layoutNames.map((entry) => ({
-              value: `${entry.name}:${entry.builtin ? "builtin" : "user"}`,
+              value: `${entry.id}:${entry.builtin ? "builtin" : "user"}`,
               label: entry.builtin
                 ? `${entry.name} (${t("builtIn")})`
                 : entry.name,

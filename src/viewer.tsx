@@ -56,17 +56,18 @@ function ViewerApp(): React.ReactElement {
         const requestedEntry = request
           ? entries.find(
               (entry) =>
-                entry.name === request.name &&
+                // Sources saved before ids existed refer to layouts by name.
+                (entry.id === request.name || entry.name === request.name) &&
                 (!request.builtin || entry.builtin),
             )
           : undefined;
         fixedLayoutRef.current = Boolean(requestedEntry);
         const entry =
           requestedEntry ??
-          selectDefaultLayoutEntry(entries, defaultLayout.name || "default");
+          selectDefaultLayoutEntry(entries, defaultLayout.id || "default");
         return entry
           ? apiRef.current.getLayout(
-              entry.name,
+              entry.id,
               requestedEntry ? (request?.builtin ?? false) : entry.builtin,
             )
           : null;

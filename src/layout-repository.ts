@@ -145,16 +145,35 @@ export class LayoutRepository {
     }
   }
 
+  /**
+   * A layout that cannot be read still belongs in the list, so its id stands
+   * in for the name it could not report.
+   */
+  private storedName(baseDir: string, id: string): string {
+    const jsonPath = path.join(baseDir, id, "layout.json");
+    if (!fs.existsSync(jsonPath)) return id;
+    try {
+      const document = JSON.parse(fs.readFileSync(jsonPath, "utf8")) as {
+        name?: unknown;
+      };
+      return typeof document.name === "string" && document.name
+        ? document.name
+        : id;
+    } catch {
+      return id;
+    }
+  }
+
   list(): LayoutEntry[] {
     return [
-      ...getLayoutDirs(this.options.builtinLayoutDir).map((name) => ({
-        id: name,
-        name,
+      ...getLayoutDirs(this.options.builtinLayoutDir).map((id) => ({
+        id,
+        name: this.storedName(this.options.builtinLayoutDir, id),
         builtin: true,
       })),
-      ...getLayoutDirs(this.options.userLayoutDir).map((name) => ({
-        id: name,
-        name,
+      ...getLayoutDirs(this.options.userLayoutDir).map((id) => ({
+        id,
+        name: this.storedName(this.options.userLayoutDir, id),
         builtin: false,
       })),
     ];
@@ -179,15 +198,15 @@ export class LayoutRepository {
     }
   }
 
-  save(name: string, layout: Layout): void {
-    assertValidLayoutName(name);
-    const layoutDir = path.join(this.options.userLayoutDir, name);
+  save(id: string, layout: Layout): void {
+    assertValidLayoutName(id);
+    const layoutDir = path.join(this.options.userLayoutDir, id);
     ensureDir(layoutDir);
-    this.copyAssets(layout, layout.name || name, name);
+    this.copyAssets(layout, layout.id || layout.name || id, id);
     // The directory is the identity, so a copy never carries the source id.
     writeJsonAtomically(
       path.join(layoutDir, "layout.json"),
-      serializeLayoutDocument({ ...layout, name, id: name }),
+      serializeLayoutDocument({ ...layout, name: layout.name || id, id }),
     );
     removeUnreferencedAssets(layoutDir, layout);
   }
@@ -257,7 +276,7 @@ export class LayoutRepository {
       );
     }
 
-    if (this.getDefault().name === oldName) this.setDefault(newName);
+    if (this.getDefault().id === oldName) this.setDefault(newName);
     return true;
   }
 
@@ -278,13 +297,18 @@ export class LayoutRepository {
     return safeFileName;
   }
 
-  getDefault(): { name: string } {
+  /** Pointer files written before v3 stored the id under `name`. */
+  getDefault(): { id: string } {
     if (!fs.existsSync(this.options.defaultLayoutFile))
-      return { name: "default" };
+      return { id: "default" };
     try {
-      return readJson(this.options.defaultLayoutFile) as { name: string };
+      const stored = readJson(this.options.defaultLayoutFile) as {
+        id?: string;
+        name?: string;
+      };
+      return { id: stored.id || stored.name || "default" };
     } catch (error) {
-      if (error instanceof CorruptLayoutError) return { name: "default" };
+      if (error instanceof CorruptLayoutError) return { id: "default" };
       throw error;
     }
   }
@@ -292,13 +316,13 @@ export class LayoutRepository {
   readDefault(): Layout {
     const entry = selectDefaultLayoutEntry(
       this.list(),
-      this.getDefault().name || "default",
+      this.getDefault().id || "default",
     );
-    return entry ? this.read(entry.name, entry.builtin) : this.read("default");
+    return entry ? this.read(entry.id, entry.builtin) : this.read("default");
   }
 
-  setDefault(name: string): void {
-    assertValidLayoutName(name);
-    writeJsonAtomically(this.options.defaultLayoutFile, { name });
+  setDefault(id: string): void {
+    assertValidLayoutName(id);
+    writeJsonAtomically(this.options.defaultLayoutFile, { id });
   }
 }

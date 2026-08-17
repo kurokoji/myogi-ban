@@ -2,10 +2,10 @@ import type { LayoutEntry } from "./types";
 
 export function selectLayoutAfterDelete(
   layouts: LayoutEntry[],
-  deletedName: string,
+  deletedId: string,
 ): LayoutEntry | undefined {
   return (
-    layouts.find((entry) => entry.name === deletedName && entry.builtin) ??
+    layouts.find((entry) => entry.id === deletedId && entry.builtin) ??
     layouts[0]
   );
 }

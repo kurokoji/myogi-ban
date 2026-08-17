@@ -127,7 +127,7 @@ test("LayoutRepository rename repoints the default layout pointer when renaming 
 
   repository.rename("custom", "renamed");
 
-  assert.equal(repository.getDefault().name, "renamed");
+  assert.equal(repository.getDefault().id, "renamed");
 });
 
 test("LayoutRepository rename leaves the default layout pointer alone for a non-default layout", (t) => {
@@ -144,7 +144,7 @@ test("LayoutRepository rename leaves the default layout pointer alone for a non-
 
   repository.rename("custom", "renamed");
 
-  assert.equal(repository.getDefault().name, "other");
+  assert.equal(repository.getDefault().id, "other");
 });
 
 test("LayoutRepository rename returns false for built-in or missing layouts", (t) => {
@@ -256,11 +256,50 @@ test("LayoutRepository lists the id of every layout", (t) => {
     userLayoutDir: user,
     defaultLayoutFile: join(root, "default.json"),
   });
-  repository.save("custom", createDefaultLayout());
+  const layout = createDefaultLayout();
+  layout.name = "custom";
+  repository.save("custom", layout);
 
   assert.deepEqual(repository.list(), [
     { id: "preset", name: "preset", builtin: true },
     { id: "custom", name: "custom", builtin: false },
+  ]);
+});
+
+test("LayoutRepository lists the stored name of each layout", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const user = join(root, "user");
+  const repository = new LayoutRepository({
+    builtinLayoutDir: join(root, "builtin"),
+    userLayoutDir: user,
+    defaultLayoutFile: join(root, "default.json"),
+  });
+  const layout = createDefaultLayout();
+  layout.name = "HIT BOX ULTRA";
+  repository.save("hit-box-ultra", layout);
+
+  assert.deepEqual(repository.list(), [
+    { id: "hit-box-ultra", name: "HIT BOX ULTRA", builtin: false },
+  ]);
+});
+
+test("LayoutRepository lists a layout with unreadable json under its id", (t) => {
+  const root = mkdtempSync(join(tmpdir(), "myogi-ban-layouts-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const user = join(root, "user");
+  mkdirSync(join(user, "broken"), { recursive: true });
+  writeFileSync(join(user, "broken", "layout.json"), "{ not json");
+  mkdirSync(join(user, "empty"), { recursive: true });
+  const repository = new LayoutRepository({
+    builtinLayoutDir: join(root, "builtin"),
+    userLayoutDir: user,
+    defaultLayoutFile: join(root, "default.json"),
+  });
+
+  assert.deepEqual(repository.list(), [
+    { id: "broken", name: "broken", builtin: false },
+    { id: "empty", name: "empty", builtin: false },
   ]);
 });
 

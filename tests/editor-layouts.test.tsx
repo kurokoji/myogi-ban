@@ -153,7 +153,7 @@ test("canceling a pending confirmation leaves the layout untouched", async () =>
 test("deleting a layout defers to a confirmation instead of a blocking dialog", async () => {
   const deleteCalls: string[] = [];
   const api = {
-    getDefaultLayout: async () => ({ name: "mypreset" }),
+    getDefaultLayout: async () => ({ id: "mypreset" }),
     getLayouts: async () => [],
     deleteLayout: async (name: string) => {
       deleteCalls.push(name);
@@ -270,7 +270,7 @@ test("renaming to a name already in use reports an error without calling the API
 
 test("renaming the default layout keeps it marked as default under its new name", async () => {
   const api = {
-    getDefaultLayout: async () => ({ name: "mypreset" }),
+    getDefaultLayout: async () => ({ id: "mypreset" }),
     getLayouts: async () => [],
     renameLayout: async () => {},
   } as unknown as ApiClient;
