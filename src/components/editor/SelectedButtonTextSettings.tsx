@@ -101,7 +101,7 @@ export function SelectedButtonTextSettings({
           }
         />
       </Group>
-      <Group gap="xs" align="end" className="selected-button-text-control">
+      <Group gap="xs" align="start" className="selected-button-text-control">
         <Switch
           size="sm"
           label={t("textOutline")}

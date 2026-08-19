@@ -67,7 +67,7 @@ export function DefaultButtonTextSettings({
           }
         />
       </Group>
-      <Group gap="xs" align="end" className="default-button-text-control">
+      <Group gap="xs" align="start" className="default-button-text-control">
         <Switch
           size="sm"
           label={t("textOutline")}

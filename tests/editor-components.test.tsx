@@ -2184,6 +2184,35 @@ test("default text rotation control updates the layout defaults", () => {
   assert.equal(updatedLayout?.defaultbuttons.cssTextRotation, "45");
 });
 
+test("the default button's outline switch stays anchored to the top of its row", () => {
+  const layout = createDefaultLayout();
+  const view = renderComponent(
+    <ButtonSettingsPanel
+      layout={layout}
+      assigningTarget={null}
+      assignmentName=""
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      updateLayout={() => {}}
+      updateSelectedButtons={() => {}}
+      onSelectedButtonChange={() => {}}
+      onAddButton={() => {}}
+      onDeleteSelectedButtons={() => {}}
+      openImagePicker={() => {}}
+      cancelAssignment={() => {}}
+    />,
+  );
+  const details = view.container.querySelector("details");
+  assert.ok(details);
+  details.open = true;
+  fireEvent(details, new componentDocument.defaultView.Event("toggle"));
+
+  const outlineSwitch = view.getByRole("switch", { name: "textOutline" });
+  const row = outlineSwitch.closest(".mantine-Group-root") as HTMLElement;
+
+  assert.equal(row.style.getPropertyValue("--group-align"), "start");
+});
+
 test("the default button's outline color picker fills the width of its row", () => {
   const layout = createDefaultLayout();
   layout.defaultbuttons.cssTextOutline = true;
@@ -2526,6 +2555,18 @@ test("enabling the outline switch reveals an outline color picker", () => {
     }),
   );
   assert.equal(updatedLayout?.buttons[0].cssTextOutline, true);
+});
+
+test("the outline switch stays anchored to the top of its row", () => {
+  const layout = createDefaultLayout();
+  const { selectedSettings } = renderSelectedButtonSettings(layout);
+
+  const outlineSwitch = within(selectedSettings).getByRole("switch", {
+    name: "textOutline inheritDefault",
+  });
+  const row = outlineSwitch.closest(".mantine-Group-root") as HTMLElement;
+
+  assert.equal(row.style.getPropertyValue("--group-align"), "start");
 });
 
 test("the outline color picker fills the width of its row", () => {
