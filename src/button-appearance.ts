@@ -17,6 +17,7 @@ export interface ButtonAppearance {
   textItalic: boolean;
   textOutline: boolean;
   textOutlineColor: string;
+  textRotation: string;
 }
 
 type ButtonOverrides = Partial<ButtonLayout> | undefined;
@@ -94,6 +95,7 @@ export function resolveButtonAppearance(
       defaults.cssTextOutlineColor,
       "#000000",
     ),
+    textRotation: text(button?.cssTextRotation, defaults.cssTextRotation, "0"),
   };
 }
 

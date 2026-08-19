@@ -63,6 +63,7 @@ function buttonStyle(
     "--button-text-style": appearance.textItalic ? "italic" : "normal",
     "--button-text-stroke-width": textStrokeWidth,
     "--button-text-stroke-color": appearance.textOutlineColor,
+    "--button-text-rotation": `${appearance.textRotation}deg`,
   });
   if (!appearance.useCss && useImage) {
     style.backgroundImage = `url("layout/${layout.id || layout.name}/${useImage}")`;

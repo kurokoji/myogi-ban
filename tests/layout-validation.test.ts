@@ -48,6 +48,21 @@ test("parseImportedLayoutJson accepts bold, italic, and outline text styling", (
   assert.equal(parsed.buttons?.[0]?.cssTextOutlineColor, "#00ff00");
 });
 
+test("parseImportedLayoutJson accepts a legacy text rotation", () => {
+  const parsed = parseImportedLayoutJson(
+    '{"buttons":[{"cssTextRotation":"45"}]}',
+  );
+
+  assert.equal(parsed.buttons?.[0]?.cssTextRotation, "45");
+});
+
+test("parseImportedLayoutJson rejects a non-string text rotation", () => {
+  assert.throws(
+    () => parseImportedLayoutJson('{"buttons":[{"cssTextRotation":45}]}'),
+    /Invalid layout/,
+  );
+});
+
 test("parseImportedLayoutJson rejects a non-string pressed border color", () => {
   assert.throws(
     () => parseImportedLayoutJson('{"buttons":[{"cssPressedBorderColor":16}]}'),

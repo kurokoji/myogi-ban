@@ -1083,6 +1083,36 @@ test("button text color and size fall back to the defaults, then to a button's o
   );
 });
 
+test("button text rotation falls back to the default, then to a button's own value", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 2;
+  layout.defaultbuttons.cssTextRotation = "15";
+  layout.buttons[1].cssTextRotation = "-30";
+  const view = renderComponent(
+    <ButtonLayer
+      layout={layout}
+      pressedButtons={[]}
+      editorMode={false}
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      onButtonClick={() => {}}
+      onButtonMouseDown={() => {}}
+    />,
+  );
+
+  const inherited = view.container.querySelector<HTMLElement>("#button0");
+  assert.equal(
+    inherited?.style.getPropertyValue("--button-text-rotation"),
+    "15deg",
+  );
+
+  const overridden = view.container.querySelector<HTMLElement>("#button1");
+  assert.equal(
+    overridden?.style.getPropertyValue("--button-text-rotation"),
+    "-30deg",
+  );
+});
+
 test("button border color falls back to the default, then to a button's own value", () => {
   const layout = createDefaultLayout();
   layout.totalbuttonshow = 2;
@@ -2120,6 +2150,40 @@ test("default text styling controls update the layout defaults", () => {
   assert.equal(updatedLayout?.defaultbuttons.cssTextOutline, true);
 });
 
+test("default text rotation control updates the layout defaults", () => {
+  const layout = createDefaultLayout();
+  let updatedLayout: typeof layout | undefined;
+  const view = renderComponent(
+    <ButtonSettingsPanel
+      layout={layout}
+      assigningTarget={null}
+      assignmentName=""
+      selectedButtonIndex={null}
+      selectedButtonIndexes={[]}
+      updateLayout={(update) => {
+        const next = structuredClone(layout);
+        update(next);
+        updatedLayout = next;
+      }}
+      updateSelectedButtons={() => {}}
+      onSelectedButtonChange={() => {}}
+      onAddButton={() => {}}
+      onDeleteSelectedButtons={() => {}}
+      openImagePicker={() => {}}
+      cancelAssignment={() => {}}
+    />,
+  );
+  const details = view.container.querySelector("details");
+  assert.ok(details);
+  details.open = true;
+  fireEvent(details, new componentDocument.defaultView.Event("toggle"));
+
+  const rotation = view.getByLabelText("textRotation") as HTMLInputElement;
+  fireEvent.change(rotation, { target: { value: "45" } });
+
+  assert.equal(updatedLayout?.defaultbuttons.cssTextRotation, "45");
+});
+
 test("default button settings toggle matching the normal color", async () => {
   const layout = createDefaultLayout();
   layout.defaultbuttons.cssColor = "#123456";
@@ -2385,6 +2449,29 @@ test("toggling bold and italic switches updates the selected button", () => {
     }),
   );
   assert.equal(updatedLayout?.buttons[0].cssTextItalic, true);
+});
+
+test("selected button text rotation inherits the default, then follows its own value", () => {
+  const layout = createDefaultLayout();
+  layout.defaultbuttons.cssTextRotation = "20";
+  let updatedLayout: typeof layout | undefined;
+  const { selectedSettings } = renderSelectedButtonSettings(
+    layout,
+    (update) => {
+      const next = structuredClone(layout);
+      update(next);
+      updatedLayout = next;
+    },
+  );
+
+  const rotation = within(selectedSettings).getByLabelText(
+    "textRotation",
+  ) as HTMLInputElement;
+  assert.equal(rotation.value, "20");
+
+  fireEvent.change(rotation, { target: { value: "-45" } });
+
+  assert.equal(updatedLayout?.buttons[0].cssTextRotation, "-45");
 });
 
 test("enabling the outline switch reveals an outline color picker", () => {

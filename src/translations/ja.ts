@@ -84,6 +84,7 @@ export const jaTranslation = {
   textItalic: "斜体",
   textOutline: "縁取り",
   textOutlineColor: "縁取りの色",
+  textRotation: "文字の角度(°)",
   select: "選択してください",
   resetToDefault: "標準に戻す",
   resetAllToDefault: "すべてのボタンを標準に戻す",

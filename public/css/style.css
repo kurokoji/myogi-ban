@@ -163,7 +163,7 @@ body {
   user-select: none;
   /* Most fonts' descent metric is taller than their ascent leaves credit
      for, so text centered by line-box metrics alone reads slightly low. */
-  transform: translateY(-0.08em);
+  transform: translateY(-0.08em) rotate(var(--button-text-rotation, 0deg));
 }
 
 /* -webkit-text-stroke disables color-glyph (COLR/CBDT) rendering in

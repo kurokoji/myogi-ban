@@ -90,6 +90,20 @@ export function DefaultButtonTextSettings({
           />
         )}
       </Group>
+      <NumberInput
+        size="xs"
+        label={t("textRotation")}
+        className="default-button-text-control"
+        min={-180}
+        max={180}
+        step={1}
+        value={numericValue(appearance.textRotation)}
+        onChange={(value) =>
+          updateLayout((next) => {
+            next.defaultbuttons.cssTextRotation = String(value ?? 0);
+          })
+        }
+      />
     </>
   );
 }

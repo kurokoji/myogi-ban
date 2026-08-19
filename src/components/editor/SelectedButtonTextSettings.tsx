@@ -135,6 +135,22 @@ export function SelectedButtonTextSettings({
           />
         )}
       </Group>
+      <InheritedNumberInput
+        size="xs"
+        label={t("textRotation")}
+        className="selected-button-text-control"
+        min={-180}
+        max={180}
+        step={1}
+        value={button?.cssTextRotation}
+        defaultValue={defaults.cssTextRotation}
+        fallbackValue="0"
+        onChange={(value) =>
+          updateSelectedButtons((next) => {
+            next.buttons[index].cssTextRotation = String(value ?? 0);
+          })
+        }
+      />
     </>
   );
 }

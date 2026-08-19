@@ -22,6 +22,15 @@ test("resolveButtonAppearance prefers a button's own value over the default", ()
   assert.equal(appearance.textSize, "32");
 });
 
+test("resolveButtonAppearance prefers a button's own text rotation over the default", () => {
+  const appearance = resolveButtonAppearance(
+    { cssTextRotation: "45" },
+    defaults({ cssTextRotation: "90" }),
+  );
+
+  assert.equal(appearance.textRotation, "45");
+});
+
 test("resolveButtonAppearance falls back to the default, then to a built-in value", () => {
   const appearance = resolveButtonAppearance(
     {},
@@ -30,6 +39,7 @@ test("resolveButtonAppearance falls back to the default, then to a built-in valu
 
   assert.equal(appearance.textColor, "#eeeeee");
   assert.equal(appearance.textOutlineColor, "#000000");
+  assert.equal(appearance.textRotation, "0");
 });
 
 test("resolveButtonAppearance treats a blank value as unset", () => {

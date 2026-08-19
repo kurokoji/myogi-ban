@@ -43,6 +43,7 @@ interface ButtonDocument {
   italic?: boolean;
   outline?: boolean;
   outlineColor?: string;
+  textRotation?: number;
 }
 
 interface StickDocument {
@@ -129,7 +130,7 @@ function validButton(value: unknown): boolean {
       "textColor",
       "outlineColor",
     ].every((key) => hasOptionalType(value, key, "string")) &&
-    ["rotation", "transitionSeconds", "textSize"].every((key) =>
+    ["rotation", "transitionSeconds", "textSize", "textRotation"].every((key) =>
       hasOptionalType(value, key, "number"),
     ) &&
     hasOptionalType(value, "useCss", "boolean") &&
@@ -218,6 +219,7 @@ function buttonDocument(button: ButtonLayout): ButtonDocument {
     italic: button.cssTextItalic,
     outline: button.cssTextOutline,
     outlineColor: button.cssTextOutlineColor,
+    textRotation: numeric(button.cssTextRotation),
   };
 }
 
@@ -247,6 +249,7 @@ function buttonOverrideDocument(
     "italic",
     "outline",
     "outlineColor",
+    "textRotation",
   ] as const) {
     if (document[key] === defaultDocument[key]) delete document[key];
   }
@@ -333,6 +336,10 @@ function runtimeButton(button: ButtonDocument): ButtonLayout {
     cssTextItalic: button.italic,
     cssTextOutline: button.outline,
     cssTextOutlineColor: button.outlineColor,
+    cssTextRotation:
+      button.textRotation === undefined
+        ? undefined
+        : String(button.textRotation),
   };
 }
 

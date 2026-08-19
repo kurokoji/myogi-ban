@@ -28,6 +28,7 @@ export interface ButtonLayout {
   cssTextItalic?: boolean;
   cssTextOutline?: boolean;
   cssTextOutlineColor?: string;
+  cssTextRotation?: string;
 }
 
 export interface StickLayout {

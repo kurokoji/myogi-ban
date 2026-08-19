@@ -37,6 +37,7 @@ const buttonStrings = [
   "cssTextColor",
   "cssTextSize",
   "cssTextOutlineColor",
+  "cssTextRotation",
 ];
 const buttonBooleans = [
   "useCss",

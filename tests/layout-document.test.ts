@@ -144,6 +144,20 @@ test("layout documents round trip bold, italic, and outline text styling", () =>
   assert.equal(restored.buttons[0].cssTextOutlineColor, "#00ff00");
 });
 
+test("layout documents round trip text rotation", () => {
+  const source = createDefaultLayout();
+  source.defaultbuttons.cssTextRotation = "15";
+  source.buttons[0].cssTextRotation = "-30";
+
+  const document = serializeLayoutDocument(source);
+  assert.equal(document.buttonDefaults.textRotation, 15);
+  assert.equal(document.buttons[0]?.textRotation, -30);
+
+  const restored = deserializeLayoutDocument(document);
+  assert.equal(restored.defaultbuttons.cssTextRotation, "15");
+  assert.equal(restored.buttons[0].cssTextRotation, "-30");
+});
+
 test("deserializeLayoutDocument keeps v1 documents readable", () => {
   const restored = deserializeLayoutDocument({
     version: "v1.0.5",

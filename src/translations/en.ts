@@ -86,6 +86,7 @@ export const enTranslation = {
   textItalic: "Italic",
   textOutline: "Outline",
   textOutlineColor: "Outline color",
+  textRotation: "Text angle (°)",
   select: "Select",
   resetToDefault: "Reset to default",
   resetAllToDefault: "Reset all buttons to default",
