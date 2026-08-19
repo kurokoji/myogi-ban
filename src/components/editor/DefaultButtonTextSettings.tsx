@@ -81,6 +81,7 @@ export function DefaultButtonTextSettings({
         {appearance.textOutline && (
           <ColorInput
             label={t("textOutlineColor")}
+            className="grow"
             value={appearance.textOutlineColor}
             onChange={(event) =>
               updateLayout((next) => {

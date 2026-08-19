@@ -118,6 +118,7 @@ export function SelectedButtonTextSettings({
         {appearance.textOutline && (
           <ColorInput
             label={t("textOutlineColor")}
+            className="grow"
             description={
               inheritsDefaultText(
                 button?.cssTextOutlineColor,

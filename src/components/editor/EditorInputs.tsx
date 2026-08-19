@@ -14,6 +14,7 @@ interface ColorInputProps {
   description?: string;
   value: string;
   onChange: ChangeEventHandler<HTMLInputElement>;
+  className?: string;
 }
 
 const COMMIT_DEBOUNCE_MS = 200;
@@ -34,6 +35,7 @@ export function ColorInput({
   description,
   value,
   onChange,
+  className,
 }: ColorInputProps): React.ReactElement {
   const generatedId = useId();
   const inputId = id ?? generatedId;
@@ -65,7 +67,7 @@ export function ColorInput({
   );
 
   return (
-    <div>
+    <div className={className}>
       <label
         htmlFor={inputId}
         style={{ fontSize: "11px", display: "block", marginBottom: "4px" }}
