@@ -1,11 +1,12 @@
-import { Group, NumberInput, Switch } from "@mantine/core";
+import { NumberInput } from "@mantine/core";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { resolveDefaultButtonAppearance } from "../../button-appearance";
 import type { EditorLayoutUpdater } from "../../editor-helpers";
 import { numericValue } from "../../editor-helpers";
 import type { Layout } from "../../types";
-import { ColorInput } from "./EditorInputs";
+import { ColorInput, LabeledSwitch } from "./EditorInputs";
+import { TextOutlineControls } from "./TextOutlineControls";
 
 interface DefaultButtonTextSettingsProps {
   layout: Layout;
@@ -45,9 +46,8 @@ export function DefaultButtonTextSettings({
           }
         />
       </div>
-      <Group gap="xs" className="default-button-text-control">
-        <Switch
-          size="sm"
+      <div className="control row align-top default-button-text-control">
+        <LabeledSwitch
           label={t("textBold")}
           checked={appearance.textBold}
           onChange={(event) =>
@@ -56,8 +56,7 @@ export function DefaultButtonTextSettings({
             })
           }
         />
-        <Switch
-          size="sm"
+        <LabeledSwitch
           label={t("textItalic")}
           checked={appearance.textItalic}
           onChange={(event) =>
@@ -66,31 +65,22 @@ export function DefaultButtonTextSettings({
             })
           }
         />
-      </Group>
-      <Group gap="xs" align="start" className="default-button-text-control">
-        <Switch
-          size="sm"
-          label={t("textOutline")}
-          checked={appearance.textOutline}
-          onChange={(event) =>
-            updateLayout((next) => {
-              next.defaultbuttons.cssTextOutline = event.target.checked;
-            })
-          }
-        />
-        {appearance.textOutline && (
-          <ColorInput
-            label={t("textOutlineColor")}
-            className="grow"
-            value={appearance.textOutlineColor}
-            onChange={(event) =>
-              updateLayout((next) => {
-                next.defaultbuttons.cssTextOutlineColor = event.target.value;
-              })
-            }
-          />
-        )}
-      </Group>
+      </div>
+      <TextOutlineControls
+        className="default-button-text-control"
+        outline={appearance.textOutline}
+        color={appearance.textOutlineColor}
+        onOutlineChange={(outline) =>
+          updateLayout((next) => {
+            next.defaultbuttons.cssTextOutline = outline;
+          })
+        }
+        onColorChange={(color) =>
+          updateLayout((next) => {
+            next.defaultbuttons.cssTextOutlineColor = color;
+          })
+        }
+      />
       <NumberInput
         size="xs"
         label={t("textRotation")}

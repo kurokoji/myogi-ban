@@ -235,8 +235,32 @@ body {
   align-items: end;
 }
 
-.control.row .mantine-InputWrapper-label {
+/*
+ * Anchors both columns to the top of the row instead of the bottom. Used
+ * where one column's content can grow taller than its sibling's (e.g. a
+ * switch whose inline description wraps, or a switch next to a color
+ * picker that only appears once the switch is on) - without this, the
+ * shorter column's control would shift position whenever the taller one
+ * changed height.
+ */
+.control.row.align-top {
+  align-items: start;
+}
+
+/*
+ * Mantine sizes its own input labels from the `size` prop (12px for
+ * size="xs", used throughout the editor's settings panels) and gives them
+ * a medium (600) font-weight. The hand-rolled labels used there instead
+ * (ColorInput, LabeledSwitch - see LabeledField in EditorInputs.tsx) use a
+ * fixed 11px at a regular weight, so without this override the two
+ * families of label look inconsistently sized and bold next to each
+ * other. #sidebar and #inspector are the two separate top-level panels
+ * that hold settings controls - see editor.tsx.
+ */
+#sidebar .mantine-InputWrapper-label,
+#inspector .mantine-InputWrapper-label {
   font-size: 11px;
+  font-weight: var(--mantine-font-weight-regular);
 }
 
 .obs-size-row {

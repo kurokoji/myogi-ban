@@ -1,10 +1,4 @@
-import {
-  Group,
-  NativeSelect,
-  NumberInput,
-  Switch,
-  TextInput,
-} from "@mantine/core";
+import { Group, NativeSelect, NumberInput, TextInput } from "@mantine/core";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import { resolveDefaultButtonAppearance } from "../../button-appearance";
@@ -14,7 +8,7 @@ import type {
 } from "../../editor-helpers";
 import type { ButtonShape, Layout } from "../../types";
 import { ButtonBorderColorControls } from "./ButtonBorderColorControls";
-import { ColorInput } from "./EditorInputs";
+import { ColorInput, LabeledSwitch } from "./EditorInputs";
 import { ImageSelectButton } from "./ImageSelectButton";
 
 interface DefaultButtonAppearanceSettingsProps {
@@ -33,8 +27,7 @@ export function DefaultButtonAppearanceSettings({
 
   return (
     <>
-      <Switch
-        size="sm"
+      <LabeledSwitch
         label={t("useCssButton")}
         className="default-button-appearance-control"
         checked={!appearance.useCss}

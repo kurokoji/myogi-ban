@@ -2184,36 +2184,7 @@ test("default text rotation control updates the layout defaults", () => {
   assert.equal(updatedLayout?.defaultbuttons.cssTextRotation, "45");
 });
 
-test("the default button's outline switch stays anchored to the top of its row", () => {
-  const layout = createDefaultLayout();
-  const view = renderComponent(
-    <ButtonSettingsPanel
-      layout={layout}
-      assigningTarget={null}
-      assignmentName=""
-      selectedButtonIndex={null}
-      selectedButtonIndexes={[]}
-      updateLayout={() => {}}
-      updateSelectedButtons={() => {}}
-      onSelectedButtonChange={() => {}}
-      onAddButton={() => {}}
-      onDeleteSelectedButtons={() => {}}
-      openImagePicker={() => {}}
-      cancelAssignment={() => {}}
-    />,
-  );
-  const details = view.container.querySelector("details");
-  assert.ok(details);
-  details.open = true;
-  fireEvent(details, new componentDocument.defaultView.Event("toggle"));
-
-  const outlineSwitch = view.getByRole("switch", { name: "textOutline" });
-  const row = outlineSwitch.closest(".mantine-Group-root") as HTMLElement;
-
-  assert.equal(row.style.getPropertyValue("--group-align"), "start");
-});
-
-test("the default button's outline color picker fills the width of its row", () => {
+test("the default button's outline switch and color picker sit in their own stack, like the border color controls", () => {
   const layout = createDefaultLayout();
   layout.defaultbuttons.cssTextOutline = true;
   const view = renderComponent(
@@ -2237,9 +2208,12 @@ test("the default button's outline color picker fills the width of its row", () 
   details.open = true;
   fireEvent(details, new componentDocument.defaultView.Event("toggle"));
 
+  const outlineSwitch = view.getByRole("switch", { name: "textOutline" });
+  const stack = outlineSwitch.closest(".text-outline-controls");
   const outlineColor = view.getByLabelText("textOutlineColor");
 
-  assert.equal(outlineColor.closest(".grow") !== null, true);
+  assert.ok(stack);
+  assert.equal(outlineColor.closest(".text-outline-controls"), stack);
 });
 
 test("default button settings toggle matching the normal color", async () => {
@@ -2496,17 +2470,37 @@ test("toggling bold and italic switches updates the selected button", () => {
 
   fireEvent.click(
     within(selectedSettings).getByRole("switch", {
-      name: "textBold inheritDefault",
+      name: "textBold",
+      description: "inheritDefault",
     }),
   );
   assert.equal(updatedLayout?.buttons[0].cssTextBold, true);
 
   fireEvent.click(
     within(selectedSettings).getByRole("switch", {
-      name: "textItalic inheritDefault",
+      name: "textItalic",
+      description: "inheritDefault",
     }),
   );
   assert.equal(updatedLayout?.buttons[0].cssTextItalic, true);
+});
+
+test("the bold and italic switches share a fixed-width grid row, so one inheriting and the other not doesn't shift either", () => {
+  const layout = createDefaultLayout();
+  const { selectedSettings } = renderSelectedButtonSettings(layout);
+
+  const boldSwitch = within(selectedSettings).getByRole("switch", {
+    name: "textBold",
+    description: "inheritDefault",
+  });
+  const italicSwitch = within(selectedSettings).getByRole("switch", {
+    name: "textItalic",
+    description: "inheritDefault",
+  });
+  const boldRow = boldSwitch.closest(".control.row");
+
+  assert.ok(boldRow);
+  assert.equal(italicSwitch.closest(".control.row"), boldRow);
 });
 
 test("selected button text rotation inherits the default, then follows its own value", () => {
@@ -2551,33 +2545,27 @@ test("enabling the outline switch reveals an outline color picker", () => {
 
   fireEvent.click(
     within(selectedSettings).getByRole("switch", {
-      name: "textOutline inheritDefault",
+      name: "textOutline",
+      description: "inheritDefault",
     }),
   );
   assert.equal(updatedLayout?.buttons[0].cssTextOutline, true);
 });
 
-test("the outline switch stays anchored to the top of its row", () => {
-  const layout = createDefaultLayout();
-  const { selectedSettings } = renderSelectedButtonSettings(layout);
-
-  const outlineSwitch = within(selectedSettings).getByRole("switch", {
-    name: "textOutline inheritDefault",
-  });
-  const row = outlineSwitch.closest(".mantine-Group-root") as HTMLElement;
-
-  assert.equal(row.style.getPropertyValue("--group-align"), "start");
-});
-
-test("the outline color picker fills the width of its row", () => {
+test("the outline switch and color picker sit in their own stack, like the border color controls", () => {
   const layout = createDefaultLayout();
   layout.buttons[0].cssTextOutline = true;
   const { selectedSettings } = renderSelectedButtonSettings(layout);
 
+  const outlineSwitch = within(selectedSettings).getByRole("switch", {
+    name: "textOutline",
+  });
+  const stack = outlineSwitch.closest(".text-outline-controls");
   const outlineColor =
     within(selectedSettings).getByLabelText("textOutlineColor");
 
-  assert.equal(outlineColor.closest(".grow") !== null, true);
+  assert.ok(stack);
+  assert.equal(outlineColor.closest(".text-outline-controls"), stack);
 });
 
 test("inherited per-button size fields show their effective default values", () => {
@@ -2782,7 +2770,7 @@ test("inherited per-button color and mode controls show their effective defaults
   const { selectedSettings } = renderSelectedButtonSettings(layout);
 
   const mode = within(selectedSettings).getByRole("switch", {
-    name: "useCssButton inheritDefault",
+    name: "useCssButton",
     description: "inheritDefault",
   });
   assert.equal((mode as HTMLInputElement).checked, false);

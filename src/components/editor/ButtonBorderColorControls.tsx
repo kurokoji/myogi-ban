@@ -1,7 +1,7 @@
-import { Stack, Switch } from "@mantine/core";
+import { Stack } from "@mantine/core";
 import type React from "react";
 import { useTranslation } from "react-i18next";
-import { ColorInput } from "./EditorInputs";
+import { ColorInput, LabeledSwitch } from "./EditorInputs";
 
 interface ButtonBorderColorControlsProps {
   className: string;
@@ -31,8 +31,7 @@ export function ButtonBorderColorControls({
   const { t } = useTranslation();
   return (
     <Stack gap="xs" className={`button-border-color-controls ${className}`}>
-      <Switch
-        size="sm"
+      <LabeledSwitch
         label={t("borderMatchesColor")}
         description={matchesColorDescription}
         checked={matchesColor}

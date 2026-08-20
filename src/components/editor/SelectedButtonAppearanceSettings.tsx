@@ -1,4 +1,4 @@
-import { Group, Switch } from "@mantine/core";
+import { Group } from "@mantine/core";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -12,7 +12,7 @@ import type {
 } from "../../editor-helpers";
 import type { ButtonShape, Layout } from "../../types";
 import { ButtonBorderColorControls } from "./ButtonBorderColorControls";
-import { ColorInput } from "./EditorInputs";
+import { ColorInput, LabeledSwitch } from "./EditorInputs";
 import { ImageSelectButton } from "./ImageSelectButton";
 import {
   InheritedNumberInput,
@@ -44,14 +44,14 @@ export function SelectedButtonAppearanceSettings({
   return (
     <>
       <Group gap="xs" className="selected-button-appearance-control">
-        <Switch
-          size="sm"
+        <LabeledSwitch
           label={t("useCssButton")}
           description={
             inheritsDefaultFlag(button?.useCss, defaults.useCss)
               ? inherited
               : undefined
           }
+          descriptionPlacement="inline"
           checked={!appearance.useCss}
           onChange={(event) =>
             updateSelectedButtons((next) => {

@@ -1,4 +1,4 @@
-import { Group, Switch, TextInput } from "@mantine/core";
+import { TextInput } from "@mantine/core";
 import type React from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -8,8 +8,9 @@ import {
 } from "../../button-appearance";
 import type { EditorLayoutUpdater } from "../../editor-helpers";
 import type { Layout } from "../../types";
-import { ColorInput } from "./EditorInputs";
+import { ColorInput, LabeledSwitch } from "./EditorInputs";
 import { InheritedNumberInput } from "./InheritedInputs";
+import { TextOutlineControls } from "./TextOutlineControls";
 
 interface SelectedButtonTextSettingsProps {
   layout: Layout;
@@ -73,13 +74,13 @@ export function SelectedButtonTextSettings({
           placeholder={defaults.cssTextSize || "14"}
         />
       </div>
-      <Group gap="xs" className="selected-button-text-control">
-        <Switch
-          size="sm"
+      <div className="control row align-top selected-button-text-control">
+        <LabeledSwitch
           label={t("textBold")}
           description={
             inheritsDefaultFlag(button?.cssTextBold) ? inherited : undefined
           }
+          descriptionPlacement="inline"
           checked={appearance.textBold}
           onChange={(event) =>
             updateSelectedButtons((next) => {
@@ -87,12 +88,12 @@ export function SelectedButtonTextSettings({
             })
           }
         />
-        <Switch
-          size="sm"
+        <LabeledSwitch
           label={t("textItalic")}
           description={
             inheritsDefaultFlag(button?.cssTextItalic) ? inherited : undefined
           }
+          descriptionPlacement="inline"
           checked={appearance.textItalic}
           onChange={(event) =>
             updateSelectedButtons((next) => {
@@ -100,42 +101,33 @@ export function SelectedButtonTextSettings({
             })
           }
         />
-      </Group>
-      <Group gap="xs" align="start" className="selected-button-text-control">
-        <Switch
-          size="sm"
-          label={t("textOutline")}
-          description={
-            inheritsDefaultFlag(button?.cssTextOutline) ? inherited : undefined
-          }
-          checked={appearance.textOutline}
-          onChange={(event) =>
-            updateSelectedButtons((next) => {
-              next.buttons[index].cssTextOutline = event.target.checked;
-            })
-          }
-        />
-        {appearance.textOutline && (
-          <ColorInput
-            label={t("textOutlineColor")}
-            className="grow"
-            description={
-              inheritsDefaultText(
-                button?.cssTextOutlineColor,
-                defaults.cssTextOutlineColor,
-              )
-                ? inherited
-                : undefined
-            }
-            value={appearance.textOutlineColor}
-            onChange={(event) =>
-              updateSelectedButtons((next) => {
-                next.buttons[index].cssTextOutlineColor = event.target.value;
-              })
-            }
-          />
-        )}
-      </Group>
+      </div>
+      <TextOutlineControls
+        className="selected-button-text-control"
+        outline={appearance.textOutline}
+        outlineDescription={
+          inheritsDefaultFlag(button?.cssTextOutline) ? inherited : undefined
+        }
+        color={appearance.textOutlineColor}
+        colorDescription={
+          inheritsDefaultText(
+            button?.cssTextOutlineColor,
+            defaults.cssTextOutlineColor,
+          )
+            ? inherited
+            : undefined
+        }
+        onOutlineChange={(outline) =>
+          updateSelectedButtons((next) => {
+            next.buttons[index].cssTextOutline = outline;
+          })
+        }
+        onColorChange={(color) =>
+          updateSelectedButtons((next) => {
+            next.buttons[index].cssTextOutlineColor = color;
+          })
+        }
+      />
       <InheritedNumberInput
         size="xs"
         label={t("textRotation")}
