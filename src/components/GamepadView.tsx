@@ -19,6 +19,7 @@ import {
   unionRectsAtIndexes,
   visibleSnapGuide,
 } from "../geometry";
+import { layoutAssetDirectory } from "../layout-image";
 import type { Layout } from "../types";
 import { EditorContextMenu } from "./editor/EditorContextMenu";
 import { ButtonLayer } from "./gamepad/ButtonLayer";
@@ -140,7 +141,7 @@ type DragState =
     };
 
 function assetUrl(layout: Layout, fileName: string): string {
-  return `layout/${layout.name}/${fileName}`;
+  return `layout/${layoutAssetDirectory(layout)}/${fileName}`;
 }
 
 function rectContainsPoint(rect: Rect, point: { x: number; y: number }) {
@@ -953,7 +954,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
       >
         <GamepadBackgroundLayer
           background={layout.background}
-          layoutId={layout.id || layout.name}
+          layoutId={layoutAssetDirectory(layout)}
           width={backgroundSize.width}
           height={backgroundSize.height}
           opacity={backgroundOpacity}

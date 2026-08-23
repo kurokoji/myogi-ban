@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createDefaultLayout } from "../src/layout";
-import { withUploadedImage } from "../src/layout-image";
+import { layoutAssetDirectory, withUploadedImage } from "../src/layout-image";
 
 test("withUploadedImage updates the background without mutating the input", () => {
   const layout = createDefaultLayout();
@@ -37,4 +37,23 @@ test("withUploadedImage updates default and selected button image states", () =>
   assert.equal(withButtons.buttons[0].img, "released.png");
   assert.equal(withButtons.buttons[1].img, "");
   assert.equal(withButtons.buttons[2].img, "released.png");
+});
+
+test("layoutAssetDirectory prefers the layout id over its name", () => {
+  const layout = createDefaultLayout();
+  layout.id = "8f14e45f-ceea-467a-9575-0e02b2c3d479";
+  layout.name = "My Layout";
+
+  assert.equal(
+    layoutAssetDirectory(layout),
+    "8f14e45f-ceea-467a-9575-0e02b2c3d479",
+  );
+});
+
+test("layoutAssetDirectory falls back to the layout name when there is no id", () => {
+  const layout = createDefaultLayout();
+  layout.id = "";
+  layout.name = "My Layout";
+
+  assert.equal(layoutAssetDirectory(layout), "My Layout");
 });

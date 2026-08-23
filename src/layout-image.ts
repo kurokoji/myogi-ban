@@ -1,6 +1,11 @@
 import { cloneLayout, type ImageUploadTarget } from "./editor-helpers";
 import type { Layout } from "./types";
 
+/** Assets live in the layout's directory, which the id names when present. */
+export function layoutAssetDirectory(layout: Layout): string {
+  return layout.id || layout.name;
+}
+
 export function withUploadedImage(
   layout: Layout,
   target: ImageUploadTarget,

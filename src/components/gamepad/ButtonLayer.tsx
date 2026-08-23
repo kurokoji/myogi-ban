@@ -1,5 +1,6 @@
 import type React from "react";
 import { resolveButtonAppearance } from "../../button-appearance";
+import { layoutAssetDirectory } from "../../layout-image";
 import { type CSSVariableStyle, cssVariables } from "../../style-types";
 import type { ButtonLayout, ButtonShape, Layout } from "../../types";
 
@@ -66,7 +67,7 @@ function buttonStyle(
     "--button-text-rotation": `${appearance.textRotation}deg`,
   });
   if (!appearance.useCss && useImage) {
-    style.backgroundImage = `url("layout/${layout.id || layout.name}/${useImage}")`;
+    style.backgroundImage = `url("layout/${layoutAssetDirectory(layout)}/${useImage}")`;
   }
   if (pressed) {
     if (button.xp || defaultButton.xp)
