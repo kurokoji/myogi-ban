@@ -380,6 +380,51 @@ test("renaming the default layout keeps it marked as default under its new name"
   assert.equal(result.current.isDefaultLayout, true);
 });
 
+test("exporting a layout fetches its images from the layout's id directory, not its display name", async () => {
+  const api = {
+    getDefaultLayout: async () => {
+      throw new Error("no default layout");
+    },
+    getLayouts: async () => [],
+  } as unknown as ApiClient;
+  const layout = createDefaultLayout();
+  layout.id = "8f14e45f-ceea-467a-9575-0e02b2c3d479";
+  layout.name = "My Layout";
+  layout.background.image = "background.png";
+  const ignoreUpdate = () => {};
+  const options = {
+    api,
+    layout,
+    buttonMappings: [],
+    stickMappings: [],
+    setButtonMappings: ignoreUpdate,
+    setStickMappings: ignoreUpdate,
+    setSelection: ignoreUpdate,
+    restoreLayout: ignoreUpdate,
+    clearLayoutHistory: () => {},
+    updateLayout: ignoreUpdate,
+    messages: baseMessages,
+  };
+  const requestedUrls: string[] = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async (input: string) => {
+    requestedUrls.push(input);
+    return { ok: false } as Response;
+  }) as typeof fetch;
+  try {
+    const { result } = renderHook(() => useEditorLayouts(options));
+    await act(async () => {});
+
+    await act(async () => result.current.exportLayout());
+
+    assert.deepEqual(requestedUrls, [
+      "/layout/8f14e45f-ceea-467a-9575-0e02b2c3d479/background.png",
+    ]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("a failed rename reports the generic operation-failed message", async () => {
   const api = {
     getDefaultLayout: async () => {

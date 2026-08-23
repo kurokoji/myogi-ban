@@ -27,7 +27,7 @@ import {
 } from "../gamepad";
 import { ensureLayoutDefaults } from "../layout";
 import { createLayoutId } from "../layout-id";
-import { withUploadedImage } from "../layout-image";
+import { layoutAssetDirectory, withUploadedImage } from "../layout-image";
 import { normalizeLayoutName } from "../layout-name";
 import {
   createLayoutPackage,
@@ -419,7 +419,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     try {
       const archive = await createLayoutPackage(layout, async (name) => {
         const response = await fetch(
-          `/layout/${encodeURIComponent(layout.name)}/${encodeURIComponent(name)}`,
+          `/layout/${encodeURIComponent(layoutAssetDirectory(layout))}/${encodeURIComponent(name)}`,
         );
         return response.ok
           ? new Uint8Array(await response.arrayBuffer())
