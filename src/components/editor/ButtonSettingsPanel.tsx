@@ -106,7 +106,10 @@ export function ButtonSettingsPanel(
             count: props.selectedButtonIndexes.length,
           })}
         </Button>
-        <ButtonAdvancedSettings label={t("advancedSettings")}>
+        <ButtonAdvancedSettings
+          label={t("advancedSettings")}
+          revealKey={selectedButtonIndex}
+        >
           <InspectorTabs
             activeTab={selectedButtonIndex !== null ? "selected" : "default"}
             tabs={[

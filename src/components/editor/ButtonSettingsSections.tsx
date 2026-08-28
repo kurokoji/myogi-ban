@@ -1,5 +1,5 @@
 import { Group, Paper, Stack, Text, Title } from "@mantine/core";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 const BUTTON_ADVANCED_SETTINGS_STORAGE_KEY = "button-advanced-settings-open";
 
@@ -21,6 +21,11 @@ interface SectionProps extends ChildrenProps {
 interface AdvancedSectionProps extends ChildrenProps {
   label: ReactNode;
   storage?: ButtonSettingsStorage;
+  /**
+   * When this changes to a non-null value, the section opens. Used to reveal
+   * the settings automatically once a button or stick is selected.
+   */
+  revealKey?: string | number | null;
 }
 
 function ButtonSettingsScope({
@@ -78,10 +83,22 @@ export function ButtonAdvancedSettings({
   children,
   label,
   storage = window.localStorage,
+  revealKey = null,
 }: AdvancedSectionProps) {
   const [open, setOpen] = useState(
-    () => storage.getItem(BUTTON_ADVANCED_SETTINGS_STORAGE_KEY) === "true",
+    () =>
+      revealKey !== null ||
+      storage.getItem(BUTTON_ADVANCED_SETTINGS_STORAGE_KEY) === "true",
   );
+
+  const lastRevealKey = useRef(revealKey);
+  useEffect(() => {
+    if (revealKey === lastRevealKey.current) return;
+    lastRevealKey.current = revealKey;
+    if (revealKey === null) return;
+    setOpen(true);
+    storage.setItem(BUTTON_ADVANCED_SETTINGS_STORAGE_KEY, "true");
+  }, [revealKey, storage]);
 
   return (
     <details

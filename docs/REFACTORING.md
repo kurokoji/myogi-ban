@@ -83,6 +83,7 @@
 - [x] R097 `GamepadView.tsx` の巨大ポインタードラッグ `useEffect` を `useGamepadPointerDrag` フックへ抽出する
 - [x] R098 `editor.tsx` のプレビュー定規・ガイド描画を `PreviewRuler` / `PreviewGuides` コンポーネントへ分離する
 - [x] R099 `useEditorLayouts` から `.myogi` パッケージ取り込みの状態・処理を `useLayoutPackageImport` フックへ分離する
+- [x] R100 ボタン選択時にインスペクターの「詳細設定」を自動で開く（インスペクター移行時に失われた R079 相当の挙動を復元）
 
 ## Lower Priority
 

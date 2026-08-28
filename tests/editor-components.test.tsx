@@ -2989,6 +2989,40 @@ test("button settings explain how to open per-button settings when unselected", 
   assert.ok(view.getByText("selectButtonForSettings"));
 });
 
+test("advanced button settings open when a control becomes selected", () => {
+  const storage = {
+    getItem: () => null,
+    setItem: () => {},
+  };
+
+  function Harness() {
+    const [selected, setSelected] = useState<number | null>(null);
+    return (
+      <>
+        <button type="button" onClick={() => setSelected(2)}>
+          select
+        </button>
+        <ButtonAdvancedSettings
+          label="Advanced"
+          storage={storage}
+          revealKey={selected}
+        >
+          <p>Advanced content</p>
+        </ButtonAdvancedSettings>
+      </>
+    );
+  }
+
+  const view = renderComponent(<Harness />);
+  const details = view.container.querySelector("details");
+  assert.ok(details);
+  assert.equal(details.open, false);
+
+  fireEvent.click(view.getByRole("button", { name: "select" }));
+
+  assert.equal(details.open, true);
+});
+
 test("advanced button settings restore their open state after remounting", () => {
   const values = new Map<string, string>();
   const storage = {
