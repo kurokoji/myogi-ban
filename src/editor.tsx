@@ -20,7 +20,6 @@ import "@fontsource-variable/m-plus-code-latin/wght.css";
 import "./i18n";
 import { ApiClient } from "./api";
 import { REPO_NAME, REPO_URL } from "./app-constants";
-import { resetButtonToDefaults } from "./button-settings";
 import { ConfirmationModal } from "./components/editor/ConfirmationModal";
 import { DragCoordinateTooltip } from "./components/editor/DragCoordinateTooltip";
 import { InspectorTabs } from "./components/editor/InspectorTabs";
@@ -42,17 +41,11 @@ import { UpdatePopup } from "./components/editor/UpdatePopup";
 import { WhatsNewPopup } from "./components/editor/WhatsNewPopup";
 import { GamepadView } from "./components/GamepadView";
 import {
-  addEditorButton,
   type ButtonPositionUpdate,
-  deleteEditorButtons,
-  distributeEditorButtons,
-  duplicateEditorButtons,
-  reorderEditorButtons,
   withButtonPositions,
 } from "./editor-buttons";
 import { cloneLayout, updateSelectedButtonSettings } from "./editor-helpers";
 import {
-  deleteEditorSelection,
   editorNudgeHistoryMode,
   editorShortcutFromKey,
   editorShortcutHint,
@@ -81,6 +74,7 @@ import {
 import { useEditorGamepad } from "./hooks/useEditorGamepad";
 import { useEditorGuides } from "./hooks/useEditorGuides";
 import { useEditorLayouts } from "./hooks/useEditorLayouts";
+import { useEditorSelectionActions } from "./hooks/useEditorSelectionActions";
 import { useLayoutHistory } from "./hooks/useLayoutHistory";
 import { usePreviewViewport } from "./hooks/usePreviewViewport";
 import { useUnsavedChangesWarning } from "./hooks/useUnsavedChangesWarning";
@@ -285,114 +279,24 @@ function EditorApp(): React.ReactElement {
     selectedButtonIndexes,
   ]);
 
-  const deleteSelection = useCallback(
-    (target: { buttonIndexes: number[]; stick: boolean }) => {
-      const deleted = deleteEditorSelection(
-        layoutRef.current,
-        buttonMappings,
-        {
-          ...target,
-          primaryButtonIndex: target.buttonIndexes[0] ?? null,
-        },
-        "Delete",
-      );
-      if (!deleted) return false;
-      updateLayout((next) => Object.assign(next, deleted.layout));
-      setButtonMappings(deleted.mapping);
-      setSelection(EMPTY_EDITOR_SELECTION);
-      cancelAssignment();
-      return true;
-    },
-    [buttonMappings, cancelAssignment, updateLayout],
-  );
-
-  const duplicateSelection = useCallback(
-    (target: { buttonIndexes: number[]; stick: boolean }) => {
-      const duplicated = duplicateEditorButtons(
-        layoutRef.current,
-        buttonMappings,
-        target.buttonIndexes,
-      );
-      if (!duplicated) return;
-      updateLayout((next) => Object.assign(next, duplicated.layout));
-      setButtonMappings(duplicated.mapping);
-      setSelection({
-        buttonIndexes: duplicated.indexes,
-        primaryButtonIndex: duplicated.indexes[0] ?? null,
-        stick: false,
-      });
-      cancelAssignment();
-    },
-    [buttonMappings, cancelAssignment, updateLayout],
-  );
-
-  const resetSelectionToDefault = useCallback(
-    (target: { buttonIndexes: number[]; stick: boolean }) => {
-      updateLayout((next) => {
-        for (const index of target.buttonIndexes) {
-          const button = next.buttons[index];
-          if (button) {
-            next.buttons[index] = resetButtonToDefaults(
-              button,
-              next.defaultbuttons,
-            );
-          }
-        }
-      });
-    },
-    [updateLayout],
-  );
-
-  const resetSelectionRotation = useCallback(
-    (target: { buttonIndexes: number[]; stick: boolean }) => {
-      updateLayout((next) => {
-        for (const index of target.buttonIndexes) {
-          if (next.buttons[index]) next.buttons[index].rotation = "0";
-        }
-      });
-    },
-    [updateLayout],
-  );
-
-  const reorderSelection = useCallback(
-    (
-      target: { buttonIndexes: number[]; stick: boolean },
-      edge: "front" | "back",
-    ) => {
-      const reordered = reorderEditorButtons(
-        layoutRef.current,
-        buttonMappings,
-        target.buttonIndexes,
-        edge,
-      );
-      updateLayout((next) => Object.assign(next, reordered.layout));
-      setButtonMappings(reordered.mapping);
-      setSelection({
-        buttonIndexes: reordered.indexes,
-        primaryButtonIndex: reordered.indexes[0] ?? null,
-        stick: false,
-      });
-      cancelAssignment();
-    },
-    [buttonMappings, cancelAssignment, updateLayout],
-  );
-
-  const distributeSelection = useCallback(
-    (
-      target: { buttonIndexes: number[]; stick: boolean },
-      direction: "horizontal" | "vertical",
-    ) => {
-      const distributed = distributeEditorButtons(
-        layoutRef.current,
-        target.buttonIndexes,
-        direction,
-      );
-      if (!distributed) return;
-      updateLayout((next) => Object.assign(next, distributed));
-      cancelAssignment();
-    },
-    [cancelAssignment, updateLayout],
-  );
+  const {
+    addButton,
+    deleteSelectedButtons,
+    deleteSelection,
+    duplicateSelection,
+    resetSelectionToDefault,
+    resetSelectionRotation,
+    reorderSelection,
+    distributeSelection,
+  } = useEditorSelectionActions({
+    layoutRef,
+    buttonMappings,
+    selection,
+    setButtonMappings,
+    setSelection,
+    updateLayout,
+    cancelAssignment,
+  });
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -581,34 +485,6 @@ function EditorApp(): React.ReactElement {
     },
     [cancelAssignment, clearSelection],
   );
-
-  const addButton = useCallback(() => {
-    const result = addEditorButton(layout, buttonMappings);
-    if (!result) return;
-    updateLayout((next) => Object.assign(next, result.layout));
-    setButtonMappings(result.mapping);
-    const newIndex = result.index;
-    setSelection(createButtonSelection(newIndex));
-    cancelAssignment();
-  }, [buttonMappings, cancelAssignment, layout, updateLayout]);
-
-  const deleteSelectedButtons = useCallback(() => {
-    const result = deleteEditorButtons(
-      layout,
-      buttonMappings,
-      selectedButtonIndexes,
-    );
-    if (result.layout.totalbuttonshow === layout.totalbuttonshow) return;
-    updateLayout((next) => Object.assign(next, result.layout));
-    setButtonMappings(result.mapping);
-    clearSelection();
-  }, [
-    clearSelection,
-    buttonMappings,
-    layout,
-    selectedButtonIndexes,
-    updateLayout,
-  ]);
 
   const selectButtonAndStartAssignment = useCallback(
     (index: number, toggleSelection: boolean) => {
