@@ -2,35 +2,24 @@ import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MAX_VISIBLE_BUTTONS } from "../app-constants";
 import type { ButtonPositionUpdate } from "../editor-buttons";
+import { type Rect, type RectCorner, unionRectsAtIndexes } from "../geometry";
 import {
-  formatDragCoordinateLabel,
-  formatDragDeltaLabel,
-} from "../editor-helpers";
-import {
-  dragGroupPositions,
-  dragPosition,
-  dragRotation,
-  type Rect,
-  type RectCorner,
-  rectsIntersect,
-  rectsOnSnapGuides,
-  resizeRotatedRectFromCorner,
-  resolveRectSnap,
-  unionRectsAtIndexes,
-  visibleSnapGuide,
-} from "../geometry";
+  type DragState,
+  type SnapGuides,
+  useGamepadPointerDrag,
+} from "../hooks/useGamepadPointerDrag";
 import { layoutAssetDirectory } from "../layout-image";
 import type { Layout } from "../types";
 import { EditorContextMenu } from "./editor/EditorContextMenu";
 import { ButtonLayer } from "./gamepad/ButtonLayer";
 import { GamepadBackgroundLayer } from "./gamepad/GamepadBackgroundLayer";
+import { normalizedRect, pointerToLocal } from "./gamepad/pointer-geometry";
 import { SelectionOverlays } from "./gamepad/SelectionOverlays";
 import { StickDirectionZones } from "./gamepad/StickDirectionZones";
 import { StickLayer } from "./gamepad/StickLayer";
 
 const STICK_SELECTION_SIZE = 96;
 const SELECTION_BOUNDS_PADDING = 12;
-const SNAP_THRESHOLD = 6;
 
 export interface GamepadViewProps {
   layout: Layout;
@@ -95,51 +84,6 @@ export interface GamepadViewProps {
   ) => void;
 }
 
-type DragState =
-  | {
-      type: "rotate";
-      index: number;
-      center: { x: number; y: number };
-      start: { x: number; y: number };
-      initialRotation: number;
-    }
-  | {
-      type: "resize";
-      target: "button" | "stick";
-      index: number;
-      corner: RectCorner;
-      startX: number;
-      startY: number;
-      initialRect: Rect;
-      rotation: number;
-    }
-  | {
-      type: "button" | "stick";
-      index: number;
-      startX: number;
-      startY: number;
-      initialX: number;
-      initialY: number;
-      snapRect: Rect;
-      snapTargets: Rect[];
-    }
-  | {
-      type: "group";
-      startX: number;
-      startY: number;
-      buttons: Array<{ index: number; initialX: number; initialY: number }>;
-      stick: { initialX: number; initialY: number } | null;
-      snapRect: Rect;
-      snapTargets: Rect[];
-    }
-  | {
-      type: "selection";
-      startX: number;
-      startY: number;
-      currentX: number;
-      currentY: number;
-    };
-
 function assetUrl(layout: Layout, fileName: string): string {
   return `layout/${layoutAssetDirectory(layout)}/${fileName}`;
 }
@@ -153,20 +97,6 @@ function rectContainsPoint(rect: Rect, point: { x: number; y: number }) {
   );
 }
 
-function normalizedRect(
-  startX: number,
-  startY: number,
-  endX: number,
-  endY: number,
-): Rect {
-  return {
-    left: Math.min(startX, endX),
-    top: Math.min(startY, endY),
-    right: Math.max(startX, endX),
-    bottom: Math.max(startY, endY),
-  };
-}
-
 function unionRects(rects: Rect[]): Rect | null {
   if (rects.length === 0) return null;
   return rects.reduce(
@@ -178,20 +108,6 @@ function unionRects(rects: Rect[]): Rect | null {
     }),
     rects[0],
   );
-}
-
-function pointerToLocal(
-  event: { clientX: number; clientY: number },
-  element: HTMLElement,
-  size: { width: number; height: number },
-): { x: number; y: number } {
-  const rect = element.getBoundingClientRect();
-  const scaleX = rect.width ? size.width / rect.width : 1;
-  const scaleY = rect.height ? size.height / rect.height : 1;
-  return {
-    x: (event.clientX - rect.left) * scaleX,
-    y: (event.clientY - rect.top) * scaleY,
-  };
 }
 
 function useBackgroundSize(
@@ -311,11 +227,7 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
   const dragMovedRef = useRef(false);
   const areaRef = useRef<HTMLDivElement | null>(null);
   const [dragState, setDragState] = useState<DragState | null>(null);
-  const [snapGuides, setSnapGuides] = useState<{
-    x?: number;
-    y?: number;
-    targets: Rect[];
-  } | null>(null);
+  const [snapGuides, setSnapGuides] = useState<SnapGuides | null>(null);
   const [contextMenu, setContextMenu] = useState<{
     x: number;
     y: number;
@@ -355,6 +267,29 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
       bottom: centerY + height / 2,
     };
   }, [layout.stick.x, layout.stick.y, stickScaleX, stickScaleY]);
+
+  useGamepadPointerDrag({
+    editorMode,
+    areaRef,
+    selectionSurfaceRef,
+    backgroundSize,
+    aspectRatioLocked,
+    snappingEnabled,
+    guides: layout.guides,
+    showstick: layout.showstick,
+    buttonRects,
+    stickRect,
+    onPositionsChange,
+    onDragCoordinateChange,
+    onSizeChange,
+    onRotationChange,
+    onLayoutDragEnd,
+    onSelectionChange,
+    dragState,
+    setDragState,
+    dragMovedRef,
+    setSnapGuides,
+  });
 
   const selectionRect =
     dragState?.type === "selection"
@@ -633,253 +568,6 @@ export function GamepadView(props: GamepadViewProps): React.ReactElement {
     },
     [editorMode, onSelectionChange],
   );
-
-  useEffect(() => {
-    const surface = selectionSurfaceRef?.current;
-    if (!editorMode || !surface) return;
-
-    const handleExternalMouseDown = (event: MouseEvent) => {
-      if (event.button !== 0) return;
-      const target = event.target;
-      if (!(target instanceof HTMLElement)) return;
-      if (
-        target.closest(
-          "#gamepad-area, .preview-ruler, .preview-guide, .preview-toolbar, .preview-history-toolbar",
-        )
-      )
-        return;
-      const area = areaRef.current;
-      if (!area) return;
-      const local = pointerToLocal(event, area, backgroundSize);
-      dragMovedRef.current = false;
-      setDragState({
-        type: "selection",
-        startX: local.x,
-        startY: local.y,
-        currentX: local.x,
-        currentY: local.y,
-      });
-    };
-
-    const handleExternalClick = (event: MouseEvent) => {
-      if (!dragMovedRef.current) return;
-      dragMovedRef.current = false;
-      event.stopPropagation();
-    };
-
-    surface.addEventListener("mousedown", handleExternalMouseDown);
-    surface.addEventListener("click", handleExternalClick);
-    return () => {
-      surface.removeEventListener("mousedown", handleExternalMouseDown);
-      surface.removeEventListener("click", handleExternalClick);
-    };
-  }, [backgroundSize, editorMode, selectionSurfaceRef]);
-
-  useEffect(() => {
-    if (!dragState) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (dragState.type === "selection") {
-        setSnapGuides(null);
-        const area = areaRef.current;
-        if (!area) return;
-        const local = pointerToLocal(e, area, backgroundSize);
-        if (
-          Math.abs(local.x - dragState.startX) > 2 ||
-          Math.abs(local.y - dragState.startY) > 2
-        ) {
-          dragMovedRef.current = true;
-        }
-        setDragState((current) =>
-          current?.type === "selection"
-            ? { ...current, currentX: local.x, currentY: local.y }
-            : current,
-        );
-        return;
-      }
-
-      if (dragState.type === "resize") {
-        const area = areaRef.current;
-        if (!area) return;
-        const local = pointerToLocal(e, area, backgroundSize);
-        const resized = resizeRotatedRectFromCorner(
-          dragState.initialRect,
-          dragState.corner,
-          {
-            x: local.x - dragState.startX,
-            y: local.y - dragState.startY,
-          },
-          12,
-          dragState.rotation,
-          aspectRatioLocked,
-        );
-        dragMovedRef.current = true;
-        onSizeChange?.({
-          type: dragState.target,
-          index: dragState.index,
-          x: Math.round(resized.x),
-          y: Math.round(resized.y),
-          width: Math.round(resized.width),
-          height: Math.round(resized.height),
-        });
-        return;
-      }
-
-      if (dragState.type === "rotate") {
-        const area = areaRef.current;
-        if (!area) return;
-        dragMovedRef.current = true;
-        onRotationChange?.({
-          index: dragState.index,
-          rotation: dragRotation(
-            dragState.initialRotation,
-            dragState.center,
-            dragState.start,
-            pointerToLocal(e, area, backgroundSize),
-          ),
-        });
-        return;
-      }
-
-      const area = areaRef.current;
-      if (!area) return;
-      const local = pointerToLocal(e, area, backgroundSize);
-      const deltaX = local.x - dragState.startX;
-      const deltaY = local.y - dragState.startY;
-      if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {
-        dragMovedRef.current = true;
-      }
-      const snap = resolveRectSnap(
-        snappingEnabled,
-        dragState.snapRect,
-        { x: deltaX, y: deltaY },
-        dragState.snapTargets,
-        SNAP_THRESHOLD,
-        layout.guides,
-      );
-      const snappedDelta = snap.delta;
-      setSnapGuides(
-        snap.guideX === undefined && snap.guideY === undefined
-          ? null
-          : {
-              x: visibleSnapGuide(snap.guideX, layout.guides.vertical),
-              y: visibleSnapGuide(snap.guideY, layout.guides.horizontal),
-              targets: rectsOnSnapGuides(
-                dragState.snapTargets,
-                snap.guideX,
-                snap.guideY,
-              ),
-            },
-      );
-
-      if (dragState.type === "group") {
-        const groupButtons = dragGroupPositions(
-          dragState.buttons,
-          { x: dragState.startX, y: dragState.startY },
-          {
-            x: dragState.startX + snappedDelta.x,
-            y: dragState.startY + snappedDelta.y,
-          },
-        );
-        const groupStick = dragState.stick
-          ? {
-              x: Math.round(dragState.stick.initialX + snappedDelta.x),
-              y: Math.round(dragState.stick.initialY + snappedDelta.y),
-            }
-          : undefined;
-        onPositionsChange?.({ buttons: groupButtons, stick: groupStick });
-        const singleItem =
-          groupButtons.length + (groupStick ? 1 : 0) === 1
-            ? (groupButtons[0] ?? groupStick)
-            : undefined;
-        onDragCoordinateChange?.({
-          x: e.clientX,
-          y: e.clientY,
-          label: singleItem
-            ? formatDragCoordinateLabel(singleItem.x, singleItem.y)
-            : formatDragDeltaLabel(
-                Math.round(snappedDelta.x),
-                Math.round(snappedDelta.y),
-              ),
-        });
-        return;
-      }
-
-      const position = dragPosition(
-        { x: dragState.initialX, y: dragState.initialY },
-        { x: 0, y: 0 },
-        snappedDelta,
-      );
-
-      if (dragState.type === "button") {
-        onPositionsChange?.({
-          buttons: [{ index: dragState.index, ...position }],
-        });
-      } else if (dragState.type === "stick") {
-        onPositionsChange?.({ buttons: [], stick: position });
-      }
-      onDragCoordinateChange?.({
-        x: e.clientX,
-        y: e.clientY,
-        label: formatDragCoordinateLabel(position.x, position.y),
-      });
-    };
-
-    const handleMouseUp = () => {
-      setSnapGuides(null);
-      onDragCoordinateChange?.(null);
-      if (dragState.type === "selection") {
-        const selectedRect = normalizedRect(
-          dragState.startX,
-          dragState.startY,
-          dragState.currentX,
-          dragState.currentY,
-        );
-        const isClickSelection =
-          Math.abs(dragState.currentX - dragState.startX) < 3 &&
-          Math.abs(dragState.currentY - dragState.startY) < 3;
-        if (isClickSelection) {
-          onSelectionChange?.({ buttonIndexes: [], stick: false });
-          setDragState(null);
-          return;
-        }
-        const buttonIndexes = buttonRects
-          .filter((button) => rectsIntersect(selectedRect, button))
-          .map((button) => button.index);
-        onSelectionChange?.({
-          buttonIndexes,
-          stick: layout.showstick && rectsIntersect(selectedRect, stickRect),
-        });
-        setDragState(null);
-        return;
-      }
-      setDragState(null);
-      onLayoutDragEnd?.();
-    };
-
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [
-    dragState,
-    aspectRatioLocked,
-    backgroundSize,
-    buttonRects,
-    layout.guides,
-    layout.showstick,
-    onPositionsChange,
-    onDragCoordinateChange,
-    onSizeChange,
-    onRotationChange,
-    onLayoutDragEnd,
-    onSelectionChange,
-    snappingEnabled,
-    stickRect,
-  ]);
 
   const handleButtonClick = useCallback(
     (index: number, event: React.MouseEvent) => {

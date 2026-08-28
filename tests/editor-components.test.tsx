@@ -240,6 +240,53 @@ test("editor context menu offers horizontal and vertical distribution", () => {
   assert.deepEqual(distributions, ["horizontal"]);
 });
 
+test("a marquee drag on the selection surface selects the enclosed buttons", () => {
+  const layout = createDefaultLayout();
+  layout.totalbuttonshow = 1;
+  layout.buttons[0] = {
+    ...layout.buttons[0],
+    x: "100",
+    y: "100",
+    w: "60",
+    h: "60",
+  };
+  const selections: unknown[] = [];
+  const surfaceRef = createRef<HTMLDivElement>();
+
+  function Harness() {
+    return (
+      <div ref={surfaceRef} data-testid="surface">
+        <GamepadView
+          layout={layout}
+          stickClass="stick"
+          pressedButtons={[]}
+          editorMode={true}
+          selectionSurfaceRef={surfaceRef}
+          onSelectionChange={(selection) => selections.push(selection)}
+        />
+      </div>
+    );
+  }
+
+  renderComponent(<Harness />);
+  const surface = surfaceRef.current as HTMLDivElement;
+
+  fireEvent.mouseDown(surface, { button: 0, clientX: 5, clientY: 5 });
+  fireEvent.mouseMove(componentDocument, { clientX: 400, clientY: 400 });
+  fireEvent.mouseUp(componentDocument, { clientX: 400, clientY: 400 });
+
+  assert.equal(
+    selections.some(
+      (selection) =>
+        Array.isArray(
+          (selection as { buttonIndexes: number[] }).buttonIndexes,
+        ) &&
+        (selection as { buttonIndexes: number[] }).buttonIndexes.includes(0),
+    ),
+    true,
+  );
+});
+
 test("right-clicking an unselected button selects it and opens its delete menu", () => {
   const layout = createDefaultLayout();
   layout.totalbuttonshow = 2;
