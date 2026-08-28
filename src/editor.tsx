@@ -24,6 +24,8 @@ import { ConfirmationModal } from "./components/editor/ConfirmationModal";
 import { DragCoordinateTooltip } from "./components/editor/DragCoordinateTooltip";
 import { InspectorTabs } from "./components/editor/InspectorTabs";
 import { ObsSetupPanel } from "./components/editor/ObsSetupPanel";
+import { PreviewGuides } from "./components/editor/PreviewGuides";
+import { PreviewRuler } from "./components/editor/PreviewRuler";
 import { PreviewZoomControls } from "./components/editor/PreviewZoomControls";
 import {
   BackgroundSettingsPanel,
@@ -648,73 +650,20 @@ function EditorApp(): React.ReactElement {
           onScroll={updateRulerOrigin}
           ref={previewScrollRef}
         >
-          <div className="preview-ruler-corner" aria-hidden="true" />
-          <div
-            className="preview-ruler preview-ruler-horizontal"
-            aria-hidden="true"
-            onMouseDown={(event) => startGuideDrag("y", event)}
-          >
-            {rulerTicks.map((value) => {
-              const major = value % RULER_MAJOR_STEP === 0;
-              return (
-                <span
-                  className={`preview-ruler-tick ${major ? "preview-ruler-tick-major" : ""}`}
-                  key={value}
-                  style={{
-                    left: `calc(${rulerOrigin.x + value * previewScale}px - var(--preview-ruler-size))`,
-                  }}
-                >
-                  {major && (
-                    <span className="preview-ruler-label">{value}</span>
-                  )}
-                </span>
-              );
-            })}
-          </div>
-          <div
-            className="preview-ruler preview-ruler-vertical"
-            aria-hidden="true"
-            onMouseDown={(event) => startGuideDrag("x", event)}
-          >
-            {rulerTicks.map((value) => {
-              const major = value % RULER_MAJOR_STEP === 0;
-              return (
-                <span
-                  className={`preview-ruler-tick ${major ? "preview-ruler-tick-major" : ""}`}
-                  key={value}
-                  style={{
-                    top: `calc(${rulerOrigin.y + value * previewScale}px - var(--preview-ruler-size))`,
-                  }}
-                >
-                  {major && (
-                    <span className="preview-ruler-label">{value}</span>
-                  )}
-                </span>
-              );
-            })}
-          </div>
-          <div className="preview-guides" aria-hidden="true">
-            {layout.guides.vertical.map((guide, index) => (
-              <span
-                className="preview-guide preview-guide-vertical"
-                key={`x-${index}`}
-                onMouseDown={(event) =>
-                  startExistingGuideDrag("x", index, event)
-                }
-                style={{ left: rulerOrigin.x + guide * previewScale }}
-              />
-            ))}
-            {layout.guides.horizontal.map((guide, index) => (
-              <span
-                className="preview-guide preview-guide-horizontal"
-                key={`y-${index}`}
-                onMouseDown={(event) =>
-                  startExistingGuideDrag("y", index, event)
-                }
-                style={{ top: rulerOrigin.y + guide * previewScale }}
-              />
-            ))}
-          </div>
+          <PreviewRuler
+            ticks={rulerTicks}
+            majorStep={RULER_MAJOR_STEP}
+            origin={rulerOrigin}
+            scale={previewScale}
+            onStartGuideDrag={startGuideDrag}
+          />
+          <PreviewGuides
+            vertical={layout.guides.vertical}
+            horizontal={layout.guides.horizontal}
+            origin={rulerOrigin}
+            scale={previewScale}
+            onStartExistingGuideDrag={startExistingGuideDrag}
+          />
           <div
             id="preview-container"
             ref={previewContainerRef}
