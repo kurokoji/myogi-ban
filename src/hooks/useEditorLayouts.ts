@@ -29,20 +29,15 @@ import { ensureLayoutDefaults } from "../layout";
 import { createLayoutId } from "../layout-id";
 import { layoutAssetDirectory, withUploadedImage } from "../layout-image";
 import { normalizeLayoutName } from "../layout-name";
-import {
-  createLayoutPackage,
-  InvalidLayoutPackageError,
-  readLayoutPackage,
-  summarizeLayoutPackage,
-} from "../layout-package";
+import { createLayoutPackage } from "../layout-package";
 import {
   buildLayoutForSave,
   createEditorSnapshotSignature,
 } from "../layout-save";
 import { selectLayoutAfterDelete } from "../layout-selection";
 import { parseImportedLayoutJson } from "../layout-validation";
-import { runSingleFlight } from "../single-flight";
 import type { Layout, LayoutEntry, OperationStatus } from "../types";
+import { useLayoutPackageImport } from "./useLayoutPackageImport";
 
 interface UseEditorLayoutsOptions {
   api: ApiClient;
@@ -98,7 +93,6 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
   const imageUploadTargetRef = useRef<ImageUploadTarget>({
     type: "background",
   });
-  const importInProgressRef = useRef(false);
   const [layoutNames, setLayoutNames] = useState<LayoutEntry[]>([]);
   const [selectedLayout, setSelectedLayout] = useState("");
   const [layoutName, setLayoutName] = useState("mypreset");
@@ -108,41 +102,8 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
   const [defaultLayoutId, setDefaultLayoutId] = useState("");
   const [cleanSignature, setCleanSignature] = useState("");
   const [status, setStatus] = useState<OperationStatus>(null);
-  const [importInProgress, setImportInProgress] = useState(false);
   const [pendingConfirmation, setPendingConfirmation] =
     useState<PendingConfirmation | null>(null);
-  const [pendingLayoutImport, setPendingLayoutImport] = useState<{
-    data: Uint8Array;
-    preview: {
-      name: string;
-      savedName: string;
-      formatVersion: number;
-      imageCount: number;
-      imageBytes: number;
-    };
-  } | null>(null);
-
-  const layoutPackageErrorMessage = (error: unknown): string => {
-    const code =
-      error instanceof ApiError || error instanceof InvalidLayoutPackageError
-        ? error.code
-        : undefined;
-    if (
-      code === "package_too_large" ||
-      code === "layout_too_large" ||
-      code === "image_too_large"
-    )
-      return messages.layoutPackageTooLarge;
-    if (code === "invalid_image_content")
-      return messages.layoutPackageImageInvalid;
-    if (
-      code === "unsafe_path" ||
-      code === "unexpected_file" ||
-      code === "too_many_files"
-    )
-      return messages.layoutPackageUnsafe;
-    return messages.invalidLayoutFile;
-  };
 
   const refreshLayouts = useCallback(async () => {
     try {
@@ -188,6 +149,21 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
       setStickMappings,
     ],
   );
+
+  const {
+    pendingImport,
+    importInProgress,
+    inspectPackageFile,
+    confirmImport,
+    cancelImport,
+  } = useLayoutPackageImport({
+    api,
+    applyLayout,
+    refreshLayouts,
+    setSelectedLayout,
+    setStatus,
+    messages,
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -445,20 +421,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     if (!file) return;
     event.target.value = "";
     if (file.name.toLowerCase().endsWith(".myogi")) {
-      try {
-        const data = new Uint8Array(await file.arrayBuffer());
-        const summary = summarizeLayoutPackage(await readLayoutPackage(data));
-        setPendingLayoutImport({
-          data,
-          preview: {
-            ...summary,
-            savedName: summary.name,
-          },
-        });
-      } catch (error) {
-        console.error("Failed to inspect layout package:", error);
-        setStatus({ kind: "error", message: layoutPackageErrorMessage(error) });
-      }
+      await inspectPackageFile(file);
       return;
     }
     const hasUnsavedChanges =
@@ -484,30 +447,6 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
       }
     };
     reader.readAsText(file);
-  };
-
-  const confirmImport = async () => {
-    if (!pendingLayoutImport) return;
-    await runSingleFlight(importInProgressRef, async () => {
-      setImportInProgress(true);
-      try {
-        const result = await api.importLayoutPackage(pendingLayoutImport.data);
-        setPendingLayoutImport(null);
-        await refreshLayouts();
-        applyLayout(result.layout, result.name, false);
-        setSelectedLayout(layoutSelectionValue(result.layout.id, false));
-        setStatus({ kind: "success", message: messages.saved });
-      } catch (error) {
-        console.error("Failed to import layout package:", error);
-        setStatus({ kind: "error", message: layoutPackageErrorMessage(error) });
-      } finally {
-        setImportInProgress(false);
-      }
-    });
-  };
-
-  const cancelImport = () => {
-    if (!importInProgressRef.current) setPendingLayoutImport(null);
   };
 
   const confirmPendingAction = async () => {
@@ -536,7 +475,7 @@ export function useEditorLayouts(options: UseEditorLayoutsOptions) {
     layoutNames,
     openLayout,
     openImagePicker,
-    pendingImport: pendingLayoutImport?.preview ?? null,
+    pendingImport,
     renameLayout,
     saveLayout,
     saveLayoutAs,

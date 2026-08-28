@@ -82,7 +82,7 @@
 - [x] R096 `editor.tsx` のキーボードショートカット `useEffect` を純粋関数と `useEditorKeyboardShortcuts` フックへ分離する
 - [ ] R097 `GamepadView.tsx` の巨大ポインタードラッグ `useEffect` を `useGamepadPointerDrag` フックへ抽出する
 - [x] R098 `editor.tsx` のプレビュー定規・ガイド描画を `PreviewRuler` / `PreviewGuides` コンポーネントへ分離する
-- [ ] R099 `useEditorLayouts` を保存系フックとインポート系フックへ分割する
+- [x] R099 `useEditorLayouts` から `.myogi` パッケージ取り込みの状態・処理を `useLayoutPackageImport` フックへ分離する
 
 ## Lower Priority
 
