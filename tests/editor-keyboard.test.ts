@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  decideEditorKeyboardAction,
   deleteEditorSelection,
   editorNudgeHistoryMode,
   editorShortcutFromKey,
@@ -8,6 +9,107 @@ import {
   isEditableKeyboardTarget,
   nudgeEditorSelection,
 } from "../src/editor-keyboard";
+
+const baseContext = {
+  isEditableTarget: false,
+  shortcut: null,
+  repeat: false,
+  selectionEmpty: true,
+  hasSelectedButtons: false,
+  currentBuiltin: false,
+} as const;
+
+test("decideEditorKeyboardAction ignores events from editable targets", () => {
+  assert.deepEqual(
+    decideEditorKeyboardAction({
+      ...baseContext,
+      isEditableTarget: true,
+      shortcut: "save",
+    }),
+    { action: "none", preventDefault: false },
+  );
+});
+
+test("decideEditorKeyboardAction saves on Ctrl+S but stays inert while repeating or on a builtin", () => {
+  assert.deepEqual(
+    decideEditorKeyboardAction({ ...baseContext, shortcut: "save" }),
+    { action: "save", preventDefault: true },
+  );
+  assert.deepEqual(
+    decideEditorKeyboardAction({
+      ...baseContext,
+      shortcut: "save",
+      repeat: true,
+    }),
+    { action: "none", preventDefault: true },
+  );
+  assert.deepEqual(
+    decideEditorKeyboardAction({
+      ...baseContext,
+      shortcut: "save",
+      currentBuiltin: true,
+    }),
+    { action: "none", preventDefault: true },
+  );
+});
+
+test("decideEditorKeyboardAction only clears a non-empty selection", () => {
+  assert.deepEqual(
+    decideEditorKeyboardAction({
+      ...baseContext,
+      shortcut: "clearSelection",
+    }),
+    { action: "none", preventDefault: false },
+  );
+  assert.deepEqual(
+    decideEditorKeyboardAction({
+      ...baseContext,
+      shortcut: "clearSelection",
+      selectionEmpty: false,
+    }),
+    { action: "clearSelection", preventDefault: true },
+  );
+});
+
+test("decideEditorKeyboardAction suppresses repeated undo/redo", () => {
+  assert.deepEqual(
+    decideEditorKeyboardAction({
+      ...baseContext,
+      shortcut: "undo",
+      repeat: true,
+    }),
+    { action: "none", preventDefault: true },
+  );
+});
+
+test("decideEditorKeyboardAction defers delete preventDefault to the caller", () => {
+  assert.deepEqual(
+    decideEditorKeyboardAction({ ...baseContext, shortcut: "delete" }),
+    { action: "delete", preventDefault: false },
+  );
+});
+
+test("decideEditorKeyboardAction requires a button selection for duplicate and resetRotation", () => {
+  assert.deepEqual(
+    decideEditorKeyboardAction({ ...baseContext, shortcut: "duplicate" }),
+    { action: "none", preventDefault: false },
+  );
+  assert.deepEqual(
+    decideEditorKeyboardAction({
+      ...baseContext,
+      shortcut: "resetRotation",
+      hasSelectedButtons: true,
+    }),
+    { action: "resetRotation", preventDefault: true },
+  );
+});
+
+test("decideEditorKeyboardAction treats unrecognized keys as nudge candidates", () => {
+  assert.deepEqual(
+    decideEditorKeyboardAction({ ...baseContext, shortcut: null }),
+    { action: "nudge", preventDefault: false },
+  );
+});
 
 test("editorShortcutHint formats shortcuts for hover descriptions", () => {
   assert.equal(editorShortcutHint("save", "Win32"), "Ctrl+S");
