@@ -76,6 +76,15 @@
 - [x] R046 `selectedButtonIndex` と `selectedButtonIndexes` を単一の選択モデルへ統合する
 - [x] R047 最大ボタン数・既定寸法・ポーリング間隔などのマジックナンバーを定数化する
 
+## Pending
+
+- [x] R095 `editor.tsx` の選択操作コールバック群を `useEditorSelectionActions` フックへ抽出する
+- [x] R096 `editor.tsx` のキーボードショートカット `useEffect` を純粋関数と `useEditorKeyboardShortcuts` フックへ分離する
+- [x] R097 `GamepadView.tsx` の巨大ポインタードラッグ `useEffect` を `useGamepadPointerDrag` フックへ抽出する
+- [x] R098 `editor.tsx` のプレビュー定規・ガイド描画を `PreviewRuler` / `PreviewGuides` コンポーネントへ分離する
+- [x] R099 `useEditorLayouts` から `.myogi` パッケージ取り込みの状態・処理を `useLayoutPackageImport` フックへ分離する
+- [x] R100 ボタン選択時にインスペクターの「詳細設定」を自動で開く（インスペクター移行時に失われた R079 相当の挙動を復元）
+
 ## Lower Priority
 
 - [x] R048 日本語・英語翻訳を別ファイルへ分割する

@@ -20,11 +20,12 @@ import "@fontsource-variable/m-plus-code-latin/wght.css";
 import "./i18n";
 import { ApiClient } from "./api";
 import { REPO_NAME, REPO_URL } from "./app-constants";
-import { resetButtonToDefaults } from "./button-settings";
 import { ConfirmationModal } from "./components/editor/ConfirmationModal";
 import { DragCoordinateTooltip } from "./components/editor/DragCoordinateTooltip";
 import { InspectorTabs } from "./components/editor/InspectorTabs";
 import { ObsSetupPanel } from "./components/editor/ObsSetupPanel";
+import { PreviewGuides } from "./components/editor/PreviewGuides";
+import { PreviewRuler } from "./components/editor/PreviewRuler";
 import { PreviewZoomControls } from "./components/editor/PreviewZoomControls";
 import {
   BackgroundSettingsPanel,
@@ -42,23 +43,11 @@ import { UpdatePopup } from "./components/editor/UpdatePopup";
 import { WhatsNewPopup } from "./components/editor/WhatsNewPopup";
 import { GamepadView } from "./components/GamepadView";
 import {
-  addEditorButton,
   type ButtonPositionUpdate,
-  deleteEditorButtons,
-  distributeEditorButtons,
-  duplicateEditorButtons,
-  reorderEditorButtons,
   withButtonPositions,
 } from "./editor-buttons";
 import { cloneLayout, updateSelectedButtonSettings } from "./editor-helpers";
-import {
-  deleteEditorSelection,
-  editorNudgeHistoryMode,
-  editorShortcutFromKey,
-  editorShortcutHint,
-  isEditableKeyboardTarget,
-  nudgeEditorSelection,
-} from "./editor-keyboard";
+import { editorShortcutHint } from "./editor-keyboard";
 import {
   applyEditorResize,
   applyEditorRotation,
@@ -80,7 +69,9 @@ import {
 } from "./gamepad";
 import { useEditorGamepad } from "./hooks/useEditorGamepad";
 import { useEditorGuides } from "./hooks/useEditorGuides";
+import { useEditorKeyboardShortcuts } from "./hooks/useEditorKeyboardShortcuts";
 import { useEditorLayouts } from "./hooks/useEditorLayouts";
+import { useEditorSelectionActions } from "./hooks/useEditorSelectionActions";
 import { useLayoutHistory } from "./hooks/useLayoutHistory";
 import { usePreviewViewport } from "./hooks/usePreviewViewport";
 import { useUnsavedChangesWarning } from "./hooks/useUnsavedChangesWarning";
@@ -285,198 +276,40 @@ function EditorApp(): React.ReactElement {
     selectedButtonIndexes,
   ]);
 
-  const deleteSelection = useCallback(
-    (target: { buttonIndexes: number[]; stick: boolean }) => {
-      const deleted = deleteEditorSelection(
-        layoutRef.current,
-        buttonMappings,
-        {
-          ...target,
-          primaryButtonIndex: target.buttonIndexes[0] ?? null,
-        },
-        "Delete",
-      );
-      if (!deleted) return false;
-      updateLayout((next) => Object.assign(next, deleted.layout));
-      setButtonMappings(deleted.mapping);
-      setSelection(EMPTY_EDITOR_SELECTION);
-      cancelAssignment();
-      return true;
-    },
-    [buttonMappings, cancelAssignment, updateLayout],
-  );
-
-  const duplicateSelection = useCallback(
-    (target: { buttonIndexes: number[]; stick: boolean }) => {
-      const duplicated = duplicateEditorButtons(
-        layoutRef.current,
-        buttonMappings,
-        target.buttonIndexes,
-      );
-      if (!duplicated) return;
-      updateLayout((next) => Object.assign(next, duplicated.layout));
-      setButtonMappings(duplicated.mapping);
-      setSelection({
-        buttonIndexes: duplicated.indexes,
-        primaryButtonIndex: duplicated.indexes[0] ?? null,
-        stick: false,
-      });
-      cancelAssignment();
-    },
-    [buttonMappings, cancelAssignment, updateLayout],
-  );
-
-  const resetSelectionToDefault = useCallback(
-    (target: { buttonIndexes: number[]; stick: boolean }) => {
-      updateLayout((next) => {
-        for (const index of target.buttonIndexes) {
-          const button = next.buttons[index];
-          if (button) {
-            next.buttons[index] = resetButtonToDefaults(
-              button,
-              next.defaultbuttons,
-            );
-          }
-        }
-      });
-    },
-    [updateLayout],
-  );
-
-  const resetSelectionRotation = useCallback(
-    (target: { buttonIndexes: number[]; stick: boolean }) => {
-      updateLayout((next) => {
-        for (const index of target.buttonIndexes) {
-          if (next.buttons[index]) next.buttons[index].rotation = "0";
-        }
-      });
-    },
-    [updateLayout],
-  );
-
-  const reorderSelection = useCallback(
-    (
-      target: { buttonIndexes: number[]; stick: boolean },
-      edge: "front" | "back",
-    ) => {
-      const reordered = reorderEditorButtons(
-        layoutRef.current,
-        buttonMappings,
-        target.buttonIndexes,
-        edge,
-      );
-      updateLayout((next) => Object.assign(next, reordered.layout));
-      setButtonMappings(reordered.mapping);
-      setSelection({
-        buttonIndexes: reordered.indexes,
-        primaryButtonIndex: reordered.indexes[0] ?? null,
-        stick: false,
-      });
-      cancelAssignment();
-    },
-    [buttonMappings, cancelAssignment, updateLayout],
-  );
-
-  const distributeSelection = useCallback(
-    (
-      target: { buttonIndexes: number[]; stick: boolean },
-      direction: "horizontal" | "vertical",
-    ) => {
-      const distributed = distributeEditorButtons(
-        layoutRef.current,
-        target.buttonIndexes,
-        direction,
-      );
-      if (!distributed) return;
-      updateLayout((next) => Object.assign(next, distributed));
-      cancelAssignment();
-    },
-    [cancelAssignment, updateLayout],
-  );
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (isEditableKeyboardTarget(event.target)) return;
-
-      const shortcut = editorShortcutFromKey(event);
-      if (shortcut === "save") {
-        event.preventDefault();
-        if (!event.repeat && !currentBuiltin) saveLayout();
-        return;
-      }
-      if (shortcut === "clearSelection") {
-        if (selection.buttonIndexes.length === 0 && !selection.stick) return;
-        event.preventDefault();
-        setSelection(EMPTY_EDITOR_SELECTION);
-        cancelAssignment();
-        return;
-      }
-      if (shortcut === "selectAll") {
-        event.preventDefault();
-        const buttonIndexes = Array.from(
-          { length: layoutRef.current.totalbuttonshow },
-          (_, index) => index,
-        );
-        setSelection({
-          buttonIndexes,
-          primaryButtonIndex: buttonIndexes[0] ?? null,
-          stick: false,
-        });
-        cancelAssignment();
-        return;
-      }
-      if (shortcut === "undo") {
-        event.preventDefault();
-        if (!event.repeat) undoLayout();
-        return;
-      }
-      if (shortcut === "redo") {
-        event.preventDefault();
-        if (!event.repeat) redoLayout();
-        return;
-      }
-      if (shortcut === "delete" && deleteSelection(selection)) {
-        event.preventDefault();
-        return;
-      }
-      if (shortcut === "duplicate" && selection.buttonIndexes.length > 0) {
-        event.preventDefault();
-        if (!event.repeat) duplicateSelection(selection);
-        return;
-      }
-      if (shortcut === "resetRotation" && selection.buttonIndexes.length > 0) {
-        event.preventDefault();
-        if (!event.repeat) resetSelectionRotation(selection);
-        return;
-      }
-      const moved = nudgeEditorSelection(
-        layoutRef.current,
-        selection,
-        event.key,
-      );
-      if (!moved) return;
-      event.preventDefault();
-      if (editorNudgeHistoryMode(event.repeat) === "record") {
-        updateLayout((next) => Object.assign(next, moved));
-        return;
-      }
-      setLayout(moved);
-      layoutRef.current = moved;
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [
-    cancelAssignment,
-    currentBuiltin,
+  const {
+    addButton,
+    deleteSelectedButtons,
     deleteSelection,
     duplicateSelection,
-    redoLayout,
+    resetSelectionToDefault,
     resetSelectionRotation,
-    saveLayout,
+    reorderSelection,
+    distributeSelection,
+  } = useEditorSelectionActions({
+    layoutRef,
+    buttonMappings,
     selection,
-    undoLayout,
+    setButtonMappings,
+    setSelection,
     updateLayout,
-  ]);
+    cancelAssignment,
+  });
+
+  useEditorKeyboardShortcuts({
+    layoutRef,
+    selection,
+    currentBuiltin,
+    setLayout,
+    setSelection,
+    cancelAssignment,
+    saveLayout,
+    undoLayout,
+    redoLayout,
+    updateLayout,
+    deleteSelection,
+    duplicateSelection,
+    resetSelectionRotation,
+  });
 
   const clearGuides = useCallback(() => {
     updateLayout((next) => {
@@ -581,34 +414,6 @@ function EditorApp(): React.ReactElement {
     },
     [cancelAssignment, clearSelection],
   );
-
-  const addButton = useCallback(() => {
-    const result = addEditorButton(layout, buttonMappings);
-    if (!result) return;
-    updateLayout((next) => Object.assign(next, result.layout));
-    setButtonMappings(result.mapping);
-    const newIndex = result.index;
-    setSelection(createButtonSelection(newIndex));
-    cancelAssignment();
-  }, [buttonMappings, cancelAssignment, layout, updateLayout]);
-
-  const deleteSelectedButtons = useCallback(() => {
-    const result = deleteEditorButtons(
-      layout,
-      buttonMappings,
-      selectedButtonIndexes,
-    );
-    if (result.layout.totalbuttonshow === layout.totalbuttonshow) return;
-    updateLayout((next) => Object.assign(next, result.layout));
-    setButtonMappings(result.mapping);
-    clearSelection();
-  }, [
-    clearSelection,
-    buttonMappings,
-    layout,
-    selectedButtonIndexes,
-    updateLayout,
-  ]);
 
   const selectButtonAndStartAssignment = useCallback(
     (index: number, toggleSelection: boolean) => {
@@ -845,73 +650,20 @@ function EditorApp(): React.ReactElement {
           onScroll={updateRulerOrigin}
           ref={previewScrollRef}
         >
-          <div className="preview-ruler-corner" aria-hidden="true" />
-          <div
-            className="preview-ruler preview-ruler-horizontal"
-            aria-hidden="true"
-            onMouseDown={(event) => startGuideDrag("y", event)}
-          >
-            {rulerTicks.map((value) => {
-              const major = value % RULER_MAJOR_STEP === 0;
-              return (
-                <span
-                  className={`preview-ruler-tick ${major ? "preview-ruler-tick-major" : ""}`}
-                  key={value}
-                  style={{
-                    left: `calc(${rulerOrigin.x + value * previewScale}px - var(--preview-ruler-size))`,
-                  }}
-                >
-                  {major && (
-                    <span className="preview-ruler-label">{value}</span>
-                  )}
-                </span>
-              );
-            })}
-          </div>
-          <div
-            className="preview-ruler preview-ruler-vertical"
-            aria-hidden="true"
-            onMouseDown={(event) => startGuideDrag("x", event)}
-          >
-            {rulerTicks.map((value) => {
-              const major = value % RULER_MAJOR_STEP === 0;
-              return (
-                <span
-                  className={`preview-ruler-tick ${major ? "preview-ruler-tick-major" : ""}`}
-                  key={value}
-                  style={{
-                    top: `calc(${rulerOrigin.y + value * previewScale}px - var(--preview-ruler-size))`,
-                  }}
-                >
-                  {major && (
-                    <span className="preview-ruler-label">{value}</span>
-                  )}
-                </span>
-              );
-            })}
-          </div>
-          <div className="preview-guides" aria-hidden="true">
-            {layout.guides.vertical.map((guide, index) => (
-              <span
-                className="preview-guide preview-guide-vertical"
-                key={`x-${index}`}
-                onMouseDown={(event) =>
-                  startExistingGuideDrag("x", index, event)
-                }
-                style={{ left: rulerOrigin.x + guide * previewScale }}
-              />
-            ))}
-            {layout.guides.horizontal.map((guide, index) => (
-              <span
-                className="preview-guide preview-guide-horizontal"
-                key={`y-${index}`}
-                onMouseDown={(event) =>
-                  startExistingGuideDrag("y", index, event)
-                }
-                style={{ top: rulerOrigin.y + guide * previewScale }}
-              />
-            ))}
-          </div>
+          <PreviewRuler
+            ticks={rulerTicks}
+            majorStep={RULER_MAJOR_STEP}
+            origin={rulerOrigin}
+            scale={previewScale}
+            onStartGuideDrag={startGuideDrag}
+          />
+          <PreviewGuides
+            vertical={layout.guides.vertical}
+            horizontal={layout.guides.horizontal}
+            origin={rulerOrigin}
+            scale={previewScale}
+            onStartExistingGuideDrag={startExistingGuideDrag}
+          />
           <div
             id="preview-container"
             ref={previewContainerRef}

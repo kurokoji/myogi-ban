@@ -65,6 +65,81 @@ export function editorShortcutFromKey(event: {
   return key === "r" ? "resetRotation" : null;
 }
 
+export type EditorKeyboardAction =
+  | "none"
+  | "save"
+  | "clearSelection"
+  | "selectAll"
+  | "undo"
+  | "redo"
+  | "delete"
+  | "duplicate"
+  | "resetRotation"
+  | "nudge";
+
+export interface EditorKeyboardContext {
+  isEditableTarget: boolean;
+  shortcut: EditorShortcut | null;
+  repeat: boolean;
+  selectionEmpty: boolean;
+  hasSelectedButtons: boolean;
+  currentBuiltin: boolean;
+}
+
+export interface EditorKeyboardDecision {
+  action: EditorKeyboardAction;
+  preventDefault: boolean;
+}
+
+export function decideEditorKeyboardAction(
+  context: EditorKeyboardContext,
+): EditorKeyboardDecision {
+  if (context.isEditableTarget) {
+    return { action: "none", preventDefault: false };
+  }
+  switch (context.shortcut) {
+    case "save":
+      return {
+        action: !context.repeat && !context.currentBuiltin ? "save" : "none",
+        preventDefault: true,
+      };
+    case "clearSelection":
+      return context.selectionEmpty
+        ? { action: "none", preventDefault: false }
+        : { action: "clearSelection", preventDefault: true };
+    case "selectAll":
+      return { action: "selectAll", preventDefault: true };
+    case "undo":
+      return {
+        action: context.repeat ? "none" : "undo",
+        preventDefault: true,
+      };
+    case "redo":
+      return {
+        action: context.repeat ? "none" : "redo",
+        preventDefault: true,
+      };
+    case "delete":
+      return { action: "delete", preventDefault: false };
+    case "duplicate":
+      return context.hasSelectedButtons
+        ? {
+            action: context.repeat ? "none" : "duplicate",
+            preventDefault: true,
+          }
+        : { action: "none", preventDefault: false };
+    case "resetRotation":
+      return context.hasSelectedButtons
+        ? {
+            action: context.repeat ? "none" : "resetRotation",
+            preventDefault: true,
+          }
+        : { action: "none", preventDefault: false };
+    default:
+      return { action: "nudge", preventDefault: false };
+  }
+}
+
 export function deleteEditorSelection(
   layout: Layout,
   buttonMappings: ButtonMapping[],
