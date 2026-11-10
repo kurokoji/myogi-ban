@@ -72,4 +72,16 @@ int main()
 	       "uses the default layout dimensions endpoint when no layout is selected");
 	expect(state.browser_settings().url == "http://127.0.0.1:33770/view",
 	       "restores the default viewer URL");
+
+	state.use_native_input(true);
+	expect(state.browser_settings().url == "http://127.0.0.1:33770/view?input=native",
+	       "asks the viewer for server-side input without a layout");
+	state.select_layout("builtin:arcade stick");
+	expect(state.browser_settings().url ==
+		       "http://127.0.0.1:33770/view?layout=arcade%20stick&builtin=true&input=native",
+	       "appends the native input request after the layout selection");
+	state.use_native_input(false);
+	state.select_layout("");
+	expect(state.browser_settings().url == "http://127.0.0.1:33770/view",
+	       "omits the input request when the browser gamepad API is used");
 }

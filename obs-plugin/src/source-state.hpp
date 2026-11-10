@@ -29,6 +29,8 @@ public:
 
 	void apply_dimensions(SourceDimensions dimensions);
 	bool select_layout(std::string selection);
+	// Takes controller input from the server instead of the browser Gamepad API.
+	void use_native_input(bool enabled);
 	const SelectedLayout &selected_layout() const;
 	std::string dimensions_api_path() const;
 	bool advance_readiness_check(float seconds);
@@ -37,4 +39,5 @@ public:
 private:
 	float readiness_check_elapsed = 0.0f;
 	SelectedLayout layout;
+	bool native_input = false;
 };

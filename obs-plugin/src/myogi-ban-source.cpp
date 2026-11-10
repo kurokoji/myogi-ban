@@ -11,6 +11,7 @@ constexpr const char *kServerOnly = "server_only";
 constexpr const char *kWidth = "width";
 constexpr const char *kHeight = "height";
 constexpr const char *kLayout = "layout";
+constexpr const char *kNativeInput = "native_input";
 constexpr const char *kRefreshPageCache = "refresh_page_cache";
 struct MyogiBanSource {
 	obs_source_t *source = nullptr;
@@ -89,6 +90,7 @@ void source_defaults(obs_data_t *settings)
 	obs_data_set_default_int(settings, kWidth, 500);
 	obs_data_set_default_int(settings, kHeight, 250);
 	obs_data_set_default_string(settings, kLayout, "");
+	obs_data_set_default_bool(settings, kNativeInput, false);
 }
 
 void source_update(void *data, obs_data_t *settings)
@@ -98,6 +100,7 @@ void source_update(void *data, obs_data_t *settings)
 	context->server_only = obs_data_get_bool(settings, kServerOnly);
 	context->state.apply_dimensions({static_cast<uint32_t>(obs_data_get_int(settings, kWidth)),
 					 static_cast<uint32_t>(obs_data_get_int(settings, kHeight))});
+	context->state.use_native_input(obs_data_get_bool(settings, kNativeInput));
 	const bool layout_changed = context->state.select_layout(obs_data_get_string(settings, kLayout));
 	ServerProcess::instance().ensure_started(context->executable_path, context->server_only);
 	if (layout_changed && ServerProcess::instance().port_ready()) {
@@ -256,6 +259,7 @@ obs_properties_t *source_properties(void *data)
 			obs_data_release(response);
 	}
 	obs_property_set_modified_callback2(layouts, layout_modified, data);
+	obs_properties_add_bool(properties, kNativeInput, obs_module_text("NativeInput"));
 	obs_properties_add_button(properties, kRefreshPageCache, obs_module_text("RefreshPageCache"),
 				  refresh_page_cache);
 	return properties;

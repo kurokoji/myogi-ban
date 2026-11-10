@@ -48,6 +48,11 @@ bool SourceState::select_layout(std::string selection)
 	return changed;
 }
 
+void SourceState::use_native_input(bool enabled)
+{
+	native_input = enabled;
+}
+
 const SelectedLayout &SourceState::selected_layout() const
 {
 	return layout;
@@ -73,8 +78,12 @@ bool SourceState::advance_readiness_check(float seconds)
 BrowserSettings SourceState::browser_settings() const
 {
 	std::string url(kViewerUrl);
-	if (!layout.is_default)
-		url += "?layout=" + percent_encode(layout.id) + "&builtin=" +
-		       (layout.builtin ? "true" : "false");
+	char separator = '?';
+	if (!layout.is_default) {
+		url += "?layout=" + percent_encode(layout.id) + "&builtin=" + (layout.builtin ? "true" : "false");
+		separator = '&';
+	}
+	if (native_input)
+		url += std::string(1, separator) + "input=native";
 	return {std::move(url), width, height, false};
 }
