@@ -8,6 +8,7 @@ import { resolveElectronRendererUrl } from "./electron-renderer";
 import { shouldOpenWindowForSecondInstance } from "./electron-single-instance";
 import { requestRunningWindow } from "./electron-window-request";
 import { createLocalServer } from "./local-server";
+import { loadSdlInputSource, type SdlModule } from "./native-input-sdl";
 import { getInstalledObsPluginVersion } from "./obs-plugin-install-status";
 import { cleanupLocalServer } from "./server-cleanup";
 import { PORT } from "./types";
@@ -87,6 +88,7 @@ function startServer(): void {
     userLayoutDir: path.join(dataDir, "user-layouts"),
     defaultLayoutFile: path.join(dataDir, "default-layout.json"),
     pidFile: path.join(dataDir, "server.pid"),
+    nativeInput: loadSdlInputSource(() => require("@kmamal/sdl") as SdlModule),
     onListening: () => {
       if (windowRequested) showMainWindow();
     },

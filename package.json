@@ -6,8 +6,8 @@
   "main": "dist/electron.js",
   "scripts": {
     "build": "npm run build:server && npm run build:electron && npm run build:web",
-    "build:server": "esbuild src/server.ts --bundle --platform=node --outfile=dist/server.js --external:ws --external:express",
-    "build:electron": "esbuild src/electron.ts --bundle --platform=node --outfile=dist/electron.js --external:electron --external:ws --external:express",
+    "build:server": "esbuild src/server.ts --bundle --platform=node --outfile=dist/server.js --external:ws --external:express --external:@kmamal/sdl",
+    "build:electron": "esbuild src/electron.ts --bundle --platform=node --outfile=dist/electron.js --external:electron --external:ws --external:express --external:@kmamal/sdl",
     "build:obs-plugin": "node scripts/build-obs-plugin.mjs",
     "test:obs-plugin": "node scripts/test-obs-plugin.mjs",
     "build:obs-plugin-installer": "npm run build:obs-plugin && node scripts/build-obs-plugin-installer.mjs",
@@ -27,11 +27,14 @@
   },
   "build": {
     "appId": "myogi-ban",
+    "npmRebuild": false,
     "productName": "Myogi Ban",
     "files": [
       "dist/**/*",
       "public/**/*",
       "build/**/*",
+      "!build/obs-plugin/**",
+      "!build/obs-plugin-tests/**",
       "THIRD_PARTY_LICENSES.md",
       "package.json"
     ],
@@ -64,6 +67,7 @@
   "dependencies": {
     "@fontsource-variable/m-plus-2": "^5.3.0",
     "@fontsource-variable/m-plus-code-latin": "^5.3.0",
+    "@kmamal/sdl": "^0.11.13",
     "@mantine/core": "^9.4.1",
     "@mantine/hooks": "^9.4.1",
     "@tabler/icons-react": "^3.45.0",

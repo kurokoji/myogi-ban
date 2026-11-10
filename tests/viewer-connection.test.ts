@@ -5,6 +5,7 @@ import {
   createViewerWebSocketUrl,
   layoutForViewerState,
   nextViewerConnectionStatus,
+  viewerInputModeFromSearch,
   viewerLayoutRequestFromSearch,
 } from "../src/viewer-connection";
 
@@ -37,6 +38,23 @@ test("viewer websocket uses the dedicated application path", () => {
   );
 });
 
+test("a native viewer asks the server for controller input on its websocket", () => {
+  assert.equal(
+    createViewerWebSocketUrl(
+      { protocol: "http:", host: "127.0.0.1:33770" },
+      "native",
+    ),
+    "ws://127.0.0.1:33770/ws?input=native",
+  );
+  assert.equal(
+    createViewerWebSocketUrl(
+      { protocol: "http:", host: "127.0.0.1:33770" },
+      "browser",
+    ),
+    "ws://127.0.0.1:33770/ws",
+  );
+});
+
 test("viewer connection status covers API errors and websocket reconnects", () => {
   assert.equal(nextViewerConnectionStatus("loading", "api-error"), "error");
   assert.equal(
@@ -50,5 +68,19 @@ test("viewer connection status covers API errors and websocket reconnects", () =
   assert.equal(
     nextViewerConnectionStatus("disconnected", "socket-open"),
     "connected",
+  );
+});
+
+test("viewer input mode defaults to the browser gamepad API", () => {
+  assert.equal(viewerInputModeFromSearch(""), "browser");
+  assert.equal(viewerInputModeFromSearch("?layout=a"), "browser");
+  assert.equal(viewerInputModeFromSearch("?input=unknown"), "browser");
+});
+
+test("viewer input mode reads the native input request from the URL", () => {
+  assert.equal(viewerInputModeFromSearch("?input=native"), "native");
+  assert.equal(
+    viewerInputModeFromSearch("?layout=a&builtin=true&input=native"),
+    "native",
   );
 });

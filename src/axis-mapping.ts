@@ -25,3 +25,20 @@ export function decodeAxisMapping(code: number): AxisMapping | null {
   const magnitude = (payload - axis * AXIS_FACTOR) / 100;
   return { axis, value: negative ? -magnitude : magnitude };
 }
+
+/** Whether `axes` has moved far enough from `center` toward the mapped direction. */
+export function isAxisMappingTriggered(
+  code: number,
+  axes: readonly number[],
+  center: readonly number[],
+): boolean {
+  const mapping = decodeAxisMapping(code);
+  if (!mapping) return false;
+  const { axis, value } = mapping;
+  if (axis >= axes.length) return false;
+
+  const sign = value < 0 ? -1 : 1;
+  const min = (value - (center[axis] || 0)) * 0.55;
+  const max = value + 0.05 * sign;
+  return axes[axis] >= Math.min(min, max) && axes[axis] <= Math.max(min, max);
+}

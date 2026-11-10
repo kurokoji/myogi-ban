@@ -1,4 +1,4 @@
-import { decodeAxisMapping, encodeAxisMapping } from "./axis-mapping";
+import { encodeAxisMapping, isAxisMappingTriggered } from "./axis-mapping";
 import { TOTAL_BUTTONS } from "./types";
 
 export type ButtonMapping = number; // 0-51: button index, 1000000+: axis code
@@ -41,6 +41,19 @@ export function toggleMappingAssignment(
   if (target.type === "button") nextButtons[target.index] = code;
   else nextStick[target.index] = code;
   return { buttonMappings: nextButtons, stickMappings: nextStick };
+}
+
+/** Whether a button or axis assignment is active for the given input. */
+export function isMappingPressed(
+  mapping: ButtonMapping,
+  buttons: readonly boolean[],
+  axes: readonly number[],
+  axesCenter: readonly number[],
+): boolean {
+  if (mapping === UNASSIGNED_MAPPING) return false;
+  if (mapping >= 1000000)
+    return isAxisMappingTriggered(mapping, axes, axesCenter);
+  return mapping >= 0 && buttons[mapping] === true;
 }
 
 export class GamepadManager {
@@ -111,32 +124,12 @@ export class GamepadManager {
   }
 
   isButtonPressed(mapping: ButtonMapping, gamepad: Gamepad): boolean {
-    if (mapping === UNASSIGNED_MAPPING) return false;
-    if (mapping >= 1000000) {
-      return this.isAxisTriggered(mapping, gamepad);
-    }
-    return (
-      mapping >= 0 &&
-      mapping < gamepad.buttons.length &&
-      gamepad.buttons[mapping].pressed
+    return isMappingPressed(
+      mapping,
+      gamepad.buttons.map((button) => button.pressed),
+      gamepad.axes,
+      this.axesCenter,
     );
-  }
-
-  private isAxisTriggered(code: number, gamepad: Gamepad): boolean {
-    const mapping = decodeAxisMapping(code);
-    if (!mapping) return false;
-    const { axis, value: val } = mapping;
-    const sign = val < 0 ? -1 : 1;
-
-    if (axis >= gamepad.axes.length) return false;
-
-    const gamepadAxis = gamepad.axes[axis];
-    const min = (val - (this.axesCenter[axis] || 0)) * 0.55;
-    const max = val + 0.05 * sign;
-    const realMin = Math.min(min, max);
-    const realMax = Math.max(min, max);
-
-    return gamepadAxis >= realMin && gamepadAxis <= realMax;
   }
 
   detectButtonPress(): number | null {

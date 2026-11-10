@@ -4,6 +4,7 @@ import * as http from "http";
 import * as path from "path";
 import WebSocket from "ws";
 import { LayoutRepository } from "./layout-repository";
+import type { NativeInputSource } from "./native-input";
 import { registerImageRoutes } from "./server-routes/image-routes";
 import { registerLayoutRoutes } from "./server-routes/layout-routes";
 import { registerStateRoutes } from "./server-routes/state-routes";
@@ -25,6 +26,8 @@ export interface LocalServerOptions {
   onShowWindow?: () => void;
   updateManager?: UpdateManager;
   whatsNewManager?: WhatsNewManager;
+  /** Controller input read by the server, for viewers that cannot read it. */
+  nativeInput?: NativeInputSource;
 }
 
 function ensureDir(dir: string): void {
@@ -54,6 +57,28 @@ export function createLocalServer(options: LocalServerOptions): http.Server {
     });
   };
 
+  // The controller is only opened while a viewer asks for native input, so
+  // the editor and browser viewers keep exclusive use of the Gamepad API.
+  const nativeViewers = new Set<WebSocket>();
+  let latestInputMessage: string | null = null;
+  let stopNativeInput: (() => void) | null = null;
+  const startNativeInput = (): void => {
+    stopNativeInput ??=
+      options.nativeInput?.subscribe((frame) => {
+        const message = JSON.stringify({ type: "input", data: frame });
+        latestInputMessage = message;
+        nativeViewers.forEach((client) => {
+          if (client.readyState === WebSocket.OPEN) client.send(message);
+        });
+      }) ?? null;
+  };
+  const releaseNativeInput = (): void => {
+    stopNativeInput?.();
+    stopNativeInput = null;
+    latestInputMessage = null;
+  };
+  server.on("close", releaseNativeInput);
+
   expressApp.use("/layout", express.static(options.userLayoutDir));
   expressApp.use(express.static(options.publicDir));
   expressApp.use(express.json({ limit: "100mb" }));
@@ -74,7 +99,20 @@ export function createLocalServer(options: LocalServerOptions): http.Server {
     registerWhatsNewRoutes(expressApp, options.whatsNewManager);
   }
 
-  wss.on("connection", (ws) => {
+  wss.on("connection", (ws, request) => {
+    const wantsNativeInput =
+      new URL(request.url ?? "/", "http://localhost").searchParams.get(
+        "input",
+      ) === "native";
+    if (wantsNativeInput && options.nativeInput) {
+      nativeViewers.add(ws);
+      ws.on("close", () => {
+        nativeViewers.delete(ws);
+        if (nativeViewers.size === 0) releaseNativeInput();
+      });
+      startNativeInput();
+      if (latestInputMessage) ws.send(latestInputMessage);
+    }
     if (stateStore.latest) {
       ws.send(JSON.stringify({ type: "state", data: stateStore.latest }));
     }

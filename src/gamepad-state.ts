@@ -1,4 +1,10 @@
-import type { ButtonMapping, GamepadManager, StickMapping } from "./gamepad";
+import {
+  type ButtonMapping,
+  type GamepadManager,
+  isMappingPressed,
+  type StickMapping,
+} from "./gamepad";
+import type { InputFrame } from "./native-input";
 import { type GamepadState, type Layout, STICK_NAMES } from "./types";
 
 export interface GamepadSnapshot {
@@ -36,6 +42,40 @@ export function createEmptySnapshot(layout: Layout): GamepadSnapshot {
     pressedButtons: Array.from({ length: layout.totalbuttonshow }, () => false),
     inputs: [],
     statusChanged: false,
+  };
+}
+
+/** Applies the layout's assignments to input read outside the browser. */
+export function snapshotFromInputFrame(
+  frame: InputFrame,
+  layout: Layout,
+  buttonMappings: ButtonMapping[],
+  stickMappings: StickMapping[],
+): GamepadSnapshot {
+  const isPressed = (mapping: ButtonMapping): boolean =>
+    isMappingPressed(mapping, frame.buttons, frame.axes, []);
+  const stickStatus = [0, 1, 2, 3].map((i) => isPressed(stickMappings[i]));
+  const stickClass = stickStatus.reduce(
+    (classes, pressed, i) =>
+      pressed ? `${classes} ${STICK_NAMES[i]}` : classes,
+    "stick",
+  );
+  const inputs: number[] = [];
+  const pressedButtons = Array.from(
+    { length: layout.totalbuttonshow },
+    (_, i) => {
+      const pressed = isPressed(buttonMappings[i]);
+      if (pressed) inputs.push(i);
+      return pressed;
+    },
+  );
+
+  return {
+    stickClass,
+    stickStatus,
+    pressedButtons,
+    inputs,
+    statusChanged: inputs.length > 0,
   };
 }
 

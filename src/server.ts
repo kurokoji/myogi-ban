@@ -1,5 +1,6 @@
 import * as path from "path";
 import { createLocalServer } from "./local-server";
+import { loadSdlInputSource, type SdlModule } from "./native-input-sdl";
 import { PORT } from "./types";
 import { UpdateManager } from "./update-manager";
 import { WhatsNewManager } from "./whats-new-manager";
@@ -18,6 +19,7 @@ const server = createLocalServer({
   userLayoutDir: path.join(dataDir, "user-layouts"),
   defaultLayoutFile: path.join(dataDir, "default-layout.json"),
   pidFile,
+  nativeInput: loadSdlInputSource(() => require("@kmamal/sdl") as SdlModule),
   updateManager: new UpdateManager({ currentVersion }),
   whatsNewManager: new WhatsNewManager({
     currentVersion,

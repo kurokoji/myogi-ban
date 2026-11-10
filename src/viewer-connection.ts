@@ -28,6 +28,15 @@ export function viewerLayoutRequestFromSearch(
   return { id, builtin: params.get("builtin") === "true" };
 }
 
+/** "native" takes input from the server instead of the browser Gamepad API. */
+export type ViewerInputMode = "browser" | "native";
+
+export function viewerInputModeFromSearch(search: string): ViewerInputMode {
+  return new URLSearchParams(search).get("input") === "native"
+    ? "native"
+    : "browser";
+}
+
 export function layoutForViewerState(
   current: Layout,
   incoming: Layout,
@@ -36,9 +45,13 @@ export function layoutForViewerState(
   return fixedLayout ? current : incoming;
 }
 
-export function createViewerWebSocketUrl(location: ViewerLocation): string {
+export function createViewerWebSocketUrl(
+  location: ViewerLocation,
+  inputMode: ViewerInputMode = "browser",
+): string {
   const protocol = location.protocol === "https:" ? "wss" : "ws";
-  return `${protocol}://${location.host}/ws`;
+  const query = inputMode === "native" ? "?input=native" : "";
+  return `${protocol}://${location.host}/ws${query}`;
 }
 
 export function nextViewerConnectionStatus(

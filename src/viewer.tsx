@@ -12,15 +12,21 @@ import {
   type StickMapping,
 } from "./gamepad";
 import { startGamepadMonitor } from "./gamepad-monitor";
-import { createEmptySnapshot, readGamepadSnapshot } from "./gamepad-state";
+import {
+  createEmptySnapshot,
+  readGamepadSnapshot,
+  snapshotFromInputFrame,
+} from "./gamepad-state";
 import { useLatestRef } from "./hooks/useLatestRef";
 import { createDefaultLayout, ensureLayoutDefaults } from "./layout";
+import type { InputFrame } from "./native-input";
 import type { GamepadState, Layout } from "./types";
 import {
   createViewerWebSocketUrl,
   layoutForViewerState,
   nextViewerConnectionStatus,
   type ViewerConnectionStatus,
+  viewerInputModeFromSearch,
   viewerLayoutRequestFromSearch,
 } from "./viewer-connection";
 
@@ -30,6 +36,8 @@ function ViewerApp(): React.ReactElement {
     viewerLayoutRequestFromSearch(location.search),
   );
   const fixedLayoutRef = useRef(layoutRequestRef.current !== null);
+  // In native mode the server reads the controller; the browser cannot (e.g. OBS CEF).
+  const nativeInput = viewerInputModeFromSearch(location.search) === "native";
   const [layout, setLayout] = useState<Layout>(() => createDefaultLayout());
   const [buttonMappings, setButtonMappings] = useState<ButtonMapping[]>(() =>
     GamepadManager.createDefaultButtonMappings(),
@@ -97,7 +105,9 @@ function ViewerApp(): React.ReactElement {
     let socket: WebSocket | null = null;
     let retryTimer = 0;
     const connect = () => {
-      socket = new WebSocket(createViewerWebSocketUrl(location));
+      socket = new WebSocket(
+        createViewerWebSocketUrl(location, nativeInput ? "native" : "browser"),
+      );
       socket.onopen = () =>
         setConnectionStatus((current) =>
           nextViewerConnectionStatus(current, "socket-open"),
@@ -105,10 +115,25 @@ function ViewerApp(): React.ReactElement {
       socket.onmessage = (event) => {
         const message = JSON.parse(String(event.data)) as {
           type?: string;
-          data?: GamepadState;
+          data?: GamepadState | InputFrame | null;
         };
+        if (message.type === "input") {
+          if (!nativeInput) return;
+          const frame = message.data as InputFrame | null;
+          setSnapshot(
+            frame
+              ? snapshotFromInputFrame(
+                  frame,
+                  layoutRef.current,
+                  buttonMappingsRef.current,
+                  stickMappingsRef.current,
+                )
+              : createEmptySnapshot(layoutRef.current),
+          );
+          return;
+        }
         if (message.type !== "state" || !message.data) return;
-        const state = message.data;
+        const state = message.data as GamepadState;
         const nextLayout = ensureLayoutDefaults(
           layoutForViewerState(
             layoutRef.current,
@@ -117,6 +142,7 @@ function ViewerApp(): React.ReactElement {
           ),
         );
         setLayout(nextLayout);
+        if (nativeInput) return;
         setSnapshot({
           ...createEmptySnapshot(nextLayout),
           stickClass: state.stick,
@@ -137,9 +163,10 @@ function ViewerApp(): React.ReactElement {
       window.clearTimeout(retryTimer);
       socket?.close();
     };
-  }, [layoutRef]);
+  }, [buttonMappingsRef, layoutRef, nativeInput, stickMappingsRef]);
 
   useEffect(() => {
+    if (nativeInput) return;
     const manager = new GamepadManager();
     manager.onDisconnect(() => {
       setSnapshot(createEmptySnapshot(layoutRef.current));
@@ -167,7 +194,7 @@ function ViewerApp(): React.ReactElement {
       stopMonitor();
       manager.dispose();
     };
-  }, [buttonMappingsRef, layoutRef, stickMappingsRef]);
+  }, [buttonMappingsRef, layoutRef, nativeInput, stickMappingsRef]);
 
   return (
     <div

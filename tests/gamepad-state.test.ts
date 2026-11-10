@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { encodeAxisMapping } from "../src/axis-mapping";
+import { GamepadManager, UNASSIGNED_MAPPING } from "../src/gamepad";
 import {
   areGamepadStatesEqual,
   gamepadStateForBroadcast,
+  snapshotFromInputFrame,
 } from "../src/gamepad-state";
 import { createDefaultLayout } from "../src/layout";
 
@@ -57,4 +60,40 @@ test("gamepad state changes when stick, connection, or layout changes", () => {
     }),
     false,
   );
+});
+
+test("an input frame is mapped to buttons and stick directions like a browser gamepad", () => {
+  const layout = createDefaultLayout();
+  const buttons = Array.from({ length: 17 }, () => false);
+  buttons[0] = true; // standard button 0 is assigned to layout button 4
+  buttons[15] = true; // d-pad right
+  const snapshot = snapshotFromInputFrame(
+    { buttons, axes: [0, 0, 0, 0] },
+    layout,
+    GamepadManager.createDefaultButtonMappings(),
+    GamepadManager.createDefaultStickMappings(),
+  );
+
+  assert.equal(snapshot.pressedButtons[4], true);
+  assert.equal(snapshot.pressedButtons[0], false);
+  assert.equal(snapshot.stickClass, "stick stick-right");
+  assert.equal(snapshot.statusChanged, true);
+});
+
+test("an input frame honours axis assignments", () => {
+  const layout = createDefaultLayout();
+  const stickMappings = [
+    UNASSIGNED_MAPPING,
+    UNASSIGNED_MAPPING,
+    encodeAxisMapping({ axis: 0, value: -1 }),
+    UNASSIGNED_MAPPING,
+  ];
+  const snapshot = snapshotFromInputFrame(
+    { buttons: [], axes: [-0.95, 0, 0, 0] },
+    layout,
+    GamepadManager.createDefaultButtonMappings(),
+    stickMappings,
+  );
+
+  assert.equal(snapshot.stickClass, "stick stick-left");
 });

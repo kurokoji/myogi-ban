@@ -3,6 +3,7 @@ import type { AddressInfo } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createLocalServer } from "../src/local-server";
+import type { NativeInputSource } from "../src/native-input";
 import type { Layout } from "../src/types";
 import type { UpdateManager } from "../src/update-manager";
 import type { WhatsNewManager } from "../src/whats-new-manager";
@@ -28,6 +29,7 @@ export async function startTestWebServer(
   onShowWindow?: () => void,
   updateManager?: UpdateManager,
   whatsNewManager?: WhatsNewManager,
+  nativeInput?: NativeInputSource,
 ): Promise<TestWebServer> {
   const root = mkdtempSync(join(tmpdir(), "myogi-ban-web-e2e-"));
   const publicDir = join(root, "public");
@@ -56,6 +58,7 @@ export async function startTestWebServer(
         onShowWindow,
         updateManager,
         whatsNewManager,
+        nativeInput,
         onListening: () => resolve(instance),
       });
     },
